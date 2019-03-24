@@ -1,0 +1,33 @@
+Source File                    | Test  | API			
+-------------------------------+-------+-----------------
+Builder							true	true						
+BuildFS							true	true
+ClassDefinitionScanner			true	true
+Component						true	true
+CompoPath						true	true
+Config							true	true
+CT								N/A		true
+DefaultBuildFS					true	true
+Descriptor						true	true
+DirPath							true	true
+EditablePath					true	true
+FilePath						true	true
+FilesHandler					N/A		true
+FileType						true 	true
+LayoutFile						true	true
+LayoutReader					true	true
+PageDocument					true	true
+Path							true	true
+Preview							true	true
+PreviewServlet					true	true
+Project							true	true							
+Reference						true	true
+ReferenceHandler				N/A		true
+ResourceType					true	true
+ScriptFile						true	true
+SourceReader					true	true
+StyleReader						true	true
+ValueReferencesResolver			true	true
+Variables						true	true
+Variants						true	true
+WoodException					N/A		true

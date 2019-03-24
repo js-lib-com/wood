@@ -1,0 +1,11 @@
+body {
+	background-image: url("@image/page-bg");
+}
+
+section {
+	background-image: url("@image/index-bg");
+}
+
+div {
+	background-image: url("@image/compo-bg");
+}

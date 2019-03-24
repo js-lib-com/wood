@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<string>
+	<caption>Nephew Caption</caption>
+	<tooltip>nephew tooltip</tooltip>
+	<description><![CDATA[This is <strong>nephew</strong> <em>description</em>.]]></description>
+</string>

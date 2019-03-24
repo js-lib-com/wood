@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: js.wood.unit.ComponentTest
+-------------------------------------------------------------------------------
+Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.442 s - in js.wood.unit.ComponentTest

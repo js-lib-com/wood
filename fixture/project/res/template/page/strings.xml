@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<string>
+	<logout>Logout</logout>
+	<login>Login</login>
+	<register>Register</register>
+	
+	<home>Home</home>
+	<videos>Videos</videos>
+	<mixes>Mixes</mixes>
+	<news>News Feed</news>
+	<profile>User Profile</profile>
+	
+	<copyright>copyright &#169; @string/logo-type</copyright>
+</string>

@@ -1,0 +1,11 @@
+.dialog {
+	position: relative;
+}
+
+.dialog .x-close {
+	background-image: url(@image/x-close);
+}
+
+.dialog .x-close:hover {
+	background-image: url(@image/x-close-hover);
+}

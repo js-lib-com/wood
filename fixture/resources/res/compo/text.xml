@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<text>
+	<!-- do not format this file. next message is used for test case assert -->
+	<alert>This is <em>alert</em> message.</alert>
+</text>

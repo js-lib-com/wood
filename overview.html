@@ -1,0 +1,645 @@
+<body>
+    <style>
+.footer ul li {
+	font-size: 100%;
+}
+</style>
+
+    <h1 class="title">WOOD - Web Object Oriented Development</h1>
+    <h5>Development Tool For User Interfaces Based On Web Technologies.</h5>
+    <p>WOOD tool promotes an object oriented development paradigm for user interfaces based on web technologies. It uses decomposition of complex user interfaces into user interface components - for short components. Component is the base unit for code reusability that keeps all its files together, in the component directory. It can inherit from components with editable elements - named templates and aggregate components designed for specific reusable tasks - named widgets.</p>
+    <p>There is no formal limitation on templates inheritance hierarchy. A template can inherit from another template creating an arbitrary long templates chain. The same goes for widgets. A component can aggregate more that one single widget and an widget can aggregate its own widgets, creating a tree of arbitrary complexity. And since template is a component it can use its own widgets tree. Also, an widget is a component too and can inherit from template; not depicted in ASCII diagram below for brevity.</p>
+    <p>
+        A site page is just a component with &lt;body&gt; element and has a collection of other components. In fact this structure is a well known OOP design pattern named <code>composite</code>, depicted in the right.
+    </p>
+    <pre>
+	+-----------+        +--------+                                                 +-----------+                                                 
+	| template  +---+--->| widget +--- . . .                               +--------> component |
+	+-----^-----+   |    +--------+                                        |        +-----^-----+
+	      |       . . .                                                    |              | 
+	    . . .                              +--------+                      |       +------+-----+-------------+ 
+	      |                           +--->| widget |                      |       |            |             |
+	+-----------+        +--------+   |    +--------+                      |   +---+--+   +-----+----+   +----+---+   
+	| template  |   +--->| widget +---+                                    +---+ page +   | template |   | widget |
+	+-----^-----+   |    +--------+   |                                        +------+   +----------+   +--------+
+	      |         |                 +--- . . .  
+	+-----------+   |
+	| component +---+
+	+-----------+   |    +--------+
+	                +--->| widget +--- . . .
+	                     +--------+
+	</pre>
+    <p>To sum-up, WOOD tool uses major object oriented features, as follow:</p>
+    <ul style="font-size: 100% !important;">
+        <li><b>encapsulation</b> - by keeping all component files in a single directory that act as name space,</li>
+        <li><b>privacy</b> - build and preview processes does search for resources only in component directory,</li>
+        <li><b>inheritance</b> - via editable elements from templates,</li>
+        <li><b>aggregation</b> - using widget components,</li>
+        <li><b>unit test</b> - unit testing is not strictly speaking specific to OOP but is well supported by encapsulation.</li>
+    </ul>
+
+    <h5>Component</h5>
+    <p>Component is designed to break down inherent web interfaces complexity. It is self-containing and fully described and is the basic building block. A component resides in its own directory and all its source, resource and descriptor files are hosted there:</p>
+    <pre>
+	+---------------------------------+
+	| component                       | 
+	|                                 |                  | image
+	| +--------+ +-------+ +--------+ |   +- media file -> audio
+	| | layout | | style | | script | |   |              | video
+	| +--------+ +-------+ +--------+ |   |                
+	|                                 |   |              | string  
+	| +------------+  +-------------+ |   |              | text 
+	| | descriptor |  |  resources  +----->              | color   
+	| +------------+  +-------------+ |   +- variable ---> dimen
+	+---------------------------------+                  | style
+	</pre>
+    <ul>
+        <li><b>layout</b> - describes component user interface structure using (X)HTML5 markup language,</li>
+        <li><b>style</b> - standard CSS3 used to fix layout elements position and dimension; note that presentational styles are kept in application <code>theme</code>,</li>
+        <li><b>script</b> - script for component behavior,</li>
+        <li><b>resource</b> - variables declared in XML files and support media files - mostly images,</li>
+        <li><b>descriptor</b> - optional component meta-data, e.g. page description for SEO.</li>
+    </ul>
+    <p>
+        By convention component name, directory name and its layout, style and descriptor files basename are the same. For example, a component named <code>progress-bar</code> has <code>progress-bar.htm</code> layout file and <code>progress-bar.css</code> style.
+    </p>
+    <p>Components are designed to work together into complex structures. Structure is described by component relations and a relation is defined using an WOOD operator. Now, considering their relations, there are couple component kinds:</p>
+    <ul>
+        <li><b>template</b> - contain editable areas and cannot be used for build; in a sense they are abstract components,
+        <li><b>content</b> - describe content to be injected into template editable areas; we can see it as subclass,
+        <li><b>widget</b> - are reusable components that can be included in both template and content components,
+        <li><b>page</b> - is a component with &lt;body&gt; element or that inherit from a template with &lt;body&gt; element.
+    </ul>
+    <p>Component promotes reusability via classic OOP paradigms: encapsulation, inheritance and aggregation. Both inheritance and aggregation act upon layouts, so that, when talking about components inheritance/aggregation we actually refer to layouts. Anyway, because of structuring user interface in components, styles are object oriented too in the sense that a component style file contains rules only for that component - a sort of OOP encapsulation.</p>
+    <p>
+        Note that WOOD requires separation of concerns, especially separation of presentation and content. For this reason component style should define only layout specific rules, all presentational rules being defined under <code>theme</code> directory. For now this policy is just a good practice recommendation but next versions will enforce it on preview and build.
+    </p>
+    <p>Both widgets and templates can be reused as part of components library. Also library provides ready to use page templates. When start an empty project just import desired page template and implements its editable elements.</p>
+    <p>Developer can preview components using any browser; this is true for templates too. Browser is the viewer for WYSIWYG development. Also components are part of building process that generates site pages. Anyway, building templates have not much sense since its functionality is not completely described.</p>
+
+    <h5>Operators</h5>
+    <p>WOOD operators are standard element attributes with predefined names recognized by WOOD tools. Operators are used to define relations between components, like inheritance and aggregation allowing build and preview tools to put together all components into pages. After processing operators are removed from resulting page.</p>
+    <p>Clearly an operator should have a name and we should avoid name collision with standard (X)HTML5 attribute names. On the other hand, in order to accommodate developer style there are couple naming strategies. See table for supported naming strategy and {@link js.wood.NamingStrategy} class.</p>
+    <table border="1" style="border-collapse: collapse;">
+        <tr>
+            <td>Enum Constant</td>
+            <td>Name</td>
+            <td>Description</td>
+        </tr>
+        <tr>
+            <td><b>ATTR</b></td>
+            <td>Attribute name</td>
+            <td>Simple attribute name. Because it does not use prefix it is prone to name collision but is simple to use.</td>
+        </tr>
+        <tr>
+            <td><b>DATA_ATTR</b></td>
+            <td>Custom attribute name</td>
+            <td>Uses HTML custom attribute name, that is, prefixed with <code>data-</code>. This naming convention is a trade-off between simplicity to use and avoiding name collisions.
+            </td>
+        </tr>
+        <tr>
+            <td><b>XMLNS</b></td>
+            <td>XML name space</td>
+            <td>This is default naming strategy and offer a clear separation for WOOD operator name space. Anyway, add complexity because name space should be declared with WOOD URI: <code>xmlns:wood="js-lib.com/wood"</code>.
+            </td>
+        </tr>
+    </table>
+    <p>Default operators naming strategy is XML name space and this is also used in example from this document. Both build and preview have options to select desired naming strategy but selected naming convention is global per project.</p>
+    <p>Below are listed supported operators with short description. Following sections describe every operator in details. One can observe that with a limited number of operators WOOD is able to describe arbitrary complex component graphs.</p>
+    <table border="1" style="border-collapse: collapse;">
+        <tr>
+            <td>Operator</td>
+            <td>Description</td>
+            <td>Operand</td>
+            <td>Example</td>
+        </tr>
+        <tr>
+            <td><b>wood:editable</b></td>
+            <td>Define editable area into templates.</td>
+            <td>Editable area name</td>
+            <td>&lt;section wood:editable="section"&gt;&lt;/section&gt;</td>
+        </tr>
+        <tr>
+            <td><b>wood:template</b></td>
+            <td>Inject template content into editable area.</td>
+            <td>Reference to editable area</td>
+            <td>&lt;section wood:template="page#section"&gt;</td>
+        </tr>
+        <tr>
+            <td><b>wood:widget</b></td>
+            <td>Insert widget layout into calling scope.</td>
+            <td>Reference to widget</td>
+            <td>&lt;div wood:widget="list-view"&gt;&lt;/div&gt;</td>
+        </tr>
+        <tr>
+            <td><b>wood:param</b></td>
+            <td>Used in conjunction with <code>wood:widget</code> and <code>wood:template</code> to define layout parameters list.
+            </td>
+            <td>Parameters list with syntax similar to inline CSS style</td>
+            <td>&lt;div ... wood:param="caption:Users List;"&gt;&lt;/div&gt;</td>
+        </tr>
+        <tr>
+            <td><b>wood:script</b></td>
+            <td>Declare script class, especially page class, to include into generated page.</td>
+            <td>Qualified script class name</td>
+            <td>&lt;div wood:script="ro.gnotis.UserPage"&gt;&lt;/div&gt;</td>
+        </tr>
+    </table>
+
+    <h5>Style Preprocessing</h5>
+    <p>A component has private resources that could be referenced from source files. This is true for component style too. A style source can use variables, declared into variables declaration XML files. Also media file references can be used, for example background images. Style variables and media files references are first style pre-processing support.</p>
+    <p>
+        In sample code <code>@image/background</code> is a reference to an image file located into component directory or global assets. By convention media file reference is the file name but without extension. References <code>@dimen/desktop-width</code> and <code>@color/text-color</code> are variables declared into XML files from component directory or global assets. For a discussion about references see <a href="#resources">Resource and Reference</a>.
+    </p>
+    <pre>
+    body {
+        background-image: url(@image/background);
+        width: @dimen/desktop-width;
+        color: @color/text-color;
+    }
+    </pre>
+    <p>
+        WOOD supports styles mixin or inclusssion. Mixin allows for style reusing: declare generic style rules with a name in a styles variable XML file and insert where appropriate. In below example <code>window</code> style rules from <code>styles.xml</code> are inserted into <code>compo.css</code>.
+    </p>
+    <pre>
+    compo.css
+    header {
+        position: absolute;
+        {@literal @}style/window
+        text-align: center;
+    }
+    
+    styles.xml
+    &lt;window&gt;
+        &lt;background-color&gt;@color/page-header-bg&lt;/background-color&gt;
+        &lt;width&gt;50%&lt;/width&gt;
+        &lt;height&gt;@dimen/page-header-height&lt;/height&gt;
+    &lt;/window&gt;
+    </pre>
+    <p>After processing resulting style file will look like:</p>
+    <pre>
+    header {
+        position: absolute;
+        background-color: @color/page-header-bg;
+        width: 50%;
+        height: @dimen/page-header-height; 
+        text-align: center;
+    }
+    </pre>
+    <p>
+        There is also support for responsive design, styles based on media queries - for now only viewport width. A style file can have variant, for example, <code>compo_w800.css</code>. When processed, content from that file is appended to base <code>page.css</code> in a media query block for <code>max-width</code> of 800px.
+    </p>
+    <p>In example, base style has center text align and styles for devices less than 800px uses left align.</p>
+    <pre>
+    compo.css
+    header {
+        position: absolute;
+        text-align: center;
+    }
+    
+    compo_w800.css
+    header {
+        text-align: left;
+    }
+    </pre>
+    <p>Resulting style file will merge both base and variant style files with media query prefix for styles from variant. For details about media query processing see {@link js.wood.StyleReader}.</p>
+    <pre>
+    compo.css
+    header {
+        position: absolute;
+        text-align: center;
+    }
+    
+    {@literal @}media screen and (max-width : 800px) {
+    header {
+        text-align: left;
+    }
+    }
+    </pre>
+
+    <h5>Style Namespace</h5>
+    <p>HTML styling is intrinsically complex. WOOD component based approach breaks complexity in manageable units but is prone to name collision and style overriding. Now, overriding can be on purpose but also by accident and for complex sites can be hard to detect.</p>
+    <p>In order to avoid accidental overriding WOOD uses namespace for component CSS style file. A namespace is simple an unique name used as element class that prefixes all style rules related to component. Name uniqueness should be ensured by developer but a good practice is to use component script class converted to dash case. For example ro.gnotis.UserPage is converted to ro-gnotis-userpage.</p>
+    <p>
+        When including child widgets, parent should avoiding using global namespace. Instead every parent section should use namespace on its direct scope. In example below do not use <code>ro-gnotis-userpage</code> class on <code>body</code> element but to first and last <code>div</code> elements.
+    </p>
+    <pre>
+    +------------------------------+    &lt;body&gt;                                       user-page.css
+    | +--------------------------+ |      &lt;div class="ro-gnotis-userpage"&gt;           .ro-gnotis-userpage .header {
+    | | .ro-gnotis-userpage      | |        &lt;div class="header"&gt;&lt;/div&gt;                 background-color: red;
+    | | +----------------------+ | |      &lt;/div&gt;                                     } 
+    | | | .header              | | |       
+    | | +----------------------+ | |      &lt;div wood:widget="lib/list-view"&gt;&lt;/div&gt;    list-view.css
+    | +--------------------------+ |                                                 .js-widget-listview .header {
+    |                              |      &lt;div class="ro-gnotis-userpage"&gt;             background-color: green;
+    | +--------------------------+ |        &lt;div class="footer"&gt;&lt;/div&gt;               }
+    | | .js-widget-listview      | |      &lt;/div&gt;    
+    | | +----------------------+ | |    &lt;/body&gt;
+    | | | .header              | | |
+    | | +----------------------+ | |
+    | +--------------------------+ | 
+    |                              |
+    | +--------------------------+ |
+    | | .ro-gnotis-userpage      | | 
+    | +--------------------------+ |
+    +------------------------------+
+    </pre>
+    <p>In depicted context, user page has an header section and include a list view widget somewhere below. List view has its own header. Into generated page, WOOD includes widget style before parent style. This way parent is able to customize widget style, although this technique may be controversial since breaks encapsulation.</p>
+    <p>Resulting style, after browser processing, may look like:</p>
+    <pre>
+    .js-widget-listview .header {
+      background-color: green;
+    }
+    .ro-gnotis-userpage .header {
+      background-color: red;
+    }    
+    </pre>
+    <p>
+        If <code>ro-gnotis-userpage</code> class would be global on <code>body</code> element the parent header style would override list view header and its color would be red instead of green.
+    </p>
+
+    <h5>Encapsulation and Privacy</h5>
+    <p>
+        Encapsulation is achieved by structuring project user interface in self-containing components. A component is fully defined and possess all resources it needs. A direct side effect is that an component is unit testing friendly, see <a href="#testing">Unit Testing</a> section. Also component acts as a name space. For example, an image from a component may have the same name as an image from another component.
+    </p>
+    <p>
+        Build and preview processes search for variables and media files only inside component directory. This ensure one can freely change resources from a component without the risk of breaking other components. Anyway, if one really needs global resources there is project <code>asset</code> directory just for that.
+    </p>
+
+    <h5>Inheritance</h5>
+    <p>
+        OOP inheritance is emulated using templates with editable elements. An editable is an element with <code>wood:editable</code> operator; attribute value is that editable name. A component with layout with editable elements is called template. An editable element define an insertion point where content layout will be injected by WOOD tool. Content element is the root of content layout and will literally replace editable element from template. A content element is an element that has <code>wood:template</code> operator that contains the path to named editable element. In resulting page, template styles are included before content style so that content component can overwrite template styles. Variables are replaced by their defined values at layout and style files reading, on the fly.
+    </p>
+    <p>
+        Because a template layout file can contain multiple editable elements the path referring to an editable element should include both component path and editable name, e.g. <code>template/page#body</code> . See below simplified rule and {@link js.wood.EditablePath} for details about path syntax.
+    </p>
+    <pre>
+	editable-path = component-path '#' editable-name
+	</pre>
+    <p>Below ASCII diagram describe component inheritance via template mechanism. For brevity only one editable is figured but a template may have a not limited number of editable elements. A component that uses a template but does not define content for all template editable elements become a template on its turn. This way one can create an arbitrary large inheritance chain; a sub-template can define content for any super-template from hierarchy and can include its own editable elements.</p>
+    <pre>
+	template layout                template style
+	+-----------------------+      +----------------+
+	| . . .                 +------> style rules    |         template script        
+	|                       |      +----------------+         +-----------------+
+	|   editable element    +---------------------------------> behavior        | 
+	|   +---------------+   |      template resource          +-----------------+ 
+	|   | wood:editable |   |      +-------------------+
+	|   +-------^-------+   +------> variables + media |  
+	+-----------|-----------+      +-------------------+
+	            |
+	            |                  content style                
+	+-----------|-----------+      +---------------+
+	|  +--------+--------+  +------> style rules   |          content script
+	|  |  wood:template  |  |      +---------------+          +----------------+
+	|  |-----------------|  +---------------------------------> behavior       |
+	|  | content layout  |  |      content resource           +----------------+ 
+	|  +-----------------+  |      +-------------------+
+	|  content element      +------> variables + media |
+	| . . .                 |      +-------------------+
+	+-----------------------+
+	content layout
+	</pre>
+    <p>Note that multiple inheritance is not supported. A content layout may define content for multiple editable elements but all should belong to the same template.</p>
+    <pre>
+    grand-parent.htm
+    &lt;body&gt;   														
+        &lt;h1&gt;Grand Parent&lt;/h1&gt; 
+        &lt;section wood:editable="section"&gt;&lt;/section&gt;
+    &lt;/body&gt; 
+                                   
+    parent.htm        
+    &lt;section wood:template="grand-parent#section"&gt;                    
+        &lt;h2&gt;Parent&lt;/h2&gt;                       
+        &lt;div wood:editable="paragraph"&gt;&lt;/div&gt;
+    &lt;/section&gt;
+	
+    child.htm
+    &lt;div wood:template="parent#paragraph"&gt;
+        &lt;h3&gt;Child&lt;/h3&gt;
+    &lt;/div&gt;
+	</pre>
+    <p>
+        In above snippet we have three component layout files: child, parent and grand-parent. Child define content for <code>paragraph</code> editable section from parent. Parent define content for <code>section</code> editable element from grand parent. Resulted document is below.
+    </p>
+    <pre>
+    &lt;body&gt;
+        &lt;h1&gt;Grand Parent&lt;/h1&gt;
+        &lt;section&gt;
+            &lt;h2&gt;Parent&lt;/h2&gt;
+            &lt;div&gt;
+                &lt;h3&gt;Child&lt;/h3&gt;
+            &lt;/div&gt;
+        &lt;/section&gt;
+    &lt;/body&gt;                                                                            
+    </pre>
+    <p>Child &lt;div&gt; and its descendants replaces parent &lt;div&gt;. Parent &lt;section&gt; and its descendants - that now include already inserted child &lt;div&gt;, replaces grand-parent &lt;section&gt;.</p>
+
+    <h5>Template Parameters</h5>
+    <p>
+        A template may contain, beside editable areas, <code>@param</code> parameter references for template customization. For example, a template for a dialog box may have a title and every dialog, based on this dialog template, to have its own title value.
+    </p>
+    <pre>
+    template/dialog/dialog.htm
+    &lt;div class="dialog"&gt;
+        &lt;h2 class="title"&gt;@param/title&lt;/h2&gt;
+        &lt;div class="box-close"&gt;&lt;/div&gt;
+        ...
+        &lt;div data-editable="body"&gt;&lt;/div&gt;
+        ...
+    &lt;/div&gt;
+    
+    dialog/user/user.htm
+    &lt;div data-template="template/dialog#body" data-param="title:Edit User"&gt;
+        &lt;form&gt;
+        ...
+        &lt;/form&gt;
+    &lt;/div&gt;
+    </pre>
+    <p>
+        Generated user dialog template will look like below sample code. Body editable is replaces by provided <code>form</code> and title updated from parameter.
+    </p>
+    <pre>
+    &lt;div class="dialog"&gt;
+        &lt;h2 class="title"&gt;Edit User&lt;/h2&gt;
+        &lt;div class="box-close"&gt;&lt;/div&gt;
+        ...
+        &lt;div&gt;
+            &lt;form&gt;
+            ...
+            &lt;/form&gt;
+        &lt;/div&gt;
+        ...
+    &lt;/div&gt;
+    </pre>
+    <p>See {@link js.wood.LayoutParameters} for parameters list syntax and {@link js.wood.SourceReader} for parameters injection.</p>
+
+    <h5>Aggregation</h5>
+    <p>OOP aggregation is implemented by inserting layout defined in external components into parent layout. Parent layout defines widget path elements pointing to components defined by this project or imported in library. For performance reasons referring to widgets from remote servers is not supported. If need to use remote components one should import them to this project library. Widget component is a standard component but specifically crafted for reuse.</p>
+    <p>Both parent and widget components may have styles, resources and scripts. As with inheritance, widgets style are included before parent style so that parent can overwrite and customize widgets.</p>
+    <p>Widget path elements defined by parent layout acts as insertion points where referred widget layout is inserted. Attributes define by widget layout root element are merged with attributes defined by parent widget path element; parent attributes take precedence. To state it clearly, parent can customize both widget styles and attributes.</p>
+    <p>Is legal for widget layout to use templates. Also, an widget layout may define its own widget path elements pointing to other widget layouts. There is no restriction on the number of widgets a parent can include. This way a tree of widgets is created; combining both templates and widgets can result in pretty complex components graph.</p>
+    <pre>
+	parent layout
+	+----------------------------+         
+	|  widget path element       |      widget layout
+	|  +--------------------+    |      +---------------+
+	|  |    wood:widget     +-----------> . . .         |
+	|  +--------------------+    |      +---------------+ 
+	| . . .                      |
+	+----------------------------+
+	</pre>
+    <p>
+        Here we have a parent with a child that have a child, that is, parent nephew. Parent &lt;section&gt; element has <code>wood:widget</code> operator that contain child widget path. Similar for child &lt;div&gt; element. Widget path is a {@link js.wood.CompoPath}.
+    </p>
+    <pre>
+    parent.htm
+    &lt;body&gt;
+	   &lt;h1&gt;Parent&lt;/h1&gt;
+	   &lt;section wood:widget="child"&gt;&lt;/section&gt;
+    &lt;/body&gt;
+
+    child.htm
+    &lt;section&gt;
+        &lt;h2&gt;Child&lt;/h2&gt;
+        &lt;div wood:widget="nephew"&gt;&lt;/div&gt;
+    &lt;/section&gt;
+
+    nephew.htm
+    &lt;div&gt;
+        &lt;h3&gt;Nephew&lt;/h3&gt;
+    &lt;/div&gt;
+    </pre>
+    <p>Widgets tree processing is recursive in depth-first order. Nephew &lt;div&gt; and its descendants replaces child &lt;div&gt; element. Child &lt;section&gt; and its descendants - that now include nephew, replaces parent &lt;section&gt; element. Resulted document is below.</p>
+    <pre>
+    &lt;body&gt;
+        &lt;h1&gt;Parent&lt;/h1&gt;
+        &lt;section&gt;
+            &lt;h2&gt;Child&lt;/h2&gt;
+            &lt;div&gt;
+                &lt;h3&gt;Nephew&lt;/h3&gt;
+            &lt;/div&gt;
+        &lt;/section&gt;
+    &lt;/body&gt;
+    </pre>
+    <p>One may notice that inheritance and aggregation results are identical. And this is indeed true in OOP and as with OOP also aggregation is preferred versus inheritance. In fact inheritance is used mostly for page skeletons; the rest is widgets aggregation.</p>
+
+    <h5>Widget Parameters</h5>
+    <p>
+        When an widget is reused in many places it may be necessary to customize every widget instance with specific parameters. For example there may be many lists of objects but every one need to have its specific caption. For this, widget layout has <code>@param</code> reference that is text replaced with <code>wood:param</code> parameters list from widget path element.
+    </p>
+    <p>
+        In sample code, parent has two references to the same child widget but customized with different <code>caption</code> value. On child widget, <code>caption</code> parameter is declared with the same name as that used by parent parameters list.
+    </p>
+    <pre>
+    parent.htm
+    &lt;body&gt;
+       &lt;h1&gt;Parent&lt;/h1&gt;
+       &lt;section wood:widget="child" wood:param="caption:John Doe"&gt;&lt;/section&gt;
+       &lt;section wood:widget="child" wood:param="caption:Jane Doe"&gt;&lt;/section&gt;
+    &lt;/body&gt;
+
+    child.htm
+    &lt;section&gt;
+        &lt;h2&gt;@param/caption&lt;/h2&gt;
+        &lt;div class="body"&gt;&lt;/div&gt;
+    &lt;/section&gt;
+    </pre>
+    <p>After processing parent will have two child sections but every section with its own heading value.</p>
+    <pre>
+    &lt;body&gt;
+        &lt;h1&gt;Parent&lt;/h1&gt;
+        &lt;section&gt;
+            &lt;h2&gt;John Doe&lt;/h2&gt;
+            &lt;div class="body"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+        &lt;section&gt;
+            &lt;h2&gt;Jane Doe&lt;/h2&gt;
+            &lt;div class="body"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+    &lt;/body&gt;
+    </pre>
+    <p>See {@link js.wood.LayoutParameters} for parameters list syntax and {@link js.wood.SourceReader} for parameters injection.</p>
+
+    <a id="testing"></a>
+    <h5>Unit Testing</h5>
+    <p>A component grows in a development silo and can be developed as a unit and when integrated is fully functional. Testing is part of interactive development process and as a consequence is enacted by preview.</p>
+    <p>
+        Component under development can have an unit testing file named <code>preview.htm</code>. When browser asks for a component, preview process replaces component layout with its <code>preview.htm</code> content, of course if present. Preview uses component as widget and takes care to display it. There are also preview style and script files, namely <code>preview.css</code> and <code>preview.js</code> that support this testing mechanism.
+    </p>
+    <p>
+        Here is simplified preview for <code>paging</code> component. In order to test paging functionality it also uses an external widget that display a list of items.
+    </p>
+    <pre>
+    &lt;div&gt;
+        &lt;div wood:widget="list-ctrl"&gt;&lt;/div&gt;
+        &lt;ul wood:widget="paging"&gt;&lt;/ul&gt;
+    &lt;/div&gt;
+    </pre>
+    <p>
+        Note that <code>preview</code> files are used only for development and are not part of distribution. Also build process ignores them.
+    </p>
+
+    <a id="resources"></a>
+    <h5>Resource and Reference</h5>
+    <p>Resources are external entities used by source files. There are two major kinds of resources: variables and media files. Variables are text replaced with values defined in variables files. A variables file can contain variable of the same type; XML root is the variable type - see {@link js.wood.ResourceType} for supported types. Media are files referenced from sources like images, audio and video files.</p>
+    <p>A reference is a pointer from a source file to a resource, be it variable or media file. It has a type and a name, uniquely identifying the resource in its scope. Reference scope is the component to which source file belongs plus global assets scope.</p>
+    <p>Reference syntax is described below. This syntax is the same, no mater the source file type where reference is used: layout, style or script.</p>
+    <pre>
+    reference = MARK resource-type SEP name
+    name      = 1CH  
+    ; resource-type is defined by {@link js.wood.ResourceType}, to lower case
+  
+    ; terminal symbols definition
+    MARK = "@"                 ; reference mark
+    SEP  = "/"                 ; reference name separator
+    CH   = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
+  
+    ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
+    </pre>
+    <p>As stated variables and media files can be referenced from any source file: layout, style or script. Here are sample usage for all three cases. Note that references are text replaced and where source file syntax requires quotes (") they should be explicitly used.</p>
+    <pre>
+    &lt;body&gt;
+        &lt;h1&gt;@string/title&lt;/h1&gt;
+        &lt;img src="@image/logo" /&gt;
+        &lt;p&gt;@text/message&lt;/p&gt;
+        . . .
+    &lt;/body&gt;
+   
+    body {
+        {@literal @}style/page
+        width: {@literal @}dimen/page-width;
+        background-image: url("@image/page-bg");
+        background-color: {@literal @}color/page-color;
+        . . .
+    }
+  
+    js.ua.System.alert("@string/exception");
+    this.setRichText("@text/message");
+    this.logo.setSrc("@image/logo");
+    this.audioPlayer.play("@audio/beep");
+    </pre>
+
+    <h5>Script Classes</h5>
+    <p>
+        WOOD automates script files includssion into generated pages. For this, scripts code base should be structured on packages and class names should be qualified. Also layout element with user defined class should declare it using <code>data-class</code> custom attribute. WOOD uses declared qualified name to search for proper script file and include into page.
+    </p>
+
+    <h5>Modus Operandi</h5>
+    <p>WOOD supplies two major services: preview and build. Preview is used with a standard web browser and a Tomcat runtime. There is a preview Servlet that redirect browser requests to project source files. Developer change source files and press F5 in browser to see results. Build process prepares site files for production deployment. Note that build outcome are standard web user interface files that can be integrated into any web project.</p>
+    <p>Source files reside in a project with a predefined files layout, see below section. WOOD tool works only on its own files and ignores all others. This way an WOOD project can be part of a larger, master project - perhaps an Eclipse project. WOOD tools is designed for web user interfaces; server side coding is not in scope. Although WOOD is written in Java and operates using Tomcat, there is no formal restriction regarding the language used for server side logic.</p>
+
+    <h5>Project</h5>
+    <p>In essence an WOOD project is just a directory with source files. By convention project name is the that directory name.</p>
+    <p>Current project file system is depicted below. There are four source directories and one build target. There is also a project configuration XML file. It is acceptable to share directories with master project, if any. For example lib can hold Java archives.</p>
+    <pre>
+	/                     ; project root
+	/build/site           ; site build target directory
+	/gen/                 ; optional generated scripts, mostly HTTP-RMI stubs
+	/lib/                 ; third-party user interface components and script libraries
+	/res/                 ; application user interface resources
+	|   /asset            ; project assets directory stores global variables and media files
+	|   /theme            ; UI resources theme for presentational styles
+	~                     ; application defined components
+	/script/              ; application specific scripts structured in packages
+	+-project.xml         ; project configuration file
+	</pre>
+    <p>Note that default build target directory is a sub-directory of master project build. This is to allow storing all build files in the same place.</p>
+
+    <h5>Preview</h5>
+    <p>Preview process is supported by {@link js.wood.PreviewServlet} class that is configured to get all requests for a particular project. Every project has its own root context and there is no formal limit on the number of projects from a Tomcat runtime. Note that preview Servlet is not part of project WAR but is integrated into WOOD library that should be installed into Tomcat runtime.</p>
+    <p>
+        In fact project preview WAR is empty. It should contains only <code>web.xml</code> descriptor in the standard path. It should declare preview Servlet as context listener and configure request path. Also needs to supply project directory absolute path, as context parameter. See sample below.
+    </p>
+    <pre>
+	&lt;context-param&gt;
+		&lt;param-name&gt;PROJECT_DIR&lt;/param-name&gt;
+		&lt;param-value&gt;path/to/project&lt;/param-value&gt;
+	&lt;/context-param&gt;
+   
+	&lt;listener&gt;
+		&lt;listener-class&gt;js.wood.PreviewServlet&lt;/listener-class&gt;
+	&lt;/listener&gt;
+   
+	&lt;servlet&gt;
+		&lt;servlet-name&gt;development&lt;/servlet-name&gt;
+		&lt;servlet-class&gt;js.wood.PreviewServlet&lt;/servlet-class&gt;
+		&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+	&lt;/servlet&gt;
+   
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;development&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;/&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+	</pre>
+    <p>Project preview WAR creation is not in WOOD library scope. It is delegated to external tools. For example Eclipse plug-in knows to create project preview and deploy it in Tomcat runtime.</p>
+
+    <h5>Build</h5>
+    <p>This library supplies a {@link js.wood.Builder} class that is designed for integration with external tools. There are extensions for Ant tasks and Eclipse plug-in using this Builder class, but not part of this library distribution.</p>
+    <p>To use this class, create instance providing project directory then just invoke build(). Optionally, one may set the build number. Build site directory is controlled by build process and is project configurable; it can be obtaining via site path getter.</p>
+    <pre>
+	Builder builder = new Builder(projectDir);
+	builder.setBuildNumber(buildNumber);
+	builder.build();
+	...
+	String sitePath = builder.getSitePath();
+	</pre>
+    <p>{@link js.wood.Builder} acts as a bridge between {@link js.wood.Project} and {@link js.wood.BuildFS}. It reads component source and resource files from project, consolidates them into pages then write to build site directory.</p>
+
+    <h5>Build File System</h5>
+    <p>Build file system is the directory structure for site files. Different build file systems are supported but a default implementation exists, see {@link js.wood.DefaultBuildFS}.</p>
+    <p>Default build file system uses separated directories for styles, scripts and media files; all media files are stored in the same place. Pages are placed in build directory root. For multi-language projects, replicates single language directories layout for every language. Language directories have the same language ISO 639-1 name.</p>
+    <pre>
+    /                       /                  
+    /media/                 /en/
+    /script/                |  /media/
+    /style/                 |  /script/
+    +-page.htm              |  /style/    
+                            |  +-page.htm  
+                            |
+                            /ro/
+                            |  /media/
+                            |  /script/
+                            |  /style/
+                            |  +-page.htm
+	</pre>
+    <p>Here is a build directory layout for both single and multi language projects.</p>
+
+    <h5>Files Naming Conventions</h5>
+    <p>
+        Path names used by WOOD obey Java file names convention but with couple syntax constrains. There are reserved character for different semantic extensions. For this reason allowed character set for names is US-ASCII alphanumeric characters, dash (-) and dot (.); dot is for file names with version like <code>js-lib-1.2.3.js</code>. Also always uses slash (/) for file separator. Note that underscore (_) is used for variants separator and is not allowed in names.
+    </p>
+    <pre>
+	SEP = "/"                          ; file separator
+	CH  = ALPHA / DIGIT / "-" / "."    ; character is US-ASCII alphanumeric, dash and dot
+  
+	; ALPHA and DIGIT are described by RFC5234, Appendix B.1
+	</pre>
+
+    <h5>Page Header</h5>
+    <p>
+        There are two configuration files affecting page header elements. One is project global with impact on all pages, {@link js.wood.Config} whereas page descriptor defines only page specific settings, see {@link js.wood.Descriptor}. Page descriptor is located into page directory and has the same name as page but with <code>xml</code> extension.
+    </p>
+    <p>
+        Page title and description is defined by page descriptor. It <code>title</code> element is missing uses <code>project / page</code> display and if <code>description</code> element is missing uses <code>title</code>.
+    </p>
+
+    <h5>WOOD Diagram</h5>
+    <p>In order to have a picture of components relations is helping to draw a diagram; this diagram resemble UML and concentrates on inheritance and aggregation. There are symbols for every component relation, see below.</p>
+    <pre>
+    &lt;-&gt;  - editable
+    &lt;[]&gt; - template
+    &lt;o&gt;  - widget
+    </pre>
+    <p>And here is a sample diagram</p>
+    <pre>
+    
+    </pre>
+
+    <h5>Style Usage Guides</h5>
+    <p>In a web project styles can quickly become complex and need discipline to keep conflicts out. Here are some good practice recommendations for styles handling.</p>
+    <ol>
+        <li>Use CSS class for styles only. Do not use CSS class for components getter, that is, avoid getByCssClass(). Use <code>name</code> or <code>data-name</code> instead and getByName().
+        </li>
+    </ol>
+</body>
