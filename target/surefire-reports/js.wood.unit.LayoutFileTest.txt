@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: js.wood.unit.LayoutFileTest
--------------------------------------------------------------------------------
-Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.197 s - in js.wood.unit.LayoutFileTest
