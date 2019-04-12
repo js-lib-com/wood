@@ -2,22 +2,22 @@ package js.wood;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.mozilla.javascript.Node;
+import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.FunctionCall;
 
 import js.util.Files;
 import js.util.Strings;
 import js.wood.script.AstHandler;
 import js.wood.script.Names;
 import js.wood.script.Scanner;
-
-import org.mozilla.javascript.Node;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.FunctionCall;
+import js.wood.script.Utils;
 
 /**
  * Script scanner for class definitions. This utility class discovers script classes defined by a script file or declared as
@@ -43,7 +43,7 @@ public class ClassDefinitionScanner {
 
 		Reader reader = null;
 		try {
-			reader = new FileReader(scriptFile);
+			reader = Utils.getFileReader(scriptFile);
 			scanner.parse(reader, scriptFile.getName());
 		} catch (FileNotFoundException e) {
 			throw new WoodException("Missing script file |%s|.", scriptFile);

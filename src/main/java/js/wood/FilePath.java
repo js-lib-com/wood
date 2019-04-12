@@ -1,13 +1,13 @@
 package js.wood;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import js.util.Files;
 import js.util.Strings;
+import js.wood.script.Utils;
 
 /**
  * File path identifies component files, both source files and resources. Recognized source files are layout (HTM),
@@ -287,7 +287,7 @@ public class FilePath extends Path
   public Reader getReader() throws WoodException
   {
     try {
-      return new FileReader(toFile());
+      return Utils.getFileReader(toFile());
     }
     catch(FileNotFoundException e) {
       throw new WoodException(e);

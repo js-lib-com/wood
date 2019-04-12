@@ -1,7 +1,15 @@
 package js.wood.script;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import js.lang.BugError;
 
 /**
  * Package internal utility functions.
@@ -80,5 +88,14 @@ public final class Utils {
 	public static String getDependencyQualifiedClassName(String qualifiedMemeberName) {
 		Matcher m = DEPENDENCY_NAME.matcher(qualifiedMemeberName);
 		return m.find() ? m.group(1) : "";
+	}
+
+	public static Reader getFileReader(File file) throws FileNotFoundException {
+		try {
+			return new InputStreamReader(new FileInputStream(file), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// fatal condition: JVM without UTF-8 support
+			throw new BugError(e);
+		}
 	}
 }

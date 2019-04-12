@@ -2,7 +2,6 @@ package js.wood.script;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,8 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import js.util.Files;
 
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.Token;
@@ -28,6 +25,8 @@ import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.ReturnStatement;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
+
+import js.util.Files;
 
 /**
  * Dependencies scanner for j(s)-script sources. A j(s)-script is a standard ECMA script forced to OOP by semantic conventions.
@@ -94,7 +93,7 @@ public class DependencyScanner {
 
 		Reader reader = null;
 		try {
-			scanner.parse(new FileReader(jsScriptFile), jsScriptFile.getName());
+			scanner.parse(Utils.getFileReader(jsScriptFile), jsScriptFile.getName());
 		} finally {
 			Files.close(reader);
 		}
