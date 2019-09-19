@@ -242,6 +242,7 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		}
 
 		if (filePath.isScript()) {
+			httpResponse.setContentType(ContentType.APPLICATION_JAVASCRIPT.getValue());
 			Reader reader = new SourceReader(filePath, this);
 			Files.copy(reader, httpResponse.getWriter());
 			return;
