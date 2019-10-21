@@ -120,6 +120,7 @@ public final class Project {
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
 	public Project(String projectPath) throws IllegalArgumentException {
+		Params.notNull(projectPath,  "Project directory");
 		this.projectDir = new File(projectPath);
 		Params.isDirectory(this.projectDir, "Project directory");
 		this.config = new ProjectConfig(this);

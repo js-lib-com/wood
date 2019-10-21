@@ -2,41 +2,40 @@ package js.wood.unit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import js.container.ContainerSPI;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.dom.w3c.DocumentBuilderImpl;
-import js.servlet.TinyContainer;
-import js.unit.HttpServletRequestStub;
-import js.unit.HttpServletResponseStub;
-import js.unit.HttpSessionStub;
-import js.unit.ServletConfigStub;
-import js.unit.ServletContextStub;
-import js.unit.TestContext;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CompoPath;
@@ -50,12 +49,12 @@ import js.wood.ReferenceHandler;
 import js.wood.ResourceType;
 import js.wood.Variables;
 import js.wood.WoodException;
-import junit.framework.TestCase;
 
-import org.junit.Test;
-
+@RunWith(MockitoJUnitRunner.class)
 public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 	private Project project;
+	private StringWriter responseWriter = new StringWriter();
+	private ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 
 	// ------------------------------------------------------
 	// Preview
@@ -261,9 +260,11 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletContextInitialization() throws Exception {
-		exerciseServlet("styles", "/test/res/page/page.css");
+		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/page/page.css");
 		assertNotNull(project.getProjectDir());
-		// TODO: assert response content type is CSS
+		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
+		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 	}
 
 	@Test
@@ -278,16 +279,16 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletLayout() throws Exception {
-		MockHttpResponse httpResponse = exerciseServlet("project", "/test/page/index");
+		exerciseServlet("project", "/test/page/index");
 		DocumentBuilder builder = new DocumentBuilderImpl();
-		assertIndexPage(builder.parseHTML(httpResponse.stringWriter.toString()));
+		assertIndexPage(builder.parseHTML(responseWriter.toString()));
 	}
 
 	@Test
 	public void servletCompoPreview() throws Exception {
-		MockHttpResponse httpResponse = exerciseServlet("styles", "/test/compo");
+		exerciseServlet("styles", "/test/compo");
 		DocumentBuilder builder = new DocumentBuilderImpl();
-		Document doc = builder.parseHTML(httpResponse.stringWriter.toString());
+		Document doc = builder.parseHTML(responseWriter.toString());
 
 		assertEquals("Styles / Preview", doc.getByTag("title").getText());
 
@@ -309,10 +310,12 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletStyle() throws Throwable {
-		MockHttpResponse httpResponse = exerciseServlet("styles", "/test/res/page/page.css");
-		String style = httpResponse.stringWriter.toString();
+		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/page/page.css");
+		String style = responseWriter.toString();
 
-		// TODO: assert response content type is CSS
+		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
+		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 
 		assertTrue(style.startsWith("body {"));
 		assertTrue(style.contains("background-color: #001122;"));
@@ -323,10 +326,12 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletStyleReset() throws Throwable {
-		MockHttpResponse httpResponse = exerciseServlet("styles", "/test/res/theme/reset.css");
-		String style = httpResponse.stringWriter.toString();
+		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/theme/reset.css");
+		String style = responseWriter.toString();
 
-		// TODO: assert response content type is CSS
+		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
+		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 
 		assertTrue(style.contains("h1,h2,h3,h4,h5,h6 {"));
 		assertTrue(style.contains("list-style-type: none;"));
@@ -337,8 +342,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletScript() throws Throwable {
-		MockHttpResponse httpResponse = exerciseServlet("strings", "/test/script/js/wood/Compo.js");
-		String script = httpResponse.stringWriter.toString();
+		exerciseServlet("strings", "/test/script/js/wood/Compo.js");
+		String script = responseWriter.toString();
 
 		assertTrue(script.startsWith("$package(\"js.wood\");"));
 		assertTrue(script.contains("this.setCaption('Hello');"));
@@ -348,8 +353,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletImage() throws Throwable {
-		MockHttpResponse httpResponse = exerciseServlet("images", "/test/res/compo/logo.png");
-		byte[] image = httpResponse.byteStream.toByteArray();
+		exerciseServlet("images", "/test/res/compo/logo.png");
+		byte[] image = responseStream.toByteArray();
 		assertEquals('P', image[1]);
 		assertEquals('N', image[2]);
 		assertEquals('G', image[3]);
@@ -357,8 +362,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 
 	@Test
 	public void servletImageVariant() throws Throwable {
-		MockHttpResponse httpResponse = exerciseServlet("images-variant", "/test/res/asset/logo.png");
-		byte[] image = httpResponse.byteStream.toByteArray();
+		exerciseServlet("images-variant", "/test/res/asset/logo.png");
+		byte[] image = responseStream.toByteArray();
 		assertEquals('P', image[1]);
 		assertEquals('N', image[2]);
 		assertEquals('G', image[3]);
@@ -426,27 +431,43 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 		}
 	}
 
-	private MockHttpResponse exerciseServlet(String projectDirName, String requestURI, String... headers) throws Exception {
-		ContainerSPI container = (ContainerSPI) TestContext.start();
-
-		MockServletContext context = new MockServletContext(path(projectDirName));
-		context.setAttribute(TinyContainer.ATTR_INSTANCE, container);
-
-		MockServletConfig config = new MockServletConfig(context);
+	private HttpServletResponse exerciseServlet(String projectDirName, String requestURI, String... headers) throws Exception {
+		ServletContext context = mock(ServletContext.class);
+		when(context.getInitParameter("PROJECT_DIR")).thenReturn(path(projectDirName));
+		
+		ServletConfig config = mock(ServletConfig.class);
+		when(config.getServletContext()).thenReturn(context);
 
 		PreviewServlet servlet = new PreviewServlet();
 		servlet.init(config);
 
 		project = Classes.getFieldValue(servlet, "project");
 
-		MockHttpRequest httpRequest = new MockHttpRequest(context);
-		httpRequest.requestURI = requestURI;
+		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
+		when(httpRequest.getContextPath()).thenReturn("/test");
+		when(httpRequest.getRequestURI()).thenReturn(requestURI);
 		for (int i = 0; i < headers.length; i += 2) {
-			TestCase.assertTrue(headers.length > i + 1);
-			httpRequest.headers.put(headers[i], headers[i + 1]);
+			// TestCase.assertTrue(headers.length > i + 1);
+			// httpRequest.headers.put(headers[i], headers[i + 1]);
 		}
 
-		MockHttpResponse httpResponse = new MockHttpResponse();
+		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
+		when(httpResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
+		when(httpResponse.getOutputStream()).thenReturn(new ServletOutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				responseStream.write(b);
+			}
+
+			@Override
+			public boolean isReady() {
+				return true;
+			}
+
+			@Override
+			public void setWriteListener(WriteListener writeListener) {
+			}
+		});
 
 		invoke(field(servlet, "variablesCache"), "update", project);
 		servlet.service(httpRequest, httpResponse);
@@ -507,196 +528,5 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 		assertTrue(scripts.contains("/project-preview/script/js/compo/Dialog.js"));
 		assertTrue(scripts.contains("/project-preview/script/js/hood/TopMenu.js"));
 		assertTrue(scripts.contains("/project-preview/script/hc/view/DiscographyView.js"));
-	}
-}
-
-class MockServletConfig extends ServletConfigStub {
-	private ServletContext context;
-
-	public MockServletConfig(ServletContext context) {
-		super();
-		this.context = context;
-	}
-
-	@Override
-	public ServletContext getServletContext() {
-		return context;
-	}
-}
-
-class MockServletContext extends ServletContextStub {
-	private Map<String, String> parameters = new HashMap<String, String>();
-	private Map<String, Object> attributes = new HashMap<String, Object>();
-
-	public MockServletContext(String projectDirName) {
-		this.parameters.put("PROJECT_DIR", projectDirName);
-		this.parameters.put("NAMING_STRATEGY", "XMLNS");
-		this.parameters.put("PREVIEW_CALLBACK", null);
-	}
-
-	@Override
-	public String getRealPath(String resource) {
-		return ".";
-	}
-
-	@Override
-	public String getInitParameter(String name) {
-		TestCase.assertTrue(parameters.containsKey(name));
-		return parameters.get(name);
-	}
-
-	@Override
-	public Object getAttribute(String name) {
-		return attributes.get(name);
-	}
-
-	@Override
-	public void setAttribute(String name, Object value) {
-		attributes.put(name, value);
-	}
-}
-
-class MockHttpSession extends HttpSessionStub {
-	private Map<String, Object> attributes = new HashMap<String, Object>();
-
-	@Override
-	public Object getAttribute(String name) {
-		return attributes.get(name);
-	}
-
-	@Override
-	public void setAttribute(String name, Object value) {
-		attributes.put(name, value);
-	}
-}
-
-class MockHttpRequest extends HttpServletRequestStub {
-	ServletContext servletContext;
-	Map<String, String> headers = new HashMap<String, String>();
-	String requestURI;
-	HttpSession session = new MockHttpSession();
-
-	public MockHttpRequest() {
-	}
-
-	public MockHttpRequest(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
-	@Override
-	public Locale getLocale() {
-		return Locale.getDefault();
-	}
-
-	@Override
-	public ServletContext getServletContext() {
-		return this.servletContext;
-	}
-
-	@Override
-	public String getContextPath() {
-		return "/test";
-	}
-
-	@Override
-	public String getRemoteHost() {
-		return "localhost";
-	}
-
-	@Override
-	public String getMethod() {
-		return "POST";
-	}
-
-	@Override
-	public String getRequestURI() {
-		return this.requestURI;
-	}
-
-	@Override
-	public String getHeader(String name) {
-		return this.headers.get(name);
-	}
-
-	@Override
-	public Cookie[] getCookies() {
-		return new Cookie[0];
-	}
-
-	@Override
-	public HttpSession getSession(boolean create) {
-		return create ? session : null;
-	}
-
-	@Override
-	public Principal getUserPrincipal() {
-		return null;
-	}
-
-	@Override
-	public HttpSession getSession() {
-		return session;
-	}
-}
-
-class MockHttpResponse extends HttpServletResponseStub {
-	String contentType;
-	ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-	StringWriter stringWriter = new StringWriter();
-
-	@Override
-	public ServletOutputStream getOutputStream() throws IOException {
-		return new ServletOutputStream() {
-			@Override
-			public void write(int b) throws IOException {
-				MockHttpResponse.this.byteStream.write(b);
-			}
-
-			@Override
-			public boolean isReady() {
-				return true;
-			}
-
-			@Override
-			public void setWriteListener(WriteListener writeListener) {
-			}
-		};
-	}
-
-	@Override
-	public PrintWriter getWriter() throws IOException {
-		return new PrintWriter(this.stringWriter);
-	}
-
-	@Override
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	@Override
-	public void setCharacterEncoding(String charset) {
-		TestCase.assertEquals("UTF-8", charset);
-	}
-}
-
-class OutputStream extends ServletOutputStream {
-	private StringWriter stringWriter;
-
-	public OutputStream(StringWriter stringWriter) {
-		this.stringWriter = stringWriter;
-	}
-
-	@Override
-	public void write(int b) throws IOException {
-		this.stringWriter.append((char) b);
-	}
-
-	@Override
-	public boolean isReady() {
-		return true;
-	}
-
-	@Override
-	public void setWriteListener(WriteListener writeListener) {
 	}
 }

@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.security.Principal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -17,19 +18,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import js.container.ContainerSPI;
-import js.core.Factory;
-import js.http.ContentType;
 import js.json.Json;
-import js.lang.Callback;
+import js.lang.BugError;
 import js.log.Log;
 import js.log.LogContext;
 import js.log.LogFactory;
 import js.rmi.BusinessException;
-import js.servlet.RequestContext;
-import js.servlet.TinyContainer;
 import js.util.Classes;
 import js.util.Files;
+import js.util.Strings;
 
 /**
  * Preview servlet allows access from browser to project components and related files. This allows to use browser for components
@@ -86,16 +83,8 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 	/** Servlet context init parameter for project directory. */
 	private static final String PROJECT_DIR_PARAM = "PROJECT_DIR";
 
-	private static final String PREVIEW_CALLBACK_PARAM = "PREVIEW_CALLBACK";
-
-	/** Parent container. */
-	private ContainerSPI container;
-
 	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
 	private Project project;
-
-	/** Preview callback defined by user code. */
-	private Callback<ContainerSPI> previewCallback;
 
 	/**
 	 * Preview layout is a special layout used for component unit test. It is returned instead of component; preview layout uses
@@ -118,15 +107,9 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 	 */
 	@Override
 	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
 		ServletContext context = config.getServletContext();
-		container = (ContainerSPI) context.getAttribute(TinyContainer.ATTR_INSTANCE);
 		project = new Project(context.getInitParameter(PROJECT_DIR_PARAM));
-
-		String previewCallbackValue = context.getInitParameter(PREVIEW_CALLBACK_PARAM);
-		if (previewCallbackValue != null) {
-			previewCallback = Classes.newInstance(previewCallbackValue);
-		}
-
 		json = Classes.loadService(Json.class);
 	}
 
@@ -145,18 +128,6 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		logContext.put(LOG_CONTEXT_ID, Integer.toString(requestID.getAndIncrement(), Character.MAX_RADIX));
 
 		long start = System.currentTimeMillis();
-		Factory.bind(container);
-
-		RequestContext context = Factory.getInstance(RequestContext.class);
-		context.attach(httpRequest, httpResponse);
-
-		if (!container.isAuthenticated()) {
-			container.login(new PreviewUser());
-		}
-
-		if (previewCallback != null) {
-			previewCallback.handle(container);
-		}
 
 		try {
 			doService(httpRequest, httpResponse);
@@ -169,9 +140,8 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 			log.dump("Fatal preview exception: ", e);
 			throw new ServletException(e);
 		} finally {
-			log.trace("%s %s processed in %d msec.", httpRequest.getMethod(), context.getRequestURL(), System.currentTimeMillis() - start);
+			log.trace("%s %s processed in %d msec.", httpRequest.getMethod(), httpRequest.getRequestURL(), System.currentTimeMillis() - start);
 			logContext.clear();
-			context.detach();
 		}
 	}
 
@@ -185,26 +155,23 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 	private void doService(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
 		httpResponse.setCharacterEncoding("UTF-8");
 
-		final String context = httpRequest.getContextPath();
+		final String contextPath = httpRequest.getContextPath();
 		// request path is request URI without context; it does not starts with a path separator
 		String requestPath = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length() + 1);
-		log.debug("Request |%s| on context |%s|.", requestPath, context);
+		log.debug("Request |%s| on context |%s|.", requestPath, contextPath);
 
-		if (RmiRequestHandler.accept(requestPath)) {
-			RmiRequestHandler handler = new RmiRequestHandler(project, requestPath);
-			handler.service(httpRequest, httpResponse);
-			return;
-		}
+		if (needForward(requestPath)) {
+			// by convention preview context has suffix -preview
+			int suffixSeparatorPosition = contextPath.lastIndexOf('-');
+			String contextName = contextPath.substring(0, suffixSeparatorPosition);
 
-		if (RestRequestHandler.accept(requestPath)) {
-			RestRequestHandler handler = new RestRequestHandler(container, project, requestPath);
-			handler.service(httpRequest, httpResponse);
-			return;
-		}
+			ServletContext context = getServletContext().getContext(contextName);
+			if (context == null) {
+				throw new BugError("Application context |%s| is not deployed or preview context is not configured with crossContext='true'", contextName);
+			}
 
-		if (ResourceRequestHandler.accept(requestPath)) {
-			ResourceRequestHandler handler = new ResourceRequestHandler(project, httpRequest);
-			handler.service(httpRequest, httpResponse);
+			RequestDispatcher dispatcher = context.getRequestDispatcher(forwardPath(project, requestPath));
+			dispatcher.forward(httpRequest, httpResponse);
 			return;
 		}
 
@@ -234,7 +201,7 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		FilePath filePath = project.getFile(requestPath);
 		if (filePath.isStyle()) {
 			if (!filePath.hasVariants()) {
-				httpResponse.setContentType(ContentType.TEXT_CSS.getValue());
+				httpResponse.setContentType(TEXT_CSS);
 				Reader reader = new SourceReader(new StyleReader(filePath), filePath, this);
 				Files.copy(reader, httpResponse.getWriter());
 			}
@@ -242,7 +209,7 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		}
 
 		if (filePath.isScript()) {
-			httpResponse.setContentType(ContentType.APPLICATION_JAVASCRIPT.getValue());
+			httpResponse.setContentType(APPLICATION_JAVASCRIPT);
 			Reader reader = new SourceReader(filePath, this);
 			Files.copy(reader, httpResponse.getWriter());
 			return;
@@ -257,7 +224,7 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		}
 
 		File file = filePath.toFile();
-		httpResponse.setContentType(ContentType.forFile(file).getValue());
+		httpResponse.setContentType(forFile(file));
 		Files.copy(file, httpResponse.getOutputStream());
 	}
 
@@ -304,7 +271,7 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 	 */
 	private void sendThrowable(HttpServletResponse httpResponse, int responseCode, Throwable throwable) throws IOException {
 		httpResponse.setStatus(responseCode);
-		httpResponse.setContentType(ContentType.APPLICATION_JSON.getValue());
+		httpResponse.setContentType(APPLICATION_JSON);
 
 		StringWriter buffer = new StringWriter();
 		json.stringify(buffer, throwable);
@@ -360,10 +327,90 @@ public final class PreviewServlet extends HttpServlet implements ReferenceHandle
 		}
 	}
 
-	private static class PreviewUser implements Principal {
-		@Override
-		public String getName() {
-			return "preview-user";
+	private static boolean needForward(String requestPath) {
+		if (requestPath.endsWith(".rmi")) {
+			return true;
 		}
+		if (requestPath.contains("/rest/")) {
+			return true;
+		}
+		if (requestPath.endsWith(".xsp") || requestPath.contains("/captcha/image")) {
+			return true;
+		}
+		return false;
+	}
+
+	private static final String TEXT_HTML = "text/html;charset=UTF-8";
+	private static final String TEXT_XML = "text/xml;charset=UTF-8";
+	private static final String TEXT_CSS = "text/css;charset=UTF-8";
+	private static final String APPLICATION_JAVASCRIPT = "application/javascript;charset=UTF-8";
+	private static final String APPLICATION_JSON = "application/json";
+	private static final String IMAGE_PNG = "image/png";
+	private static final String IMAGE_JPEG = "image/jpeg";
+	private static final String IMAGE_GIF = "image/gif";
+	private static final String IMAGE_TIFF = "image/tiff";
+	private static final String IMAGE_SVG = "image/svg+xml";
+
+	/** Content type for widespread file extensions. */
+	private static final Map<String, String> FILE_TYPES = new HashMap<>();
+	static {
+		FILE_TYPES.put("html", TEXT_HTML);
+		FILE_TYPES.put("htm", TEXT_HTML);
+		FILE_TYPES.put("xml", TEXT_XML);
+		FILE_TYPES.put("css", TEXT_CSS);
+		FILE_TYPES.put("js", APPLICATION_JAVASCRIPT);
+		FILE_TYPES.put("json", APPLICATION_JSON);
+		FILE_TYPES.put("png", IMAGE_PNG);
+		FILE_TYPES.put("jpg", IMAGE_JPEG);
+		FILE_TYPES.put("jpeg", IMAGE_JPEG);
+		FILE_TYPES.put("gif", IMAGE_GIF);
+		FILE_TYPES.put("tiff", IMAGE_TIFF);
+		FILE_TYPES.put("svg", IMAGE_SVG);
+	}
+
+	private static String forFile(File file) {
+		String contentType = FILE_TYPES.get(Files.getExtension(file));
+		if (contentType == null) {
+			log.debug("Unknown content type for |%s|. Replace with default |%s|.", file, TEXT_HTML);
+			contentType = TEXT_HTML;
+		}
+		return contentType;
+	}
+
+	private static String forwardPath(Project project, String requestPath) {
+		// assume we are into preview for component '/res/compos/dialogs/alert'
+		// current loaded content is the last part of the path, i.e. 'alert'
+		// from a component script there is a RMI request for sixqs.site.controller.MainController#getCategoriesSelect
+
+		// in this case browser generated URL is like
+		// http://localhost/site2/compos/dialog/sixqs/site/controller/MainController/getCategoriesSelect.rmi
+		// note that from prefix path 'alert' is missing since is current loaded content
+
+		// in order to discover RMI class path need to remove prefix path, after extension remove
+		// for that remove from request path the paths components that are directories into project resources
+		// in above example remove 'compos/dialogs/'
+
+		// compos/dialogs/sixqs/site/controller/MainController/getCategoriesSelect.rmi
+		List<String> pathParts = Strings.split(requestPath, '/');
+		// [ compos, dialogs, sixqs, site, controller, MainController, getCategoriesSelect.rmi]
+
+		// remove path parts that are directories into project resources
+		File resourcesPath = project.getResourcesDir().toFile();
+		for (;;) {
+			resourcesPath = new File(resourcesPath, pathParts.get(0));
+			if (!resourcesPath.isDirectory()) {
+				break;
+			}
+			pathParts.remove(0);
+		}
+
+		// [ sixqs, site, controller, MainController, getCategoriesSelect.rmi]
+		StringBuilder builder = new StringBuilder();
+		for (String pathPart : pathParts) {
+			builder.append('/');
+			builder.append(pathPart);
+		}
+		// /sixqs/site/controller/MainController/getCategoriesSelect.rmi
+		return builder.toString();
 	}
 }
