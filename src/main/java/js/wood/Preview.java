@@ -5,8 +5,9 @@ import java.io.Writer;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
+import js.dom.EList;
 import js.dom.Element;
-import js.dom.w3c.DocumentBuilderImpl;
+import js.util.Classes;
 import js.util.Strings;
 
 /**
@@ -48,7 +49,7 @@ public final class Preview {
 		ProjectConfig config = project.getConfig();
 		ComponentDescriptor descriptor = compo.getDescriptor();
 
-		DocumentBuilder builder = new DocumentBuilderImpl();
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		Document doc = builder.createHTML();
 
 		Element html = doc.getRoot();
@@ -61,10 +62,7 @@ public final class Preview {
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
 
-		for (Element meta : config.getMetas()) {
-			head.addChild(meta);
-			head.addText("\r\n");
-		}
+		addChildren(head, config.getMetas(), "name");
 
 		String defaultTitle = Strings.concat(project.getDisplay(), " / ", compo.getDisplay());
 		String title = descriptor.getTitle(defaultTitle);
@@ -89,6 +87,12 @@ public final class Preview {
 		// 4. theme styles - theme styles are in no particular order since they are independent of each other
 		// 5. component styles - first used template and widgets styles then component
 
+		addChildren(head, config.getStyles(), "href");
+
+		for (ComponentDescriptor.StyleReference scriptReference : compo.getDescriptorLinks()) {
+			addStyle(doc, scriptReference);
+		}
+
 		for (String font : config.getFonts()) {
 			addStyle(doc, font);
 		}
@@ -101,16 +105,18 @@ public final class Preview {
 			addStyle(doc, absoluteUrlPath(stylePath));
 		}
 
+		addChildren(body, config.getScripts(), "src");
+
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty
-		for (ComponentDescriptor.ScriptReference script : compo.getDescriptorScripts()) {
+		for (ComponentDescriptor.ScriptReference scriptReference : compo.getDescriptorScripts()) {
 			// component descriptor third party scripts accept both project file path and absolute URL
-			// if file path is used convert to absolute URL path, otherwise leave it as it is since points to foreign server
-			String scriptPath = script.getSource();
+			// if file path is used, convert it to absolute URL path, otherwise leave it as it is since points to foreign server
+			String scriptPath = scriptReference.getSource();
 			if (FilePath.accept(scriptPath)) {
 				scriptPath = absoluteUrlPath(scriptPath);
 			}
-			addScript(doc, scriptPath);
+			addScript(doc, scriptPath, scriptReference);
 		}
 
 		// component scripts - both 3pty and local, are available only for automatic discovery
@@ -124,10 +130,9 @@ public final class Preview {
 			for (ScriptFile scriptFile : compo.getScriptFiles()) {
 				addScript(doc, absoluteUrlPath(scriptFile.getSourceFile()));
 			}
-		}
-		else {
+		} else {
 			// if script discovery is enabled preview.js is included into compo.getScriptFiles()
-			// takes care to include preview.js, if discovery is not enabled 
+			// takes care to include preview.js, if discovery is not enabled
 			ScriptFile previewScript = project.getPreviewScript(compo.getPreviewScript());
 			if (previewScript != null) {
 				addScript(doc, absoluteUrlPath(compo.getPreviewScript()));
@@ -137,6 +142,24 @@ public final class Preview {
 
 		DefaultAttributes.update(doc);
 		doc.serialize(writer, true);
+	}
+
+	private static void addStyle(Document doc, ComponentDescriptor.StyleReference styleRef) {
+		Element head = doc.getByTag("head");
+
+		Element link = doc.createElement("link");
+		link.setAttr("href", styleRef.getHref());
+		if (styleRef.hasIntegrity()) {
+			link.setAttr("integrity", styleRef.getIntegrity());
+		}
+		if (styleRef.hasCrossorigin()) {
+			link.setAttr("crossorigin", styleRef.getCrossorigin());
+		}
+		link.setAttr("rel", "stylesheet");
+		link.setAttr("type", "text/css");
+
+		head.addChild(link);
+		head.addText("\r\n");
 	}
 
 	/**
@@ -163,6 +186,23 @@ public final class Preview {
 		head.addText("\r\n");
 	}
 
+	private static void addScript(Document doc, String src, ComponentDescriptor.ScriptReference scriptRef) {
+		Element parent = doc.getByTag(scriptRef.isAppendToHead() ? "head" : "body");
+
+		Element script = doc.createElement("script");
+		script.setAttr("src", src);
+		if (scriptRef.hasIntegrity()) {
+			script.setAttr("integrity", scriptRef.getIntegrity());
+		}
+		if (scriptRef.hasCrossorigin()) {
+			script.setAttr("crossorigin", scriptRef.getCrossorigin());
+		}
+		script.setAttr("type", "text/javascript");
+
+		parent.addChild(script);
+		parent.addText("\r\n");
+	}
+
 	/**
 	 * Build absolute URL path for given file path. Returned path contains project context but not protocol or host name.
 	 * 
@@ -186,5 +226,16 @@ public final class Preview {
 		builder.append(Path.SEPARATOR);
 		builder.append(filePath);
 		return builder.toString();
+	}
+
+	private static void addChildren(Element parent, EList children, String keyAttr) {
+		for (Element child : children) {
+			String keyValue = child.getAttr(keyAttr);
+			if (parent.getByAttr(keyAttr, keyValue) != null) {
+				continue;
+			}
+			parent.addChild(child);
+			parent.addText("\r\n");
+		}
 	}
 }

@@ -16,8 +16,8 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.w3c.DocumentBuilderImpl;
 import js.lang.BugError;
+import js.util.Classes;
 import js.util.Strings;
 
 /**
@@ -43,6 +43,8 @@ import js.util.Strings;
  * @author Iulian Rotaru
  */
 public class Component {
+	private final DocumentBuilder documentBuilder;
+
 	/** Parent project reference. */
 	private final Project project;
 
@@ -67,8 +69,10 @@ public class Component {
 	/** The list of style files used by this component, in the proper oder for page document inclusion. */
 	private final List<FilePath> styleFiles = new ArrayList<FilePath>();
 
+	private final LinkedHashSet<ComponentDescriptor.StyleReference> styleReferences = new LinkedHashSet<>();
+
 	private final LinkedHashSet<ComponentDescriptor.ScriptReference> scriptReferences = new LinkedHashSet<>();
-	
+
 	/** Aggregated set of script classes declared by this component, in no particular order. */
 	private final Set<String> scriptClasses = new HashSet<String>();
 
@@ -113,6 +117,8 @@ public class Component {
 	 * @param referenceHandler resource references handler,
 	 */
 	public Component(FilePath layoutPath, ReferenceHandler referenceHandler) {
+		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
+
 		this.project = layoutPath.getProject();
 		this.operators = this.project.getOperatorsHandler();
 		this.layoutParameters = new LayoutParameters();
@@ -148,6 +154,7 @@ public class Component {
 			}
 		}
 
+		styleReferences.addAll(descriptor.getStyles());
 		scriptReferences.addAll(descriptor.getScripts());
 
 		// uses project detected script classes to find out script files that this component depends on
@@ -206,6 +213,7 @@ public class Component {
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor compoDescriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+			styleReferences.addAll(compoDescriptor.getStyles());
 			scriptReferences.addAll(compoDescriptor.getScripts());
 
 			// widget path element may have invocation parameters for widget layout customization
@@ -259,8 +267,7 @@ public class Component {
 		}
 
 		Reader reader = new LayoutReader(new SourceReader(layoutPath, layoutParameters, referenceHandler));
-		DocumentBuilder builder = new DocumentBuilderImpl();
-		Document layout = project.hasNamespace() ? builder.loadXMLNS(reader) : builder.loadXML(reader);
+		Document layout = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
 		if (!layout.getRoot().hasChildren()) {
 			throw new WoodException("Empty layout |%s|.", layoutPath);
 		}
@@ -400,6 +407,10 @@ public class Component {
 	 */
 	public List<FilePath> getStyleFiles() {
 		return styleFiles;
+	}
+
+	public LinkedHashSet<ComponentDescriptor.StyleReference> getDescriptorLinks() {
+		return styleReferences;
 	}
 
 	public LinkedHashSet<ComponentDescriptor.ScriptReference> getDescriptorScripts() {

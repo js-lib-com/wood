@@ -170,6 +170,8 @@ public class Builder implements ReferenceHandler {
 			page.addFavicon(buildFS.writeFavicon(compo, project.getFavicon()));
 		}
 
+		page.addChildren("head", config.getStyles(), "href");
+
 		page.addStyles(config.getFonts());
 		for (FilePath style : project.getThemeStyles()) {
 			page.addStyle(buildFS.writeStyle(compo, style, this));
@@ -177,6 +179,9 @@ public class Builder implements ReferenceHandler {
 		for (FilePath style : compo.getStyleFiles()) {
 			page.addStyle(buildFS.writeStyle(compo, style, this));
 		}
+
+
+		page.addChildren("body", config.getScripts(), "src");
 
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty

@@ -8,7 +8,7 @@ import java.util.List;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.dom.w3c.DocumentBuilderImpl;
+import js.lang.BugError;
 import js.util.Classes;
 
 /**
@@ -102,7 +102,7 @@ public class ComponentDescriptor {
 	/** Empty XML document used when component descriptor file is missing. */
 	private static final Document EMPTY_DOC;
 	static {
-		DocumentBuilder builder = new DocumentBuilderImpl();
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		EMPTY_DOC = builder.createXML("component");
 	}
 
@@ -183,6 +183,28 @@ public class ComponentDescriptor {
 		return value("path", defaultValue);
 	}
 
+	public List<StyleReference> getStyles() {
+		// do not attempt to cache script paths since this method is expected to be used only once
+
+		Element stylesEl = doc.getByTag("links");
+		if (stylesEl == null) {
+			return Collections.emptyList();
+		}
+
+		List<StyleReference> styles = new ArrayList<>();
+		for (Element styleEl : stylesEl.getChildren()) {
+			String href = styleEl.getAttr("href");
+			if (href == null) {
+				throw new BugError("Invalid style reference on component descriptor |%s|. Missing style hyper-reference.", filePath);
+			}
+
+			String integrity = styleEl.getAttr("integrity");
+			String crossorigin = styleEl.getAttr("crossorigin");
+			styles.add(new StyleReference(href, integrity, crossorigin));
+		}
+		return styles;
+	}
+
 	/**
 	 * Get scripts defined by this component descriptor, both third party and local scripts. Returns a list of absolute URLs
 	 * and/or relative paths in the order and in format defined into descriptor. There is no attempt to check path validity; it
@@ -215,10 +237,21 @@ public class ComponentDescriptor {
 			return Collections.emptyList();
 		}
 
-		List<ScriptReference> scripts = new ArrayList<ScriptReference>();
+		List<ScriptReference> scripts = new ArrayList<>();
 		for (Element scriptEl : scriptsEl.getChildren()) {
+			String src = scriptEl.getText();
+			if (src.isEmpty()) {
+				src = scriptEl.getAttr("src");
+				if (src == null) {
+					throw new BugError("Invalid script reference on component descriptor |%s|. Missing script source.", filePath);
+				}
+			}
+
+			String integrity = scriptEl.getAttr("integrity");
+			String crossorigin = scriptEl.getAttr("crossorigin");
 			boolean appendToHead = Boolean.parseBoolean(scriptEl.getAttr("append-to-head"));
-			scripts.add(new ScriptReference(scriptEl.getText(), appendToHead));
+
+			scripts.add(new ScriptReference(src, integrity, crossorigin, appendToHead));
 		}
 		return scripts;
 	}
@@ -242,6 +275,65 @@ public class ComponentDescriptor {
 		return resolver.parse(value, filePath, referenceHandler);
 	}
 
+	public static class StyleReference {
+		private final String href;
+		private final String integrity;
+		private final String crossorigin;
+
+		public StyleReference(String href, String integrity, String crossorigin) {
+
+			this.href = href;
+			this.integrity = integrity;
+			this.crossorigin = crossorigin;
+		}
+
+		public String getHref() {
+			return href;
+		}
+
+		public boolean hasIntegrity() {
+			return integrity != null;
+		}
+
+		public String getIntegrity() {
+			return integrity;
+		}
+
+		public boolean hasCrossorigin() {
+			return crossorigin != null;
+		}
+
+		public String getCrossorigin() {
+			return crossorigin;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((href == null) ? 0 : href.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StyleReference other = (StyleReference) obj;
+			if (href == null) {
+				if (other.href != null)
+					return false;
+			} else if (!href.equals(other.href))
+				return false;
+			return true;
+		}
+
+	}
+
 	/**
 	 * Third party script descriptor contains script source and flag to append to document head. This class is loaded from
 	 * <code>scripts</code> section of the component descriptor, see snippet below. It is used to declare third party scripts.
@@ -258,20 +350,41 @@ public class ComponentDescriptor {
 	 */
 	public static class ScriptReference {
 		/** Script source is the URL from where third script is to be loaded. */
-		private String source;
+		private final String source;
+
+		private final String integrity;
+		private final String crossorigin;
 		/**
 		 * Usually scripts are inserted into page document at the bottom, after body content. This flag is used to force script
 		 * loading on document header.
 		 */
-		private boolean appendToHead;
+		private final boolean appendToHead;
 
-		public ScriptReference(String source, boolean appendToHead) {
+		public ScriptReference(String source, String integrity, String crossorigin, boolean appendToHead) {
 			this.source = source;
+			this.integrity = integrity;
+			this.crossorigin = crossorigin;
 			this.appendToHead = appendToHead;
 		}
 
 		public String getSource() {
 			return source;
+		}
+
+		public boolean hasIntegrity() {
+			return integrity != null;
+		}
+
+		public String getIntegrity() {
+			return integrity;
+		}
+
+		public boolean hasCrossorigin() {
+			return crossorigin != null;
+		}
+
+		public String getCrossorigin() {
+			return crossorigin;
 		}
 
 		public boolean isAppendToHead() {

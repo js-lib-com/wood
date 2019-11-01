@@ -12,7 +12,7 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.w3c.DocumentBuilderImpl;
+import js.util.Classes;
 import js.util.Strings;
 
 /**
@@ -149,7 +149,7 @@ public final class ProjectConfig {
 
 		File configFile = new File(project.getProjectDir(), CT.PROJECT_CONFIG);
 		try {
-			DocumentBuilder builder = new DocumentBuilderImpl();
+			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 			this.doc = builder.loadXML(configFile);
 		} catch (FileNotFoundException unused) {
 			throw new WoodException("Missing project configuration file |%s|.", configFile);
@@ -261,6 +261,14 @@ public final class ProjectConfig {
 	 */
 	public EList getMetas() {
 		return doc.findByTag("meta");
+	}
+
+	public EList getStyles() {
+		return doc.findByTag("link");
+	}
+
+	public EList getScripts() {
+		return doc.findByTag("script");
 	}
 
 	/**
