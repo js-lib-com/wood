@@ -269,6 +269,14 @@ public class ComponentTest extends WoodTestCase {
 		assertEquals("@text/message", references.get(2).toString());
 	}
 
+	@Test
+	public void inline() {
+		Component compo = getCompo("inline");
+
+		Element layout = compo.getLayout();
+		assertNotNull(layout);
+	}
+
 	// ------------------------------------------------------
 	// Integration test
 
@@ -350,7 +358,7 @@ public class ComponentTest extends WoodTestCase {
 		assertEquals("Update", children.item(2).getText());
 		assertEquals("Delete", children.item(3).getText());
 	}
-
+	
 	// ------------------------------------------------------
 	// Exceptional conditions
 

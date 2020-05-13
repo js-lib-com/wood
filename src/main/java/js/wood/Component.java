@@ -204,12 +204,12 @@ public class Component {
 
 		// widget path element is part of base component and contains the widget path
 		// it acts as insertion point; is where widget layout is inserted
-		for (Element widgetPathElement : getWidgetPathElements(layout)) {
+		for (Element widgetPathElement : getCompoPathElements(layout)) {
 
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = new CompoPath(project, layoutPath, operators.getOperand(widgetPathElement, Operator.WIDGET));
+			CompoPath compoPath = new CompoPath(project, layoutPath, operators.getOperand(widgetPathElement, Operator.COMPO));
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor compoDescriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
@@ -233,7 +233,7 @@ public class Component {
 				widgetPathElement.addChild(widgetChild);
 			}
 
-			operators.removeOperator(widgetPathElement, Operator.WIDGET);
+			operators.removeOperator(widgetPathElement, Operator.COMPO);
 		}
 
 		// component layout is loaded with LayoutReader decorator that insert XML declaration and root element
@@ -553,17 +553,17 @@ public class Component {
 	private static final Element[] EMPTY_ARRAY = new Element[0];
 
 	/**
-	 * An widget path is a reference to an external component; this method returns defined widget paths. Returns a newly created
-	 * array with all widget path elements found in given layout document. This method creates a new array because {@link EList}
-	 * is live and we need to remove widget paths while iterating. Returns empty array if no widget found.
+	 * An compo path is a reference to an external component; this method returns defined compo paths. Returns a newly created
+	 * array with all compo path elements found in given layout document. This method creates a new array because {@link EList}
+	 * is live and we need to remove compo paths while iterating. Returns empty array if no compo found.
 	 * <p>
-	 * Widget path element is identified by attribute with name <code>wood:widget</code>.
+	 * Compo path element is identified by attribute with name <code>wood:compo</code>.
 	 * 
 	 * @param layout layout document.
 	 * @return widgets array possible empty.
 	 */
-	private Element[] getWidgetPathElements(Document layout) {
-		EList elist = operators.findByOperator(layout, Operator.WIDGET);
+	private Element[] getCompoPathElements(Document layout) {
+		EList elist = operators.findByOperator(layout, Operator.COMPO);
 		if (elist.isEmpty()) {
 			return EMPTY_ARRAY;
 		}

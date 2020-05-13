@@ -187,7 +187,10 @@ public final class Preview {
 	}
 
 	private static void addScript(Document doc, String src, ComponentDescriptor.ScriptReference scriptRef) {
-		Element parent = doc.getByTag(scriptRef.isAppendToHead() ? "head" : "body");
+		// preview always adds scripts to page head
+		// next commented out statement is to show that 'scriptRef.isAppendToHead()' is ignored
+		// Element parent = doc.getByTag(scriptRef.isAppendToHead() ? "head" : "body");
+		Element parent = doc.getByTag("head");
 
 		Element script = doc.createElement("script");
 		script.setAttr("src", src);

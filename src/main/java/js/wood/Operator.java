@@ -14,7 +14,7 @@ public enum Operator
   /** Inject template content into editable area. */
   TEMPLATE,
   /** Insert widget layout into calling scope. */
-  WIDGET,
+  COMPO,
   /** Used in conjunction with {@link #WIDGET} and {@link #TEMPLATE} to define layout parameters list. */
   PARAM,
   /** Declare script class, especially page class, to include into generated page. */
