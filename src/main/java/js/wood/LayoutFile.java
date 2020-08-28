@@ -299,10 +299,10 @@ public class LayoutFile {
 			case CONTENT:
 				for (int i = 0; i < attributes.getLength(); ++i) {
 					String name = attributes.getQName(i);
-					if (name.endsWith("editable")) {
+					if (keyword(name, "editable")) {
 						// wood:editable, data-editable, editable
 						LayoutFile.this.editables.add(attributes.getValue(i));
-					} else if (name.endsWith("template")) {
+					} else if (keyword(name, "template")) {
 						// wood:template, data-template, template
 						EditablePath editablePath = new EditablePath(project, compoPath.getLayoutPath(), attributes.getValue(i));
 						LayoutFile.this.templatePath = editablePath;
@@ -310,6 +310,20 @@ public class LayoutFile {
 					}
 				}
 			}
+		}
+
+		private boolean keyword(String name, String keyword) {
+			// namespace naming strategy; namespace can be anything so use endsWith instead of equals
+			if (name.endsWith(":" + keyword)) {
+				return true;
+			}
+			if (name.equals("data-" + keyword)) {
+				return true;
+			}
+			if (name.equals(keyword)) {
+				return true;
+			}
+			return false;
 		}
 	}
 

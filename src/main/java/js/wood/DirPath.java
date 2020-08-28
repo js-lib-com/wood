@@ -41,7 +41,7 @@ import js.util.Strings;
  */
 public class DirPath extends Path {
 	/** Pattern for directory path. */
-	private static final Pattern PATTERN = Pattern.compile("^(res|lib|script|gen)((?:/[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PATTERN = Pattern.compile("^(res|lib|script|gen)((?:/\\.?[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
 
 	/** Source directory. */
 	private String sourceDir;
