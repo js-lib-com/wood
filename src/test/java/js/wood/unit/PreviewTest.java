@@ -1,13 +1,15 @@
 package js.wood.unit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.*;
-import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -262,8 +264,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 	public void servletContextInitialization() throws Exception {
 		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/page/page.css");
 		assertNotNull(project.getProjectDir());
-		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
-		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
 		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 	}
 
@@ -313,8 +315,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/page/page.css");
 		String style = responseWriter.toString();
 
-		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
-		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
 		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 
 		assertTrue(style.startsWith("body {"));
@@ -329,8 +331,8 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 		HttpServletResponse httpResponse = exerciseServlet("styles", "/test/res/theme/reset.css");
 		String style = responseWriter.toString();
 
-		ArgumentCaptor<String> contentTypeCaptor=ArgumentCaptor.forClass(String.class);
-		verify(httpResponse,times(1)).setContentType(contentTypeCaptor.capture());
+		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
 		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 
 		assertTrue(style.contains("h1,h2,h3,h4,h5,h6 {"));
@@ -434,7 +436,7 @@ public class PreviewTest extends WoodTestCase implements ReferenceHandler {
 	private HttpServletResponse exerciseServlet(String projectDirName, String requestURI, String... headers) throws Exception {
 		ServletContext context = mock(ServletContext.class);
 		when(context.getInitParameter("PROJECT_DIR")).thenReturn(path(projectDirName));
-		
+
 		ServletConfig config = mock(ServletConfig.class);
 		when(config.getServletContext()).thenReturn(context);
 

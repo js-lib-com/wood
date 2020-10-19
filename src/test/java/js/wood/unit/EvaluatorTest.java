@@ -51,7 +51,7 @@ public class EvaluatorTest extends WoodTestCase {
 
 	private static void assertMeasure(String measureValue, double value, String units) {
 		Object measure = Classes.newInstance("js.wood.eval.Measure", measureValue);
-		assertEquals(value, field(measure, "value"));
+		assertEquals(value, (double)field(measure, "value"), 0);
 		assertEquals(units, field(measure, "units"));
 	}
 

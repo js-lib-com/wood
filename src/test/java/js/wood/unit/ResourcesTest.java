@@ -385,8 +385,8 @@ public class ResourcesTest extends WoodTestCase implements ReferenceHandler
     assertNotNull(field(reader, "metaBuilder"));
     assertEquals("TEXT", field(reader, "state").toString());
     assertNull(field(reader, "value"));
-    assertEquals(0, field(reader, "valueIndex"));
-    assertEquals(0, field(reader, "charAfterMeta"));
+    assertEquals(0, (int)field(reader, "valueIndex"));
+    assertEquals(0, (int)field(reader, "charAfterMeta"));
   }
 
   @Test
