@@ -200,6 +200,9 @@ public final class Preview {
 		if (scriptRef.hasCrossorigin()) {
 			script.setAttr("crossorigin", scriptRef.getCrossorigin());
 		}
+		if (scriptRef.isDefer()) {
+			script.setAttr("defer", "defer");
+		}
 		script.setAttr("type", "text/javascript");
 
 		parent.addChild(script);

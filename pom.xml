@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.js-lib</groupId>
 	<artifactId>wood</artifactId>
-	<version>1.0.4-alpha</version>
+	<version>1.0.5-alpha</version>
 
 	<name>WOOD - Web Object Oriented Development</name>
 	<description>WOOD tool promotes an object oriented development paradigm for user interfaces based on web technologies. It uses decomposition of complex user interfaces into user interface components.</description>

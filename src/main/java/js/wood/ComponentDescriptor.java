@@ -249,9 +249,10 @@ public class ComponentDescriptor {
 
 			String integrity = scriptEl.getAttr("integrity");
 			String crossorigin = scriptEl.getAttr("crossorigin");
+			boolean defer = Boolean.parseBoolean(scriptEl.getAttr("defer"));
 			boolean appendToHead = Boolean.parseBoolean(scriptEl.getAttr("append-to-head"));
 
-			scripts.add(new ScriptReference(src, integrity, crossorigin, appendToHead));
+			scripts.add(new ScriptReference(src, integrity, crossorigin, defer, appendToHead));
 		}
 		return scripts;
 	}
@@ -354,16 +355,19 @@ public class ComponentDescriptor {
 
 		private final String integrity;
 		private final String crossorigin;
+		private final boolean defer;
+		
 		/**
 		 * Usually scripts are inserted into page document at the bottom, after body content. This flag is used to force script
 		 * loading on document header.
 		 */
 		private final boolean appendToHead;
 
-		public ScriptReference(String source, String integrity, String crossorigin, boolean appendToHead) {
+		public ScriptReference(String source, String integrity, String crossorigin, boolean defer, boolean appendToHead) {
 			this.source = source;
 			this.integrity = integrity;
 			this.crossorigin = crossorigin;
+			this.defer=defer;
 			this.appendToHead = appendToHead;
 		}
 
@@ -385,6 +389,10 @@ public class ComponentDescriptor {
 
 		public String getCrossorigin() {
 			return crossorigin;
+		}
+
+		public boolean isDefer() {
+			return defer;
 		}
 
 		public boolean isAppendToHead() {
