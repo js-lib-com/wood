@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project>
-	<name>resources</name>
-	<display>Test Resources</display>
-	<description>Project used as fixture for unit testing.</description>
-	<locale>en</locale>
-
-	<excludes>exception/bad-type</excludes>
-</project>

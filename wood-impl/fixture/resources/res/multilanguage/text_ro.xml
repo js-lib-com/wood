@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<text>
+	<message>
+		<h3>Devino membru al comunității @string/logo-type.</h3>
+	</message>
+	<!-- do not format this file. next message is used for test case assert -->
+	<alert>Acesta este o <em>alertă</em>.</alert>
+</text>

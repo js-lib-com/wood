@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<text>
+	<message>
+		<h3>Become member of @string/logo-type community.</h3>
+		<ul>
+			<li>Be a pro-active part of community driven development process.</li>
+			<li>Control learning circle for your self or help less experienced followers.</li>
+		</ul>
+	</message>
+	<!-- do not format this file. next message is used for test case assert -->
+	<alert>This is <em>alert</em> message.</alert>
+</text>
