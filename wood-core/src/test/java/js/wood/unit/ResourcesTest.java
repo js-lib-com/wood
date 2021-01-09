@@ -353,7 +353,7 @@ public class ResourcesTest extends WoodTestCase implements IReferenceHandler
 
   private static Object metaBuilder(String value)
   {
-    Project project = new Project("fixture/project");
+    Project project = new Project("src/test/resources/project");
     FilePath sourceFile = new FilePath(project, "res/page/index/index.htm");
     Object builder = newInstance("js.wood.SourceReader$MetaBuilder", sourceFile);
     for(int i = 0; i < value.length(); ++i) {

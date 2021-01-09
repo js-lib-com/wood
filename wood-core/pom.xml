@@ -9,12 +9,8 @@
 	</parent>
 	<artifactId>wood-core</artifactId>
 	
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
+	<name>WOOD Core</name>
+	<description>Core logic for both WOOD builder and preview.</description>
 
 	<dependencies>
 		<dependency>

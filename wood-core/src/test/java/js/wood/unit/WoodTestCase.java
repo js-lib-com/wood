@@ -25,7 +25,7 @@ import js.wood.Project;
 public class WoodTestCase {
 	protected static Project project(String projectDir) {
 		try {
-			Project project = new Project("fixture/" + projectDir);
+			Project project = new Project("src/test/resources/" + projectDir);
 			if (project.getSiteDir().exists()) {
 				Files.removeFilesHierarchy(project.getSiteDir());
 			}
@@ -39,11 +39,11 @@ public class WoodTestCase {
 	}
 
 	protected static String path(String fileName) {
-		return "fixture/" + fileName;
+		return "src/test/resources/" + fileName;
 	}
 
 	protected static File file(String fileName) {
-		return new File(new File("fixture"), fileName);
+		return new File(new File("src/test/resources"), fileName);
 	}
 
 	protected static File file(File dir, String... segments) {

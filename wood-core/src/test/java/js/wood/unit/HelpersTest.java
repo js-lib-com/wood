@@ -229,7 +229,7 @@ public class HelpersTest extends WoodTestCase
   public void styleExtensionReaderIterator()
   {
     log.trace("testStyleExtensionReaderIterator()");
-    Iterator<Character> iterator = newInstance("js.wood.StyleExtensionReader$ExtensionsIterator");
+    Iterator<Character> iterator = newInstance("js.wood.impl.StyleExtensionReader$ExtensionsIterator");
     String[] properties = new String[]
     {
         "-moz-column-count", "-webkit-column-count"
@@ -248,7 +248,7 @@ public class HelpersTest extends WoodTestCase
   public void styleExtensionReaderExtensions()
   {
     log.trace("testStyleExtensionReaderExtensions()");
-    Object extensions = newInstance("js.wood.StyleExtensionReader$Extensions");
+    Object extensions = newInstance("js.wood.impl.StyleExtensionReader$Extensions");
     assertExtensions(extensions, "column-count: 3;", "\r\n\t-moz-column-count: 3;\r\n\t-webkit-column-count: 3;");
     assertExtensions(extensions, "column-width: auto;", "\r\n\t-moz-column-width: auto;\r\n\t-webkit-column-width: auto;");
     assertExtensions(extensions, "column-gap: 40px;", "\r\n\t-moz-column-gap: 40px;\r\n\t-webkit-column-gap: 40px;");
@@ -257,7 +257,7 @@ public class HelpersTest extends WoodTestCase
 
   private static void assertExtensions(Object extensions, String declaration, String expected)
   {
-    Object builder = newInstance("js.wood.StyleExtensionReader$DeclarationBuilder");
+    Object builder = newInstance("js.wood.impl.StyleExtensionReader$DeclarationBuilder");
 
     invoke(builder, "reset");
     for(int i = 0; i < declaration.length(); ++i) {
@@ -277,7 +277,7 @@ public class HelpersTest extends WoodTestCase
   public void styleExtensionReaderBuilder()
   {
     log.trace("testStyleExtensionReaderBuilder()");
-    Object builder = newInstance("js.wood.StyleExtensionReader$DeclarationBuilder");
+    Object builder = newInstance("js.wood.impl.StyleExtensionReader$DeclarationBuilder");
     assertBuilder(builder, "column-count:3;", "column-count", "3");
     assertBuilder(builder, "column-count : 3;", "column-count", "3");
     assertBuilder(builder, "column-count\t:\t3;", "column-count", "3");

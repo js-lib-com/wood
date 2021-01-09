@@ -454,7 +454,7 @@ public class ComponentTest extends WoodTestCase {
 	// Helper methods
 
 	protected static Project project(String projectDir) {
-		Project project = new Project("fixture/" + projectDir);
+		Project project = new Project("src/test/resources/" + projectDir);
 		if (project.getSiteDir().exists()) {
 			try {
 				Files.removeFilesHierarchy(project.getSiteDir());

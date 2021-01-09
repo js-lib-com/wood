@@ -81,7 +81,7 @@ import js.wood.WoodException;
  * directory configured by build file system implementation, see {@link BuildFS#getPageDir()}. For example, in default file
  * system pages are stored into build root. If <code>path</code> element is specified, given path is used to stored page layout
  * file. In example below, <code>user-manager.htm</code> page is stored under <code>admin</code> directory. This facility is
- * useable for role based security; it allows to group pages under given path and configure security constrains base on that
+ * usable for role based security; it allows to group pages under given path and configure security constrains base on that
  * path.
  *
  * <pre>

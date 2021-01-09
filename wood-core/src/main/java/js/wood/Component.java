@@ -505,8 +505,8 @@ public class Component {
 		for (Element scriptClassEl : layout.findByXPath("//*[@data-class]")) {
 			addScriptClass(layoutFile, scriptClassEl.getAttr("data-class"));
 		}
-		for (Element scriptClassEl : layout.findByXPath("//*[@data-format]")) {
-			addScriptClass(layoutFile, scriptClassEl.getAttr("data-format"));
+		for (Element formatClassEl : layout.findByXPath("//*[@data-format]")) {
+			addScriptClass(layoutFile, formatClassEl.getAttr("data-format"));
 		}
 	}
 

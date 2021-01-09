@@ -8,6 +8,6 @@ import java.util.Set;
 
 public interface IScriptScanner {
 	Set<String> scanClassDefinition(File scriptFile) throws IOException;
-	
-	Collection<Dependency>  scanDependencies(File scriptFile, Set<String> definedClasses) throws FileNotFoundException;
+
+	Collection<Dependency> scanDependencies(File scriptFile, Set<String> definedClasses) throws FileNotFoundException;
 }
