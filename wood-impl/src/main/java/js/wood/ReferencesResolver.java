@@ -12,8 +12,8 @@ import js.util.Files;
  * replaces reference with variable value or media file URL path. The actual resource processing is delegated to
  * external reference handler.
  * <p>
- * This class provides a parsing method for variable value, see {@link #parse(String, FilePath, ReferenceHandler)}. It
- * is invoked by {@link Variables#get(String, Reference, FilePath, ReferenceHandler)} with found variable value.
+ * This class provides a parsing method for variable value, see {@link #parse(String, FilePath, IReferenceHandler)}. It
+ * is invoked by {@link Variables#get(String, Reference, FilePath, IReferenceHandler)} with found variable value.
  * Value reference may point to a new value that in its turn may have references, creating a tree of values linked by
  * references. This class parsing occurs in a recursive loop, in depth-first order, till entire values tree is resolved.
  * See {@link SourceReader} for a discussion on references tree iteration.
@@ -24,7 +24,7 @@ import js.util.Files;
 public class ReferencesResolver
 {
   /**
-   * Parse variable value and invoke {@link ReferenceHandler reference handler} when encounter a resource reference.
+   * Parse variable value and invoke {@link IReferenceHandler reference handler} when encounter a resource reference.
    * Return the value with resource references resolved.
    * 
    * @param value variable value,
@@ -32,7 +32,7 @@ public class ReferencesResolver
    * @param referenceHandler reference handler to invoke for reference processing.
    * @return value with references resolved.
    */
-  public String parse(String value, FilePath sourceFile, ReferenceHandler referenceHandler)
+  public String parse(String value, FilePath sourceFile, IReferenceHandler referenceHandler)
   {
     Reader reader = new SourceReader(new StringReader(value), sourceFile, referenceHandler);
     StringWriter writer = new StringWriter();

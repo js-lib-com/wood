@@ -62,7 +62,7 @@ import js.util.Strings;
  * 
  * @author Iulian Rotaru
  */
-public final class PreviewServlet extends HttpServlet implements ReferenceHandler {
+public final class PreviewServlet extends HttpServlet implements IReferenceHandler {
 	/** Java serialization ID, */
 	private static final long serialVersionUID = -2971057399517075118L;
 

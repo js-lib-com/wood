@@ -113,7 +113,7 @@ public class ComponentDescriptor {
 	private final FilePath filePath;
 
 	/** References handler used to actually process referenced resources; defined externally. */
-	private final ReferenceHandler referenceHandler;
+	private final IReferenceHandler referenceHandler;
 
 	/**
 	 * Resolver parses element values and invoke {@link #referenceHandler} for discovered references, if any. It is necessary
@@ -128,7 +128,7 @@ public class ComponentDescriptor {
 	 * @param filePath descriptor file path,
 	 * @param referenceHandler resource references handler.
 	 */
-	public ComponentDescriptor(FilePath filePath, ReferenceHandler referenceHandler) {
+	public ComponentDescriptor(FilePath filePath, IReferenceHandler referenceHandler) {
 		this.filePath = filePath;
 		this.referenceHandler = referenceHandler;
 		this.resolver = new ReferencesResolver();

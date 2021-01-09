@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * belongs to a type; so to fully refer a variable one need to know both type and name. See {@link ResourceType} for
  * recognized types and {@link Reference} for syntax and sample usage.
  * <p>
- * Variables are resources and are processed the same way as media files: by {@link ReferenceHandler}. When source file
+ * Variables are resources and are processed the same way as media files: by {@link IReferenceHandler}. When source file
  * is read, {@link SourceReader} discovers references and delegates reference handler. There are distinct reference
  * handler instances for build and preview processes but basically variables references are text replaces by their
  * values; this class provides getters just for that.
@@ -129,7 +129,7 @@ public class Variables
   }
 
   /**
-   * Handy alternative for {@link #get(String, Reference, FilePath, ReferenceHandler)} when language variants are not
+   * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when language variants are not
    * used. Returns null if value not found.
    * 
    * @param reference variable reference,
@@ -138,7 +138,7 @@ public class Variables
    * @return variable value.
    * @throws WoodException if variable value not found.
    */
-  public String get(Reference reference, FilePath source, ReferenceHandler listener) throws WoodException
+  public String get(Reference reference, FilePath source, IReferenceHandler listener) throws WoodException
   {
     return get(null, reference, source, listener);
   }
@@ -167,7 +167,7 @@ public class Variables
    * @return variable value.
    * @throws WoodException if variable value not found.
    */
-  public String get(Locale locale, Reference reference, FilePath source, ReferenceHandler handler) throws WoodException
+  public String get(Locale locale, Reference reference, FilePath source, IReferenceHandler handler) throws WoodException
   {
     String value = getValue(locale, reference, source, handler);
 
@@ -187,7 +187,7 @@ public class Variables
     return value;
   }
 
-  private String getValue(Locale locale, Reference reference, FilePath source, ReferenceHandler handler)
+  private String getValue(Locale locale, Reference reference, FilePath source, IReferenceHandler handler)
   {
     String value = null;
 

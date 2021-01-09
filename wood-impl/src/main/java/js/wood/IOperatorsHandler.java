@@ -11,7 +11,7 @@ import js.dom.Element;
  * 
  * @author Iulian Rotaru
  */
-public interface OperatorsHandler
+public interface IOperatorsHandler
 {
   /**
    * Find all elements from document that possess the given operator.

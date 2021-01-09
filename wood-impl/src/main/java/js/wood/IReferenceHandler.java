@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public interface ReferenceHandler
+public interface IReferenceHandler
 {
   /**
    * Handler invoked when a resource reference is discovered. A resource reference is private to a scope defined by

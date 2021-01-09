@@ -9,7 +9,7 @@ import js.wood.eval.Interpreter;
 /**
  * Source file reader with {@literal @}meta processing, also known as at-meta. This class is a decorator for a
  * characters stream reader. Beside standard reading it looks for resource references and expressions evaluation
- * described by at-meta syntax and invokes external {@link ReferenceHandler}, respective {@link Interpreter} when
+ * described by at-meta syntax and invokes external {@link IReferenceHandler}, respective {@link Interpreter} when
  * discover them. Also inject layout parameters provided by {@link LayoutParameters} when encounter <code>@param</code>
  * reference.
  * <p>
@@ -39,8 +39,8 @@ import js.wood.eval.Interpreter;
  * invoked in a chain that creates this recursive reference scanning.
  * <ol>
  * <li>{@link SourceReader source file reader} discovers a variable reference and delegates reference handler,
- * <li>{@link ReferenceHandler reference handler} retrieves value from variables instance,
- * <li>{@link Variables#get(String, Reference, FilePath, ReferenceHandler) variables getter} invokes value references
+ * <li>{@link IReferenceHandler reference handler} retrieves value from variables instance,
+ * <li>{@link Variables#get(String, Reference, FilePath, IReferenceHandler) variables getter} invokes value references
  * resolver with found value,
  * <li>{@link ReferencesResolver references resolver} discovers a variable reference and delegates reference handler,
  * back to 2,
@@ -52,7 +52,7 @@ import js.wood.eval.Interpreter;
  * Widget and template layouts can contain layout parameters defined using <code>@param</code> parameter references.
  * When source reader discover a parameter reference uses {@link #layoutParameters} to retrieve named parameter value
  * and text replace parameter reference with its value. Layout parameters map is initialized beforehand and injected via
- * constructor {@link SourceReader#SourceReader(FilePath, LayoutParameters, ReferenceHandler)}.
+ * constructor {@link SourceReader#SourceReader(FilePath, LayoutParameters, IReferenceHandler)}.
  * <p>
  * Layout parameters map is initialized from <code>wood:param</code> operator at widget or template invocation.
  * 
@@ -87,7 +87,7 @@ public final class SourceReader extends Reader
   private LayoutParameters layoutParameters;
 
   /** External defined reference handler in charge with resource processing. */
-  private ReferenceHandler referenceHandler;
+  private IReferenceHandler referenceHandler;
 
   /** Expression interpreter. */
   private Interpreter interpreter;
@@ -124,7 +124,7 @@ public final class SourceReader extends Reader
    * @param referenceHandler external reference handler.
    * @throws IllegalArgumentException if any parameter is null or source file does not exist.
    */
-  public SourceReader(Reader reader, FilePath sourceFile, ReferenceHandler referenceHandler)
+  public SourceReader(Reader reader, FilePath sourceFile, IReferenceHandler referenceHandler)
   {
     super();
     Params.notNull(reader, "Reader");
@@ -143,13 +143,13 @@ public final class SourceReader extends Reader
 
   /**
    * Convenient source reader constructor for a given source file. Create file reader for source file and delegates
-   * {@link SourceReader#SourceReader(Reader, FilePath, ReferenceHandler)}.
+   * {@link SourceReader#SourceReader(Reader, FilePath, IReferenceHandler)}.
    * 
    * @param sourceFile source file to create source reader for,
    * @param referenceHandler external defined reference handler.
    * @throws IllegalArgumentException if any parameter is null or source file does not exist.
    */
-  public SourceReader(FilePath sourceFile, ReferenceHandler referenceHandler)
+  public SourceReader(FilePath sourceFile, IReferenceHandler referenceHandler)
   {
     this(reader(sourceFile), sourceFile, referenceHandler);
   }
@@ -164,7 +164,7 @@ public final class SourceReader extends Reader
    * @param referenceHandler external reference handler.
    * @throws IllegalArgumentException if any parameter is null, source file does not exist or is not a layout.
    */
-  public SourceReader(FilePath sourceFile, LayoutParameters layoutParameters, ReferenceHandler referenceHandler)
+  public SourceReader(FilePath sourceFile, LayoutParameters layoutParameters, IReferenceHandler referenceHandler)
   {
     this(reader(sourceFile), sourceFile, referenceHandler);
     Params.isTrue(sourceFile.isLayout(), "Source file is not a widget or template layout");

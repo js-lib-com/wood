@@ -28,7 +28,7 @@ import js.wood.FilesHandler;
 import js.wood.LayoutFile;
 import js.wood.Project;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 import js.wood.ResourceType;
 import js.wood.ScriptFile;
 import js.wood.Variables;
@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ProjectTest extends WoodTestCase implements ReferenceHandler {
+public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 	private Project project;
 
 	@Before

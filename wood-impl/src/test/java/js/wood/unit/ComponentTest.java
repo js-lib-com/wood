@@ -22,7 +22,7 @@ import js.wood.Component;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 import js.wood.ScriptFile;
 import js.wood.Variables;
 import js.wood.WOOD;
@@ -254,7 +254,7 @@ public class ComponentTest extends WoodTestCase {
 		CompoPath path = new CompoPath(project, "references");
 		final List<Reference> references = new ArrayList<Reference>();
 
-		Component compo = new Component(path, new ReferenceHandler() {
+		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				references.add(reference);
@@ -473,7 +473,7 @@ public class ComponentTest extends WoodTestCase {
 	}
 
 	private static Component createCompo(final Project project, final CompoPath path) {
-		Component compo = new Component(path, new ReferenceHandler() {
+		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				Variables variables = new Variables(project, sourcePath.getDirPath());

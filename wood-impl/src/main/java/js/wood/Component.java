@@ -32,7 +32,7 @@ import js.util.Strings;
  * <p>
  * This class deals with source files aggregation: it consolidates layout from its templates hierarchy and widgets tree and
  * collect used style files and script classes. But does not deal with resources references. For that purpose, component class
- * is configured with {@link ReferenceHandler} that is in charge with resource references processing: inject variables and
+ * is configured with {@link IReferenceHandler} that is in charge with resource references processing: inject variables and
  * process media files. Resources processing is externalized because build and preview processes have different needs.
  * <p>
  * Implementation note. Resource references handling is performed on source file reading, on the fly. Component needs to load
@@ -49,7 +49,7 @@ public class Component {
 	private final Project project;
 
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
-	private final OperatorsHandler operators;
+	private final IOperatorsHandler operators;
 
 	/** Component name. By convention is the name of component directory. */
 	private final String name;
@@ -64,7 +64,7 @@ public class Component {
 	private final LayoutParameters layoutParameters;
 
 	/** External defined resource references handler in charge with resources processing. */
-	private final ReferenceHandler referenceHandler;
+	private final IReferenceHandler referenceHandler;
 
 	/** The list of style files used by this component, in the proper oder for page document inclusion. */
 	private final List<FilePath> styleFiles = new ArrayList<FilePath>();
@@ -96,12 +96,12 @@ public class Component {
 
 	/**
 	 * Create aggregated instance for component identified by given path. Just delegates
-	 * {@link #Component(FilePath, ReferenceHandler)} with component layout path.
+	 * {@link #Component(FilePath, IReferenceHandler)} with component layout path.
 	 * 
 	 * @param compoPath component path,
 	 * @param referenceHandler resource references handler.
 	 */
-	public Component(CompoPath compoPath, ReferenceHandler referenceHandler) {
+	public Component(CompoPath compoPath, IReferenceHandler referenceHandler) {
 		this(compoPath.getLayoutPath(), referenceHandler);
 	}
 
@@ -116,7 +116,7 @@ public class Component {
 	 * @param layoutPath component layout file path,
 	 * @param referenceHandler resource references handler,
 	 */
-	public Component(FilePath layoutPath, ReferenceHandler referenceHandler) {
+	public Component(FilePath layoutPath, IReferenceHandler referenceHandler) {
 		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		this.project = layoutPath.getProject();

@@ -104,7 +104,7 @@ public final class Project {
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
 	 * {@link NamingStrategy#XMLNS}.
 	 */
-	private final OperatorsHandler operatorsHandler;
+	private final IOperatorsHandler operatorsHandler;
 
 	/** Strategy used for script dependencies resolving for inclusion into build and preview. */
 	private final ScriptDependencyStrategy scriptDependencyStrategy;
@@ -776,7 +776,7 @@ public final class Project {
 	 * 
 	 * @return operator handler for project naming convention.
 	 */
-	public OperatorsHandler getOperatorsHandler() {
+	public IOperatorsHandler getOperatorsHandler() {
 		return operatorsHandler;
 	}
 

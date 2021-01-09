@@ -19,7 +19,7 @@ import js.util.Strings;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 
 
 public class WoodTestCase {
@@ -98,8 +98,8 @@ public class WoodTestCase {
 		return writer.toString();
 	}
 
-	protected static ReferenceHandler nullReferenceHandler() {
-		return new ReferenceHandler() {
+	protected static IReferenceHandler nullReferenceHandler() {
+		return new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
 				return "null";

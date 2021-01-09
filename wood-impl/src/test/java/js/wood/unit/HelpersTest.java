@@ -38,7 +38,7 @@ import js.wood.Path;
 import js.wood.Project;
 import js.wood.ProjectConfig;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 import js.wood.ResourceType;
 import js.wood.ScriptFile;
 import js.wood.StyleExtensionReader;
@@ -487,7 +487,7 @@ public class HelpersTest extends WoodTestCase
     CompoPath compoPath = new CompoPath(project, "page/index");
 
     final Variables variables = project.getVariables().get(compoPath);
-    ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/page/index/index.xml"), new ReferenceHandler()
+    ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/page/index/index.xml"), new IReferenceHandler()
     {
       @Override
       public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException

@@ -35,7 +35,7 @@ import js.util.Strings;
  * @author Iulian Rotaru
  * @version draft
  */
-public class Builder implements ReferenceHandler {
+public class Builder implements IReferenceHandler {
 	/** Class logger. */
 	private static final Log log = LogFactory.getLog(Builder.class);
 

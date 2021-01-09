@@ -13,7 +13,7 @@ import js.util.Params;
  * 
  * @author Iulian Rotaru
  */
-public class XmlnsOperatorsHandler implements OperatorsHandler
+public class XmlnsOperatorsHandler implements IOperatorsHandler
 {
   /** Name space context used by document search by XPath expression with name space. */
   private NamespaceContext namespaceContext = new NamespaceContext()

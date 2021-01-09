@@ -14,7 +14,7 @@ import js.wood.DirPath;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 import js.wood.ReferencesResolver;
 import js.wood.ResourceType;
 import js.wood.SourceReader;
@@ -24,7 +24,7 @@ import js.wood.WoodException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResourcesTest extends WoodTestCase implements ReferenceHandler
+public class ResourcesTest extends WoodTestCase implements IReferenceHandler
 {
   private Project project;
 
@@ -280,7 +280,7 @@ public class ResourcesTest extends WoodTestCase implements ReferenceHandler
     FilePath sourceFile = filePath("res/compo/compo.htm");
 
     ReferencesResolver resolver = new ReferencesResolver();
-    value = resolver.parse(value, sourceFile, new ReferenceHandler()
+    value = resolver.parse(value, sourceFile, new IReferenceHandler()
     {
       @Override
       public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException
@@ -394,7 +394,7 @@ public class ResourcesTest extends WoodTestCase implements ReferenceHandler
   {
     FilePath sourceFile = filePath("res/compo/compo.htm");
 
-    SourceReader reader = new SourceReader(sourceFile, new ReferenceHandler()
+    SourceReader reader = new SourceReader(sourceFile, new IReferenceHandler()
     {
       @Override
       public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException

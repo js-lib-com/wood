@@ -47,13 +47,13 @@ import js.wood.Preview;
 import js.wood.PreviewServlet;
 import js.wood.Project;
 import js.wood.Reference;
-import js.wood.ReferenceHandler;
+import js.wood.IReferenceHandler;
 import js.wood.ResourceType;
 import js.wood.Variables;
 import js.wood.WoodException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PreviewTest extends WoodTestCase implements ReferenceHandler {
+public class PreviewTest extends WoodTestCase implements IReferenceHandler {
 	private Project project;
 	private StringWriter responseWriter = new StringWriter();
 	private ByteArrayOutputStream responseStream = new ByteArrayOutputStream();

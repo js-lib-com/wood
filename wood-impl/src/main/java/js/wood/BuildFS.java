@@ -224,7 +224,7 @@ public abstract class BuildFS {
 	 * @return URL path relative to page location.
 	 * @throws IOException if write operation fails.
 	 */
-	public String writeStyle(Component page, FilePath styleFile, ReferenceHandler referenceHandler) throws IOException {
+	public String writeStyle(Component page, FilePath styleFile, IReferenceHandler referenceHandler) throws IOException {
 		String fileName = insertBuildNumber(formatStyleName(styleFile));
 		File targetFile = new File(getStyleDir(), fileName);
 		if (!processedFiles.contains(targetFile)) {
@@ -248,7 +248,7 @@ public abstract class BuildFS {
 	 * @return URL path relative to page location.
 	 * @throws IOException if write operation fails.
 	 */
-	public String writeScript(Component page, FilePath scriptFile, ReferenceHandler referenceHandler) throws IOException {
+	public String writeScript(Component page, FilePath scriptFile, IReferenceHandler referenceHandler) throws IOException {
 		File targetFile = new File(getScriptDir(), insertBuildNumber(formatScriptName(scriptFile)));
 		targetFile.getParentFile().mkdirs();
 		if (!processedFiles.contains(targetFile)) {
