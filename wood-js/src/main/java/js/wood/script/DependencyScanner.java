@@ -28,7 +28,6 @@ import org.mozilla.javascript.ast.VariableInitializer;
 
 import js.util.Files;
 import js.wood.Dependency;
-import js.wood.ThirdPartyDependency;
 
 /**
  * Dependencies scanner for j(s)-script sources. A j(s)-script is a standard ECMA script forced to OOP by semantic conventions.

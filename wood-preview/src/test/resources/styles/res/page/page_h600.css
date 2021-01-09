@@ -1,0 +1,3 @@
+body {
+	height: @dimen/mobile-height;
+}

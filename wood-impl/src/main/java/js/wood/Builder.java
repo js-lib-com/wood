@@ -10,6 +10,7 @@ import java.util.Map;
 import js.log.Log;
 import js.log.LogFactory;
 import js.util.Strings;
+import js.wood.impl.ProjectConfig;
 
 /**
  * Project builder for user interface resources. Builder acts as a bridge between {@link Project} and {@link BuildFS}. It reads
@@ -43,10 +44,10 @@ public class Builder implements IReferenceHandler {
 	private Project project;
 
 	/** Project discovered pages. */
-	private Collection<CompoPath> pages = new ArrayList<CompoPath>();
+	private Collection<CompoPath> pages = new ArrayList<>();
 
 	/** Cache for resource variables. */
-	private Map<DirPath, Variables> variables;
+	private Map<DirPath, IVariables> variables;
 
 	/** Current processing build file system, that is, build site directory. */
 	private BuildFS buildFS;
@@ -66,7 +67,7 @@ public class Builder implements IReferenceHandler {
 		this.project.scanBuildFiles();
 
 		// scan project layout files then initialize pages list and global variables map
-		for (LayoutFile layoutFile : this.project.getLayouts()) {
+		for (ILayoutFile layoutFile : this.project.getLayouts()) {
 			if (layoutFile.isPage()) {
 				this.pages.add(layoutFile.getCompoPath());
 			}
@@ -152,8 +153,8 @@ public class Builder implements IReferenceHandler {
 		compo.scan(false);
 		PageDocument page = new PageDocument(compo);
 
-		ProjectConfig config = project.getConfig();
-		ComponentDescriptor descriptor = compo.getDescriptor();
+		IProjectConfig config = project.getConfig();
+		IComponentDescriptor descriptor = compo.getDescriptor();
 
 		page.setLanguage((locale != null ? locale : config.getDefaultLocale()).toLanguageTag());
 		page.setContentType("text/html; charset=UTF-8");
@@ -185,7 +186,7 @@ public class Builder implements IReferenceHandler {
 
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty
-		for (ComponentDescriptor.ScriptReference script : compo.getDescriptorScripts()) {
+		for (IScriptReference script : compo.getDescriptorScripts()) {
 			// component descriptor third party scripts accept both project file path and absolute URL
 			// if file path is used copy the script to build FS, otherwise script is stored on foreign server
 			String scriptPath = script.getSource();
@@ -196,11 +197,11 @@ public class Builder implements IReferenceHandler {
 		}
 
 		// component scripts - both 3pty and local, are available only for automatic discovery
-		if (project.getScriptDependencyStrategy() == ScriptDependencyStrategy.DISCOVERY) {
+		if (project.hasScriptDiscovery()) {
 			// component third party script are served from foreign servers and need not to be copied into build FS
 			page.addScripts(compo.getThirdPartyScripts());
 
-			for (ScriptFile script : compo.getScriptFiles()) {
+			for (IScriptFile script : compo.getScriptFiles()) {
 				page.addScript(buildFS.writeScript(compo, script.getSourceFile(), this), false);
 			}
 		}
@@ -222,9 +223,9 @@ public class Builder implements IReferenceHandler {
 	 * @throws WoodException if directory variables or media file is missing.
 	 */
 	@Override
-	public String onResourceReference(Reference reference, FilePath source) throws IOException, WoodException {
+	public String onResourceReference(IReference reference, FilePath source) throws IOException, WoodException {
 		if (reference.isVariable()) {
-			Variables dirVariables = variables.get(source.getDirPath());
+			IVariables dirVariables = variables.get(source.getDirPath());
 			if (dirVariables == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", source, reference);
 			}

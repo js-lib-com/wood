@@ -17,6 +17,7 @@ import js.wood.Component;
 import js.wood.DefaultBuildFS;
 import js.wood.FilePath;
 import js.wood.Project;
+import js.wood.WoodTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -165,9 +166,9 @@ public class BuildFsTest extends WoodTestCase {
 		BuildFS buildFS = new TestBuildFS(project);
 
 		buildFS.setLocale(new Locale("en"));
-		assertDir("fixture/project/build/site/en/images", buildFS, "images");
+		assertDir("src/test/resources/project/build/site/en/images", buildFS, "images");
 		buildFS.setLocale(new Locale("ro"));
-		assertDir("fixture/project/build/site/ro/images", buildFS, "images");
+		assertDir("src/test/resources/project/build/site/ro/images", buildFS, "images");
 
 		resetProjectLocales(project);
 		try {

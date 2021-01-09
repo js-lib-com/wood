@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Test;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
@@ -28,13 +30,13 @@ import js.wood.Component;
 import js.wood.DefaultBuildFS;
 import js.wood.DirPath;
 import js.wood.FilePath;
+import js.wood.IReference;
+import js.wood.IVariables;
 import js.wood.PageDocument;
 import js.wood.Project;
-import js.wood.Reference;
-import js.wood.ResourceType;
-import js.wood.Variables;
-
-import org.junit.Test;
+import js.wood.WoodTestCase;
+import js.wood.impl.Reference;
+import js.wood.impl.ResourceType;
 
 public class BuilderTest extends WoodTestCase {
 	@Test
@@ -54,7 +56,7 @@ public class BuilderTest extends WoodTestCase {
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
 
-		Map<DirPath, Variables> variables = field(builder, "variables");
+		Map<DirPath, IVariables> variables = field(builder, "variables");
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -79,7 +81,7 @@ public class BuilderTest extends WoodTestCase {
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
 
-		Map<DirPath, Variables> variables = field(builder, "variables");
+		Map<DirPath, IVariables> variables = field(builder, "variables");
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -306,7 +308,7 @@ public class BuilderTest extends WoodTestCase {
 		Project project = field(builder, "project");
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		Reference reference = new Reference(source, ResourceType.STRING, "title");
+		IReference reference = new Reference(source, ResourceType.STRING, "title");
 
 		assertValue("Index Page", builder, "en", reference, source);
 		assertValue("Indexseite", builder, "de", reference, source);
@@ -342,7 +344,7 @@ public class BuilderTest extends WoodTestCase {
 		Project project = field(builder, "project");
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		Reference reference = new Reference(source, ResourceType.STRING, "title");
+		IReference reference = new Reference(source, ResourceType.STRING, "title");
 
 		assertValue("Index Page", builder, "en", reference, source);
 		assertValue("Indexseite", builder, "de", reference, source);
@@ -372,7 +374,7 @@ public class BuilderTest extends WoodTestCase {
 		assertValue("/de/media/template-page_logo.jpg", builder, "de", reference, source);
 	}
 
-	private static void assertValue(String expected, Builder builder, String languageTag, Reference reference, FilePath source) throws IOException {
+	private static void assertValue(String expected, Builder builder, String languageTag, IReference reference, FilePath source) throws IOException {
 		Locale locale = new Locale(languageTag);
 		field(builder, "locale", locale);
 		BuildFS buildFS = field(builder, "buildFS");

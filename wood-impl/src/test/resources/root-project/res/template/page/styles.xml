@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style>
+	<compo parent="dialog">
+		<background-color>@color/page-header-bg</background-color>
+		<width>50%</width>
+		<height>@dimen/page-header-height</height>
+	</compo>
+</style>

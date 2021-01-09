@@ -33,6 +33,7 @@
 		<module>wood-core</module>
 		<module>wood-js</module>
 		<module>wood-impl</module>
+		<module>wood-preview</module>
 	</modules>
 
 	<properties>

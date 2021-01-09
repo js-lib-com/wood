@@ -50,7 +50,7 @@ public class DefaultBuildFS extends BuildFS
   /**
    * Usually page layout files are stored on build root. Anyway, if component descriptor define <code>path</code>
    * element uses that directories path instead. Takes care to create directories path. For <code>path</code>
-   * description see {@link ComponentDescriptor}.
+   * description see {@link IComponentDescriptor}.
    */
   @Override
   protected File getPageDir(Component page)

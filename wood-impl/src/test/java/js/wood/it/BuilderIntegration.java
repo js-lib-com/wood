@@ -15,7 +15,7 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.wood.Builder;
-import js.wood.unit.WoodTestCase;
+import js.wood.WoodTestCase;
 
 import org.junit.Test;
 

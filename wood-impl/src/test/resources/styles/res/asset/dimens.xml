@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dimen>
+	<page-header-height>80px</page-header-height>
+	<mobile-width>400px</mobile-width>
+	<mobile-height>300px</mobile-height>
+	<desktop-width>600px</desktop-width>
+</dimen>
