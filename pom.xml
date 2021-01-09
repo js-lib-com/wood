@@ -32,7 +32,7 @@
 	<modules>
 		<module>wood-core</module>
 		<module>wood-js</module>
-		<module>wood-impl</module>
+		<module>wood-build</module>
 		<module>wood-preview</module>
 	</modules>
 

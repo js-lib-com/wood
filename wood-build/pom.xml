@@ -7,10 +7,10 @@
 		<artifactId>wood</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>wood-impl</artifactId>
+	<artifactId>wood-build</artifactId>
 
-	<!--<name>WOOD - Web Object Oriented Development</name>-->
-	<description>WOOD tool promotes an object oriented development paradigm for user interfaces based on web technologies. It uses decomposition of complex user interfaces into user interface components.</description>
+	<name>WOOD Builder</name>
+	<description>Create vanilla HTML site, multi-language supported, from WOOD components. Takes care to resolve variables and include styles and script references into generated pages.</description>
 	<url>https://github.com/js-lib-com/wood</url>
 
 	<developers>
