@@ -17,12 +17,12 @@ import js.wood.Component;
 import js.wood.DefaultBuildFS;
 import js.wood.FilePath;
 import js.wood.Project;
-import js.wood.WoodTestCase;
+import js.wood.BuilderTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class BuildFsTest extends WoodTestCase {
+public class BuildFsTest extends BuilderTestCase {
 	private Project project;
 
 	@Before

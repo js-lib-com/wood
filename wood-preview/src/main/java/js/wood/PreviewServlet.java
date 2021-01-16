@@ -84,7 +84,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	private static final String PROJECT_DIR_PARAM = "PROJECT_DIR";
 
 	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
-	private Project project;
+	private PreviewProject project;
 
 	/**
 	 * Preview layout is a special layout used for component unit test. It is returned instead of component; preview layout uses
@@ -109,7 +109,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ServletContext context = config.getServletContext();
-		project = new Project(context.getInitParameter(PROJECT_DIR_PARAM));
+		project = new PreviewProject(context.getInitParameter(PROJECT_DIR_PARAM));
 		json = Classes.loadService(Json.class);
 	}
 
@@ -193,7 +193,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			// create component with support for preview script
 			Component component = new Component(layoutPath, this);
 			component.scan(true);
-			Preview preview = new Preview(component);
+			Preview preview = new Preview(project, component);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}
@@ -302,7 +302,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		 * 
 		 * @param project parent project.
 		 */
-		public synchronized void update(Project project) {
+		public synchronized void update(PreviewProject project) {
 			compoVariables.clear();
 			assetVariables = project.getVariables(project.getAssetsDir());
 			themeVariables = project.getVariables(project.getThemeDir());
@@ -315,7 +315,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		 * @param sourcePath component source file.
 		 * @return component variables.
 		 */
-		public synchronized IVariables getVariables(Project project, FilePath sourcePath) {
+		public synchronized IVariables getVariables(PreviewProject project, FilePath sourcePath) {
 			IVariables variables = compoVariables.get(sourcePath.getDirPath());
 			if (variables == null) {
 				variables = project.getVariables(sourcePath.getDirPath());
@@ -377,7 +377,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		return contentType;
 	}
 
-	private static String forwardPath(Project project, String requestPath) {
+	private static String forwardPath(PreviewProject project, String requestPath) {
 		// assume we are into preview for component '/res/compos/dialogs/alert'
 		// current loaded content is the last part of the path, i.e. 'alert'
 		// from a component script there is a RMI request for sixqs.site.controller.MainController#getCategoriesSelect

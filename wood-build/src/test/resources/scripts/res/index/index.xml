@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page>
+	<version>1</version>
+	<title>Captcha Component</title>
+	<description>Custom CAPTCHA with revealed with checkbox.</description>
+	<scripts>
+		<script>lib/js-lib/js-lib.js</script>
+		<script>gen/js/controller/MainController.js</script>
+		<script>script/js/wood/IndexPage.js</script>
+		<script>script/js/format/RichText.js</script>
+		<script>script/js/widget/Description.js</script>
+	</scripts>
+</page>

@@ -27,14 +27,11 @@ import js.util.Classes;
 import js.wood.CT;
 import js.wood.DirPath;
 import js.wood.FilePath;
-import js.wood.ILayoutFile;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
-import js.wood.IVariables;
 import js.wood.Project;
 import js.wood.WoodException;
 import js.wood.impl.FilesHandler;
-import js.wood.impl.LayoutFile;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.ScriptFile;
@@ -61,7 +58,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 	public void initialization() throws FileNotFoundException {
 		project = project("project");
 
-		assertEquals(new File("fixture/project"), project.getProjectDir());
+		assertEquals(new File("src/test/resources/project"), project.getProjectDir());
 		assertNotNull(project.getConfig());
 
 		assertEquals(CT.ASSETS_DIR + "/", project.getAssetsDir().toString());
@@ -73,29 +70,8 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 		assertEquals("Test Project", project.getDisplay());
 		assertEquals("Project used as fixture for unit testing.", project.getDescription());
 
-		assertTrue(project.getLayouts().isEmpty());
 		assertTrue(project.getThemeStyles().isEmpty());
 		assertEquals(4, project.getLocales().size());
-	}
-
-	@Test
-	public void layoutsScanner() throws Exception {
-		project = project("project");
-		FilesHandler handler = Classes.newInstance("js.wood.Project$LayoutsScanner", project);
-
-		for (String file : new String[] { "res/page/index/strings.xml", //
-				"res/page/index/index.htm", //
-				"res/page/index/fake.hml", //
-				"res/template/page/logo.xml", //
-				"res/template/page/page.htm", //
-				"res/template/page/page.css" }) {
-			handler.onFile(filePath(file));
-		}
-
-		Set<ILayoutFile> layouts = project.getLayouts();
-		assertEquals(2, layouts.size());
-		assertTrue(layouts.contains(new LayoutFile(filePath("res/page/index/index.htm"))));
-		assertTrue(layouts.contains(new LayoutFile(filePath("res/template/page/page.htm"))));
 	}
 
 	@Test
@@ -138,43 +114,6 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 		assertTrue(styles.contains(filePath("res/theme/style.css")));
 	}
 
-	@Test
-	public void variablesScanner() throws Exception {
-		project = project("project");
-		FilesHandler handler = Classes.newInstance("js.wood.Project$VariablesScanner", project);
-
-		for (String file : new String[] { "res/page/index/strings.xml", //
-				"res/page/index/strings_de.xml", //
-				"res/page/index/index.css", //
-				"res/asset/colors.xml", //
-				"res/asset/favicon.ico" }) {
-			FilePath filePath = filePath(file);
-			handler.onDirectory(filePath.getDirPath());
-			handler.onFile(filePath);
-		}
-
-		Map<DirPath, IVariables> projectVariables = project.getVariables();
-		assertFalse(projectVariables.isEmpty());
-
-		assertNotNull(projectVariables.get(dirPath("res/asset")));
-		assertNotNull(projectVariables.get(dirPath("res/theme")));
-
-		IVariables dirVariables = projectVariables.get(dirPath("res/page/index"));
-		assertNotNull(dirVariables);
-		assertNotNull(field(dirVariables, "assetVariables"));
-
-		FilePath source = filePath("res/page/index/index.htm");
-		assertEquals("Index Page", variable(dirVariables, source, "en", ResourceType.STRING, "title"));
-		assertEquals("Indexseite", variable(dirVariables, source, "de", ResourceType.STRING, "title"));
-		// if a locale has not a variable uses default locale, in this case 'en'
-		assertEquals("Index Page", variable(dirVariables, source, "jp", ResourceType.STRING, "title"));
-		assertEquals("#000000", variable(dirVariables, source, "en", ResourceType.COLOR, "page-header-bg"));
-	}
-
-	private String variable(IVariables variables, FilePath source, String language, ResourceType type, String name) {
-		return variables.get(new Locale(language), new Reference(source, type, name), source, this);
-	}
-
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
 		Variables variables = new Variables(project, sourcePath.getDirPath());
@@ -184,26 +123,6 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 		return variables.get(null, reference, sourcePath, this);
 	}
 
-	@Test
-	public void emptyVariablesScanner() throws Exception {
-		project = project("project");
-		FilesHandler handler = Classes.newInstance("js.wood.Project$VariablesScanner", project);
-
-		DirPath dir = dirPath("res/template/sidebar");
-		handler.onDirectory(dir);
-
-		Map<DirPath, IVariables> projectVariables = project.getVariables();
-		assertFalse(projectVariables.isEmpty());
-
-		IVariables dirVariables = projectVariables.get(dir);
-		assertNotNull(dirVariables);
-		assertNotNull(field(dirVariables, "assetVariables"));
-
-		Map languageValues = field(dirVariables, "localeValues");
-		assertTrue(languageValues.isEmpty());
-	}
-
-	@Test
 	public void getScriptFiles() throws Throwable {
 		project = project("scripts");
 
@@ -224,26 +143,6 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 		for (int i = 0; i < expected.length; ++i) {
 			assertTrue(scriptFiles.contains(expected[i]));
 		}
-	}
-
-	@Test
-	public void pagesDiscovery() throws IOException {
-		project = project("project");
-		project.scanBuildFiles();
-
-		final Set<LayoutFile> expected = new HashSet<LayoutFile>();
-		expected.add(new LayoutFile(filePath("res/page/index/index.htm")));
-		expected.add(new LayoutFile(filePath("res/page/video-player/video-player.htm")));
-		expected.add(new LayoutFile(filePath("res/page/videos/videos.htm")));
-
-		final Set<ILayoutFile> found = new HashSet<>();
-		for (ILayoutFile layoutFile : project.getLayouts()) {
-			if (layoutFile.isPage()) {
-				found.add(layoutFile);
-			}
-		}
-
-		assertTrue(expected.equals(found));
 	}
 
 	@Test
@@ -300,19 +199,6 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	private void assertScripts(Collection<ScriptFile> scripts, String expected) {
 		assertTrue(scripts.contains(new ScriptFile(project, filePath(expected))));
-	}
-
-	@Test
-	public void previewThemeStyles() {
-		project = project("project");
-
-		List<FilePath> styles = project.previewThemeStyles();
-		assertEquals(4, styles.size());
-
-		assertEquals(filePath("res/theme/reset.css"), styles.get(0));
-		assertEquals(filePath("res/theme/fx.css"), styles.get(1));
-		assertTrue(styles.contains(filePath("res/theme/form.css")));
-		assertTrue(styles.contains(filePath("res/theme/style.css")));
 	}
 
 	@Test

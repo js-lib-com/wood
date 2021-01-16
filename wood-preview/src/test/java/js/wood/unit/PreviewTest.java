@@ -39,7 +39,6 @@ import js.dom.EList;
 import js.dom.Element;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.util.Classes;
-import js.util.Files;
 import js.util.Strings;
 import js.wood.CompoPath;
 import js.wood.Component;
@@ -48,16 +47,16 @@ import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.IVariables;
 import js.wood.Preview;
+import js.wood.PreviewProject;
 import js.wood.PreviewServlet;
-import js.wood.Project;
 import js.wood.WoodException;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PreviewTest implements IReferenceHandler {
-	private Project project;
+public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
+	private PreviewProject project;
 	private StringWriter responseWriter = new StringWriter();
 	private ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 
@@ -170,7 +169,7 @@ public class PreviewTest implements IReferenceHandler {
 		EList scripts = doc.findByTag("script");
 		assertEquals(6, scripts.size());
 
-		File projectDir = new File("fixture/scripts");
+		File projectDir = new File("src/test/resources/scripts");
 		for (Element script : scripts) {
 			File file = new File(projectDir, script.getAttr("src"));
 			assertNotNull(file);
@@ -243,7 +242,7 @@ public class PreviewTest implements IReferenceHandler {
 
 		Component component = new Component(path.getLayoutPath(), this);
 		component.scan(true);
-		Preview preview = new Preview(component);
+		Preview preview = new Preview(project, component);
 		StringWriter writer = new StringWriter();
 		preview.serialize(writer);
 		DocumentBuilder builder = new DocumentBuilderImpl();
@@ -532,54 +531,5 @@ public class PreviewTest implements IReferenceHandler {
 		assertTrue(scripts.contains("/project-preview/script/js/compo/Dialog.js"));
 		assertTrue(scripts.contains("/project-preview/script/js/hood/TopMenu.js"));
 		assertTrue(scripts.contains("/project-preview/script/hc/view/DiscographyView.js"));
-	}
-
-	private static void assertStyle(String expected, EList styles, int index) {
-		assertEquals(expected, styles.item(index).getAttr("href"));
-	}
-
-	private static void assertScript(String expected, EList scripts, int index) {
-		assertEquals(expected, scripts.item(index).getAttr("src"));
-	}
-
-	private static void assertImage(String expected, EList images, int index) {
-		assertEquals(expected, images.item(index).getAttr("src"));
-	}
-	
-	private static Project project(String projectDir) {
-		try {
-			Project project = new Project("src/test/resources/" + projectDir);
-			if (project.getSiteDir().exists()) {
-				Files.removeFilesHierarchy(project.getSiteDir());
-			}
-			return project;
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Fail to create project instance.");
-		}
-
-		throw new IllegalStateException();
-	}
-
-	private static <T> T invoke(Object object, String method, Object... args) {
-		try {
-			return Classes.invoke(object, method, args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-		throw new IllegalStateException();
-	}
-
-	private static void field(Object object, String field, Object value) {
-		Classes.setFieldValue(object, field, value);
-	}
-
-	private static <T> T field(Object object, String field) {
-		return Classes.getFieldValue(object, field);
-	}
-
-	private static String path(String fileName) {
-		return "src/test/resources/" + fileName;
 	}
 }

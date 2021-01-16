@@ -68,7 +68,7 @@ public class PathTest extends WoodTestCase
     Path path = filePath("res/compo/discography/discography.htm");
     assertEquals("res/compo/discography/discography.htm", path.value());
     assertTrue(path.exists());
-    assertEquals("fixture/project/res/compo/discography/discography.htm", path.toFile().getPath().replace('\\', '/'));
+    assertEquals("src/test/resources/project/res/compo/discography/discography.htm", path.toFile().getPath().replace('\\', '/'));
     assertTrue(path.hashCode() != 0);
   }
 
@@ -674,7 +674,7 @@ public class PathTest extends WoodTestCase
     assertEquals("page", path.getName());
     assertEquals("page-body", path.getEditableName());
 
-    assertEquals(new File("fixture/project/res/template/page"), path.toFile());
+    assertEquals(new File("src/test/resources/project/res/template/page"), path.toFile());
   }
 
   @Test

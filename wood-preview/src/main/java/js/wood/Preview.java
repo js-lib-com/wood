@@ -23,18 +23,18 @@ import js.util.Strings;
  */
 public final class Preview {
 	/** Project reference. */
-	private Project project;
+	private final PreviewProject project;
 
 	/** Wrapped component. */
-	private Component compo;
+	private final Component compo;
 
 	/**
 	 * Create component preview instance.
 	 * 
 	 * @param compo component.
 	 */
-	public Preview(Component compo) {
-		this.project = compo.getProject();
+	public Preview(PreviewProject project, Component compo) {
+		this.project = project;
 		this.compo = compo;
 	}
 
@@ -119,6 +119,7 @@ public final class Preview {
 			addScript(doc, scriptPath, scriptReference);
 		}
 
+		/*
 		// component scripts - both 3pty and local, are available only for automatic discovery
 		if (project.hasScriptDiscovery()) {
 			for (String script : compo.getThirdPartyScripts()) {
@@ -139,7 +140,8 @@ public final class Preview {
 			}
 
 		}
-
+*/
+		
 		DefaultAttributes.update(doc);
 		doc.serialize(writer, true);
 	}
@@ -180,12 +182,14 @@ public final class Preview {
 	 * @param doc HTML document,
 	 * @param src the source of script.
 	 */
+	/*
 	private static void addScript(Document doc, String src) {
 		Element head = doc.getByTag("head");
 		head.addChild(doc.createElement("script", "src", src, "type", "text/javascript"));
 		head.addText("\r\n");
 	}
-
+*/
+	
 	private static void addScript(Document doc, String src, IScriptReference scriptRef) {
 		// preview always adds scripts to page head
 		// next commented out statement is to show that 'scriptRef.isAppendToHead()' is ignored

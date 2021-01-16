@@ -9,7 +9,7 @@
 	<design>material</design>
 
 	<site-dir>build/site</site-dir>
-	<script-dependency-strategy>DISCOVERY</script-dependency-strategy>
+	<script-dependency-strategy>DESCRIPTOR</script-dependency-strategy>
 
 	<analytics>UA-12345678-1</analytics>
 

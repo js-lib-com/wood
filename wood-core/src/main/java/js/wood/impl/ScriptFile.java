@@ -1,7 +1,6 @@
 package js.wood.impl;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,6 +73,7 @@ public final class ScriptFile implements IScriptFile {
 		this.hashCode = sourceFile.hashCode();
 		System.out.println(sourceFile.toString());
 
+		/*
 		// scan for script file dependencies only if discovery is enabled
 		if (project.hasScriptDiscovery()) {
 			assertScriptScanner();
@@ -83,6 +83,7 @@ public final class ScriptFile implements IScriptFile {
 				throw new WoodException(e);
 			}
 		}
+		*/
 	}
 
 	/**

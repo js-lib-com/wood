@@ -15,11 +15,11 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.wood.Builder;
-import js.wood.WoodTestCase;
+import js.wood.BuilderTestCase;
 
 import org.junit.Test;
 
-public class BuilderIntegration extends WoodTestCase {
+public class BuilderIntegration extends BuilderTestCase {
 	private static final String[] LANGUAGES = new String[] { "de", "en", "fr", "ro" };
 
 	private static final Map<String, String> TITLES = new HashMap<String, String>();

@@ -11,6 +11,7 @@ import js.log.Log;
 import js.log.LogFactory;
 import js.util.Strings;
 import js.wood.impl.ProjectConfig;
+import js.wood.impl.Reference;
 
 /**
  * Project builder for user interface resources. Builder acts as a bridge between {@link Project} and {@link BuildFS}. It reads
@@ -41,7 +42,7 @@ public class Builder implements IReferenceHandler {
 	private static final Log log = LogFactory.getLog(Builder.class);
 
 	/** Project instance. */
-	private Project project;
+	private BuilderProject project;
 
 	/** Project discovered pages. */
 	private Collection<CompoPath> pages = new ArrayList<>();
@@ -63,11 +64,11 @@ public class Builder implements IReferenceHandler {
 	 */
 	public Builder(String projectPath) {
 		log.trace("Builder(String)");
-		this.project = new Project(projectPath);
+		this.project = new BuilderProject(projectPath);
 		this.project.scanBuildFiles();
 
 		// scan project layout files then initialize pages list and global variables map
-		for (ILayoutFile layoutFile : this.project.getLayouts()) {
+		for (LayoutFile layoutFile : this.project.getLayouts()) {
 			if (layoutFile.isPage()) {
 				this.pages.add(layoutFile.getCompoPath());
 			}
@@ -196,6 +197,7 @@ public class Builder implements IReferenceHandler {
 			page.addScript(scriptPath, script.isAppendToHead());
 		}
 
+		/*
 		// component scripts - both 3pty and local, are available only for automatic discovery
 		if (project.hasScriptDiscovery()) {
 			// component third party script are served from foreign servers and need not to be copied into build FS
@@ -205,7 +207,8 @@ public class Builder implements IReferenceHandler {
 				page.addScript(buildFS.writeScript(compo, script.getSourceFile(), this), false);
 			}
 		}
-
+*/
+		
 		DefaultAttributes.update(page.getDocument());
 
 		buildFS.writePage(compo, page);

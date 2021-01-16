@@ -86,7 +86,7 @@ public class Component {
 	private final Set<String> thirdPartyScripts = new HashSet<String>();
 
 	/** Optional component descriptor, default to null. */
-	private final ComponentDescriptor descriptor;
+	private ComponentDescriptor descriptor;
 
 	/**
 	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also
@@ -134,11 +134,13 @@ public class Component {
 		this.name = layoutPath.getBaseName();
 		this.display = Strings.toTitleCase(name);
 
-		FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
-		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		//FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
+		//this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 
 	public void scan(boolean includePreviewScript) {
+		descriptor = project.getScriptDependecyHandler().getComponentDescriptor(baseLayoutPath, referenceHandler);
+
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
@@ -165,7 +167,7 @@ public class Component {
 
 		// uses project detected script classes to find out script files that this component depends on
 		scriptFiles = collectScriptFiles(project.getScriptFiles(scriptClasses));
-
+		
 		// if preview script file is to be included updates this component scripts
 		// preview script and its direct dependencies are included last
 		if (includePreviewScript) {
@@ -278,10 +280,8 @@ public class Component {
 			throw new WoodException("Empty layout |%s|.", layoutPath);
 		}
 
-		// collect script classes declared into loaded layout fragment, but only if script discovery is enabled
-		if (project.hasScriptDiscovery()) {
-			collectScriptClasses(layoutPath, layout.getRoot());
-		}
+		// delegate script processor to handle scripts related to this component
+		project.getScriptDependecyHandler().onLayoutLoaded(layout, layoutPath, operators);
 
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
@@ -483,51 +483,6 @@ public class Component {
 
 	// --------------------------------------------------------
 	// Internal helper methods
-
-	/**
-	 * Scan given layout fragment for script classes and add to component script classes set.
-	 * 
-	 * @param layoutFile layout source file, for error reporting,
-	 * @param layout layout fragment to scan for script classes.
-	 * @throws WoodException if layout contains script classes declaration for which project has not a definition file.
-	 * @see #scriptClasses
-	 */
-	private void collectScriptClasses(FilePath layoutFile, Element layout) {
-		Element pageClassEl = operators.getByOperator(layout, Operator.SCRIPT);
-		if (pageClassEl != null) {
-			addScriptClass(layoutFile, operators.getOperand(pageClassEl, Operator.SCRIPT));
-		}
-
-		// collect all script classes used for custom elements and formatting
-		// first include custom classes then formatting
-		// both class and formatting operators are declared by template engine and prefixed with data-
-
-		for (Element scriptClassEl : layout.findByXPath("//*[@data-class]")) {
-			addScriptClass(layoutFile, scriptClassEl.getAttr("data-class"));
-		}
-		for (Element formatClassEl : layout.findByXPath("//*[@data-format]")) {
-			addScriptClass(layoutFile, formatClassEl.getAttr("data-format"));
-		}
-	}
-
-	/**
-	 * Add script class to component script classes set, {@link #scriptClasses}. Given script class is collected from layout
-	 * source file created by developer. Throws exception if requested script class is not defined in a project script file; a
-	 * reason may be class name misspelling.
-	 * 
-	 * @param layoutFile layout file declaring script class, for error reporting,
-	 * @param scriptClass qualified script class name.
-	 * @throws WoodException if script class definition file is not found.
-	 */
-	private void addScriptClass(FilePath layoutFile, String scriptClass) {
-		if (scriptClass == null) {
-			throw new WoodException("Empty script reference on |%s|. Please check wood:script, data-class and data-format attributes.", layoutFile);
-		}
-		if (!project.scriptFileExists(scriptClass)) {
-			throw new WoodException("Broken script reference. No script file found for class |%s| requested from |%s|.", scriptClass, layoutFile);
-		}
-		scriptClasses.add(scriptClass);
-	}
 
 	/**
 	 * Collect style file related to given source file, be it layout or script file. A component layout or script file may have

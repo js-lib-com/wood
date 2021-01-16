@@ -12,6 +12,6 @@ public interface IScriptReference {
 	String getCrossorigin();
 
 	boolean isDefer();
-	
+
 	boolean isAppendToHead();
 }

@@ -25,6 +25,7 @@ import js.util.Classes;
 import js.util.Strings;
 import js.wood.BuildFS;
 import js.wood.Builder;
+import js.wood.BuilderProject;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.DefaultBuildFS;
@@ -34,11 +35,11 @@ import js.wood.IReference;
 import js.wood.IVariables;
 import js.wood.PageDocument;
 import js.wood.Project;
-import js.wood.WoodTestCase;
+import js.wood.BuilderTestCase;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 
-public class BuilderTest extends WoodTestCase {
+public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void constructor() throws FileNotFoundException {
 		Builder builder = new Builder(path("project"));
@@ -261,8 +262,8 @@ public class BuilderTest extends WoodTestCase {
 		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/js-lib.js"));
 		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/hc.view.VideoPlayer.js"));
 		assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js-lib.js"));
-		assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js.compo.Dialog.js"));
-		assertTrue(scripts.indexOf("script/js.compo.Dialog.js") > scripts.indexOf("script/js-lib.js"));
+		//assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js.compo.Dialog.js"));
+		//assertTrue(scripts.indexOf("script/js.compo.Dialog.js") > scripts.indexOf("script/js-lib.js"));
 
 		assertTrue(scripts.contains("script/js-lib.js"));
 		assertTrue(scripts.contains("script/js.compo.Dialog.js"));
@@ -747,7 +748,7 @@ public class BuilderTest extends WoodTestCase {
 				"   <meta http-equiv='X-UA-Compatible' content='IE=9; IE=8; IE=7; IE=EDGE' />" + //
 				"</metas>");
 
-		Project project = project("scripts");
+		BuilderProject project = project("scripts");
 		project.scanBuildFiles();
 
 		CompoPath compoPath = new CompoPath(project, "index");
@@ -773,7 +774,7 @@ public class BuilderTest extends WoodTestCase {
 
 	@Test
 	public void pageDocumentIncludeAnalyticsScript() throws IOException {
-		Project project = project("scripts");
+		BuilderProject project = project("scripts");
 		project.scanBuildFiles();
 
 		CompoPath compoPath = new CompoPath(project, "index");
