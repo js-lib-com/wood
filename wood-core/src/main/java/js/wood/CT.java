@@ -1,104 +1,104 @@
 package js.wood;
 
-
 /**
  * Globals constants.
  * 
  * @author Iulian Rotaru
  * @since 1.0
  */
-public final class CT
-{
-  // ------------------------------------------------------
-  // Global constants
+public final class CT {
+	// ------------------------------------------------------
+	// Global constants
 
-  /** Project configuration file. */
-  public static final String PROJECT_CONFIG = "project.xml";
+	/** Default author string used when not configured on project descriptor. */
+	public static final String DEF_AUTHOR = "WOOD - Web Object Oriented Development";
 
-  /** Favicon file name stored into project assets directory. */
-  public static final String FAVICON = "favicon.ico";
+	/** Project configuration file. */
+	public static final String PROJECT_CONFIG = "project.xml";
 
-  /** End of file mark. */
-  public static final int EOF = -1;
+	/** Favicon file name stored into project assets directory. */
+	public static final String FAVICON = "favicon.ico";
 
-  /** System dependent line separator. */
-  public static final String LN = System.getProperty("line.separator");
+	/** End of file mark. */
+	public static final int EOF = -1;
 
-  /** Name convention for current directory. */
-  public static final String CURRENT_DIR = ".";
+	/** System dependent line separator. */
+	public static final String LN = System.getProperty("line.separator");
 
-  /** Seed for hash code computation. */
-  public static final int PRIME = 31;
+	/** Name convention for current directory. */
+	public static final String CURRENT_DIR = ".";
 
-  // ------------------------------------------------------
-  // Files types recognized by this build tool
+	/** Seed for hash code computation. */
+	public static final int PRIME = 31;
 
-  /** Layout file describe UI elements. */
-  public static final String LAYOUT_EXT = "htm";
-  /** The same as {@link #LAYOUT_EXT} but with leading dot. */
-  public static final String DOT_LAYOUT_EXT = ".htm";
+	// ------------------------------------------------------
+	// Files types recognized by this build tool
 
-  /** Style file for layout structure and theme styles. */
-  public static final String STYLE_EXT = "css";
-  /** The same as {@link #STYLE_EXT} but with leading dot. */
-  public static final String DOT_STYLE_EXT = ".css";
+	/** Layout file describe UI elements. */
+	public static final String LAYOUT_EXT = "htm";
+	/** The same as {@link #LAYOUT_EXT} but with leading dot. */
+	public static final String DOT_LAYOUT_EXT = ".htm";
 
-  /** Script for component behavior and application logic. */
-  public static final String SCRIPT_EXT = "js";
-  /** The same as {@link #SCRIPT_EXT} but with leading dot. */
-  public static final String DOT_SCRIPT_EXT = ".js";
+	/** Style file for layout structure and theme styles. */
+	public static final String STYLE_EXT = "css";
+	/** The same as {@link #STYLE_EXT} but with leading dot. */
+	public static final String DOT_STYLE_EXT = ".css";
 
-  /** XML files are used to define variables and descriptors. */
-  public static final String XML_EXT = "xml";
-  /** Same as {@link #XML_EXT} but with leading dot. */
-  public static final String DOT_XML_EXT = ".xml";
+	/** Script for component behavior and application logic. */
+	public static final String SCRIPT_EXT = "js";
+	/** The same as {@link #SCRIPT_EXT} but with leading dot. */
+	public static final String DOT_SCRIPT_EXT = ".js";
 
-  // ------------------------------------------------------
-  // Project directories relative to project root
+	/** XML files are used to define variables and descriptors. */
+	public static final String XML_EXT = "xml";
+	/** Same as {@link #XML_EXT} but with leading dot. */
+	public static final String DOT_XML_EXT = ".xml";
 
-  /** UI resources stores application components. */
-  public static final String RESOURCE_DIR = "res";
+	// ------------------------------------------------------
+	// Project directories relative to project root
 
-  /** Project library for third party components and script libraries. */
-  public static final String LIBRARY_DIR = "lib";
+	/** UI resources stores application components. */
+	public static final String RESOURCE_DIR = "res";
 
-  /** Script code base. */
-  public static final String SCRIPT_DIR = "script";
+	/** Project library for third party components and script libraries. */
+	public static final String LIBRARY_DIR = "lib";
 
-  /** Generated files, mainly scripts for HTTP-RMI stubs. */
-  public static final String GENERATED_DIR = "gen";
+	/** Script code base. */
+	public static final String SCRIPT_DIR = "script";
 
-  /** Default site build directory used when project configuration file does not include it. */
-  public static final String DEF_SITE_DIR = "build/site";
+	/** Generated files, mainly scripts for HTTP-RMI stubs. */
+	public static final String GENERATED_DIR = "gen";
 
-  /** Project assets directory stores global variables and media files. */
-  public static final String ASSETS_DIR = RESOURCE_DIR + "/asset";
+	/** Default site build directory used when project configuration file does not include it. */
+	public static final String DEF_SITE_DIR = "build/site";
 
-  /** Site theme directory for styles related to UI primitive elements design and theme variables. */
-  public static final String THEME_DIR = RESOURCE_DIR + "/theme";
+	/** Project assets directory stores global variables and media files. */
+	public static final String ASSETS_DIR = RESOURCE_DIR + "/asset";
 
-  // ------------------------------------------------------
-  // Dynamic generated files
+	/** Site theme directory for styles related to UI primitive elements design and theme variables. */
+	public static final String THEME_DIR = RESOURCE_DIR + "/theme";
 
-  /** File name for styles reset. */
-  public static final String RESET_CSS = "reset.css";
+	// ------------------------------------------------------
+	// Dynamic generated files
 
-  /** File name for key frames used for CSS animations. */
-  public static final String FX_CSS = "fx.css";
+	/** File name for styles reset. */
+	public static final String RESET_CSS = "reset.css";
 
-  // ------------------------------------------------------
-  // Preview files
+	/** File name for key frames used for CSS animations. */
+	public static final String FX_CSS = "fx.css";
 
-  /** The name of style file used for preview. */
-  public static final String PREVIEW_STYLE = "preview.css";
+	// ------------------------------------------------------
+	// Preview files
 
-  /** The name of script file used for preview. */
-  public static final String PREVIEW_SCRIPT = "preview.js";
+	/** The name of style file used for preview. */
+	public static final String PREVIEW_STYLE = "preview.css";
 
-  public static final String SDK_DIR = "lib/sdk";
+	/** The name of script file used for preview. */
+	public static final String PREVIEW_SCRIPT = "preview.js";
 
-  /** Prevent default constructor synthesis. */
-  private CT()
-  {
-  }
+	public static final String SDK_DIR = "lib/sdk";
+
+	/** Prevent default constructor synthesis. */
+	private CT() {
+	}
 }

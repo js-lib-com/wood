@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.log.Log;
 import js.log.LogFactory;
@@ -31,6 +30,7 @@ import js.util.Classes;
 import js.util.Files;
 import js.wood.CompoPath;
 import js.wood.FilePath;
+import js.wood.IMetaReference;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.StyleReader;
@@ -380,11 +380,10 @@ public class HelpersTest extends WoodTestCase {
 		assertEquals(new Locale("fr"), config.getLocales().get(2));
 		assertEquals(new Locale("ro"), config.getLocales().get(3));
 
-		EList metas = config.getMetas();
+		List<IMetaReference> metas = config.getMetas();
 		assertEquals(2, metas.size());
-		assertEquals("meta", metas.item(0).getTag());
-		assertEquals("X-UA-Compatible", metas.item(0).getAttr("http-equiv"));
-		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.item(0).getAttr("content"));
+		assertEquals("X-UA-Compatible", metas.get(0).getHttpEquiv());
+		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.get(0).getContent());
 
 //		List<String> fonts = config.getFonts();
 //		assertEquals(2, fonts.size());

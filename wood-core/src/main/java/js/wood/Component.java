@@ -77,11 +77,13 @@ public class Component {
 	 */
 	private final List<FilePath> styleFiles = new ArrayList<>();
 
+	private final List<IMetaReference> metaReferences = new ArrayList<>();
+
 	/**
 	 * Link references declared on this component and all included components descriptors. Link references order from
 	 * descriptors is preserved. Link references are not limited to styles.
 	 */
-	private final LinkedHashSet<ILinkReference> linkReferences = new LinkedHashSet<>();
+	private final List<ILinkReference> linkReferences = new ArrayList<>();
 
 	private final LinkedHashSet<IScriptReference> scriptReferences = new LinkedHashSet<>();
 
@@ -168,6 +170,7 @@ public class Component {
 			}
 		}
 
+		metaReferences.addAll(descriptor.getMetas());
 		linkReferences.addAll(descriptor.getLinks());
 		scriptReferences.addAll(descriptor.getScripts());
 
@@ -227,6 +230,7 @@ public class Component {
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor compoDescriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+			metaReferences.addAll(compoDescriptor.getMetas());
 			linkReferences.addAll(compoDescriptor.getLinks());
 			scriptReferences.addAll(compoDescriptor.getScripts());
 
@@ -409,6 +413,14 @@ public class Component {
 		return baseLayoutPath.getName();
 	}
 
+	public List<IMetaReference> getMetaReferences() {
+		return metaReferences;
+	}
+
+	public List<ILinkReference> getLinkReferences() {
+		return linkReferences;
+	}
+
 	/**
 	 * Get component style files in the proper order for page document inclusion.
 	 * 
@@ -417,10 +429,6 @@ public class Component {
 	 */
 	public List<FilePath> getStyleFiles() {
 		return styleFiles;
-	}
-
-	public LinkedHashSet<ILinkReference> getLinkReferences() {
-		return linkReferences;
 	}
 
 	public LinkedHashSet<IScriptReference> getDescriptorScripts() {

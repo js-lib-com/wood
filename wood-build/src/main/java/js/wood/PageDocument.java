@@ -161,18 +161,31 @@ public class PageDocument {
 		}
 	}
 
-	/**
-	 * Append style link element to this document head.
-	 * 
-	 * @param path style file URL path.
-	 */
-	public void addStyle(String path) {
-		head.addChild(doc.createElement("link", "href", path, "rel", "stylesheet", "type", "text/css"));
+	public void addMeta(IMetaReference meta) {
+		final String name = meta.getName();
+		final String httpEquiv = meta.getHttpEquiv();
+		Element metaElement = null;
+		if (name != null) {
+			metaElement = head.getByAttr("name", name);
+		}
+		if (httpEquiv != null) {
+			metaElement = head.getByAttr("http-equiv", httpEquiv);
+		}
+		if (metaElement == null) {
+			metaElement = doc.createElement("meta");
+		}
+
+		setAttr(metaElement, "name", name);
+		setAttr(metaElement, "http-equiv", httpEquiv);
+		setAttr(metaElement, "content", meta.getContent());
+		setAttr(metaElement, "charset", meta.getCharset());
+
+		head.addChild(metaElement);
 		head.addText("\r\n");
 	}
 
 	public void addLink(ILinkReference link) {
-		String href = link.getHref();
+		final String href = link.getHref();
 		Element linkElement = head.getByAttr("href", href);
 		if (linkElement == null) {
 			linkElement = doc.createElement("link");
@@ -208,6 +221,16 @@ public class PageDocument {
 		if (value != null) {
 			element.setAttr(name, value);
 		}
+	}
+
+	/**
+	 * Append style link element to this document head.
+	 * 
+	 * @param path style file URL path.
+	 */
+	public void addStyle(String path) {
+		head.addChild(doc.createElement("link", "href", path, "rel", "stylesheet", "type", "text/css"));
+		head.addText("\r\n");
 	}
 
 	/**

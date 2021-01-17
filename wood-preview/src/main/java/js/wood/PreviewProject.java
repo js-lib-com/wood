@@ -32,7 +32,7 @@ public class PreviewProject extends Project {
 	 * 
 	 * @return site style files.
 	 */
-	public List<FilePath> previewThemeStyles() {
+	public List<FilePath> getThemeStyles() {
 		themeStyles.clear();
 		DirPath dir = new DirPath(this, CT.THEME_DIR);
 		dir.files(new ThemeStylesScanner());

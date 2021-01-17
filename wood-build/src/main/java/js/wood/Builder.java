@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -158,11 +159,25 @@ public class Builder implements IReferenceHandler {
 		pageDocument.setTitle(page.getTitle());
 		pageDocument.setAuthor(project.getAuthor());
 		pageDocument.setDescription(page.getDescription());
-		pageDocument.setMetas(project.getGlobalMetas());
+
+		for (IMetaReference meta : project.getMetaReferences()) {
+			pageDocument.addMeta(meta);
+		}
+		for (IMetaReference meta : page.getMetaReferences()) {
+			pageDocument.addMeta(meta);
+		}
 
 		if (project.getFavicon().exists()) {
 			pageDocument.addFavicon(buildFS.writeFavicon(page, project.getFavicon()));
 		}
+
+		// links order:
+		// 1. external links defined by project
+		// 2. external links defined by page
+		// 3. reset.css
+		// 4. fx.css
+		// 5. theme styles - theme styles are in no particular order since they are independent of each other
+		// 6. component styles - first use template and child component styles then parent component
 
 		for (ILinkReference link : project.getLinkReferences()) {
 			pageDocument.addLink(link);
@@ -171,9 +186,17 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addLink(link);
 		}
 
-		for (FilePath styleFile : project.getThemeStyles()) {
+		ThemeStyles themeStyles = new ThemeStyles(project.getThemeStyles());
+		if (themeStyles.reset != null) {
+			pageDocument.addStyle(buildFS.writeStyle(page, themeStyles.reset, this));
+		}
+		if (themeStyles.fx != null) {
+			pageDocument.addStyle(buildFS.writeStyle(page, themeStyles.fx, this));
+		}
+		for (FilePath styleFile : themeStyles.styles) {
 			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
 		}
+
 		for (FilePath styleFile : page.getStyleFiles()) {
 			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
 		}
@@ -248,5 +271,32 @@ public class Builder implements IReferenceHandler {
 		default:
 		}
 		return null;
+	}
+
+	private static class ThemeStyles {
+		public final FilePath reset;
+		public final FilePath fx;
+		public final List<FilePath> styles = new ArrayList<>();
+
+		public ThemeStyles(List<FilePath> themeStyles) {
+			FilePath reset = null;
+			FilePath fx = null;
+			for (FilePath style : themeStyles) {
+				switch (style.getName()) {
+				case CT.RESET_CSS:
+					reset = style;
+					break;
+
+				case CT.FX_CSS:
+					fx = style;
+					break;
+
+				default:
+					this.styles.add(style);
+				}
+			}
+			this.reset = reset;
+			this.fx = fx;
+		}
 	}
 }

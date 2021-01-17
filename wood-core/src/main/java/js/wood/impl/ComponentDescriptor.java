@@ -12,6 +12,7 @@ import js.lang.BugError;
 import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.ILinkReference;
+import js.wood.IMetaReference;
 import js.wood.IReferenceHandler;
 import js.wood.WoodException;
 
@@ -185,6 +186,19 @@ public class ComponentDescriptor {
 	 */
 	public String getPath(String defaultValue) {
 		return value("path", defaultValue);
+	}
+
+
+	public List<IMetaReference> getMetas() {
+		List<IMetaReference> metas = new ArrayList<>();
+		for (Element metaElement : doc.findByTag("meta")) {
+			MetaReference meta = MetaReferenceFactory.create(metaElement);
+			if (metas.contains(meta)) {
+				throw new WoodException("Duplicate meta |%s| in component descriptor |%s|.", meta, filePath);
+			}
+			metas.add(meta);
+		}
+		return metas;
 	}
 
 	public List<ILinkReference> getLinks() {

@@ -373,19 +373,11 @@ public class Project {
 	}
 
 	/**
-	 * Scanner for style files stored into theme directory. This scanner simply add site styles to {@link #themeStyles} list but
-	 * takes care to include {@link CT#RESET_CSS} and {@link CT#FX_CSS} first, in mentioned order. After scanning completion
-	 * {@link Project#themeStyles} contains style files in proper order for inclusion in page document.
+	 * Scanner for style files stored into theme directory.
 	 * 
 	 * @author Iulian Rotaru
 	 */
 	protected class ThemeStylesScanner extends FilesHandler {
-		/**
-		 * True if {@link CT#RESET_CSS} file was processed. Help in deciding where {@link CT#FX_CSS} has to be inserted into
-		 * {@link Project#themeStyles} list.
-		 */
-		private boolean resetProcessed;
-
 		/**
 		 * Add style files residing in site styles directory to {@link Project#themeStyles} cache.
 		 */
@@ -394,16 +386,6 @@ public class Project {
 			if (!file.getDirPath().isTheme()) {
 				return;
 			}
-			if (CT.RESET_CSS.equals(file.getName())) {
-				resetProcessed = true;
-				themeStyles.add(0, file);
-				return;
-			}
-			if (CT.FX_CSS.equals(file.getName())) {
-				themeStyles.add(resetProcessed ? 1 : 0, file);
-				return;
-			}
-
 			// do not include style variants since are included by preview servlet within media query sections
 			if (!file.hasVariants() && file.isStyle()) {
 				themeStyles.add(file);
@@ -415,7 +397,7 @@ public class Project {
 		return config.getAuthor();
 	}
 
-	public EList getGlobalMetas() {
+	public List<IMetaReference> getMetaReferences() {
 		return config.getMetas();
 	}
 

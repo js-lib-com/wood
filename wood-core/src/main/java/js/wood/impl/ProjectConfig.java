@@ -16,6 +16,7 @@ import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
 import js.wood.ILinkReference;
+import js.wood.IMetaReference;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -230,7 +231,7 @@ public final class ProjectConfig {
 	 * @return project author or null.
 	 */
 	public String getAuthor() {
-		return text("author", null);
+		return text("author", CT.DEF_AUTHOR);
 	}
 
 	/**
@@ -264,8 +265,16 @@ public final class ProjectConfig {
 	 * 
 	 * @return meta elements list, possible empty.
 	 */
-	public EList getMetas() {
-		return doc.findByTag("meta");
+	public List<IMetaReference> getMetas() {
+		List<IMetaReference> metas = new ArrayList<>();
+		for (Element metaElement : doc.findByTag("meta")) {
+			MetaReference meta = MetaReferenceFactory.create(metaElement);
+			if (metas.contains(meta)) {
+				throw new WoodException("Duplicate meta |%s| in project descriptor.", meta);
+			}
+			metas.add(meta);
+		}
+		return metas;
 	}
 
 	public List<ILinkReference> getLinks() {

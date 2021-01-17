@@ -21,11 +21,11 @@ public class PreviewProjectTest extends PreviewTestCase {
 
 	@Test
 	public void previewThemeStyles() {
-		List<FilePath> styles = project.previewThemeStyles();
+		List<FilePath> styles = project.getThemeStyles();
 		assertEquals(4, styles.size());
 
-		assertEquals(filePath("res/theme/reset.css"), styles.get(0));
-		assertEquals(filePath("res/theme/fx.css"), styles.get(1));
+		assertTrue(styles.contains(filePath("res/theme/reset.css")));
+		assertTrue(styles.contains(filePath("res/theme/fx.css")));
 		assertTrue(styles.contains(filePath("res/theme/form.css")));
 		assertTrue(styles.contains(filePath("res/theme/style.css")));
 	}
