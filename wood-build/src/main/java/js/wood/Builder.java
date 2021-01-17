@@ -148,62 +148,62 @@ public class Builder implements IReferenceHandler {
 	private void buildPage(CompoPath compoPath) throws IOException {
 		log.debug("Build page |%s|.", compoPath);
 
-		Component compo = new Component(compoPath, this);
-		currentCompo.set(compo);
-		compo.scan(false);
-		PageDocument page = new PageDocument(compo);
+		Component page = new Component(compoPath, this);
+		currentCompo.set(page);
+		page.scan(false);
+		PageDocument pageDocument = new PageDocument(page);
 
-		page.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
-		page.setContentType("text/html; charset=UTF-8");
-		page.setMetas(project.getGlobalMetas());
-		page.setAuthor(project.getAuthor());
-
-		page.setTitle(compo.getTitle());
-		page.setDescription(compo.getDescription());
+		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
+		pageDocument.setContentType("text/html; charset=UTF-8");
+		pageDocument.setTitle(page.getTitle());
+		pageDocument.setAuthor(project.getAuthor());
+		pageDocument.setDescription(page.getDescription());
+		pageDocument.setMetas(project.getGlobalMetas());
 
 		if (project.getFavicon().exists()) {
-			page.addFavicon(buildFS.writeFavicon(compo, project.getFavicon()));
+			pageDocument.addFavicon(buildFS.writeFavicon(page, project.getFavicon()));
 		}
 
-		page.addChildren("head", project.getGlobalStyles(), "href");
+		for (ILinkReference link : project.getLinkReferences()) {
+			pageDocument.addLink(link);
+		}
+		for (ILinkReference link : page.getLinkReferences()) {
+			pageDocument.addLink(link);
+		}
 
-		page.addStyles(project.getGlobalFonts());
-		for (FilePath style : project.getThemeStyles()) {
-			page.addStyle(buildFS.writeStyle(compo, style, this));
+		for (FilePath styleFile : project.getThemeStyles()) {
+			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
 		}
-		for (FilePath style : compo.getStyleFiles()) {
-			page.addStyle(buildFS.writeStyle(compo, style, this));
+		for (FilePath styleFile : page.getStyleFiles()) {
+			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
 		}
-		
-		page.addChildren("body", project.getGlobalScripts(), "src");
+
+		pageDocument.addChildren("body", project.getGlobalScripts(), "src");
 
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty
-		for (IScriptReference script : compo.getDescriptorScripts()) {
+		for (IScriptReference script : page.getDescriptorScripts()) {
 			// component descriptor third party scripts accept both project file path and absolute URL
 			// if file path is used copy the script to build FS, otherwise script is stored on foreign server
 			String scriptPath = script.getSource();
 			if (FilePath.accept(scriptPath)) {
-				scriptPath = buildFS.writeScript(compo, project.getFile(scriptPath), this);
+				scriptPath = buildFS.writeScript(page, project.getFile(scriptPath), this);
 			}
-			page.addScript(scriptPath, script.isAppendToHead());
+			pageDocument.addScript(scriptPath, script.isAppendToHead());
 		}
 
 		/*
-		// component scripts - both 3pty and local, are available only for automatic discovery
-		if (project.hasScriptDiscovery()) {
-			// component third party script are served from foreign servers and need not to be copied into build FS
-			page.addScripts(compo.getThirdPartyScripts());
+		 * // component scripts - both 3pty and local, are available only for automatic discovery if
+		 * (project.hasScriptDiscovery()) { // component third party script are served from foreign servers and need not to be
+		 * copied into build FS page.addScripts(compo.getThirdPartyScripts());
+		 * 
+		 * for (IScriptFile script : compo.getScriptFiles()) { page.addScript(buildFS.writeScript(compo, script.getSourceFile(),
+		 * this), false); } }
+		 */
 
-			for (IScriptFile script : compo.getScriptFiles()) {
-				page.addScript(buildFS.writeScript(compo, script.getSourceFile(), this), false);
-			}
-		}
-*/
-		
-		DefaultAttributes.update(page.getDocument());
+		DefaultAttributes.update(pageDocument.getDocument());
 
-		buildFS.writePage(compo, page);
+		buildFS.writePage(page, pageDocument);
 	}
 
 	/**

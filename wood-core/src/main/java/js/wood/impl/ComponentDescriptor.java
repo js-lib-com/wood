@@ -11,8 +11,8 @@ import js.dom.Element;
 import js.lang.BugError;
 import js.util.Classes;
 import js.wood.FilePath;
+import js.wood.ILinkReference;
 import js.wood.IReferenceHandler;
-import js.wood.IStyleReference;
 import js.wood.WoodException;
 
 /**
@@ -187,26 +187,16 @@ public class ComponentDescriptor {
 		return value("path", defaultValue);
 	}
 
-	public List<IStyleReference> getStyles() {
-		// do not attempt to cache script paths since this method is expected to be used only once
-
-		Element stylesEl = doc.getByTag("links");
-		if (stylesEl == null) {
-			return Collections.emptyList();
-		}
-
-		List<IStyleReference> styles = new ArrayList<>();
-		for (Element styleEl : stylesEl.getChildren()) {
-			String href = styleEl.getAttr("href");
-			if (href == null) {
-				throw new BugError("Invalid style reference on component descriptor |%s|. Missing style hyper-reference.", filePath);
+	public List<ILinkReference> getLinks() {
+		List<ILinkReference> links = new ArrayList<>();
+		for (Element linkElement : doc.findByTag("link")) {
+			LinkReference link = LinkReferenceFactory.create(linkElement);
+			if (links.contains(link)) {
+				throw new WoodException("Duplicate link |%s| in component descriptor |%s|.", link, filePath);
 			}
-
-			String integrity = styleEl.getAttr("integrity");
-			String crossorigin = styleEl.getAttr("crossorigin");
-			styles.add(new StyleReference(href, integrity, crossorigin));
+			links.add(link);
 		}
-		return styles;
+		return links;
 	}
 
 	/**

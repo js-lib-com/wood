@@ -386,9 +386,9 @@ public class HelpersTest extends WoodTestCase {
 		assertEquals("X-UA-Compatible", metas.item(0).getAttr("http-equiv"));
 		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.item(0).getAttr("content"));
 
-		List<String> fonts = config.getFonts();
-		assertEquals(2, fonts.size());
-		assertEquals("http://fonts.googleapis.com/css?family=Roboto", fonts.get(0));
+//		List<String> fonts = config.getFonts();
+//		assertEquals(2, fonts.size());
+//		assertEquals("http://fonts.googleapis.com/css?family=Roboto", fonts.get(0));
 	}
 
 	@Test

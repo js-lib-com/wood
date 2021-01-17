@@ -483,26 +483,26 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 	private static void assertIndexPage(Document doc) {
 		assertEquals("Index Page", doc.getByTag("title").getText());
 
-		EList styles = doc.findByTag("link");
-		assertEquals(12, styles.size());
+		EList links = doc.findByTag("link");
+		assertEquals(12, links.size());
 
 		int index = 0;
-		assertStyle("http://fonts.googleapis.com/css?family=Roboto", styles, index++);
-		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", styles, index++);
-		assertStyle("/project-preview/res/theme/reset.css", styles, index++);
-		assertStyle("/project-preview/res/theme/fx.css", styles, index++);
+		assertStyle("http://fonts.googleapis.com/css?family=Roboto", links, index++);
+		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", links, index++);
+		assertStyle("/project-preview/res/theme/reset.css", links, index++);
+		assertStyle("/project-preview/res/theme/fx.css", links, index++);
 
 		// site styles order, beside reset and fx is not guaranteed
 		assertNotNull(doc.getByXPath("//LINK[@href='/project-preview/res/theme/form.css']"));
 		assertNotNull(doc.getByXPath("//LINK[@href='/project-preview/res/theme/style.css']"));
 
 		index += 2; // skip form.css and styles.css
-		assertStyle("/project-preview/res/template/dialog/dialog.css", styles, index++);
-		assertStyle("/project-preview/lib/paging/paging.css", styles, index++);
-		assertStyle("/project-preview/lib/list-view/list-view.css", styles, index++);
-		assertStyle("/project-preview/res/template/page/page.css", styles, index++);
-		assertStyle("/project-preview/res/template/sidebar-page/sidebar-page.css", styles, index++);
-		assertStyle("/project-preview/res/page/index/index.css", styles, index++);
+		assertStyle("/project-preview/res/template/dialog/dialog.css", links, index++);
+		assertStyle("/project-preview/lib/paging/paging.css", links, index++);
+		assertStyle("/project-preview/lib/list-view/list-view.css", links, index++);
+		assertStyle("/project-preview/res/template/page/page.css", links, index++);
+		assertStyle("/project-preview/res/template/sidebar-page/sidebar-page.css", links, index++);
+		assertStyle("/project-preview/res/page/index/index.css", links, index++);
 
 		EList elist = doc.findByTag("script");
 		List<String> scripts = new ArrayList<>();

@@ -26,6 +26,7 @@ import js.util.Strings;
 import js.wood.BuildFS;
 import js.wood.Builder;
 import js.wood.BuilderProject;
+import js.wood.BuilderTestCase;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.DefaultBuildFS;
@@ -35,7 +36,6 @@ import js.wood.IReference;
 import js.wood.IVariables;
 import js.wood.PageDocument;
 import js.wood.Project;
-import js.wood.BuilderTestCase;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 
@@ -220,14 +220,14 @@ public class BuilderTest extends BuilderTestCase {
 
 		assertEquals("text/html; charset=UTF-8", metas.item(0).getAttr("content"));
 		assertEquals("Content-Type", metas.item(0).getAttr("http-equiv"));
-		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.item(1).getAttr("content"));
-		assertEquals("X-UA-Compatible", metas.item(1).getAttr("http-equiv"));
-		assertEquals("width=device-width, initial-scale=1.0, maximum-scale=1.0", metas.item(2).getAttr("content"));
-		assertEquals("viewport", metas.item(2).getAttr("name"));
-		assertEquals("j(s)-lib", metas.item(3).getAttr("content"));
-		assertEquals("Author", metas.item(3).getAttr("name"));
-		assertEquals("Index page description.", metas.item(4).getAttr("content"));
-		assertEquals("Description", metas.item(4).getAttr("name"));
+		assertEquals("j(s)-lib", metas.item(1).getAttr("content"));
+		assertEquals("Author", metas.item(1).getAttr("name"));
+		assertEquals("Index page description.", metas.item(2).getAttr("content"));
+		assertEquals("Description", metas.item(2).getAttr("name"));
+		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.item(3).getAttr("content"));
+		assertEquals("X-UA-Compatible", metas.item(3).getAttr("http-equiv"));
+		assertEquals("width=device-width, initial-scale=1.0, maximum-scale=1.0", metas.item(4).getAttr("content"));
+		assertEquals("viewport", metas.item(4).getAttr("name"));
 
 		EList styles = doc.findByTag("link");
 		assertEquals(13, styles.size());
@@ -756,14 +756,15 @@ public class BuilderTest extends BuilderTestCase {
 		compo.scan(false);
 
 		PageDocument page = new PageDocument(compo);
-		page.setAuthor("author");
 		page.setTitle("title");
+		page.setAuthor("author");
 		page.setDescription("description");
 		page.setMetas(metas.getRoot().getChildren());
 		page.addStyle("style/index.css");
 		page.addScript("script/index.js", false);
 
 		String doc = stringify(page.getDocument());
+		System.out.println(doc);
 		assertTrue(doc.contains("<META content=\"author\" name=\"Author\"></META>"));
 		assertTrue(doc.contains("<TITLE>title</TITLE>"));
 		assertTrue(doc.contains("<META content=\"description\" name=\"Description\"></META>"));

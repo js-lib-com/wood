@@ -80,22 +80,20 @@ public final class Preview {
 		// 4. theme styles - theme styles are in no particular order since they are independent of each other
 		// 5. component styles - first used template and widgets styles then component
 
-		addChildren(head, project.getGlobalStyles(), "href");
-
-		for (IStyleReference scriptReference : compo.getDescriptorLinks()) {
-			addStyle(doc, scriptReference);
+		for (ILinkReference link : project.getLinkReferences()) {
+			addStyle(doc, link);
 		}
 
-		for (String font : project.getGlobalFonts()) {
-			addStyle(doc, font);
+		for (ILinkReference link : compo.getLinkReferences()) {
+			addStyle(doc, link);
 		}
 
-		for (FilePath stylePath : project.previewThemeStyles()) {
-			addStyle(doc, absoluteUrlPath(stylePath));
+		for (FilePath style : project.previewThemeStyles()) {
+			addStyle(doc, absoluteUrlPath(style));
 		}
 
-		for (FilePath stylePath : compo.getStyleFiles()) {
-			addStyle(doc, absoluteUrlPath(stylePath));
+		for (FilePath style : compo.getStyleFiles()) {
+			addStyle(doc, absoluteUrlPath(style));
 		}
 
 		addChildren(body, project.getGlobalScripts(), "src");
@@ -113,48 +111,58 @@ public final class Preview {
 		}
 
 		/*
-		// component scripts - both 3pty and local, are available only for automatic discovery
-		if (project.hasScriptDiscovery()) {
-			for (String script : compo.getThirdPartyScripts()) {
-				// do not convert to absolute URL path since third party scripts are already absolute URL
-				addScript(doc, script);
-			}
+		 * // component scripts - both 3pty and local, are available only for automatic discovery if
+		 * (project.hasScriptDiscovery()) { for (String script : compo.getThirdPartyScripts()) { // do not convert to absolute
+		 * URL path since third party scripts are already absolute URL addScript(doc, script); }
+		 * 
+		 * // component instance for preview includes preview script and its dependencies, it any for (IScriptFile scriptFile :
+		 * compo.getScriptFiles()) { addScript(doc, absoluteUrlPath(scriptFile.getSourceFile())); } } else { // if script
+		 * discovery is enabled preview.js is included into compo.getScriptFiles() // takes care to include preview.js, if
+		 * discovery is not enabled IScriptFile previewScript = project.getPreviewScript(compo.getPreviewScript()); if
+		 * (previewScript != null) { addScript(doc, absoluteUrlPath(compo.getPreviewScript())); }
+		 * 
+		 * }
+		 */
 
-			// component instance for preview includes preview script and its dependencies, it any
-			for (IScriptFile scriptFile : compo.getScriptFiles()) {
-				addScript(doc, absoluteUrlPath(scriptFile.getSourceFile()));
-			}
-		} else {
-			// if script discovery is enabled preview.js is included into compo.getScriptFiles()
-			// takes care to include preview.js, if discovery is not enabled
-			IScriptFile previewScript = project.getPreviewScript(compo.getPreviewScript());
-			if (previewScript != null) {
-				addScript(doc, absoluteUrlPath(compo.getPreviewScript()));
-			}
-
-		}
-*/
-		
 		DefaultAttributes.update(doc);
 		doc.serialize(writer, true);
 	}
 
-	private static void addStyle(Document doc, IStyleReference styleRef) {
+	private static void addStyle(Document doc, ILinkReference link) {
 		Element head = doc.getByTag("head");
 
-		Element link = doc.createElement("link");
-		link.setAttr("href", styleRef.getHref());
-		if (styleRef.hasIntegrity()) {
-			link.setAttr("integrity", styleRef.getIntegrity());
-		}
-		if (styleRef.hasCrossorigin()) {
-			link.setAttr("crossorigin", styleRef.getCrossorigin());
-		}
-		link.setAttr("rel", "stylesheet");
-		link.setAttr("type", "text/css");
+		Element linkElement = doc.createElement("link");
+		linkElement.setAttr("href", link.getHref());
 
-		head.addChild(link);
+		setAttr(linkElement, "hreflang", link.getHreflang());
+		setAttr(linkElement, "rel", link.getRelationship(), "stylesheet");
+		setAttr(linkElement, "type", link.getType(), "text/css");
+		setAttr(linkElement, "media", link.getMedia());
+		setAttr(linkElement, "referrerpolicy", link.getReferrerPolicy());
+		setAttr(linkElement, "crossorigin", link.getCrossOrigin());
+		setAttr(linkElement, "integrity", link.getIntegrity());
+
+		if (link.isDisabled()) {
+			linkElement.setAttr("disabled", "true");
+		}
+
+		setAttr(linkElement, "as", link.getAsType());
+		setAttr(linkElement, "sizes", link.getSizes());
+		setAttr(linkElement, "imagesizes", link.getImageSizes());
+		setAttr(linkElement, "imagesrcset", link.getImageSrcSet());
+		setAttr(linkElement, "title", link.getTitle());
+
+		head.addChild(linkElement);
 		head.addText("\r\n");
+	}
+
+	private static void setAttr(Element element, String name, String value, String... defaultValue) {
+		if (value == null && defaultValue.length == 1) {
+			value = defaultValue[0];
+		}
+		if (value != null) {
+			element.setAttr(name, value);
+		}
 	}
 
 	/**
@@ -176,13 +184,10 @@ public final class Preview {
 	 * @param src the source of script.
 	 */
 	/*
-	private static void addScript(Document doc, String src) {
-		Element head = doc.getByTag("head");
-		head.addChild(doc.createElement("script", "src", src, "type", "text/javascript"));
-		head.addText("\r\n");
-	}
-*/
-	
+	 * private static void addScript(Document doc, String src) { Element head = doc.getByTag("head");
+	 * head.addChild(doc.createElement("script", "src", src, "type", "text/javascript")); head.addText("\r\n"); }
+	 */
+
 	private static void addScript(Document doc, String src, IScriptReference scriptRef) {
 		// preview always adds scripts to page head
 		// next commented out statement is to show that 'scriptRef.isAppendToHead()' is ignored

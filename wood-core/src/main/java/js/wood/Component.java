@@ -71,10 +71,17 @@ public class Component {
 	/** External defined resource references handler in charge with resources processing. */
 	private final IReferenceHandler referenceHandler;
 
-	/** The list of style files used by this component, in the proper oder for page document inclusion. */
-	private final List<FilePath> styleFiles = new ArrayList<FilePath>();
+	/**
+	 * The list of style files used by this component - consolidated from all included components, in the proper oder for page
+	 * document inclusion.
+	 */
+	private final List<FilePath> styleFiles = new ArrayList<>();
 
-	private final LinkedHashSet<IStyleReference> styleReferences = new LinkedHashSet<>();
+	/**
+	 * Link references declared on this component and all included components descriptors. Link references order from
+	 * descriptors is preserved. Link references are not limited to styles.
+	 */
+	private final LinkedHashSet<ILinkReference> linkReferences = new LinkedHashSet<>();
 
 	private final LinkedHashSet<IScriptReference> scriptReferences = new LinkedHashSet<>();
 
@@ -161,7 +168,7 @@ public class Component {
 			}
 		}
 
-		styleReferences.addAll(descriptor.getStyles());
+		linkReferences.addAll(descriptor.getLinks());
 		scriptReferences.addAll(descriptor.getScripts());
 
 		// uses project detected script classes to find out script files that this component depends on
@@ -220,7 +227,7 @@ public class Component {
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor compoDescriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-			styleReferences.addAll(compoDescriptor.getStyles());
+			linkReferences.addAll(compoDescriptor.getLinks());
 			scriptReferences.addAll(compoDescriptor.getScripts());
 
 			// widget path element may have invocation parameters for widget layout customization
@@ -260,9 +267,9 @@ public class Component {
 	 * declaration and document root; component layout is child to injected document root. Source reader detects resource
 	 * references and invoke {@link #referenceHandler} that handle variables replacement and media files processing.
 	 * <p>
-	 * This method insert the related style file into {@link #styleFiles} list. By convention layout and style files have the
-	 * same name; anyway, style file is not mandatory. Also takes care to insert style file path in the proper order, suitable
-	 * for page header inclusion.
+	 * This method insert the related style file into {@link #styleReferences} list. By convention layout and style files have
+	 * the same name; anyway, style file is not mandatory. Also takes care to insert style file path in the proper order,
+	 * suitable for page header inclusion.
 	 * 
 	 * @param layoutPath component layout path,
 	 * @param guardCount circular reference guard.
@@ -406,14 +413,14 @@ public class Component {
 	 * Get component style files in the proper order for page document inclusion.
 	 * 
 	 * @return component style files.
-	 * @see #styleFiles
+	 * @see #styleReferences
 	 */
 	public List<FilePath> getStyleFiles() {
 		return styleFiles;
 	}
 
-	public LinkedHashSet<IStyleReference> getDescriptorLinks() {
-		return styleReferences;
+	public LinkedHashSet<ILinkReference> getLinkReferences() {
+		return linkReferences;
 	}
 
 	public LinkedHashSet<IScriptReference> getDescriptorScripts() {
@@ -486,8 +493,8 @@ public class Component {
 	 * a related style. A related style file have the same base name as source file but with style extension. This method uses
 	 * {@link FilePath#cloneToStyle()} to get related style file.
 	 * <p>
-	 * If related style file exists add it to this component used style files list, see {@link #styleFiles}. Takes care to keep
-	 * styles proper order for page document and preview inclusion.
+	 * If related style file exists add it to this component used style files list, see {@link #styleReferences}. Takes care to
+	 * keep styles proper order for page document and preview inclusion.
 	 * 
 	 * @param sourceFile source file.
 	 */
@@ -496,14 +503,15 @@ public class Component {
 		// for example, component res/path/compo has res/path/compo/compo.htm layout, res/path/compo/compo.js script and
 		// res/path/compo/compo.css style
 
-		FilePath stylePath = sourceFile.cloneToStyle();
-		if (stylePath.exists() && !styleFiles.contains(stylePath)) {
+		FilePath styleFile = sourceFile.cloneToStyle();
+		if (styleFile.exists() && !styleFiles.contains(styleFile)) {
 			// component style files are linked into build and preview document header
 			// in the order from this component styles list, first style file on top
 
 			// we need to ensure templates, widgets and scripts related style files are included before component base style
-			// for this reason we insert discovered styles at the styles list beginning
-			styleFiles.add(0, stylePath);
+			// for this reason we insert discovered style files at the styles list beginning
+
+			styleFiles.add(0, styleFile);
 		}
 	}
 

@@ -2,7 +2,6 @@ package js.wood;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -163,17 +162,6 @@ public class PageDocument {
 	}
 
 	/**
-	 * Add style file links to this document header. Styles are appended to header in the order from given list.
-	 * 
-	 * @param paths URL paths list to style files.
-	 */
-	public void addStyles(List<String> paths) {
-		for (String path : paths) {
-			addStyle(path);
-		}
-	}
-
-	/**
 	 * Append style link element to this document head.
 	 * 
 	 * @param path style file URL path.
@@ -181,6 +169,45 @@ public class PageDocument {
 	public void addStyle(String path) {
 		head.addChild(doc.createElement("link", "href", path, "rel", "stylesheet", "type", "text/css"));
 		head.addText("\r\n");
+	}
+
+	public void addLink(ILinkReference link) {
+		String href = link.getHref();
+		Element linkElement = head.getByAttr("href", href);
+		if (linkElement == null) {
+			linkElement = doc.createElement("link");
+		}
+		linkElement.setAttr("href", href);
+
+		setAttr(linkElement, "hreflang", link.getHreflang());
+		setAttr(linkElement, "rel", link.getRelationship(), "stylesheet");
+		setAttr(linkElement, "type", link.getType(), "text/css");
+		setAttr(linkElement, "media", link.getMedia());
+		setAttr(linkElement, "referrerpolicy", link.getReferrerPolicy());
+		setAttr(linkElement, "crossorigin", link.getCrossOrigin());
+		setAttr(linkElement, "integrity", link.getIntegrity());
+
+		if (link.isDisabled()) {
+			linkElement.setAttr("disabled", "true");
+		}
+
+		setAttr(linkElement, "as", link.getAsType());
+		setAttr(linkElement, "sizes", link.getSizes());
+		setAttr(linkElement, "imagesizes", link.getImageSizes());
+		setAttr(linkElement, "imagesrcset", link.getImageSrcSet());
+		setAttr(linkElement, "title", link.getTitle());
+
+		head.addChild(linkElement);
+		head.addText("\r\n");
+	}
+
+	private static void setAttr(Element element, String name, String value, String... defaultValue) {
+		if (value == null && defaultValue.length == 1) {
+			value = defaultValue[0];
+		}
+		if (value != null) {
+			element.setAttr(name, value);
+		}
 	}
 
 	/**

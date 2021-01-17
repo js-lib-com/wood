@@ -15,6 +15,7 @@ import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
+import js.wood.ILinkReference;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -267,26 +268,20 @@ public final class ProjectConfig {
 		return doc.findByTag("meta");
 	}
 
-	public EList getStyles() {
-		return doc.findByTag("link");
+	public List<ILinkReference> getLinks() {
+		List<ILinkReference> links = new ArrayList<>();
+		for (Element linkElement : doc.findByTag("link")) {
+			LinkReference link = LinkReferenceFactory.create(linkElement);
+			if (links.contains(link)) {
+				throw new WoodException("Duplicate link |%s| in project descriptor.", link);
+			}
+			links.add(link);
+		}
+		return links;
 	}
 
 	public EList getScripts() {
 		return doc.findByTag("script");
-	}
-
-	/**
-	 * Get third party fonts declared into <code>font</code> section. Order from returned list is that from configuration file.
-	 * If <code>font</code> section is missing returned list is empty.
-	 * 
-	 * @return third party fonts list possible empty.
-	 */
-	public List<String> getFonts() {
-		List<String> fonts = new ArrayList<String>();
-		for (Element fontEl : doc.findByXPath("//font")) {
-			fonts.add(fontEl.getText());
-		}
-		return fonts;
 	}
 
 	/**

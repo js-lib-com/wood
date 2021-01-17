@@ -419,12 +419,13 @@ public class Project {
 		return config.getMetas();
 	}
 
-	public EList getGlobalStyles() {
-		return config.getStyles();
-	}
-
-	public List<String> getGlobalFonts() {
-		return config.getFonts();
+	/**
+	 * Get link elements declared at project scope, therefore included in all pages head.
+	 * 
+	 * @return ordered set of link references.
+	 */
+	public List<ILinkReference> getLinkReferences() {
+		return config.getLinks();
 	}
 
 	public EList getGlobalScripts() {
@@ -438,7 +439,7 @@ public class Project {
 	 * @see #themeStyles
 	 */
 	public List<FilePath> getThemeStyles() {
-		return Collections.unmodifiableList(themeStyles);
+		return themeStyles;
 	}
 
 	/**

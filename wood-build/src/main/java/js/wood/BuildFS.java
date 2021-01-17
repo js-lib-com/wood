@@ -222,13 +222,17 @@ public abstract class BuildFS {
 	 * @param styleFile style file,
 	 * @param referenceHandler resource references handler.
 	 * @return URL path relative to page location.
-	 * @throws IOException if write operation fails.
+	 * @throws WoodException if write operation fails.
 	 */
-	public String writeStyle(Component page, FilePath styleFile, IReferenceHandler referenceHandler) throws IOException {
+	public String writeStyle(Component page, FilePath styleFile, IReferenceHandler referenceHandler) throws WoodException {
 		String fileName = insertBuildNumber(formatStyleName(styleFile));
 		File targetFile = new File(getStyleDir(), fileName);
 		if (!processedFiles.contains(targetFile)) {
-			Files.copy(new SourceReader(new StyleReader(styleFile), styleFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
+			try {
+				Files.copy(new SourceReader(new StyleReader(styleFile), styleFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
+			} catch (IOException e) {
+				throw new WoodException(e);
+			}
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
