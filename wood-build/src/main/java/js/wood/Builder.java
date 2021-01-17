@@ -9,7 +9,6 @@ import java.util.Map;
 
 import js.log.Log;
 import js.log.LogFactory;
-import js.util.Strings;
 import js.wood.impl.ProjectConfig;
 import js.wood.impl.Reference;
 
@@ -154,36 +153,29 @@ public class Builder implements IReferenceHandler {
 		compo.scan(false);
 		PageDocument page = new PageDocument(compo);
 
-		IProjectConfig config = project.getConfig();
-		IComponentDescriptor descriptor = compo.getDescriptor();
-
-		page.setLanguage((locale != null ? locale : config.getDefaultLocale()).toLanguageTag());
+		page.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
 		page.setContentType("text/html; charset=UTF-8");
-		page.setMetas(config.getMetas());
-		page.setAuthor(config.getAuthor());
+		page.setMetas(project.getGlobalMetas());
+		page.setAuthor(project.getAuthor());
 
-		// descriptor is page specific and may contain <title> and <description>
-		// if <title> is missing uses project / compo display and if <description> is missing use <title>
-		String title = descriptor.getTitle(Strings.concat(project.getDisplay(), " / ", compo.getDisplay()));
-		page.setTitle(title);
-		page.setDescription(descriptor.getDescription(title));
+		page.setTitle(compo.getTitle());
+		page.setDescription(compo.getDescription());
 
 		if (project.getFavicon().exists()) {
 			page.addFavicon(buildFS.writeFavicon(compo, project.getFavicon()));
 		}
 
-		page.addChildren("head", config.getStyles(), "href");
+		page.addChildren("head", project.getGlobalStyles(), "href");
 
-		page.addStyles(config.getFonts());
+		page.addStyles(project.getGlobalFonts());
 		for (FilePath style : project.getThemeStyles()) {
 			page.addStyle(buildFS.writeStyle(compo, style, this));
 		}
 		for (FilePath style : compo.getStyleFiles()) {
 			page.addStyle(buildFS.writeStyle(compo, style, this));
 		}
-
-
-		page.addChildren("body", config.getScripts(), "src");
+		
+		page.addChildren("body", project.getGlobalScripts(), "src");
 
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty

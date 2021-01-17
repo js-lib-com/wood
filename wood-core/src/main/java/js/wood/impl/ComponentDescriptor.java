@@ -11,7 +11,6 @@ import js.dom.Element;
 import js.lang.BugError;
 import js.util.Classes;
 import js.wood.FilePath;
-import js.wood.IComponentDescriptor;
 import js.wood.IReferenceHandler;
 import js.wood.IStyleReference;
 import js.wood.WoodException;
@@ -103,7 +102,7 @@ import js.wood.WoodException;
  * @version final
  * @see ProjectConfig
  */
-public class ComponentDescriptor implements IComponentDescriptor {
+public class ComponentDescriptor {
 	/** Empty XML document used when component descriptor file is missing. */
 	private static final Document EMPTY_DOC;
 	static {
@@ -162,7 +161,6 @@ public class ComponentDescriptor implements IComponentDescriptor {
 	 * @param defaultValue default title value.
 	 * @return component title or supplied default value.
 	 */
-	@Override
 	public String getTitle(String defaultValue) {
 		return value("title", defaultValue);
 	}
@@ -174,7 +172,6 @@ public class ComponentDescriptor implements IComponentDescriptor {
 	 * @param defaultValue default description value.
 	 * @return component description or supplied default value.
 	 */
-	@Override
 	public String getDescription(String defaultValue) {
 		return value("description", defaultValue);
 	}
@@ -186,7 +183,6 @@ public class ComponentDescriptor implements IComponentDescriptor {
 	 * @param defaultValue default path value.
 	 * @return page layout directory path or supplied default value.
 	 */
-	@Override
 	public String getPath(String defaultValue) {
 		return value("path", defaultValue);
 	}

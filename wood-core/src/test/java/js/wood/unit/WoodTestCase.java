@@ -1,6 +1,5 @@
 package js.wood.unit;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -20,7 +19,6 @@ import js.wood.FilePath;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
-
 
 public class WoodTestCase {
 	protected static Project project(String projectDir) {
@@ -115,6 +113,6 @@ public class WoodTestCase {
 	protected static void resetProjectLocales(Project project) {
 		List<Locale> locales = new ArrayList<Locale>();
 		locales.add(new Locale("en"));
-		field(project.getConfig(), "locales", locales);
+		field(field(project, "config"), "locales", locales);
 	}
 }

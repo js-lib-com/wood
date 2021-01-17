@@ -68,7 +68,7 @@ public class PreviewTestCase {
 	protected static void resetProjectLocales(Project project) {
 		List<Locale> locales = new ArrayList<Locale>();
 		locales.add(new Locale("en"));
-		field(project.getConfig(), "locales", locales);
+		field(field(project, "config"), "locales", locales);
 	}
 
 	protected static <T> T invoke(Object object, String method, Object... args) {

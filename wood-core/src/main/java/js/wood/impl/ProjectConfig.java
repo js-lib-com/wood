@@ -15,7 +15,6 @@ import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
-import js.wood.IProjectConfig;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -116,7 +115,7 @@ import js.wood.WoodException;
  * @since 1.0
  * @see ComponentDescriptor
  */
-public final class ProjectConfig implements IProjectConfig {
+public final class ProjectConfig {
 	/** Project reference. */
 	private Project project;
 
@@ -229,7 +228,6 @@ public final class ProjectConfig implements IProjectConfig {
 	 * 
 	 * @return project author or null.
 	 */
-	@Override
 	public String getAuthor() {
 		return text("author", null);
 	}
@@ -265,17 +263,14 @@ public final class ProjectConfig implements IProjectConfig {
 	 * 
 	 * @return meta elements list, possible empty.
 	 */
-	@Override
 	public EList getMetas() {
 		return doc.findByTag("meta");
 	}
 
-	@Override
 	public EList getStyles() {
 		return doc.findByTag("link");
 	}
 
-	@Override
 	public EList getScripts() {
 		return doc.findByTag("script");
 	}
@@ -286,7 +281,6 @@ public final class ProjectConfig implements IProjectConfig {
 	 * 
 	 * @return third party fonts list possible empty.
 	 */
-	@Override
 	public List<String> getFonts() {
 		List<String> fonts = new ArrayList<String>();
 		for (Element fontEl : doc.findByXPath("//font")) {
@@ -315,7 +309,6 @@ public final class ProjectConfig implements IProjectConfig {
 	 * @return default locale.
 	 * @see #defaultLocale
 	 */
-	@Override
 	public Locale getDefaultLocale() {
 		return defaultLocale;
 	}

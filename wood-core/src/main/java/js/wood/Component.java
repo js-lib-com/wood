@@ -16,7 +16,6 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
-import js.lang.BugError;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
@@ -134,8 +133,8 @@ public class Component {
 		this.name = layoutPath.getBaseName();
 		this.display = Strings.toTitleCase(name);
 
-		//FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
-		//this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		// FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
+		// this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 
 	public void scan(boolean includePreviewScript) {
@@ -167,7 +166,7 @@ public class Component {
 
 		// uses project detected script classes to find out script files that this component depends on
 		scriptFiles = collectScriptFiles(project.getScriptFiles(scriptClasses));
-		
+
 		// if preview script file is to be included updates this component scripts
 		// preview script and its direct dependencies are included last
 		if (includePreviewScript) {
@@ -354,16 +353,16 @@ public class Component {
 	}
 
 	/**
-	 * Return optional component descriptor.
+	 * Return page security role or null if security role is not defined. This property has meaning only on page components.
+	 * <p>
+	 * Security role is declared on page components and is used by site builder to create specific sub-directories where to
+	 * store role related files.
 	 * 
-	 * @return component descriptor.
-	 * @throws BugError if component descriptor is missing.
+	 * @return page security role or null if not defined.
 	 */
-	public IComponentDescriptor getDescriptor() {
-		if (descriptor == null) {
-			throw new BugError("Attempt to retrieve missing missing component descriptor for |%s|.", name);
-		}
-		return descriptor;
+	public String getSecurityRole() {
+		// TODO: rename <path> element from descriptor to <security-role>
+		return descriptor.getPath(null);
 	}
 
 	/**
@@ -376,14 +375,12 @@ public class Component {
 		return name;
 	}
 
-	/**
-	 * Get this component display name.
-	 * 
-	 * @return component display.
-	 * @see #display
-	 */
-	public String getDisplay() {
-		return display;
+	public String getTitle() {
+		return descriptor.getTitle(Strings.concat(project.getDisplay(), " / ", display));
+	}
+
+	public String getDescription() {
+		return descriptor.getDescription(getTitle());
 	}
 
 	/**

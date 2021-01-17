@@ -8,7 +8,6 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
-import js.util.Strings;
 
 /**
  * Component preview wraps component in standard HTML document and serialize it to given writer. This component preview class is
@@ -46,14 +45,11 @@ public final class Preview {
 	 * @throws IOException if document serialization fails.
 	 */
 	public void serialize(Writer writer) throws IOException {
-		IProjectConfig config = project.getConfig();
-		IComponentDescriptor descriptor = compo.getDescriptor();
-
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		Document doc = builder.createHTML();
 
 		Element html = doc.getRoot();
-		html.setAttr("lang", config.getDefaultLocale().toLanguageTag());
+		html.setAttr("lang", project.getDefaultLocale().toLanguageTag());
 		Element head = doc.createElement("head");
 		Element body = doc.createElement("body");
 		html.addChild(head).addChild(body);
@@ -62,15 +58,12 @@ public final class Preview {
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
 
-		addChildren(head, config.getMetas(), "name");
+		addChildren(head, project.getGlobalMetas(), "name");
 
-		String defaultTitle = Strings.concat(project.getDisplay(), " / ", compo.getDisplay());
-		String title = descriptor.getTitle(defaultTitle);
-		head.addChild(doc.createElement("title").setText(title));
+		head.addChild(doc.createElement("title").setText(compo.getTitle()));
 		head.addText("\r\n");
 
-		String description = descriptor.getDescription(title);
-		head.addChild(doc.createElement("meta", "name", "Description", "content", description));
+		head.addChild(doc.createElement("meta", "name", "Description", "content", compo.getDescription()));
 		head.addText("\r\n");
 
 		Element layout = compo.getLayout();
@@ -87,13 +80,13 @@ public final class Preview {
 		// 4. theme styles - theme styles are in no particular order since they are independent of each other
 		// 5. component styles - first used template and widgets styles then component
 
-		addChildren(head, config.getStyles(), "href");
+		addChildren(head, project.getGlobalStyles(), "href");
 
 		for (IStyleReference scriptReference : compo.getDescriptorLinks()) {
 			addStyle(doc, scriptReference);
 		}
 
-		for (String font : config.getFonts()) {
+		for (String font : project.getGlobalFonts()) {
 			addStyle(doc, font);
 		}
 
@@ -105,7 +98,7 @@ public final class Preview {
 			addStyle(doc, absoluteUrlPath(stylePath));
 		}
 
-		addChildren(body, config.getScripts(), "src");
+		addChildren(body, project.getGlobalScripts(), "src");
 
 		// scripts listed on component descriptor are included in the order they are listed
 		// for script dependencies discovery this scripts list may be empty
