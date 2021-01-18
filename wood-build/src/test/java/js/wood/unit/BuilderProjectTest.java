@@ -25,12 +25,10 @@ import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.IVariables;
 import js.wood.LayoutFile;
-import js.wood.Project;
 import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
-import js.wood.impl.ScriptFile;
 import js.wood.impl.Variables;
 
 public class BuilderProjectTest extends BuilderTestCase implements IReferenceHandler {
@@ -65,23 +63,6 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 		assertEquals(2, layouts.size());
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/page/index/index.htm"))));
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/template/page/page.htm"))));
-	}
-
-	public void scriptFileScanDepenencies() {
-		project.scanBuildFiles();
-		Map<String, ScriptFile> classScripts = Classes.getFieldValue(project, Project.class, "classScripts");
-
-		ScriptFile script = new ScriptFile(project, filePath("script/js/wood/IndexPage.js"));
-		script.scanDependencies(classScripts);
-
-		Set<ScriptFile> strongDependecies = field(script, "strongDependencies");
-		assertEquals(1, strongDependecies.size());
-		assertScript(strongDependecies, "lib/js-lib/js-lib.js");
-
-		Set<ScriptFile> weakDependencies = field(script, "weakDependencies");
-		assertEquals(2, weakDependencies.size());
-		assertScript(weakDependencies, "script/js/widget/Description.js");
-		assertScript(weakDependencies, "script/js/format/RichText.js");
 	}
 
 	@Test
@@ -183,10 +164,6 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 			invoke(variables, "load", project.getAssetsDir());
 		}
 		return variables.get(null, reference, sourcePath, this);
-	}
-
-	private void assertScript(Set<ScriptFile> scripts, String scriptFile) {
-		assertTrue(scripts.contains(new ScriptFile(project, filePath(scriptFile))));
 	}
 
 	private DirPath dirPath(String path) {

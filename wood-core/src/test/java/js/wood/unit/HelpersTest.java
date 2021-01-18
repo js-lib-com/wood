@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +38,6 @@ import js.wood.impl.FileType;
 import js.wood.impl.LayoutReader;
 import js.wood.impl.ProjectConfig;
 import js.wood.impl.ResourceType;
-import js.wood.impl.ScriptFile;
 import js.wood.impl.StyleExtensionReader;
 import js.wood.impl.Variants;
 
@@ -50,35 +48,6 @@ public class HelpersTest extends WoodTestCase {
 
 	private FilePath filePath(String path) {
 		return new FilePath(project, path);
-	}
-
-	// ------------------------------------------------------
-	// ScriptFile
-
-	@Test
-	public void scriptFileConstructor() {
-		log.trace("testScriptFileConstructor()");
-		project = project("scripts");
-
-		ScriptFile script = new ScriptFile(project, filePath("script/js/wood/IndexPage.js"));
-		assertEquals("script/js/wood/IndexPage.js", field(script, "sourceFile").toString());
-		assertEquals("script/js/wood/IndexPage.js", script.toString());
-		assertTrue(((Set<?>) field(script, "strongDependencies")).isEmpty());
-		assertTrue(((Set<?>) field(script, "weakDependencies")).isEmpty());
-		assertTrue(((Set<?>) field(script, "thirdPartyDependencies")).isEmpty());
-
-		Set<String> classes = script.getDefinedClasses();
-		assertEquals(1, classes.size());
-		assertEquals("js.wood.IndexPage", classes.iterator().next());
-
-		script = new ScriptFile(project, filePath("lib/js-lib/js-lib.js"));
-		classes = script.getDefinedClasses();
-
-		assertEquals(4, classes.size());
-		assertTrue(classes.contains("js.lang.Operator"));
-		assertTrue(classes.contains("js.dom.Element"));
-		assertTrue(classes.contains("js.ua.System"));
-		assertTrue(classes.contains("js.format.DateFormat"));
 	}
 
 	// ------------------------------------------------------

@@ -2,13 +2,11 @@ package js.wood;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import js.dom.Attr;
 import js.dom.Document;
@@ -22,7 +20,6 @@ import js.wood.impl.EditablePath;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.LayoutReader;
 import js.wood.impl.Operator;
-import js.wood.impl.ScriptFile;
 import js.wood.impl.ScriptReference;
 
 /**
@@ -52,6 +49,9 @@ public class Component {
 
 	/** Parent project reference. */
 	private final Project project;
+
+	/** Optional component descriptor, default to null. */
+	private ComponentDescriptor descriptor;
 
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
@@ -87,26 +87,11 @@ public class Component {
 
 	private final List<IScriptReference> scriptReferences = new ArrayList<>();
 
-	/** Aggregated set of script classes declared by this component, in no particular order. */
-	private final Set<String> scriptClasses = new HashSet<String>();
-
-	/** Third party scripts are loaded from remote servers, for example google maps API. This list contains absolute URLs. */
-	private final Set<String> thirdPartyScripts = new HashSet<String>();
-
-	/** Optional component descriptor, default to null. */
-	private ComponentDescriptor descriptor;
-
 	/**
 	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also
 	 * references are resolved, that is, references replaced with variables values and media URL paths.
 	 */
 	private Element layout;
-
-	/**
-	 * The list of script files used by this component, in proper order for page document inclusion. This list contains scripts
-	 * directly referenced by component and all dependencies but does not include third party scripts.
-	 */
-	private List<IScriptFile> scriptFiles;
 
 	/**
 	 * Create aggregated instance for component identified by given path. Just delegates
@@ -142,13 +127,11 @@ public class Component {
 		this.name = layoutPath.getBaseName();
 		this.display = Strings.toTitleCase(name);
 
-		// FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
-		// this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
+		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 
 	public void scan(boolean includePreviewScript) {
-		descriptor = project.getScriptDependecyHandler().getComponentDescriptor(baseLayoutPath, referenceHandler);
-
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
@@ -173,18 +156,6 @@ public class Component {
 		addAll(metaReferences, descriptor.getMetas());
 		addAll(linkReferences, descriptor.getLinks());
 		addAll(scriptReferences, descriptor.getScripts());
-
-		// uses project detected script classes to find out script files that this component depends on
-		scriptFiles = collectScriptFiles(project.getScriptFiles(scriptClasses));
-
-		// if preview script file is to be included updates this component scripts
-		// preview script and its direct dependencies are included last
-		if (includePreviewScript) {
-			IScriptFile previewScript = project.getPreviewScript(baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_SCRIPT));
-			if (previewScript != null) {
-				updateScriptFiles(scriptFiles, previewScript);
-			}
-		}
 	}
 
 	/**
@@ -289,9 +260,6 @@ public class Component {
 		if (!layout.getRoot().hasChildren()) {
 			throw new WoodException("Empty layout |%s|.", layoutPath);
 		}
-
-		// delegate script processor to handle scripts related to this component
-		project.getScriptDependecyHandler().onLayoutLoaded(layout, layoutPath, operators);
 
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
@@ -436,27 +404,6 @@ public class Component {
 	}
 
 	/**
-	 * Get component script files in order proper for page document inclusion. Returned list contains this component direct
-	 * referenced files and all dependencies, less third party scripts - see {@link #thirdPartyScripts}.
-	 * 
-	 * @return component used script files.
-	 * @see #scriptFiles
-	 */
-	public List<IScriptFile> getScriptFiles() {
-		return scriptFiles;
-	}
-
-	/**
-	 * Return absolute URL list for third party scripts used by this component.
-	 * 
-	 * @return component third party scripts, in no particular order.
-	 * @see #thirdPartyScripts
-	 */
-	public Set<String> getThirdPartyScripts() {
-		return thirdPartyScripts;
-	}
-
-	/**
 	 * Get the file path for optional preview style. Preview style is used only by preview process and provides styles for unit
 	 * testing context.
 	 * <p>
@@ -572,65 +519,6 @@ public class Component {
 			if (!element.hasAttr(attr.getName())) {
 				element.setAttr(attr.getName(), attr.getValue());
 			}
-		}
-	}
-
-	/**
-	 * Create the list of this component script files in dependencies order. Uses given script classes to retrieve script files
-	 * declaring them, see {@link Project#getScriptFiles(Collection)}. Add obtained script files and their dependencies using
-	 * {@link #updateScriptFiles(List, ScriptFile)} recursively. On scanning process updates third party scripts list, see
-	 * {@link #thirdPartyScripts}.
-	 * <p>
-	 * Returned list scripts are in the proper order for inclusion into {@link PageDocument}.
-	 * 
-	 * @param collection script classes discovered by this component, in no particular order.
-	 * @return the list of script files, in dependencies order.
-	 */
-	private List<IScriptFile> collectScriptFiles(Collection<IScriptFile> componentScriptFiles) {
-		List<IScriptFile> scriptFiles = new Vector<>();
-		for (IScriptFile scriptFile : componentScriptFiles) {
-			updateScriptFiles(scriptFiles, scriptFile);
-		}
-		return scriptFiles;
-	}
-
-	/**
-	 * Add source script and its dependencies to target scripts and update {@link #thirdPartyScripts}. Target scripts order
-	 * matters; it should be the proper order to include into {@link PageDocument}. To ensure inclusion order, this method uses
-	 * next heuristic:
-	 * <ul>
-	 * <li>first add recursively source script strong dependencies,
-	 * <li>add source script, if not already included,
-	 * <li>lastly add recursively weak dependencies.
-	 * </ul>
-	 * <p>
-	 * This logic ensure all strong dependencies tree is included before source script; also all weak dependencies tree is
-	 * included after. This is true for every recursive iteration so that a strong dependency and all its next level
-	 * dependencies are included before source script. Also this logic ensure a script is included only once.
-	 * 
-	 * @param targetScripts target script files,
-	 * @param sourceScript source script file to scan for dependencies.
-	 */
-	private void updateScriptFiles(List<IScriptFile> targetScripts, IScriptFile sourceScript) {
-		// a script file may denote a scripted widget and may have a related style file
-		// a scripted widget is a component without layout, that is, a component providing behavior and style but with
-		// layout defined by parent component
-		collectRelatedStyle(sourceScript.getSourceFile());
-
-		for (String thirdPartyDependency : sourceScript.getThirdPartyDependencies()) {
-			if (!thirdPartyScripts.contains(thirdPartyDependency)) {
-				thirdPartyScripts.add(thirdPartyDependency);
-			}
-		}
-
-		for (IScriptFile dependency : sourceScript.getStrongDependencies()) {
-			updateScriptFiles(targetScripts, dependency);
-		}
-		if (!targetScripts.contains(sourceScript)) {
-			targetScripts.add(sourceScript);
-		}
-		for (IScriptFile dependency : sourceScript.getWeakDependencies()) {
-			updateScriptFiles(targetScripts, dependency);
 		}
 	}
 

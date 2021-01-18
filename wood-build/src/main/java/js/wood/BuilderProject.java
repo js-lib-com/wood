@@ -74,7 +74,7 @@ public class BuilderProject extends Project {
 	 */
 	private class FilesScanner {
 		/** Specialized file handlers. */
-		private FilesHandler[] handlers = new FilesHandler[] { new LayoutsScanner(), new ScriptsScanner(), new ThemeStylesScanner(), new VariablesScanner() };
+		private FilesHandler[] handlers = new FilesHandler[] { new LayoutsScanner(), new ThemeStylesScanner(), new VariablesScanner() };
 
 		/**
 		 * Scan given directory recursively till no more sub-directories.

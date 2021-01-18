@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page>
+	<title>@string/page-title</title>
+	<description>@string/page-description</description>
+	<scripts>
+		<script src="js/fake/Class.js"></script>
+	</scripts>
+</page>

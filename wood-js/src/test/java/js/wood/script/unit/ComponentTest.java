@@ -1,7 +1,6 @@
 package js.wood.script.unit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -11,7 +10,6 @@ import java.util.Locale;
 
 import org.junit.Test;
 
-import js.dom.Element;
 import js.util.Classes;
 import js.util.Files;
 import js.wood.CompoPath;
@@ -19,32 +17,11 @@ import js.wood.Component;
 import js.wood.FilePath;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
-import js.wood.IScriptFile;
 import js.wood.Project;
 import js.wood.WoodException;
 import js.wood.impl.Variables;
 
 public class ComponentTest {
-	@Test
-	public void pageScript() {
-		Component compo = getCompo("scripts/page-script");
-		List<IScriptFile> scripts = compo.getScriptFiles();
-
-		assertEquals(2, scripts.size());
-		assertEquals("lib/js-lib.js", scripts.get(0).toString());
-		assertEquals("script/js/wood/Page.js", scripts.get(1).toString());
-	}
-
-	@Test
-	public void scriptsInclusion() {
-		Component compo = getCompo("scripts/compo");
-		List<IScriptFile> scripts = compo.getScriptFiles();
-
-		assertEquals(3, scripts.size());
-		assertEquals("lib/js-lib.js", scripts.get(0).toString());
-		assertEquals("script/js/wood/Title.js", scripts.get(1).toString());
-		assertEquals("script/js/wood/Widget.js", scripts.get(2).toString());
-	}
 
 	@Test
 	public void scriptedWidgetStyle() {
@@ -53,21 +30,6 @@ public class ComponentTest {
 
 		assertEquals(1, styles.size());
 		assertEquals("lib/scripted-widget/scripted-widget.css", styles.get(0).toString());
-	}
-
-	@Test
-	public void thirdPartyScripts() {
-		Component compo = getCompo("scripts/3pty-scripts");
-		Element layout = compo.getLayout();
-		assertNotNull(layout);
-
-		assertEquals(1, compo.getThirdPartyScripts().size());
-		assertEquals("http://maps.google.com/maps/api/js?sensor=false", compo.getThirdPartyScripts().iterator().next());
-
-		assertEquals(3, compo.getScriptFiles().size());
-		assertEquals("lib/js-lib.js", compo.getScriptFiles().get(0).toString());
-		assertEquals("script/js/wood/GeoMap.js", compo.getScriptFiles().get(1).toString());
-		assertEquals("lib/google-maps-api.js", compo.getScriptFiles().get(2).toString());
 	}
 
 	@Test
@@ -94,7 +56,6 @@ public class ComponentTest {
 				fail();
 			}
 		}
-		project.previewScriptFiles();
 		return project;
 	}
 

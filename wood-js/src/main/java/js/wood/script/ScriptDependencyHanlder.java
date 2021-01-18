@@ -10,25 +10,21 @@ import js.dom.Element;
 import js.wood.FilePath;
 import js.wood.IOperatorsHandler;
 import js.wood.IReferenceHandler;
-import js.wood.IScriptDependecyHandler;
 import js.wood.WoodException;
 import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.Operator;
-import js.wood.impl.ScriptFile;
 
-public class ScriptDependencyHanlder implements IScriptDependecyHandler {
+public class ScriptDependencyHanlder  {
 	/** Aggregated set of script classes declared by this component, in no particular order. */
 	private final Set<String> scriptClasses = new HashSet<>();
 
 	/** Script file where certain script class is defined. */
 	private Map<String, ScriptFile> classScripts = new HashMap<>();
 
-	@Override
 	public void onLayoutLoaded(Document layoutDoc, FilePath layoutPath, IOperatorsHandler operators) {
 		collectScriptClasses(layoutPath, layoutDoc.getRoot(), operators);
 	}
 
-	@Override
 	public ComponentDescriptor getComponentDescriptor(FilePath layoutPath, IReferenceHandler referenceHandler) {
 		// TODO Auto-generated method stub
 		return null;

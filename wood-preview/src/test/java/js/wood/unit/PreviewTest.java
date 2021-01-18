@@ -239,13 +239,13 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 		project = project(projectDirName);
 
 		CompoPath path = new CompoPath(project, pathValue);
-		project.previewScriptFiles();
-
 		Component component = new Component(path.getLayoutPath(), this);
 		component.scan(true);
+
 		Preview preview = new Preview(project, component);
 		StringWriter writer = new StringWriter();
 		preview.serialize(writer);
+		
 		DocumentBuilder builder = new DocumentBuilderImpl();
 		return builder.parseHTML(writer.toString());
 	}

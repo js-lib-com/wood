@@ -186,8 +186,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 				layoutPath = layoutPreview;
 			}
 
-			// rescan project script files and update variables cache every time a component is requested
-			project.previewScriptFiles();
+			// update variables cache every time a component is requested
 			variablesCache.update(project);
 
 			// create component with support for preview script

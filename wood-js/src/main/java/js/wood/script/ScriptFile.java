@@ -1,4 +1,4 @@
-package js.wood.impl;
+package js.wood.script;
 
 import java.io.FileNotFoundException;
 import java.util.Collection;
@@ -6,12 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import js.util.Classes;
 import js.wood.Dependency;
 import js.wood.DirPath;
 import js.wood.FilePath;
-import js.wood.IScriptFile;
-import js.wood.IScriptScanner;
 import js.wood.Project;
 import js.wood.WoodException;
 
@@ -22,7 +19,7 @@ import js.wood.WoodException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public final class ScriptFile implements IScriptFile {
+public final class ScriptFile {
 	/** Script source file. */
 	private FilePath sourceFile;
 
@@ -33,10 +30,10 @@ public final class ScriptFile implements IScriptFile {
 	 * Strong dependencies are those susceptible to be used on script loading. These files need to be loaded before this script
 	 * file.
 	 */
-	private Set<IScriptFile> strongDependencies = new HashSet<>();
+	private Set<ScriptFile> strongDependencies = new HashSet<>();
 
 	/** Weak dependencies are runtime dependencies used after script loaded. */
-	private Set<IScriptFile> weakDependencies = new HashSet<>();
+	private Set<ScriptFile> weakDependencies = new HashSet<>();
 
 	/** Third party dependencies are URLs to scripts stored on foreign servers, like google maps API. */
 	private Set<String> thirdPartyDependencies = new HashSet<>();
@@ -44,13 +41,13 @@ public final class ScriptFile implements IScriptFile {
 	/** Cached value for instance hash code. Cache is possible because is based on source path that is immutable. */
 	private int hashCode;
 
-	private final IScriptScanner scriptScanner;
+	private final ScriptScanner scriptScanner;
 
 	/**
 	 * Unit test constructor.
 	 */
 	private ScriptFile() {
-		this.scriptScanner = Classes.loadOptionalService(IScriptScanner.class);
+		this.scriptScanner = new ScriptScanner();
 	}
 
 	/**
@@ -101,7 +98,6 @@ public final class ScriptFile implements IScriptFile {
 	 * @return script file path.
 	 * @see #sourceFile
 	 */
-	@Override
 	public FilePath getSourceFile() {
 		return sourceFile;
 	}
@@ -123,8 +119,7 @@ public final class ScriptFile implements IScriptFile {
 	 * @return strong dependencies.
 	 * @see #strongDependencies
 	 */
-	@Override
-	public Iterable<IScriptFile> getStrongDependencies() {
+	public Iterable<ScriptFile> getStrongDependencies() {
 		return strongDependencies;
 	}
 
@@ -135,8 +130,7 @@ public final class ScriptFile implements IScriptFile {
 	 * @return weak dependencies.
 	 * @see #weakDependencies
 	 */
-	@Override
-	public Iterable<IScriptFile> getWeakDependencies() {
+	public Iterable<ScriptFile> getWeakDependencies() {
 		return weakDependencies;
 	}
 
@@ -147,7 +141,6 @@ public final class ScriptFile implements IScriptFile {
 	 * @return third party dependencies.
 	 * @see #thirdPartyDependencies
 	 */
-	@Override
 	public Iterable<String> getThirdPartyDependencies() {
 		return thirdPartyDependencies;
 	}

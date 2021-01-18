@@ -347,10 +347,6 @@ public final class ProjectConfig {
 		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
 	}
 
-	public ScriptDependencyStrategy getScriptDependencyStrategy() {
-		return ScriptDependencyStrategy.valueOf(text("script-dependency-strategy", ScriptDependencyStrategy.DESCRIPTOR.name()));
-	}
-
 	/**
 	 * Return text value for element denoted by tag name or default value if element is missing.
 	 * 

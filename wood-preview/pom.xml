@@ -9,6 +9,9 @@
 	</parent>
 	<artifactId>wood-preview</artifactId>
 
+	<name>WOOD Preview</name>
+	<description>Create component preview.</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
