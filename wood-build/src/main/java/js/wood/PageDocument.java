@@ -10,8 +10,10 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.io.VariablesWriter;
+import js.lang.Handler;
 import js.util.Classes;
 import js.util.Files;
+import js.util.Strings;
 
 /**
  * HTML page document created on build process and serialized on build directory. This class just supplies specialized setters
@@ -21,6 +23,8 @@ import js.util.Files;
  * @since 1.0
  */
 public class PageDocument {
+	private final BuilderProject project;
+
 	/** X(HT)ML document. */
 	private Document doc;
 
@@ -35,8 +39,9 @@ public class PageDocument {
 
 	/** Create empty page document without body content. Testing constructor. */
 	@SuppressWarnings("unused")
-	private PageDocument() {
+	private PageDocument(BuilderProject project) {
 		init();
+		this.project = project;
 		this.body = doc.createElement("body");
 		this.html.addChild(this.body);
 		this.html.addText("\r\n");
@@ -49,6 +54,7 @@ public class PageDocument {
 	 */
 	public PageDocument(Component component) {
 		init();
+		this.project = (BuilderProject) component.getProject();
 		this.body = this.doc.importElement(component.getLayout());
 		this.html.addChild(this.body);
 		this.html.addText("\r\n");
@@ -211,6 +217,44 @@ public class PageDocument {
 		setAttr(linkElement, "title", link.getTitle());
 
 		head.addChild(linkElement);
+		head.addText("\r\n");
+	}
+
+	public void addScript(IScriptReference script, Handler<String, FilePath> handler) throws IOException {
+		String src = script.getSource();
+		assert src != null;
+		Element scriptElement = head.getByAttr("src", src);
+		if (scriptElement == null) {
+			scriptElement = doc.createElement("script");
+		}
+		if (!script.isEmbedded()) {
+			if(FilePath.accept(src)) {
+				src = handler.handle(project.getFile(src));
+			}
+			scriptElement.setAttr("src", src);
+		}
+
+		setAttr(scriptElement, "type", script.getType(), "text/javascript");
+		if (script.isAsync()) {
+			scriptElement.setAttr("async", "true");
+		}
+		if (script.isDefer()) {
+			scriptElement.setAttr("defer", "true");
+		}
+		if (script.isNoModule()) {
+			scriptElement.setAttr("nomodule", "true");
+		}
+
+		setAttr(scriptElement, "nonce", script.getNonce());
+		setAttr(scriptElement, "referrerpolicy", script.getReferrerPolicy());
+		setAttr(scriptElement, "crossorigin", script.getCrossOrigin());
+		setAttr(scriptElement, "integrity", script.getIntegrity());
+
+		if (script.isEmbedded()) {
+			scriptElement.setText(Strings.load(project.getFile(script.getSource()).toFile()));
+		}
+
+		head.addChild(scriptElement);
 		head.addText("\r\n");
 	}
 

@@ -10,13 +10,13 @@ import java.util.regex.Matcher;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
 import js.wood.ILinkReference;
 import js.wood.IMetaReference;
+import js.wood.IScriptReference;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -289,8 +289,16 @@ public final class ProjectConfig {
 		return links;
 	}
 
-	public EList getScripts() {
-		return doc.findByTag("script");
+	public List<IScriptReference> getScripts() {
+		List<IScriptReference> scripts = new ArrayList<>();
+		for (Element scriptElement : doc.findByTag("script")) {
+			ScriptReference script = ScriptReferenceFactory.create(scriptElement);
+			if (scripts.contains(script)) {
+				throw new WoodException("Duplicate script |%s| in project descriptor.", script);
+			}
+			scripts.add(script);
+		}
+		return scripts;
 	}
 
 	/**

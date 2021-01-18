@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +23,7 @@ import js.wood.impl.LayoutParameters;
 import js.wood.impl.LayoutReader;
 import js.wood.impl.Operator;
 import js.wood.impl.ScriptFile;
+import js.wood.impl.ScriptReference;
 
 /**
  * Meta-data about component consolidated instance. Component is a piece of user interface designed to interconnect with another
@@ -85,7 +85,7 @@ public class Component {
 	 */
 	private final List<ILinkReference> linkReferences = new ArrayList<>();
 
-	private final LinkedHashSet<IScriptReference> scriptReferences = new LinkedHashSet<>();
+	private final List<IScriptReference> scriptReferences = new ArrayList<>();
 
 	/** Aggregated set of script classes declared by this component, in no particular order. */
 	private final Set<String> scriptClasses = new HashSet<String>();
@@ -170,9 +170,9 @@ public class Component {
 			}
 		}
 
-		metaReferences.addAll(descriptor.getMetas());
-		linkReferences.addAll(descriptor.getLinks());
-		scriptReferences.addAll(descriptor.getScripts());
+		addAll(metaReferences, descriptor.getMetas());
+		addAll(linkReferences, descriptor.getLinks());
+		addAll(scriptReferences, descriptor.getScripts());
 
 		// uses project detected script classes to find out script files that this component depends on
 		scriptFiles = collectScriptFiles(project.getScriptFiles(scriptClasses));
@@ -180,7 +180,7 @@ public class Component {
 		// if preview script file is to be included updates this component scripts
 		// preview script and its direct dependencies are included last
 		if (includePreviewScript) {
-			IScriptFile previewScript = project.getPreviewScript(getPreviewScript());
+			IScriptFile previewScript = project.getPreviewScript(baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_SCRIPT));
 			if (previewScript != null) {
 				updateScriptFiles(scriptFiles, previewScript);
 			}
@@ -229,10 +229,10 @@ public class Component {
 			CompoPath compoPath = new CompoPath(project, layoutPath, operators.getOperand(widgetPathElement, Operator.COMPO));
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
-			ComponentDescriptor compoDescriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-			metaReferences.addAll(compoDescriptor.getMetas());
-			linkReferences.addAll(compoDescriptor.getLinks());
-			scriptReferences.addAll(compoDescriptor.getScripts());
+			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+			addAll(metaReferences, descriptor.getMetas());
+			addAll(linkReferences, descriptor.getLinks());
+			addAll(scriptReferences, descriptor.getScripts());
 
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
@@ -431,7 +431,7 @@ public class Component {
 		return styleFiles;
 	}
 
-	public LinkedHashSet<IScriptReference> getDescriptorScripts() {
+	public List<IScriptReference> getScriptReferences() {
 		return scriptReferences;
 	}
 
@@ -476,10 +476,11 @@ public class Component {
 	 * Returned file path is optional, that is, designed file is not mandatory to exist. Is caller responsibility to ensure file
 	 * exist before using it.
 	 * 
-	 * @return component script preview file.
+	 * @return component script preview file or null if not defined.
 	 */
-	public FilePath getPreviewScript() {
-		return baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_SCRIPT);
+	public IScriptReference getPreviewScript() {
+		FilePath file = baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_SCRIPT);
+		return file.exists() ? new ScriptReference(file.value()) : null;
 	}
 
 	/**
@@ -630,6 +631,14 @@ public class Component {
 		}
 		for (IScriptFile dependency : sourceScript.getWeakDependencies()) {
 			updateScriptFiles(targetScripts, dependency);
+		}
+	}
+
+	private static <T> void addAll(List<T> target, List<T> source) {
+		for (T item : source) {
+			if (!target.contains(item)) {
+				target.add(item);
+			}
 		}
 	}
 

@@ -575,6 +575,7 @@ public class BuilderTest extends BuilderTestCase {
 
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
+		doc.dump();
 		EList scripts = doc.findByTag("script");
 		assertEquals(4, scripts.size());
 

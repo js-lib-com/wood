@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import js.dom.EList;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Params;
@@ -410,7 +409,7 @@ public class Project {
 		return config.getLinks();
 	}
 
-	public EList getGlobalScripts() {
+	public List<IScriptReference> getScriptReferences() {
 		return config.getScripts();
 	}
 

@@ -3,15 +3,21 @@ package js.wood;
 public interface IScriptReference {
 	String getSource();
 
-	boolean hasIntegrity();
+	String getType();
 
-	String getIntegrity();
-
-	boolean hasCrossorigin();
-
-	String getCrossorigin();
-
+	boolean isAsync();
+	
 	boolean isDefer();
 
-	boolean isAppendToHead();
+	boolean isNoModule();
+	
+	String getNonce();
+	
+	String getReferrerPolicy();
+	
+	String getIntegrity();
+
+	String getCrossOrigin();
+	
+	boolean isEmbedded();
 }

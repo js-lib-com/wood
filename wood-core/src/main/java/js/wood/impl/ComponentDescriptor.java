@@ -2,18 +2,17 @@ package js.wood.impl;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.lang.BugError;
 import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.ILinkReference;
 import js.wood.IMetaReference;
 import js.wood.IReferenceHandler;
+import js.wood.IScriptReference;
 import js.wood.WoodException;
 
 /**
@@ -237,30 +236,15 @@ public class ComponentDescriptor {
 	 * 
 	 * @return scripts declared by this component descriptor.
 	 */
-	public List<ScriptReference> getScripts() {
+	public List<IScriptReference> getScripts() {
 		// do not attempt to cache script paths since this method is expected to be used only once
-
-		Element scriptsEl = doc.getByTag("scripts");
-		if (scriptsEl == null) {
-			return Collections.emptyList();
-		}
-
-		List<ScriptReference> scripts = new ArrayList<>();
-		for (Element scriptEl : scriptsEl.getChildren()) {
-			String src = scriptEl.getText();
-			if (src.isEmpty()) {
-				src = scriptEl.getAttr("src");
-				if (src == null) {
-					throw new BugError("Invalid script reference on component descriptor |%s|. Missing script source.", filePath);
-				}
+		List<IScriptReference> scripts = new ArrayList<>();
+		for (Element scriptElement : doc.findByTag("script")) {
+			ScriptReference script = ScriptReferenceFactory.create(scriptElement);
+			if (scripts.contains(script)) {
+				throw new WoodException("Duplicate script |%s| in component descriptor |%s|.", script, filePath);
 			}
-
-			String integrity = scriptEl.getAttr("integrity");
-			String crossorigin = scriptEl.getAttr("crossorigin");
-			boolean defer = Boolean.parseBoolean(scriptEl.getAttr("defer"));
-			boolean appendToHead = Boolean.parseBoolean(scriptEl.getAttr("append-to-head"));
-
-			scripts.add(new ScriptReference(src, integrity, crossorigin, defer, appendToHead));
+			scripts.add(script);
 		}
 		return scripts;
 	}

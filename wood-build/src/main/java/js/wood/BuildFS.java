@@ -250,13 +250,17 @@ public abstract class BuildFS {
 	 * @param scriptFile script file,
 	 * @param referenceHandler resource references handler.
 	 * @return URL path relative to page location.
-	 * @throws IOException if write operation fails.
+	 * @throws WoodException if write operation fails.
 	 */
-	public String writeScript(Component page, FilePath scriptFile, IReferenceHandler referenceHandler) throws IOException {
+	public String writeScript(Component page, FilePath scriptFile, IReferenceHandler referenceHandler) {
 		File targetFile = new File(getScriptDir(), insertBuildNumber(formatScriptName(scriptFile)));
 		targetFile.getParentFile().mkdirs();
 		if (!processedFiles.contains(targetFile)) {
-			Files.copy(new SourceReader(scriptFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
+			try {
+				Files.copy(new SourceReader(scriptFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
+			} catch (IOException e) {
+				throw new WoodException(e);
+			}
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);

@@ -7,9 +7,9 @@ import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
+import js.util.Strings;
 
 /**
  * Component preview wraps component in standard HTML document and serialize it to given writer. This component preview class is
@@ -111,33 +111,17 @@ public final class Preview {
 			addStyle(doc, absoluteUrlPath(style));
 		}
 
-		addChildren(body, project.getGlobalScripts(), "src");
-
-		// scripts listed on component descriptor are included in the order they are listed
-		// for script dependencies discovery this scripts list may be empty
-		for (IScriptReference scriptReference : compo.getDescriptorScripts()) {
-			// component descriptor third party scripts accept both project file path and absolute URL
-			// if file path is used, convert it to absolute URL path, otherwise leave it as it is since points to foreign server
-			String scriptPath = scriptReference.getSource();
-			if (FilePath.accept(scriptPath)) {
-				scriptPath = absoluteUrlPath(scriptPath);
-			}
-			addScript(doc, scriptPath, scriptReference);
+		for (IScriptReference script : project.getScriptReferences()) {
+			addScript(doc, script);
+		}
+		for (IScriptReference script : compo.getScriptReferences()) {
+			addScript(doc, script);
 		}
 
-		/*
-		 * // component scripts - both 3pty and local, are available only for automatic discovery if
-		 * (project.hasScriptDiscovery()) { for (String script : compo.getThirdPartyScripts()) { // do not convert to absolute
-		 * URL path since third party scripts are already absolute URL addScript(doc, script); }
-		 * 
-		 * // component instance for preview includes preview script and its dependencies, it any for (IScriptFile scriptFile :
-		 * compo.getScriptFiles()) { addScript(doc, absoluteUrlPath(scriptFile.getSourceFile())); } } else { // if script
-		 * discovery is enabled preview.js is included into compo.getScriptFiles() // takes care to include preview.js, if
-		 * discovery is not enabled IScriptFile previewScript = project.getPreviewScript(compo.getPreviewScript()); if
-		 * (previewScript != null) { addScript(doc, absoluteUrlPath(compo.getPreviewScript())); }
-		 * 
-		 * }
-		 */
+		IScriptReference previewScript = compo.getPreviewScript();
+		if (previewScript != null) {
+			addScript(doc, previewScript);
+		}
 
 		DefaultAttributes.update(doc);
 		doc.serialize(writer, true);
@@ -223,33 +207,45 @@ public final class Preview {
 	 * 
 	 * @param doc HTML document,
 	 * @param src the source of script.
+	 * @throws IOException
 	 */
-	/*
-	 * private static void addScript(Document doc, String src) { Element head = doc.getByTag("head");
-	 * head.addChild(doc.createElement("script", "src", src, "type", "text/javascript")); head.addText("\r\n"); }
-	 */
-
-	private static void addScript(Document doc, String src, IScriptReference scriptRef) {
-		// preview always adds scripts to page head
-		// next commented out statement is to show that 'scriptRef.isAppendToHead()' is ignored
-		// Element parent = doc.getByTag(scriptRef.isAppendToHead() ? "head" : "body");
-		Element parent = doc.getByTag("head");
-
-		Element script = doc.createElement("script");
-		script.setAttr("src", src);
-		if (scriptRef.hasIntegrity()) {
-			script.setAttr("integrity", scriptRef.getIntegrity());
+	private void addScript(Document doc, IScriptReference script) throws IOException {
+		String src = script.getSource();
+		assert src != null;
+		Element head = doc.getByTag("head");
+		Element scriptElement = head.getByAttr("src", src);
+		if (scriptElement == null) {
+			scriptElement = doc.createElement("script");
 		}
-		if (scriptRef.hasCrossorigin()) {
-			script.setAttr("crossorigin", scriptRef.getCrossorigin());
+		if (!script.isEmbedded()) {
+			if (FilePath.accept(src)) {
+				src = absoluteUrlPath(project.getFile(src));
+			}
+			scriptElement.setAttr("src", src);
 		}
-		if (scriptRef.isDefer()) {
-			script.setAttr("defer", "defer");
-		}
-		script.setAttr("type", "text/javascript");
 
-		parent.addChild(script);
-		parent.addText("\r\n");
+		setAttr(scriptElement, "type", script.getType(), "text/javascript");
+		if (script.isAsync()) {
+			scriptElement.setAttr("async", "true");
+		}
+		if (script.isDefer()) {
+			scriptElement.setAttr("defer", "true");
+		}
+		if (script.isNoModule()) {
+			scriptElement.setAttr("nomodule", "true");
+		}
+
+		setAttr(scriptElement, "nonce", script.getNonce());
+		setAttr(scriptElement, "referrerpolicy", script.getReferrerPolicy());
+		setAttr(scriptElement, "crossorigin", script.getCrossOrigin());
+		setAttr(scriptElement, "integrity", script.getIntegrity());
+
+		if (script.isEmbedded()) {
+			scriptElement.setText(Strings.load(project.getFile(script.getSource()).toFile()));
+		}
+
+		head.addChild(scriptElement);
+		head.addText("\r\n");
 	}
 
 	/**
@@ -275,17 +271,6 @@ public final class Preview {
 		builder.append(Path.SEPARATOR);
 		builder.append(filePath);
 		return builder.toString();
-	}
-
-	private static void addChildren(Element parent, EList children, String keyAttr) {
-		for (Element child : children) {
-			String keyValue = child.getAttr(keyAttr);
-			if (parent.getByAttr(keyAttr, keyValue) != null) {
-				continue;
-			}
-			parent.addChild(child);
-			parent.addText("\r\n");
-		}
 	}
 
 	private static class ThemeStyles {

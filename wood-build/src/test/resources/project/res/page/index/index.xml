@@ -3,15 +3,14 @@
 	<title>@string/page-title</title>
 	<description>@string/page-description</description>
 	<scripts>
-		<script>lib/js-lib/js-lib.js</script>
-		<script>script/hc/page/Index.js</script>
-		<script>gen/js/controller/MainController.js</script>
-		<script>script/js/hood/MainMenu.js</script>
-		<script>script/hc/view/VideoPlayer.js</script>
-		<script>lib/list-view/list-view.js</script>
-		<script>lib/paging/paging.js</script>
-		<script>script/js/compo/Dialog.js</script>
-		<script>script/js/hood/TopMenu.js</script>
-		<script>script/hc/view/DiscographyView.js</script>
+		<script src="script/hc/page/Index.js"></script>
+		<script src="gen/js/controller/MainController.js"></script>
+		<script src="script/js/hood/MainMenu.js"></script>
+		<script src="script/hc/view/VideoPlayer.js"></script>
+		<script src="lib/list-view/list-view.js"></script>
+		<script src="lib/paging/paging.js"></script>
+		<script src="script/js/compo/Dialog.js"></script>
+		<script src="script/js/hood/TopMenu.js"></script>
+		<script src="script/hc/view/DiscographyView.js"></script>
 	</scripts>
 </page>

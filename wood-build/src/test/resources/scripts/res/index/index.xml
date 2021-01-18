@@ -4,10 +4,10 @@
 	<title>Captcha Component</title>
 	<description>Custom CAPTCHA with revealed with checkbox.</description>
 	<scripts>
-		<script>lib/js-lib/js-lib.js</script>
-		<script>gen/js/controller/MainController.js</script>
-		<script>script/js/wood/IndexPage.js</script>
-		<script>script/js/format/RichText.js</script>
-		<script>script/js/widget/Description.js</script>
+		<script src="lib/js-lib/js-lib.js"></script>
+		<script src="gen/js/controller/MainController.js"></script>
+		<script src="script/js/wood/IndexPage.js"></script>
+		<script src="script/js/format/RichText.js"></script>
+		<script src="script/js/widget/Description.js"></script>
 	</scripts>
 </page>

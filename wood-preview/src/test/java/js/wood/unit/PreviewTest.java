@@ -66,6 +66,7 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 	@Test
 	public void previewSimpleLayout() throws IOException {
 		Document doc = exercisePreview("components", "res/simple/layout");
+		doc.dump();
 		assertEmptyHead(doc);
 		assertEquals("Components / Layout", doc.getByTag("title").getText());
 		assertEquals("Simple Layout", doc.getByTag("h1").getText());

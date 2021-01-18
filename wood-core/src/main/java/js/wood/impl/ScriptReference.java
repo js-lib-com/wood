@@ -20,22 +20,25 @@ public class ScriptReference implements IScriptReference {
 	/** Script source is the URL from where third script is to be loaded. */
 	private final String source;
 
-	private final String integrity;
-	private final String crossorigin;
-	private final boolean defer;
-	
-	/**
-	 * Usually scripts are inserted into page document at the bottom, after body content. This flag is used to force script
-	 * loading on document header.
-	 */
-	final boolean appendToHead;
+	private String type;
+	private boolean async;
+	private boolean defer;
+	private boolean noModule;
+	private String nonce;
+	private String referrerPolicy;
+	private String integrity;
+	private String crossOrigin;
+	private boolean embedded;
 
-	public ScriptReference(String source, String integrity, String crossorigin, boolean defer, boolean appendToHead) {
+	public ScriptReference(String source) {
+		this.source = source;
+	}
+
+	public ScriptReference(String source, String integrity, String crossOrigin, boolean defer) {
 		this.source = source;
 		this.integrity = integrity;
-		this.crossorigin = crossorigin;
-		this.defer=defer;
-		this.appendToHead = appendToHead;
+		this.crossOrigin = crossOrigin;
+		this.defer = defer;
 	}
 
 	@Override
@@ -43,24 +46,26 @@ public class ScriptReference implements IScriptReference {
 		return source;
 	}
 
-	@Override
-	public boolean hasIntegrity() {
-		return integrity != null;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@Override
-	public String getIntegrity() {
-		return integrity;
+	public String getType() {
+		return type;
+	}
+
+	public void setAsync(boolean async) {
+		this.async = async;
 	}
 
 	@Override
-	public boolean hasCrossorigin() {
-		return crossorigin != null;
+	public boolean isAsync() {
+		return async;
 	}
 
-	@Override
-	public String getCrossorigin() {
-		return crossorigin;
+	public void setDefer(boolean defer) {
+		this.defer = defer;
 	}
 
 	@Override
@@ -68,9 +73,58 @@ public class ScriptReference implements IScriptReference {
 		return defer;
 	}
 
+	public void setNoModule(boolean noModule) {
+		this.noModule = noModule;
+	}
+
 	@Override
-	public boolean isAppendToHead() {
-		return appendToHead;
+	public boolean isNoModule() {
+		return noModule;
+	}
+
+	public void setNonce(String nonce) {
+		this.nonce = nonce;
+	}
+
+	@Override
+	public String getNonce() {
+		return nonce;
+	}
+
+	public void setReferrerPolicy(String referrerPolicy) {
+		this.referrerPolicy = referrerPolicy;
+	}
+
+	@Override
+	public String getReferrerPolicy() {
+		return referrerPolicy;
+	}
+
+	public void setIntegrity(String integrity) {
+		this.integrity = integrity;
+	}
+
+	@Override
+	public String getIntegrity() {
+		return integrity;
+	}
+
+	public void setCrossOrigin(String crossOrigin) {
+		this.crossOrigin = crossOrigin;
+	}
+
+	@Override
+	public String getCrossOrigin() {
+		return crossOrigin;
+	}
+
+	public void setEmbedded(boolean embedded) {
+		this.embedded = embedded;
+	}
+
+	@Override
+	public boolean isEmbedded() {
+		return embedded;
 	}
 
 	@Override
@@ -96,5 +150,10 @@ public class ScriptReference implements IScriptReference {
 		} else if (!source.equals(other.source))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return source;
 	}
 }

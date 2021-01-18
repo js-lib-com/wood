@@ -201,28 +201,12 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
 		}
 
-		pageDocument.addChildren("body", project.getGlobalScripts(), "src");
-
-		// scripts listed on component descriptor are included in the order they are listed
-		// for script dependencies discovery this scripts list may be empty
-		for (IScriptReference script : page.getDescriptorScripts()) {
-			// component descriptor third party scripts accept both project file path and absolute URL
-			// if file path is used copy the script to build FS, otherwise script is stored on foreign server
-			String scriptPath = script.getSource();
-			if (FilePath.accept(scriptPath)) {
-				scriptPath = buildFS.writeScript(page, project.getFile(scriptPath), this);
-			}
-			pageDocument.addScript(scriptPath, script.isAppendToHead());
+		for (IScriptReference script : project.getScriptReferences()) {
+			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
 		}
-
-		/*
-		 * // component scripts - both 3pty and local, are available only for automatic discovery if
-		 * (project.hasScriptDiscovery()) { // component third party script are served from foreign servers and need not to be
-		 * copied into build FS page.addScripts(compo.getThirdPartyScripts());
-		 * 
-		 * for (IScriptFile script : compo.getScriptFiles()) { page.addScript(buildFS.writeScript(compo, script.getSourceFile(),
-		 * this), false); } }
-		 */
+		for (IScriptReference script : page.getScriptReferences()) {
+			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
+		}
 
 		DefaultAttributes.update(pageDocument.getDocument());
 
