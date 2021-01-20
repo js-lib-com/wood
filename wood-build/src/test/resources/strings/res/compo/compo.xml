@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compo>
+	<scripts>
+		<script src="script/js/wood/Compo.js"></script>
+	</scripts>
+</compo>
