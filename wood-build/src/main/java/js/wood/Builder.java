@@ -10,7 +10,6 @@ import java.util.Map;
 
 import js.log.Log;
 import js.log.LogFactory;
-import js.wood.impl.ProjectConfig;
 import js.wood.impl.Reference;
 
 /**
@@ -98,7 +97,7 @@ public class Builder implements IReferenceHandler {
 
 	/**
 	 * Get the site build directory path, relative to project. Returned value is that from project configuration - see
-	 * {@link ProjectConfig#getSiteDir(String)}, or default value {@link CT#DEF_SITE_DIR}. Path is guaranteed to have trailing
+	 * {@link Project#getSiteDir(String)}, or default value {@link CT#DEF_SITE_DIR}. Path is guaranteed to have trailing
 	 * file separator.
 	 * 
 	 * @return site build path.

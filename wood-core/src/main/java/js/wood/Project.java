@@ -14,7 +14,7 @@ import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.NamingStrategy;
-import js.wood.impl.ProjectConfig;
+import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.Reference;
 import js.wood.impl.XmlnsOperatorsHandler;
 
@@ -26,7 +26,7 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * larger project layout, like an Eclipse project.
  * <p>
  * Current Project file system is depicted below. There are four source directories and one build target. There is also a
- * project configuration XML file, see {@link ProjectConfig}. It is acceptable to share directories with master project, if any.
+ * project configuration XML file, see {@link ProjectDescriptor}. It is acceptable to share directories with master project, if any.
  * For example <code>lib</code> can hold Java archives. Anyway, master project files must not use extensions expected by this
  * tool library and file name should obey syntax described by {@link FilePath}.
  * 
@@ -45,7 +45,7 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * 
  * Note that default build target directory is a sub-directory of master project build. This is to allow storing all build files
  * in the same place. Anyway, site build directory is Project configurable, see <code>site-dir</code> from
- * {@link ProjectConfig}.
+ * {@link ProjectDescriptor}.
  * <p>
  * Project instance is used in two different modes: build and preview. When working for build, project scans and cache files
  * meta data; cache is valid for entire build process. On preview mode project does not use cache in order to display most
@@ -59,19 +59,19 @@ public class Project {
 	// Project instance
 
 	/**
-	 * Project name is used for internal representation. This value may be supplied by {@link ProjectConfig#getName(String)}
+	 * Project name is used for internal representation. This value may be supplied by {@link ProjectDescriptor#getName(String)}
 	 * with default to project directory name.
 	 */
 	private final String name;
 
 	/**
-	 * Project display is for user interface. If this value is not provided by {@link ProjectConfig#getDisplay(String)} uses
+	 * Project display is for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
 	 * project name converted to title case.
 	 */
 	private final String display;
 
 	/**
-	 * Project description. Uses project display if this value is not provided by {@link ProjectConfig#getDescription(String)}.
+	 * Project description. Uses project display if this value is not provided by {@link ProjectDescriptor#getDescription(String)}.
 	 */
 	private final String description;
 
@@ -96,9 +96,9 @@ public class Project {
 	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
 	 * project directory root.
 	 */
-	private final ProjectConfig config;
+	private final ProjectDescriptor descriptor;
 
-	/** List of paths excluded from build process. Configurable per project, see {@link ProjectConfig#getExcludes()}. */
+	/** List of paths excluded from build process. Configurable per project, see {@link ProjectDescriptor#getExcludes()}. */
 	private final List<Path> excludes;
 
 	/**
@@ -121,22 +121,27 @@ public class Project {
 		Params.notNull(projectPath, "Project directory");
 		this.projectDir = new File(projectPath);
 		Params.isDirectory(this.projectDir, "Project directory");
-		this.config = new ProjectConfig(this);
+		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
 
 		this.resourcesDir = new DirPath(this, CT.RESOURCE_DIR);
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
-		this.siteDir = new File(projectPath, config.getSiteDir(CT.DEF_SITE_DIR));
+		this.siteDir = new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
 		if (!this.siteDir.exists()) {
 			this.siteDir.mkdir();
 		}
 
-		this.name = config.getName(this.projectDir.getName());
-		this.display = config.getDisplay(Strings.toTitleCase(this.name));
-		this.description = config.getDescription(this.display);
-		this.excludes = config.getExcludes();
+		this.name = descriptor.getName(this.projectDir.getName());
+		this.display = descriptor.getDisplay(Strings.toTitleCase(this.name));
+		this.description = descriptor.getDescription(this.display);
 
-		switch (this.config.getNamingStrategy()) {
+		this.excludes = new ArrayList<>();
+		for (String exclude : descriptor.getExcludes()) {
+			excludes.add(Path.create(this, exclude.trim()));
+		}
+
+
+		switch (this.descriptor.getNamingStrategy()) {
 		case XMLNS:
 			operatorsHandler = new XmlnsOperatorsHandler();
 			break;
@@ -268,10 +273,10 @@ public class Project {
 	 * Get project supported locale settings as configured by project descriptor. Returned list is immutable.
 	 * 
 	 * @return project locale.
-	 * @see ProjectConfig#getLocales()
+	 * @see ProjectDescriptor#getLocales()
 	 */
 	public List<Locale> getLocales() {
-		return config.getLocales();
+		return descriptor.getLocales();
 	}
 
 	/**
@@ -280,11 +285,11 @@ public class Project {
 	 * @return true if project is multi-locale.
 	 */
 	public boolean isMultiLocale() {
-		return config.getLocales().size() > 1;
+		return descriptor.getLocales().size() > 1;
 	}
 
 	public Locale getDefaultLocale() {
-		return config.getDefaultLocale();
+		return descriptor.getDefaultLocale();
 	}
 
 	/**
@@ -342,11 +347,11 @@ public class Project {
 	}
 
 	public String getAuthor() {
-		return config.getAuthor();
+		return descriptor.getAuthor();
 	}
 
 	public List<IMetaReference> getMetaReferences() {
-		return config.getMetas();
+		return descriptor.getMetas();
 	}
 
 	/**
@@ -355,11 +360,11 @@ public class Project {
 	 * @return ordered set of link references.
 	 */
 	public List<ILinkReference> getLinkReferences() {
-		return config.getLinks();
+		return descriptor.getLinks();
 	}
 
 	public List<IScriptReference> getScriptReferences() {
-		return config.getScripts();
+		return descriptor.getScripts();
 	}
 
 	/**

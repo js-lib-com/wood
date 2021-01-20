@@ -12,8 +12,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,18 +23,12 @@ import js.dom.DocumentBuilder;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.log.Log;
 import js.log.LogFactory;
-import js.util.Classes;
 import js.util.Files;
-import js.wood.CompoPath;
 import js.wood.FilePath;
-import js.wood.IMetaReference;
-import js.wood.Path;
 import js.wood.Project;
 import js.wood.StyleReader;
-import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.FileType;
 import js.wood.impl.LayoutReader;
-import js.wood.impl.ProjectConfig;
 import js.wood.impl.ResourceType;
 import js.wood.impl.StyleExtensionReader;
 import js.wood.impl.Variants;
@@ -325,69 +317,5 @@ public class HelpersTest extends WoodTestCase {
 		assertFalse(FileType.LAYOUT.equals(new File("path/file.js")));
 		assertFalse(FileType.LAYOUT.equals(new File("path/file.xml")));
 		assertFalse(FileType.LAYOUT.equals(new File("path/file")));
-	}
-
-	// ------------------------------------------------------
-	// Config
-
-	@Test
-	public void configConstructor() {
-		log.trace("testConfigConstructor()");
-		project = project("project");
-		ProjectConfig config = new ProjectConfig(project);
-
-		assertEquals("j(s)-lib", config.getAuthor());
-		assertEquals("project", config.getName(null));
-		assertEquals("Test Project", config.getDisplay(null));
-		assertEquals("Project used as fixture for unit testing.", config.getDescription(null));
-		assertEquals("build/site", config.getSiteDir(null));
-		assertEquals("UA-12345678-1", config.getSDKID("analytics"));
-
-		assertEquals(4, config.getLocales().size());
-		assertEquals(new Locale("en"), config.getLocales().get(0));
-		assertEquals(new Locale("de"), config.getLocales().get(1));
-		assertEquals(new Locale("fr"), config.getLocales().get(2));
-		assertEquals(new Locale("ro"), config.getLocales().get(3));
-
-		List<IMetaReference> metas = config.getMetas();
-		assertEquals(2, metas.size());
-		assertEquals("X-UA-Compatible", metas.get(0).getHttpEquiv());
-		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.get(0).getContent());
-
-//		List<String> fonts = config.getFonts();
-//		assertEquals(2, fonts.size());
-//		assertEquals("http://fonts.googleapis.com/css?family=Roboto", fonts.get(0));
-	}
-
-	@Test
-	public void configGetExcludes() {
-		log.trace("testConfigGetExcludes()");
-		DocumentBuilder builder = new DocumentBuilderImpl();
-		Document doc = builder.parseXML("<project><excludes>page/about, res/compo/video-player/video-player.xml</excludes></project>");
-
-		project = project("project");
-		ProjectConfig config = new ProjectConfig(project);
-		Classes.setFieldValue(config, "doc", doc);
-		List<Path> excludes = config.getExcludes();
-
-		assertNotNull(excludes);
-		assertEquals(2, excludes.size());
-		assertTrue(excludes.get(0) instanceof CompoPath);
-		assertTrue(excludes.get(1) instanceof FilePath);
-	}
-
-	// ------------------------------------------------------
-	// Descriptor
-
-	@Test
-	public void descriptorConstructor() {
-		log.trace("testDescriptorConstructor()");
-		project = project("project");
-		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/page/index/index.xml"), nullReferenceHandler());
-
-		assertNotNull(field(descriptor, "doc"));
-		assertEquals("res/page/index/index.xml", field(descriptor, "filePath").toString());
-		assertEquals("null reference handler", field(descriptor, "referenceHandler").toString());
-		assertNotNull(field(descriptor, "resolver"));
 	}
 }

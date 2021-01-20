@@ -17,8 +17,6 @@ import js.wood.CT;
 import js.wood.ILinkReference;
 import js.wood.IMetaReference;
 import js.wood.IScriptReference;
-import js.wood.Path;
-import js.wood.Project;
 import js.wood.WoodException;
 
 /**
@@ -117,10 +115,7 @@ import js.wood.WoodException;
  * @since 1.0
  * @see ComponentDescriptor
  */
-public final class ProjectConfig {
-	/** Project reference. */
-	private Project project;
-
+public final class ProjectDescriptor {
 	/** XML DOM document. */
 	private Document doc;
 
@@ -147,18 +142,14 @@ public final class ProjectConfig {
 	 * Create project configuration instance. Searches for configuration file into given project directory. Throws exception if
 	 * project configuration file or language section is missing.
 	 * 
-	 * @param project parent project.
 	 * @throws WoodException if configuration file not found or language section is missing.
 	 */
-	public ProjectConfig(Project project) throws WoodException {
-		this.project = project;
-
-		File configFile = new File(project.getProjectDir(), CT.PROJECT_CONFIG);
+	public ProjectDescriptor(File descriptorFile) throws WoodException {
 		try {
 			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			this.doc = builder.loadXML(configFile);
+			this.doc = builder.loadXML(descriptorFile);
 		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing project configuration file |%s|.", configFile);
+			throw new WoodException("Missing project configuration file |%s|.", descriptorFile);
 		}
 
 		Element localeElement = this.doc.getByTag("locale");
@@ -196,6 +187,15 @@ public final class ProjectConfig {
 	}
 
 	/**
+	 * Get project author or null if not set.
+	 * 
+	 * @return project author or null.
+	 */
+	public String getAuthor() {
+		return text("author", CT.DEF_AUTHOR);
+	}
+
+	/**
 	 * Get project name or default value if <code>name</code> element is missing.
 	 * 
 	 * @param defaultValue default value.
@@ -226,12 +226,21 @@ public final class ProjectConfig {
 	}
 
 	/**
-	 * Get project author or null if not set.
+	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
+	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
 	 * 
-	 * @return project author or null.
+	 * @return project configured locales.
+	 * @see #locales
 	 */
-	public String getAuthor() {
-		return text("author", CT.DEF_AUTHOR);
+	public List<Locale> getLocales() {
+		if (locales.isEmpty()) {
+			throw new IllegalStateException("Project locale not initialized.");
+		}
+		return Collections.unmodifiableList(locales);
+	}
+
+	public String getTheme() {
+		return text("theme", null);
 	}
 
 	/**
@@ -243,20 +252,6 @@ public final class ProjectConfig {
 	 */
 	public String getSiteDir(String defaultValue) {
 		return text("site-dir", defaultValue);
-	}
-
-	/**
-	 * Get SDK specific service ID for requested named service. Returned ID have meaning in requested service scope, e.g. for
-	 * Google Analytics returned value is track ID whereas for Facebook is application ID.
-	 * <p>
-	 * Service name is under developer control; it is the name of SDK initialization script from library SDK directory. This
-	 * library sources layout convention is to use the same name for script file and the element from config file. This very
-	 * name is by definition the <em>service name</code>.
-	 * 
-	 * @return service specific ID.
-	 */
-	public String getSDKID(String serviceName) {
-		return text(serviceName, null);
 	}
 
 	/**
@@ -302,20 +297,6 @@ public final class ProjectConfig {
 	}
 
 	/**
-	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
-	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
-	 * 
-	 * @return project configured locales.
-	 * @see #locales
-	 */
-	public List<Locale> getLocales() {
-		if (locales.isEmpty()) {
-			throw new IllegalStateException("Project locale not initialized.");
-		}
-		return Collections.unmodifiableList(locales);
-	}
-
-	/**
 	 * Get project configured default locale.
 	 * 
 	 * @return default locale.
@@ -331,16 +312,12 @@ public final class ProjectConfig {
 	 * 
 	 * @return excluded paths list, possible empty.
 	 */
-	public List<Path> getExcludes() {
+	public List<String> getExcludes() {
 		Element el = doc.getByTag("excludes");
 		if (el == null) {
 			return Collections.emptyList();
 		}
-		List<Path> excludes = new ArrayList<Path>();
-		for (String exclude : Strings.split(el.getText(), ',', ' ')) {
-			excludes.add(Path.create(project, exclude.trim()));
-		}
-		return excludes;
+		return Strings.split(el.getText(), ',', ' ');
 	}
 
 	public NamingStrategy getNamingStrategy() {

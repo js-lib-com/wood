@@ -16,7 +16,7 @@ import js.wood.IScriptReference;
 import js.wood.WoodException;
 
 /**
- * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectConfig} that
+ * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor} that
  * affects all components from project. Current implementation is actually used for pages; support for ordinary components is
  * expected.
  * <p>
@@ -100,7 +100,7 @@ import js.wood.WoodException;
  * 
  * @author Iulian Rotaru
  * @version final
- * @see ProjectConfig
+ * @see ProjectDescriptor
  */
 public class ComponentDescriptor {
 	/** Empty XML document used when component descriptor file is missing. */
