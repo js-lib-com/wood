@@ -1,11 +1,13 @@
 package js.wood;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import js.util.Files;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Variables;
 
@@ -19,8 +21,15 @@ public class BuilderProject extends Project {
 	/** Cache for resource variables. */
 	private Map<DirPath, Variables> variables = new HashMap<>();
 
+	/** Site build directory, usually part of master project build. */
+	private File siteDir;
+
 	public BuilderProject(String projectPath) throws IllegalArgumentException {
 		super(projectPath);
+		this.siteDir = new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
+		if (!this.siteDir.exists()) {
+			this.siteDir.mkdir();
+		}
 	}
 
 	/**
@@ -36,13 +45,40 @@ public class BuilderProject extends Project {
 		scanner.scan(new DirPath(this, CT.GENERATED_DIR));
 
 		/*
-		// scan for dependencies after all script files loaded, but only if discovery is enabled
-		if (scriptDependencyStrategy == ScriptDependencyStrategy.DISCOVERY) {
-			for (ScriptFile scriptFile : scripts.values()) {
-				scriptFile.scanDependencies(classScripts);
-			}
-		}
-		*/
+		 * // scan for dependencies after all script files loaded, but only if discovery is enabled if (scriptDependencyStrategy
+		 * == ScriptDependencyStrategy.DISCOVERY) { for (ScriptFile scriptFile : scripts.values()) {
+		 * scriptFile.scanDependencies(classScripts); } }
+		 */
+	}
+
+	/**
+	 * Set site build directory. This method is designed for builder instance customization.
+	 * 
+	 * @param siteDir site build directory, relative to project root.
+	 * @see siteDir
+	 */
+	public void setSiteDir(File siteDir) {
+		this.siteDir = siteDir;
+	}
+
+	/**
+	 * Get site build directory.
+	 * 
+	 * @return site build directory.
+	 * @see #siteDir
+	 */
+	public File getSiteDir() {
+		return siteDir;
+	}
+
+	/**
+	 * Get the path, relative to project root, of the site build directory. Returned value is guaranteed to have trailing file
+	 * separator.
+	 * 
+	 * @return site build path.
+	 */
+	public String getSitePath() {
+		return Files.getRelativePath(projectDir, siteDir, true) + Path.SEPARATOR;
 	}
 
 	/**

@@ -47,16 +47,7 @@ public class ComponentTest {
 	// Helper methods
 
 	protected static Project project(String projectDir) {
-		Project project = new Project("src/test/resources/" + projectDir);
-		if (project.getSiteDir().exists()) {
-			try {
-				Files.removeFilesHierarchy(project.getSiteDir());
-			} catch (IOException e) {
-				e.printStackTrace();
-				fail();
-			}
-		}
-		return project;
+		return new Project("src/test/resources/" + projectDir);
 	}
 
 	private static Component getCompo(String path) {

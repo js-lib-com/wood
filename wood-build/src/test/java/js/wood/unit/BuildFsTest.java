@@ -9,21 +9,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.BuildFS;
 import js.wood.Builder;
+import js.wood.BuilderProject;
+import js.wood.BuilderTestCase;
 import js.wood.Component;
 import js.wood.DefaultBuildFS;
 import js.wood.FilePath;
-import js.wood.Project;
-import js.wood.BuilderTestCase;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class BuildFsTest extends BuilderTestCase {
-	private Project project;
+	private BuilderProject project;
 
 	@Before
 	public void beforeTest() throws Exception {
@@ -34,7 +34,7 @@ public class BuildFsTest extends BuilderTestCase {
 	// BuildFS
 
 	private static class TestBuildFS extends BuildFS {
-		public TestBuildFS(Project project) {
+		public TestBuildFS(BuilderProject project) {
 			super(project);
 		}
 

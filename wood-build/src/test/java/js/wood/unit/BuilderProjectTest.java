@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import js.util.Classes;
 import js.wood.BuilderProject;
 import js.wood.BuilderTestCase;
+import js.wood.CT;
 import js.wood.CompoPath;
 import js.wood.DirPath;
 import js.wood.FilePath;
@@ -42,6 +44,8 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 	@Test
 	public void initialization() throws FileNotFoundException {
 		project = project("project");
+		assertEquals(new File(project.getProjectDir(), CT.DEF_SITE_DIR), project.getSiteDir());
+		assertEquals("build/site/", project.getSitePath());
 		assertTrue(project.getLayouts().isEmpty());
 	}
 

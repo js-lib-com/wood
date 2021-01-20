@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
@@ -76,7 +75,7 @@ public class Project {
 	private final String description;
 
 	/** Project directory. All project file are included here, no external references allowed. */
-	private final File projectDir;
+	protected final File projectDir;
 
 	private final DirPath resourcesDir;
 
@@ -96,7 +95,7 @@ public class Project {
 	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
 	 * project directory root.
 	 */
-	private final ProjectDescriptor descriptor;
+	protected final ProjectDescriptor descriptor;
 
 	/** List of paths excluded from build process. Configurable per project, see {@link ProjectDescriptor#getExcludes()}. */
 	private final List<Path> excludes;
@@ -106,9 +105,6 @@ public class Project {
 	 * {@link NamingStrategy#XMLNS}.
 	 */
 	private final IOperatorsHandler operatorsHandler;
-
-	/** Site build directory, usually part of master project build. */
-	private File siteDir;
 
 	/**
 	 * Construct not initialized project instance. Initialize project instance state. Load project configuration and create
@@ -126,10 +122,6 @@ public class Project {
 		this.resourcesDir = new DirPath(this, CT.RESOURCE_DIR);
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
-		this.siteDir = new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
-		if (!this.siteDir.exists()) {
-			this.siteDir.mkdir();
-		}
 
 		this.name = descriptor.getName(this.projectDir.getName());
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.name));
@@ -157,16 +149,6 @@ public class Project {
 		default:
 			operatorsHandler = null;
 		}
-	}
-
-	/**
-	 * Set site build directory. This method is designed for builder instance customization.
-	 * 
-	 * @param siteDir site build directory, relative to project root.
-	 * @see siteDir
-	 */
-	public void setSiteDir(File siteDir) {
-		this.siteDir = siteDir;
 	}
 
 	/**
@@ -234,26 +216,6 @@ public class Project {
 	 */
 	public DirPath getThemeDir() {
 		return themeDir;
-	}
-
-	/**
-	 * Get site build directory.
-	 * 
-	 * @return site build directory.
-	 * @see #siteDir
-	 */
-	public File getSiteDir() {
-		return siteDir;
-	}
-
-	/**
-	 * Get the path, relative to project root, of the site build directory. Returned value is guaranteed to have trailing file
-	 * separator.
-	 * 
-	 * @return site build path.
-	 */
-	public String getSitePath() {
-		return Files.getRelativePath(projectDir, siteDir, true) + Path.SEPARATOR;
 	}
 
 	public CompoPath getCompoPath(String path) {

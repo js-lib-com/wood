@@ -31,7 +31,7 @@ import js.util.Params;
  */
 public abstract class BuildFS {
 	/** Project reference. */
-	private final Project project;
+	private final BuilderProject project;
 
 	/**
 	 * Build number or 0 if not set. Specialized write methods take care to append build number, of course if set.
@@ -52,7 +52,7 @@ public abstract class BuildFS {
 	 * 
 	 * @param project project reference.
 	 */
-	public BuildFS(Project project) {
+	public BuildFS(BuilderProject project) {
 		this.project = project;
 	}
 

@@ -13,7 +13,6 @@ import java.util.Locale;
 import js.dom.Document;
 import js.dom.EList;
 import js.util.Classes;
-import js.util.Files;
 import js.util.Strings;
 import js.wood.FilePath;
 import js.wood.IReference;
@@ -22,18 +21,7 @@ import js.wood.Project;
 
 public class WoodTestCase {
 	protected static Project project(String projectDir) {
-		try {
-			Project project = new Project("src/test/resources/" + projectDir);
-			if (project.getSiteDir().exists()) {
-				Files.removeFilesHierarchy(project.getSiteDir());
-			}
-			return project;
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Fail to create project instance.");
-		}
-
-		throw new IllegalStateException();
+		return new Project("src/test/resources/" + projectDir);
 	}
 
 	protected static String path(String fileName) {

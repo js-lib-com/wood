@@ -7,6 +7,7 @@
 	<theme>material</theme>
 	<site-dir>build/site</site-dir>
 	<locale>en, de, fr, ro</locale>
+	<naming-strategy>XMLNS</naming-strategy>
 
 	<metas>
 		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />

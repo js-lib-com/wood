@@ -16,6 +16,7 @@ import org.junit.Test;
 import js.wood.ILinkReference;
 import js.wood.IMetaReference;
 import js.wood.IScriptReference;
+import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
 
 public class ProjectDescriptorTest extends WoodTestCase {
@@ -34,6 +35,7 @@ public class ProjectDescriptorTest extends WoodTestCase {
 		assertThat(descriptor.getDescription(null), equalTo("Test project description."));
 		assertThat(descriptor.getTheme(), equalTo("material"));
 		assertThat(descriptor.getSiteDir(null), equalTo("build/site"));
+		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 	}
 
 	@Test

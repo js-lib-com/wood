@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -18,7 +17,6 @@ import js.dom.EList;
 import js.dom.Element;
 import js.dom.NamespaceContext;
 import js.util.Classes;
-import js.util.Files;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.FilePath;
@@ -406,19 +404,6 @@ public class ComponentTest extends WoodTestCase {
 
 	// ------------------------------------------------------
 	// Helper methods
-
-	protected static Project project(String projectDir) {
-		Project project = new Project("src/test/resources/" + projectDir);
-		if (project.getSiteDir().exists()) {
-			try {
-				Files.removeFilesHierarchy(project.getSiteDir());
-			} catch (IOException e) {
-				e.printStackTrace();
-				fail();
-			}
-		}
-		return project;
-	}
 
 	private static Component getCompo(String path) {
 		Project project = project("components");

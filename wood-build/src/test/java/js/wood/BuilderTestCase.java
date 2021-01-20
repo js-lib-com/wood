@@ -63,7 +63,7 @@ public class BuilderTestCase {
 	protected static void resetProjectLocales(Project project) {
 		List<Locale> locales = new ArrayList<Locale>();
 		locales.add(new Locale("en"));
-		field(Classes.getFieldValue(project, Project.class, "config"), "locales", locales);
+		field(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
 	}
 
 	protected static <T> T invoke(Object object, String method, Object... args) {

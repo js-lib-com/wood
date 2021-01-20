@@ -44,7 +44,7 @@ public class BuilderTest extends BuilderTestCase {
 	public void constructor() throws FileNotFoundException {
 		Builder builder = new Builder(path("project"));
 
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		assertNotNull(project);
 
 		BuildFS buildFS = field(builder, "buildFS");
@@ -69,7 +69,7 @@ public class BuilderTest extends BuilderTestCase {
 	public void constructor_RootContext() throws FileNotFoundException {
 		Builder builder = new Builder(path("root-project"));
 
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		assertNotNull(project);
 
 		BuildFS buildFS = field(builder, "buildFS");
@@ -93,7 +93,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void build() throws IOException {
 		Builder builder = new Builder(path("project"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<Locale>();
@@ -133,7 +133,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void build_RootContext() throws IOException {
 		Builder builder = new Builder(path("root-project"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<Locale>();
@@ -175,7 +175,7 @@ public class BuilderTest extends BuilderTestCase {
 		Builder builder = new Builder(path("project"));
 		Locale locale = new Locale("en");
 		field(builder, "locale", locale);
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 
 		BuildFS buildFS = new DefaultBuildFS(project) {
 			@Override
@@ -195,7 +195,7 @@ public class BuilderTest extends BuilderTestCase {
 		Builder builder = new Builder(path("project"));
 		Locale locale = new Locale("en");
 		field(builder, "locale", locale);
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 
 		BuildFS buildFS = new DefaultBuildFS(project) {
 			@Override
@@ -387,7 +387,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void strings() throws IOException {
 		Builder builder = new Builder(path("strings"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -472,7 +472,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void styles() throws Exception {
 		Builder builder = new Builder(path("styles"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -510,7 +510,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void styleMixin() throws IOException {
 		Builder builder = new Builder(path("styles"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -528,7 +528,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void scripts() throws IOException {
 		Builder builder = new Builder(path("scripts"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -561,7 +561,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void thirdPartyScripts() throws Exception {
 		Builder builder = new Builder(path("scripts"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -589,7 +589,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void images() throws IOException {
 		Builder builder = new Builder(path("images"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -631,7 +631,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void expression() throws IOException {
 		Builder builder = new Builder(path("project"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		resetProjectLocales(project);
 		builder.build();
 
@@ -643,7 +643,7 @@ public class BuilderTest extends BuilderTestCase {
 	@Test
 	public void expression_RootContext() throws IOException {
 		Builder builder = new Builder(path("root-project"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		resetProjectLocales(project);
 		builder.build();
 
@@ -654,19 +654,19 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void sitePathTrailingSeparator() {
-		Project project = project("project");
+		BuilderProject project = project("project");
 		assertTrue(project.getSitePath().endsWith("/"));
 	}
 
 	@Test
 	public void sitePathTrailingSeparator_RootContext() {
-		Project project = project("root-project");
+		BuilderProject project = project("root-project");
 		assertTrue(project.getSitePath().endsWith("/"));
 	}
 
 	@Test
 	public void isExcluded() {
-		Project project = project("project");
+		BuilderProject project = project("project");
 		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
@@ -675,7 +675,7 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void isExcluded_RootContext() {
-		Project project = project("root-project");
+		BuilderProject project = project("root-project");
 		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
@@ -686,7 +686,7 @@ public class BuilderTest extends BuilderTestCase {
 	public void buildNumber() throws Exception {
 		Builder builder = new Builder(path("project"));
 		field(builder, "locale", new Locale("en"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		resetProjectLocales(project);
 
 		builder.setBuildNumber(1);
@@ -712,7 +712,7 @@ public class BuilderTest extends BuilderTestCase {
 	public void buildNumber_RootContext() throws Exception {
 		Builder builder = new Builder(path("root-project"));
 		field(builder, "locale", new Locale("en"));
-		Project project = field(builder, "project");
+		BuilderProject project = field(builder, "project");
 		resetProjectLocales(project);
 
 		builder.setBuildNumber(1);

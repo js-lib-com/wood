@@ -41,7 +41,7 @@ public class DefaultBuildFS extends BuildFS {
 	 * 
 	 * @param project project reference.
 	 */
-	public DefaultBuildFS(Project project) {
+	public DefaultBuildFS(BuilderProject project) {
 		super(project);
 	}
 

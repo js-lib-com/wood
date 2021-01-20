@@ -225,6 +225,21 @@ public final class ProjectDescriptor {
 		return text("description", defaultValue);
 	}
 
+	public String getTheme() {
+		return text("theme", null);
+	}
+
+	/**
+	 * Get site build directory path, relative to project root. Return default value if <code>site-dir</code> element is
+	 * missing.
+	 * 
+	 * @param defaultValue default value.
+	 * @return site build directory path or default value.
+	 */
+	public String getSiteDir(String defaultValue) {
+		return text("site-dir", defaultValue);
+	}
+
 	/**
 	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
 	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
@@ -239,19 +254,18 @@ public final class ProjectDescriptor {
 		return Collections.unmodifiableList(locales);
 	}
 
-	public String getTheme() {
-		return text("theme", null);
+	/**
+	 * Get project configured default locale.
+	 * 
+	 * @return default locale.
+	 * @see #defaultLocale
+	 */
+	public Locale getDefaultLocale() {
+		return defaultLocale;
 	}
 
-	/**
-	 * Get site build directory path, relative to project root. Return default value if <code>site-dir</code> element is
-	 * missing.
-	 * 
-	 * @param defaultValue default value.
-	 * @return site build directory path or default value.
-	 */
-	public String getSiteDir(String defaultValue) {
-		return text("site-dir", defaultValue);
+	public NamingStrategy getNamingStrategy() {
+		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
 	}
 
 	/**
@@ -297,16 +311,6 @@ public final class ProjectDescriptor {
 	}
 
 	/**
-	 * Get project configured default locale.
-	 * 
-	 * @return default locale.
-	 * @see #defaultLocale
-	 */
-	public Locale getDefaultLocale() {
-		return defaultLocale;
-	}
-
-	/**
 	 * Get the list of paths excluded from build process. Returned list is empty if <code>excludes</code> element is not
 	 * present.
 	 * 
@@ -318,10 +322,6 @@ public final class ProjectDescriptor {
 			return Collections.emptyList();
 		}
 		return Strings.split(el.getText(), ',', ' ');
-	}
-
-	public NamingStrategy getNamingStrategy() {
-		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
 	}
 
 	/**

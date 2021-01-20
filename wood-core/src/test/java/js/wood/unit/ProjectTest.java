@@ -51,8 +51,6 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 		assertNotNull(field(project, "descriptor"));
 
 		assertEquals(CT.ASSETS_DIR + "/", project.getAssetsDir().toString());
-		assertEquals(new File(project.getProjectDir(), CT.DEF_SITE_DIR), project.getSiteDir());
-		assertEquals("build/site/", project.getSitePath());
 		assertEquals("res/asset/favicon.ico", project.getFavicon().toString());
 
 		assertEquals("project", project.getName());
