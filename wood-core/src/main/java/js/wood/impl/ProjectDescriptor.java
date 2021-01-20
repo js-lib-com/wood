@@ -120,56 +120,48 @@ public final class ProjectDescriptor {
 	private Document doc;
 
 	/**
-	 * Project configured locales. If project is not locale sensitive, locales list has a single null record. Null record
-	 * denotes default locale, that is, files without locale variant. For locale sensitive project first record is still null,
-	 * still representing the default locale.
+	 * Mandatory project locale. This property should be present even if project has a single locale. This is because there is
+	 * no way to reliable detect locale from resource files.
 	 * <p>
-	 * TODO: is not acurate: If <code>locale</code> element is missing from project configuration file this list is initialized
-	 * as for default locale - single null record.
+	 * The first declared locale is always the default one; this holds true even if there is a single locale declared. Note that
+	 * default locale is used for resources without locale variant.
 	 */
 	private List<Locale> locales = new ArrayList<Locale>();
 
 	/**
-	 * Default language is the first language from configured languages. Into {@link #languages} list default language is marked
-	 * with first null record. This default language value is that from configuration file and is needed to set correct HTML
-	 * <code>lang</code> attribute.
-	 * 
-	 * @todo update
-	 */
-	private Locale defaultLocale;
-
-	/**
-	 * Create project configuration instance. Searches for configuration file into given project directory. Throws exception if
-	 * project configuration file or language section is missing.
-	 * 
-	 * @throws WoodException if configuration file not found or language section is missing.
+	 * Create project descriptor instance. Every <em>WOOD</em> project should have descriptor with at least <locale> element
+	 * declared.
+	 *
+	 * @param descriptorFile descriptor file, absolute path.
+	 * @throws WoodException if descriptor file not found or locale property is missing.
 	 */
 	public ProjectDescriptor(File descriptorFile) throws WoodException {
 		try {
 			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 			this.doc = builder.loadXML(descriptorFile);
 		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing project configuration file |%s|.", descriptorFile);
+			throw new WoodException("Missing project descriptor |%s|.", descriptorFile);
 		}
 
 		Element localeElement = this.doc.getByTag("locale");
 		if (localeElement == null) {
-			throw new WoodException("Invalid project configuration file. Missing <locale> element.");
+			throw new WoodException("Invalid project descriptor. Missing <locale> element.");
 		}
-
-		for (String languageTag : Strings.split(localeElement.getText(), ',', ' ')) {
-			Locale locale = getLocale(languageTag);
-			if (defaultLocale == null) {
-				// first locale is always the default one
-				defaultLocale = locale;
-			}
-			locales.add(locale);
+		Strings.split(localeElement.getText(), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
+		if (locales.isEmpty()) {
+			throw new WoodException("Invalid project descriptor. Empty <locale> element.");
 		}
 	}
 
-	private static final Locale getLocale(String languageTag) {
+	/**
+	 * Create locale instance for given language tag.
+	 * 
+	 * @param languageTag language tag.
+	 * @return locale instance for the language tag.
+	 */
+	private static final Locale locale(String languageTag) {
 		// TODO: study if to replace this logic with Locale.Builder.setLanguageTag(java.lang.String)
-		// wood locale is a subset of BCP language tag
+		// WOOD locale is a subset of BCP language tag
 
 		// Locale.Builder builder = new Locale.Builder();
 		// builder.setLanguageTag(languageTag);
@@ -248,9 +240,6 @@ public final class ProjectDescriptor {
 	 * @see #locales
 	 */
 	public List<Locale> getLocales() {
-		if (locales.isEmpty()) {
-			throw new IllegalStateException("Project locale not initialized.");
-		}
 		return Collections.unmodifiableList(locales);
 	}
 
@@ -258,10 +247,9 @@ public final class ProjectDescriptor {
 	 * Get project configured default locale.
 	 * 
 	 * @return default locale.
-	 * @see #defaultLocale
 	 */
 	public Locale getDefaultLocale() {
-		return defaultLocale;
+		return locales.get(0);
 	}
 
 	public NamingStrategy getNamingStrategy() {

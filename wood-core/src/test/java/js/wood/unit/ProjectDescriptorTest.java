@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.io.File;
 import java.util.List;
@@ -88,5 +89,22 @@ public class ProjectDescriptorTest extends WoodTestCase {
 		assertThat(excludes, notNullValue());
 		assertThat(excludes, hasSize(1));
 		assertThat(excludes.get(0), equalTo("page/about"));
+	}
+	
+	@Test
+	public void defaults() {
+		descriptor = new ProjectDescriptor(new File("src/test/resources/project-descriptor-empty.xml"));
+		assertThat(descriptor.getAuthor(), equalTo("WOOD"));
+		assertThat(descriptor.getName(null), nullValue());
+		assertThat(descriptor.getDisplay(null), nullValue());
+		assertThat(descriptor.getDescription(null), nullValue());
+		assertThat(descriptor.getTheme(), nullValue());
+		assertThat(descriptor.getSiteDir(null), nullValue());
+		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
+		
+		assertThat(descriptor.getMetas(), emptyIterable());
+		assertThat(descriptor.getLinks(), emptyIterable());
+		assertThat(descriptor.getScripts(), emptyIterable());
+		assertThat(descriptor.getExcludes(), emptyIterable());
 	}
 }

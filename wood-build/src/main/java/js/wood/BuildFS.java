@@ -380,8 +380,7 @@ public abstract class BuildFS {
 	protected File createDirectory(String dirName) {
 		File dir = project.getSiteDir();
 
-		// if project is multi-locale create a sub-directory with name equal
-		// with locale language tag
+		// if project is multi-locale create a sub-directory with name equal with locale language tag
 		if (project.isMultiLocale()) {
 			dir = new File(dir, locale.toLanguageTag());
 		}

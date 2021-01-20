@@ -11,7 +11,7 @@ public final class CT {
 	// Global constants
 
 	/** Default author string used when not configured on project descriptor. */
-	public static final String DEF_AUTHOR = "WOOD - Web Object Oriented Development";
+	public static final String DEF_AUTHOR = "WOOD";
 
 	/** Project configuration file. */
 	public static final String PROJECT_CONFIG = "project.xml";

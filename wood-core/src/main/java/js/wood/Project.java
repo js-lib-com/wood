@@ -114,7 +114,7 @@ public class Project {
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
 	public Project(String projectPath) throws IllegalArgumentException {
-		Params.notNull(projectPath, "Project directory");
+		Params.notNullOrEmpty(projectPath, "Project directory");
 		this.projectDir = new File(projectPath);
 		Params.isDirectory(this.projectDir, "Project directory");
 		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
@@ -239,15 +239,6 @@ public class Project {
 	 */
 	public List<Locale> getLocales() {
 		return descriptor.getLocales();
-	}
-
-	/**
-	 * Return true if this project has support for multiple locale settings.
-	 * 
-	 * @return true if project is multi-locale.
-	 */
-	public boolean isMultiLocale() {
-		return descriptor.getLocales().size() > 1;
 	}
 
 	public Locale getDefaultLocale() {

@@ -82,6 +82,15 @@ public class BuilderProject extends Project {
 	}
 
 	/**
+	 * Return true if this project has support for multiple locale settings.
+	 * 
+	 * @return true if project is multi-locale.
+	 */
+	public boolean isMultiLocale() {
+		return descriptor.getLocales().size() > 1;
+	}
+
+	/**
 	 * Get project layout files, in no particular order. Returned collection is not modifiable.
 	 * 
 	 * @return project layout files.
