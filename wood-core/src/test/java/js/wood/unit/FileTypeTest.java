@@ -1,6 +1,7 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -12,30 +13,37 @@ import js.wood.impl.FileType;
 
 public class FileTypeTest extends WoodTestCase {
 	@Test
-	public void fileTypeForExtension() {
-		assertEquals(FileType.LAYOUT, FileType.forExtension("htm"));
-		assertEquals(FileType.STYLE, FileType.forExtension("css"));
-		assertEquals(FileType.SCRIPT, FileType.forExtension("js"));
-		assertEquals(FileType.XML, FileType.forExtension("xml"));
-		assertEquals(FileType.MEDIA, FileType.forExtension(null));
-		assertEquals(FileType.MEDIA, FileType.forExtension(""));
-		assertEquals(FileType.MEDIA, FileType.forExtension("png"));
-		assertEquals(FileType.MEDIA, FileType.forExtension("avi"));
+	public void forExtension() {
+		assertThat(FileType.forExtension("htm"), equalTo(FileType.LAYOUT));
+		assertThat(FileType.forExtension("css"), equalTo(FileType.STYLE));
+		assertThat(FileType.forExtension("js"), equalTo(FileType.SCRIPT));
+		assertThat(FileType.forExtension("xml"), equalTo(FileType.XML));
+		assertThat(FileType.forExtension("jpg"), equalTo(FileType.MEDIA));
+		assertThat(FileType.forExtension("jpeg"), equalTo(FileType.MEDIA));
+		assertThat(FileType.forExtension("png"), equalTo(FileType.MEDIA));
+		assertThat(FileType.forExtension("avi"), equalTo(FileType.MEDIA));
+	}
+
+	/** Not recognized extensions are considered media file. Also if extension is null or empty. */
+	@Test
+	public void nullOrBadExtension() {
+		assertThat(FileType.forExtension("fake"), equalTo(FileType.MEDIA));
+		assertThat(FileType.forExtension(null), equalTo(FileType.MEDIA));
+		assertThat(FileType.forExtension(""), equalTo(FileType.MEDIA));
 	}
 
 	@Test
-	public void fileTypeEquals() {
+	public void equals() {
 		assertTrue(FileType.LAYOUT.equals(new File("path/file.htm")));
+		assertFalse(FileType.LAYOUT.equals(new File("path/file.css")));
+		assertFalse(FileType.LAYOUT.equals(new File("path/file.js")));
+		assertFalse(FileType.LAYOUT.equals(new File("path/file.xml")));
+		assertFalse(FileType.LAYOUT.equals(new File("path/file")));
 		assertTrue(FileType.STYLE.equals(new File("path/file.css")));
 		assertTrue(FileType.SCRIPT.equals(new File("path/file.js")));
 		assertTrue(FileType.XML.equals(new File("path/file.xml")));
 		assertTrue(FileType.MEDIA.equals(new File("path/file")));
 		assertTrue(FileType.MEDIA.equals(new File("path/file.png")));
 		assertTrue(FileType.MEDIA.equals(new File("path/file.avi")));
-
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.css")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.js")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.xml")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file")));
 	}
 }

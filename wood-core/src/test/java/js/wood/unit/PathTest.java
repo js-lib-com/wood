@@ -32,7 +32,6 @@ import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variants;
 
-@SuppressWarnings("deprecation")
 public class PathTest extends WoodTestCase
 {
   private Project project;
@@ -233,8 +232,6 @@ public class PathTest extends WoodTestCase
     assertEquals(0, variants.getViewportWidth());
     assertEquals(0, variants.getViewportHeight());
     assertEquals(Variants.Orientation.NONE, variants.getOrientation());
-    assertNull(variants.getStyle());
-    assertNull(variants.getTheme());
 
     path = filePath("res/compo/discography/discography_w800.css");
     variants = path.getVariants();
@@ -262,33 +259,6 @@ public class PathTest extends WoodTestCase
     variants = path.getVariants();
     assertEquals(new Locale("ro"), variants.getLocale());
     assertEquals(800, variants.getViewportWidth());
-
-    path = filePath("res/compo/discography/style_flat-style.css");
-    variants = path.getVariants();
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertEquals("flat", variants.getStyle());
-    assertNull(variants.getTheme());
-
-    path = filePath("res/compo/discography/color_autumn-theme.xml");
-    variants = path.getVariants();
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertNull(variants.getStyle());
-    assertEquals("autumn", variants.getTheme());
-
-    path = filePath("res/compo/discography/style_ro_w800_flat-style.css");
-    variants = path.getVariants();
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-    assertEquals("flat", variants.getStyle());
-
-    path = filePath("res/compo/discography/style_ro_w800_h600_classic-theme.css");
-    variants = path.getVariants();
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-    assertEquals(600, variants.getViewportHeight());
-    assertEquals("classic", variants.getTheme());
   }
 
   // this test case is not related to file path but does related to variants used primarily by file path
@@ -329,41 +299,10 @@ public class PathTest extends WoodTestCase
     assertEquals(new Locale("ro"), variants.getLocale());
     assertEquals(800, variants.getViewportWidth());
 
-    variants = new Variants("mobile");
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertNull(variants.getStyle());
-    assertNull(variants.getTheme());
-
-    variants = new Variants("mobile_portrait");
+    variants = new Variants("portrait");
     assertNull(variants.getLocale());
     assertEquals(0, variants.getViewportWidth());
     assertEquals(Variants.Orientation.PORTRAIT, variants.getOrientation());
-    assertNull(variants.getStyle());
-    assertNull(variants.getTheme());
-
-    variants = new Variants("flat-style");
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertEquals("flat", variants.getStyle());
-    assertNull(variants.getTheme());
-
-    variants = new Variants("autumn-theme");
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertNull(variants.getStyle());
-    assertEquals("autumn", variants.getTheme());
-
-    variants = new Variants("ro_w800_h600_classic-theme");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-    assertEquals(600, variants.getViewportHeight());
-    assertEquals("classic", variants.getTheme());
-
-    variants = new Variants("ro_w800_flat-style_fake-variant");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-    assertEquals("flat", variants.getStyle());
   }
 
   @Test

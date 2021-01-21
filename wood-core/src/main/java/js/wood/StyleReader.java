@@ -146,7 +146,7 @@ public class StyleReader extends Reader
       weight += (4000 + variants.getViewportWidth());
     }
     if(variants.hasScreen()) {
-      weight += (8000 + variants.getScreen().getResolution());
+      weight += (8000 + variants.getScreen().getWidth());
     }
     if(variants.hasOrientation()) {
       weight += (12000 + variants.getOrientation().ordinal());
@@ -330,7 +330,7 @@ public class StyleReader extends Reader
       case LARGE:
         mediaType = "screen";
         // media selected only if screen width strictly greater than 1200px
-        mediaExpressions.add(String.format("(min-width : %dpx)", screen.getResolution() + 1));
+        mediaExpressions.add(String.format("(min-width : %dpx)", screen.getWidth() + 1));
         break;
 
       case NORMAL:
@@ -341,19 +341,19 @@ public class StyleReader extends Reader
       case MEDIUM:
         mediaType = "screen";
         // media selected only if screen width is less or equal to 992
-        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getResolution()));
+        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getWidth()));
         break;
 
       case SMALL:
         mediaType = "screen";
         // media selected only if screen width is less or equal to 768
-        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getResolution()));
+        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getWidth()));
         break;
 
       case EXTRA_SMALL:
         mediaType = "screen";
         // media selected only if screen width is less or equal to 560
-        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getResolution()));
+        mediaExpressions.add(String.format("(max-width : %dpx)", screen.getWidth()));
         break;
 
       default:
