@@ -254,55 +254,6 @@ public class PathTest extends WoodTestCase
     variants = path.getVariants();
     assertEquals(new Locale("ro"), variants.getLocale());
     assertEquals(800, variants.getViewportWidth());
-
-    path = filePath("res/compo/discography/colors_jp_w800_ro.xml");
-    variants = path.getVariants();
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-  }
-
-  // this test case is not related to file path but does related to variants used primarily by file path
-  @Test
-  public void variantSafeConstructor()
-  {
-    Variants variants = new Variants("de");
-    assertEquals(new Locale("de"), variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertEquals(0, variants.getViewportHeight());
-
-    variants = new Variants("en-US");
-    assertEquals(new Locale("en", "US"), variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertEquals(0, variants.getViewportHeight());
-
-    variants = new Variants("w800");
-    assertNull(variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-
-    variants = new Variants("h800");
-    assertNull(variants.getLocale());
-    assertEquals(800, variants.getViewportHeight());
-
-    variants = new Variants("ro_w800");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-
-    variants = new Variants("ro_h800");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportHeight());
-
-    variants = new Variants("w800_ro");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-
-    variants = new Variants("jp_w800_ro");
-    assertEquals(new Locale("ro"), variants.getLocale());
-    assertEquals(800, variants.getViewportWidth());
-
-    variants = new Variants("portrait");
-    assertNull(variants.getLocale());
-    assertEquals(0, variants.getViewportWidth());
-    assertEquals(Variants.Orientation.PORTRAIT, variants.getOrientation());
   }
 
   @Test

@@ -1,24 +1,18 @@
 package js.wood.impl;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.Element;
 import js.util.Classes;
 import js.wood.FilePath;
-import js.wood.ILinkReference;
-import js.wood.IMetaReference;
 import js.wood.IReferenceHandler;
-import js.wood.IScriptReference;
 import js.wood.WoodException;
 
 /**
- * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor} that
- * affects all components from project. Current implementation is actually used for pages; support for ordinary components is
- * expected.
+ * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor}
+ * that affects all components from project. Current implementation is actually used for pages; support for ordinary components
+ * is expected.
  * <p>
  * Here are current implemented values:
  * <table border="1" style="border-collapse:collapse;">
@@ -97,22 +91,14 @@ import js.wood.WoodException;
  *  +-login.htm
  *  ~
  * </pre>
+ * <p>
+ * Component descriptor instance has not mutable state, therefore is thread safe.
  * 
  * @author Iulian Rotaru
  * @version final
  * @see ProjectDescriptor
  */
-public class ComponentDescriptor {
-	/** Empty XML document used when component descriptor file is missing. */
-	private static final Document EMPTY_DOC;
-	static {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		EMPTY_DOC = builder.createXML("component");
-	}
-
-	/** XML DOM document. */
-	private final Document doc;
-
+public class ComponentDescriptor extends BaseDescriptor {
 	/** File path for component descriptor. It has owning component name and XML extension. */
 	private final FilePath filePath;
 
@@ -133,14 +119,31 @@ public class ComponentDescriptor {
 	 * @param referenceHandler resource references handler.
 	 */
 	public ComponentDescriptor(FilePath filePath, IReferenceHandler referenceHandler) {
+		super(document(filePath));
 		this.filePath = filePath;
 		this.referenceHandler = referenceHandler;
 		this.resolver = new ReferencesResolver();
+	}
+
+	/** Empty XML document used when component descriptor file is missing. */
+	private static final Document EMPTY_DOC;
+	static {
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+		EMPTY_DOC = builder.createXML("component");
+	}
+
+	/**
+	 * Create optional component descriptor document. Return empty document if descriptor file is missing.
+	 * 
+	 * @param descriptorFile component descriptor file, absolute path.
+	 * @return component descriptor document, possible empty.
+	 */
+	private static Document document(FilePath descriptorFile) {
 		try {
 			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			this.doc = this.filePath.exists() ? builder.loadXML(this.filePath.toFile()) : EMPTY_DOC;
+			return descriptorFile.exists() ? builder.loadXML(descriptorFile.toFile()) : EMPTY_DOC;
 		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing project configuration file |%s| although it exists.", this.filePath);
+			throw new WoodException("Missing component descriptor file |%s| although it exists.", descriptorFile);
 		}
 	}
 
@@ -151,29 +154,7 @@ public class ComponentDescriptor {
 	 * @return component version or null.
 	 */
 	public String getVersion() {
-		return value("version", null);
-	}
-
-	/**
-	 * Get component title or given default value, if title is missing or not set. This property is loaded from
-	 * <code>title</code> element.
-	 * 
-	 * @param defaultValue default title value.
-	 * @return component title or supplied default value.
-	 */
-	public String getTitle(String defaultValue) {
-		return value("title", defaultValue);
-	}
-
-	/**
-	 * Get component description or given default value, if description is missing or not set. This property is loaded from
-	 * <code>description</code> element.
-	 * 
-	 * @param defaultValue default description value.
-	 * @return component description or supplied default value.
-	 */
-	public String getDescription(String defaultValue) {
-		return value("description", defaultValue);
+		return text("version", null);
 	}
 
 	/**
@@ -183,88 +164,20 @@ public class ComponentDescriptor {
 	 * @param defaultValue default path value.
 	 * @return page layout directory path or supplied default value.
 	 */
-	public String getPath(String defaultValue) {
-		return value("path", defaultValue);
-	}
-
-
-	public List<IMetaReference> getMetas() {
-		List<IMetaReference> metas = new ArrayList<>();
-		for (Element metaElement : doc.findByTag("meta")) {
-			MetaReference meta = MetaReferenceFactory.create(metaElement);
-			if (metas.contains(meta)) {
-				throw new WoodException("Duplicate meta |%s| in component descriptor |%s|.", meta, filePath);
-			}
-			metas.add(meta);
-		}
-		return metas;
-	}
-
-	public List<ILinkReference> getLinks() {
-		List<ILinkReference> links = new ArrayList<>();
-		for (Element linkElement : doc.findByTag("link")) {
-			LinkReference link = LinkReferenceFactory.create(linkElement);
-			if (links.contains(link)) {
-				throw new WoodException("Duplicate link |%s| in component descriptor |%s|.", link, filePath);
-			}
-			links.add(link);
-		}
-		return links;
+	public String getSecurityRole() {
+		return text("security-role", null);
 	}
 
 	/**
-	 * Get scripts defined by this component descriptor, both third party and local scripts. Returns a list of absolute URLs
-	 * and/or relative paths in the order and in format defined into descriptor. There is no attempt to check path validity; it
-	 * is developer responsibility to ensure URLs and paths are correct and inclusion order is proper.
-	 * <p>
-	 * Note that local paths are used only if project script dependency strategy is {@link ScriptDependencyStrategy#DESCRIPTOR}.
-	 * <p>
-	 * Here is expected scripts descriptor format.
+	 * Return text value from element identified by tag name or given default value, if element not found or its text content is
+	 * not set. Uses {@link ReferencesResolver} to resolve value references, if any.
 	 * 
-	 * <pre>
-	 * &lt;scripts&gt;
-	 *    &lt;script append-to-head="true"&gt;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&lt;/script&gt;
-	 *    &lt;script&gt;http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js&lt;/script&gt;
-	 *    &lt;script&gt;lib/js-lib/js-lib.js&lt;/script&gt;
-	 *    &lt;script&gt;gen/com/kidscademy/AdminService.js&lt;/script&gt;
-	 *    &lt;script&gt;script/com/kidscademy/admin/FormPage.js&lt;/script&gt;
-	 * &lt;/scripts&gt;
-	 * </pre>
-	 * <p>
-	 * If optional attribute <code>append-to-head</code> is present into <code>script</code> element enable
-	 * {@link ScriptReference#appendToHead}.
-	 * 
-	 * @return scripts declared by this component descriptor.
+	 * @param tagName tag name identifying desired element,
+	 * @param defaultValue default value, returned when no value.
+	 * @return element text value or given default value.
 	 */
-	public List<IScriptReference> getScripts() {
-		// do not attempt to cache script paths since this method is expected to be used only once
-		List<IScriptReference> scripts = new ArrayList<>();
-		for (Element scriptElement : doc.findByTag("script")) {
-			ScriptReference script = ScriptReferenceFactory.create(scriptElement);
-			if (scripts.contains(script)) {
-				throw new WoodException("Duplicate script |%s| in component descriptor |%s|.", script, filePath);
-			}
-			scripts.add(script);
-		}
-		return scripts;
-	}
-
-	/**
-	 * Return text value from element or null if element not found or value not set. Uses {@link ReferencesResolver} to resolve
-	 * value references, if any.
-	 * 
-	 * @param tag tag name identifying desired element.
-	 * @return element text value or null.
-	 */
-	private String value(String tag, String defaultValue) {
-		Element el = doc.getByTag(tag);
-		if (el == null) {
-			return defaultValue;
-		}
-		String value = el.getText();
-		if (value.isEmpty()) {
-			return defaultValue;
-		}
-		return resolver.parse(value, filePath, referenceHandler);
+	protected String text(String tagName, String defaultValue) {
+		String value = super.text(tagName, null);
+		return value != null ? resolver.parse(value, filePath, referenceHandler) : defaultValue;
 	}
 }

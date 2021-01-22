@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import js.wood.impl.FileType;
 
-public class FileTypeTest extends WoodTestCase {
+public class FileTypeTest {
 	@Test
 	public void forExtension() {
 		assertThat(FileType.forExtension("htm"), equalTo(FileType.LAYOUT));

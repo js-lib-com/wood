@@ -341,7 +341,7 @@ public class Component {
 	 */
 	public String getSecurityRole() {
 		// TODO: rename <path> element from descriptor to <security-role>
-		return descriptor.getPath(null);
+		return descriptor.getSecurityRole();
 	}
 
 	/**
@@ -354,12 +354,12 @@ public class Component {
 		return name;
 	}
 
-	public String getTitle() {
-		return descriptor.getTitle(Strings.concat(project.getDisplay(), " / ", display));
+	public String getDisplay() {
+		return descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", display));
 	}
 
 	public String getDescription() {
-		return descriptor.getDescription(getTitle());
+		return descriptor.getDescription(getDisplay());
 	}
 
 	/**

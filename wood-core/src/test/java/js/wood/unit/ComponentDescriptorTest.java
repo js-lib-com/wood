@@ -1,24 +1,52 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
+import java.io.File;
+
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.Project;
+import js.wood.FilePath;
+import js.wood.IReferenceHandler;
 import js.wood.impl.ComponentDescriptor;
 
-public class ComponentDescriptorTest extends WoodTestCase {
-	private Project project;
-	
-	@Test
-	public void descriptorConstructor() {
-		project = project("project");
-		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/page/index/index.xml"), nullReferenceHandler());
+@RunWith(MockitoJUnitRunner.class)
+public class ComponentDescriptorTest {
+	@Mock
+	private FilePath filePath;
+	@Mock
+	private IReferenceHandler referenceHandler;
 
-		assertNotNull(field(descriptor, "doc"));
-		assertEquals("res/page/index/index.xml", field(descriptor, "filePath").toString());
-		assertEquals("null reference handler", field(descriptor, "referenceHandler").toString());
-		assertNotNull(field(descriptor, "resolver"));
+	private ComponentDescriptor descriptor;
+
+	@Before
+	public void beforeTest() {
+		when(filePath.exists()).thenReturn(true);
+		descriptor = descriptor("component-descriptor.xml");
+	}
+
+	@Test
+	public void properties() {
+		assertThat(descriptor.getVersion(), equalTo("1.0"));
+		assertThat(descriptor.getSecurityRole(), equalTo("admin"));
+	}
+
+	@Test
+	public void defaults() {
+		descriptor = descriptor("empty-project-descriptor.xml");
+		assertThat(descriptor.getVersion(), nullValue());
+		assertThat(descriptor.getSecurityRole(), nullValue());
+	}
+
+	private ComponentDescriptor descriptor(String descriptorFile) {
+		when(filePath.toFile()).thenReturn(new File("src/test/resources/" + descriptorFile));
+		return new ComponentDescriptor(filePath, referenceHandler);
 	}
 }

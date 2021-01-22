@@ -36,16 +36,16 @@ public abstract class Path
   public static final String SEPARATOR = "/";
 
   /** Parent project reference. All paths are always relative to this parent project.*/
-  protected Project project;
+  protected final Project project;
 
   /** Path value relative to project root. */
-  protected String value;
+  protected final String value;
 
   /** Wrapped Java file include project root. */
-  protected File file;
+  protected final File file;
 
   /** Cached value for instance hash code. */
-  private int hashCode;
+  private final int hashCode;
 
   /**
    * Create path instance, initialize value and wrapped file and compute instance hash code. Uses {@link #value} to

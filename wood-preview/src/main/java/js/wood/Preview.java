@@ -60,7 +60,7 @@ public final class Preview {
 
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
-		head.addChild(doc.createElement("title").setText(compo.getTitle()));
+		head.addChild(doc.createElement("title").setText(compo.getDisplay()));
 		head.addText("\r\n");
 		head.addChild(doc.createElement("meta", "name", "Author", "content", project.getAuthor()));
 		head.addText("\r\n");

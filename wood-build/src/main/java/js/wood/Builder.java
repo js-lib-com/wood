@@ -155,7 +155,7 @@ public class Builder implements IReferenceHandler {
 
 		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");
-		pageDocument.setTitle(page.getTitle());
+		pageDocument.setTitle(page.getDisplay());
 		pageDocument.setAuthor(project.getAuthor());
 		pageDocument.setDescription(page.getDescription());
 

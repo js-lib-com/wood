@@ -34,7 +34,7 @@ public class ComponentTest extends WoodTestCase {
 
 		assertEquals("res/simple/layout/layout.htm", field(compo, "baseLayoutPath").toString());
 		assertEquals("layout", compo.getName());
-		assertEquals("Components / Layout", compo.getTitle());
+		assertEquals("Components / Layout", compo.getDisplay());
 		assertEquals("Components / Layout", compo.getDescription());
 		assertEquals("layout.htm", compo.getLayoutFileName());
 

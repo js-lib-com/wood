@@ -145,6 +145,7 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 		assertTrue(expected.equals(found));
 	}
 
+	@Test
 	public void descriptorValues() {
 		project.scanBuildFiles();
 		CompoPath compoPath = new CompoPath(project, "page/index");
@@ -157,7 +158,7 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 			}
 		});
 
-		assertEquals("Index Page", descriptor.getTitle(null));
+		assertEquals("Index Page", descriptor.getDisplay(null));
 		assertEquals("Index page description.", descriptor.getDescription(null));
 	}
 

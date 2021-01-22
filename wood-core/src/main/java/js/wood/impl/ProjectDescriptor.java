@@ -14,9 +14,6 @@ import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
-import js.wood.ILinkReference;
-import js.wood.IMetaReference;
-import js.wood.IScriptReference;
 import js.wood.WoodException;
 
 /**
@@ -110,15 +107,14 @@ import js.wood.WoodException;
  *      &lt;excludes&gt;page/about, compo/video-player&lt;/excludes&gt;
  *  &lt;/project&gt;
  * </pre>
+ * <p>
+ * Project descriptor instance has not mutable state, therefore is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
  * @see ComponentDescriptor
  */
-public final class ProjectDescriptor {
-	/** XML DOM document. */
-	private Document doc;
-
+public final class ProjectDescriptor extends BaseDescriptor {
 	/**
 	 * Mandatory project locale. This property should be present even if project has a single locale. This is because there is
 	 * no way to reliable detect locale from resource files.
@@ -126,7 +122,7 @@ public final class ProjectDescriptor {
 	 * The first declared locale is always the default one; this holds true even if there is a single locale declared. Note that
 	 * default locale is used for resources without locale variant.
 	 */
-	private List<Locale> locales = new ArrayList<Locale>();
+	private final List<Locale> locales = new ArrayList<Locale>();
 
 	/**
 	 * Create project descriptor instance. Every <em>WOOD</em> project should have descriptor with at least <locale> element
@@ -136,12 +132,7 @@ public final class ProjectDescriptor {
 	 * @throws WoodException if descriptor file not found or locale property is missing.
 	 */
 	public ProjectDescriptor(File descriptorFile) throws WoodException {
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			this.doc = builder.loadXML(descriptorFile);
-		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing project descriptor |%s|.", descriptorFile);
-		}
+		super(document(descriptorFile));
 
 		Element localeElement = this.doc.getByTag("locale");
 		if (localeElement == null) {
@@ -150,6 +141,22 @@ public final class ProjectDescriptor {
 		Strings.split(localeElement.getText(), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <locale> element.");
+		}
+	}
+
+	/**
+	 * Create project descriptor document.
+	 * 
+	 * @param descriptorFile project descriptor file, absolute path.
+	 * @return project descriptor document.
+	 * @throws WoodException if project descriptor file is missing.
+	 */
+	private static Document document(File descriptorFile) {
+		try {
+			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+			return builder.loadXML(descriptorFile);
+		} catch (FileNotFoundException unused) {
+			throw new WoodException("Missing project descriptor |%s|.", descriptorFile);
 		}
 	}
 
@@ -197,26 +204,6 @@ public final class ProjectDescriptor {
 		return text("name", defaultValue);
 	}
 
-	/**
-	 * Get project display or default value if <code>display</code> element is missing.
-	 * 
-	 * @param defaultValue default value.
-	 * @return project display or default value.
-	 */
-	public String getDisplay(String defaultValue) {
-		return text("display", defaultValue);
-	}
-
-	/**
-	 * Get project description or default value if <code>description</code> element is missing.
-	 * 
-	 * @param defaultValue default value.
-	 * @return project description or default value.
-	 */
-	public String getDescription(String defaultValue) {
-		return text("description", defaultValue);
-	}
-
 	public String getTheme() {
 		return text("theme", null);
 	}
@@ -257,48 +244,6 @@ public final class ProjectDescriptor {
 	}
 
 	/**
-	 * Get meta elements list declared into <code>meta</code> section. Returned elements list contains meta elements as they are
-	 * into configuration file. If <code>meta</code> section is missing returned elements list is empty.
-	 * 
-	 * @return meta elements list, possible empty.
-	 */
-	public List<IMetaReference> getMetas() {
-		List<IMetaReference> metas = new ArrayList<>();
-		for (Element metaElement : doc.findByTag("meta")) {
-			MetaReference meta = MetaReferenceFactory.create(metaElement);
-			if (metas.contains(meta)) {
-				throw new WoodException("Duplicate meta |%s| in project descriptor.", meta);
-			}
-			metas.add(meta);
-		}
-		return metas;
-	}
-
-	public List<ILinkReference> getLinks() {
-		List<ILinkReference> links = new ArrayList<>();
-		for (Element linkElement : doc.findByTag("link")) {
-			LinkReference link = LinkReferenceFactory.create(linkElement);
-			if (links.contains(link)) {
-				throw new WoodException("Duplicate link |%s| in project descriptor.", link);
-			}
-			links.add(link);
-		}
-		return links;
-	}
-
-	public List<IScriptReference> getScripts() {
-		List<IScriptReference> scripts = new ArrayList<>();
-		for (Element scriptElement : doc.findByTag("script")) {
-			ScriptReference script = ScriptReferenceFactory.create(scriptElement);
-			if (scripts.contains(script)) {
-				throw new WoodException("Duplicate script |%s| in project descriptor.", script);
-			}
-			scripts.add(script);
-		}
-		return scripts;
-	}
-
-	/**
 	 * Get the list of paths excluded from build process. Returned list is empty if <code>excludes</code> element is not
 	 * present.
 	 * 
@@ -310,17 +255,5 @@ public final class ProjectDescriptor {
 			return Collections.emptyList();
 		}
 		return Strings.split(el.getText(), ',', ' ');
-	}
-
-	/**
-	 * Return text value for element denoted by tag name or default value if element is missing.
-	 * 
-	 * @param tagName element tag name,
-	 * @param defaultValue default value to use when element is missing.
-	 * @return element text or default value.
-	 */
-	private String text(String tagName, String defaultValue) {
-		Element el = doc.getByTag(tagName);
-		return el != null ? el.getText() : defaultValue;
 	}
 }
