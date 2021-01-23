@@ -176,7 +176,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		if (CompoPath.accept(requestPath)) {
-			CompoPath compoPath = project.getCompoPath(requestPath);
+			CompoPath compoPath = new CompoPath(project, requestPath);
 			FilePath layoutPath = compoPath.getLayoutPath();
 
 			// if component has preview layout uses it instead of component layout
@@ -215,13 +215,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		// all other files are just sent back to browser
-		if (!filePath.exists() && filePath.isMedia()) {
-			filePath = filePath.getVariant("en");
-			if (!filePath.exists()) {
-
-			}
-		}
-
 		File file = filePath.toFile();
 		httpResponse.setContentType(forFile(file));
 		Files.copy(file, httpResponse.getOutputStream());

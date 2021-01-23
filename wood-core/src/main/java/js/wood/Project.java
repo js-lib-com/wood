@@ -218,10 +218,6 @@ public class Project {
 		return themeDir;
 	}
 
-	public CompoPath getCompoPath(String path) {
-		return new CompoPath(this, path);
-	}
-
 	/**
 	 * Get project favicon.
 	 * 

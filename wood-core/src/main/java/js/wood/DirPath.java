@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import js.util.Files;
+import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
@@ -37,6 +38,8 @@ import js.wood.impl.FilesHandler;
  * 
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
+ * <p>
+ * Directory path has no mutable state and is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -46,10 +49,10 @@ public class DirPath extends Path {
 	private static final Pattern PATTERN = Pattern.compile("^(res|lib|script|gen)((?:/\\.?[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
 
 	/** Source directory. */
-	private String sourceDir;
+	private final String sourceDir;
 
 	/** Directory path segments does not include source directory. */
-	private ArrayList<String> pathSegments;
+	private final ArrayList<String> pathSegments;
 
 	/**
 	 * Create an immutable directory path instance. It is not legal to use absolute paths, that is, path to start with file
@@ -59,7 +62,6 @@ public class DirPath extends Path {
 	 * @param dirPath directory path, relative to project root.
 	 * @throws WoodException if <code>path</code> parameter is absolute or uses not valid characters.
 	 */
-	@SuppressWarnings("unchecked")
 	public DirPath(Project project, String dirPath) throws WoodException {
 		super(project, dir(dirPath));
 		Matcher matcher = PATTERN.matcher(dirPath);
@@ -67,7 +69,7 @@ public class DirPath extends Path {
 			throw new WoodException("Directory path parameter |%s| is invalid.", dirPath);
 		}
 		sourceDir = matcher.group(1);
-		pathSegments = new ArrayList<String>(matcher.group(2) != null ? Strings.split(matcher.group(2), Path.SEPARATOR) : Collections.EMPTY_LIST);
+		pathSegments = new ArrayList<>(Strings.split(matcher.group(2), Path.SEPARATOR));
 	}
 
 	/**
@@ -269,10 +271,6 @@ public class DirPath extends Path {
 		return CT.LIBRARY_DIR.equals(sourceDir);
 	}
 
-	public boolean isSDK() {
-		return value.startsWith(CT.SDK_DIR);
-	}
-
 	/**
 	 * Test if this path designates project generated files directory. Generated files directory contains mostly scripts for
 	 * HTTP-RMI stubs.
@@ -315,7 +313,7 @@ public class DirPath extends Path {
 	 */
 	private class FilesIterable implements Iterable<FilePath> {
 		/** Files iterator. */
-		private Iterator<FilePath> iterator;
+		private final Iterator<FilePath> iterator;
 
 		/**
 		 * Construct file iterable instance for files from requested directory.
@@ -323,7 +321,12 @@ public class DirPath extends Path {
 		 * @param dir directory to iterate.
 		 */
 		public FilesIterable(File dir) {
-			iterator = new FilesIterator(dir.listFiles());
+			File[] files = dir.listFiles();
+			if (files == null) {
+				iterator = Collections.emptyIterator();
+			} else {
+				iterator = new FilesIterator(files);
+			}
 		}
 
 		/**
@@ -356,7 +359,7 @@ public class DirPath extends Path {
 	 */
 	private class FilesIterator implements Iterator<FilePath> {
 		/** Directory files. */
-		private File[] files;
+		private final File[] files;
 
 		/** Current processing index updated by {@link #hasNext()}. */
 		private int index;
@@ -367,6 +370,7 @@ public class DirPath extends Path {
 		 * @param files files list.
 		 */
 		public FilesIterator(File[] files) {
+			Params.notNull(files, "Files list");
 			this.files = files;
 			this.index = -1;
 		}
@@ -378,9 +382,6 @@ public class DirPath extends Path {
 		 */
 		@Override
 		public boolean hasNext() {
-			if (files == null) {
-				return false;
-			}
 			for (++index; index < files.length; ++index) {
 				if (files[index].isFile()) {
 					return true;

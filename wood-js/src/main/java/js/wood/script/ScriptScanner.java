@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-import js.wood.Dependency;
-
 public class ScriptScanner  {
 	public ScriptScanner() {
 	}

@@ -366,7 +366,7 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 
 	@Test
 	public void servletImageVariant() throws Throwable {
-		exerciseServlet("images-variant", "/test/res/asset/logo.png");
+		exerciseServlet("images-variant", "/test/res/asset/logo_ro.png");
 		byte[] image = responseStream.toByteArray();
 		assertEquals('P', image[1]);
 		assertEquals('N', image[2]);
@@ -482,7 +482,7 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 	// Commons helpers
 
 	private static void assertIndexPage(Document doc) {
-		assertEquals("Index Page", doc.getByTag("title").getText());
+		assertEquals("Test Project / Index", doc.getByTag("title").getText());
 
 		EList links = doc.findByTag("link");
 		assertEquals(12, links.size());

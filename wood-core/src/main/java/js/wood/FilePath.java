@@ -44,13 +44,15 @@ import js.wood.impl.Variants;
  * RES    = "res"                       ; UI resources
  * LIB    = "lib"                       ; third-party Java archives and UI components
  * SCRIPT = "script"                    ; scripts source directory
- * GEN    = "gen"                       ; generated scripts, mostly HTTP-RMI stubs
+ * GEN    = "gen"                       ; generated scripts, mostly server services stub
  * SEP  = "/"                           ; file separator is always slash
  * DOT    = "."                         ; dot as file extension separator
  * CH     = ALPHA / DIGIT / "-" / "."   ; character is US-ASCII alphanumeric, dash and dot
  * 
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
+ * <p>
+ * File path has no mutable state and is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -69,19 +71,19 @@ public class FilePath extends Path {
 			Pattern.CASE_INSENSITIVE);
 
 	/** This file parent directory. */
-	private DirPath dirPath;
+	private final DirPath dirPath;
 
 	/** File base name is the file name without variants and extension. Leading file separator is not included. */
-	private String basename;
+	private final String basename;
 
 	/** File name including extension but no trailing file separator nor variants. */
-	private String name;
+	private final String name;
 
 	/** Optional variants, empty if file path has none. */
-	private Variants variants;
+	private final Variants variants;
 
 	/** File type. */
-	private FileType fileType;
+	private final FileType fileType;
 
 	/**
 	 * Create immutable path instance from a given path value.
@@ -126,6 +128,11 @@ public class FilePath extends Path {
 		return name;
 	}
 
+	/**
+	 * Test if this file path has variants.
+	 * 
+	 * @return true if this file path has variants.
+	 */
 	public boolean hasVariants() {
 		return !variants.isEmpty();
 	}
@@ -188,7 +195,7 @@ public class FilePath extends Path {
 	 * 
 	 * @return true if this file is a component descriptor.
 	 */
-	public boolean isCompoDescriptor() {
+	public boolean isComponentDescriptor() {
 		return fileType == FileType.XML && basename.equals(dirPath.getName());
 	}
 
@@ -239,10 +246,6 @@ public class FilePath extends Path {
 		return name.equalsIgnoreCase(CT.PREVIEW_SCRIPT);
 	}
 
-	public boolean isSDKScript() {
-		return fileType == FileType.SCRIPT && dirPath.isSDK();
-	}
-
 	/**
 	 * Test if this file is a media file.
 	 * 
@@ -268,7 +271,7 @@ public class FilePath extends Path {
 	 * @return newly created reader.
 	 * @throws WoodException if this file does not exist on file system.
 	 */
-	public Reader getReader() throws WoodException {
+	public Reader getReader() {
 		try {
 			return new InputStreamReader(new FileInputStream(file), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -277,14 +280,6 @@ public class FilePath extends Path {
 		} catch (FileNotFoundException e) {
 			throw new WoodException(e);
 		}
-	}
-
-	public FilePath getVariant(String variant) {
-		int i = value.lastIndexOf('.');
-		if (i == -1) {
-			i = value.length();
-		}
-		return new FilePath(project, Strings.concat(value.substring(0, i), '_', variant, value.substring(i)));
 	}
 
 	/**

@@ -66,10 +66,11 @@ import js.wood.impl.EditablePath;
  *         |     / page /
  *         |     |      / index /    --> page/index
  * </pre>
+ * <p>
+ * Component path has no mutable state and is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
- * @see js.wood WOOD description
  */
 public class CompoPath extends DirPath {
 	/** Component path pattern. */
@@ -80,7 +81,8 @@ public class CompoPath extends DirPath {
 			")/?$", //
 			Pattern.CASE_INSENSITIVE);
 
-	private boolean inlineCompoPath;
+	/** Simple component that has only layout file and no component directory. */
+	private final boolean inlineCompoPath;
 
 	/**
 	 * Create component path instance with safe path value. This constructor is designed to be called with verified path value
@@ -92,22 +94,6 @@ public class CompoPath extends DirPath {
 	 */
 	public CompoPath(Project project, String compoPath) {
 		super(project, value(compoPath));
-	}
-
-	/**
-	 * Create component path instance with path value read from layout file. Since path value is not reliable this constructor
-	 * test its integrity and throws exception if invalid or not found.
-	 * 
-	 * @param project project reference,
-	 * @param layoutPath path to layout file declaring the component path,
-	 * @param compoPath component path value.
-	 * @throws WoodException if <code>compoPath</code> parameter does not match pattern or directory is missing.
-	 */
-	public CompoPath(Project project, FilePath layoutPath, String compoPath) throws WoodException {
-		this(project, value(compoPath));
-		if (value == null) {
-			throw new WoodException("Invalid component path |%s| declared in layout file |%s|.", compoPath, layoutPath);
-		}
 		if (!exists()) {
 			// by convention component path is the name of the directory where layout file is stored
 			// for example for path/to/compo there is 'compo' directory and 'compo/compo.htm' layout file
@@ -115,13 +101,15 @@ public class CompoPath extends DirPath {
 
 			// in the case of inline components there may be no enclosing directory
 			// remember that inline component have only layout files and directory is optional
-			// in this case test for layout file existence
+			// in this is the case test for layout file existence
 
 			File inlineCompoFile = new File(file.getAbsoluteFile() + CT.DOT_LAYOUT_EXT);
 			if (!inlineCompoFile.exists()) {
-				throw new WoodException("Missing component path |%s| requested from layout file |%s|.", compoPath, layoutPath);
+				throw new WoodException("Missing component path |%s|.", compoPath);
 			}
 			inlineCompoPath = true;
+		} else {
+			inlineCompoPath = false;
 		}
 	}
 

@@ -197,7 +197,7 @@ public class Component {
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = new CompoPath(project, layoutPath, operators.getOperand(widgetPathElement, Operator.COMPO));
+			CompoPath compoPath = new CompoPath(project, operators.getOperand(widgetPathElement, Operator.COMPO));
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
@@ -292,7 +292,7 @@ public class Component {
 		Editables editables = null;
 
 		for (Element contentElement : contentElements) {
-			EditablePath editablePath = new EditablePath(project, layoutPath, operators.getOperand(contentElement, Operator.TEMPLATE));
+			EditablePath editablePath = new EditablePath(layoutPath, operators.getOperand(contentElement, Operator.TEMPLATE));
 
 			if (template == null) {
 				// prepare layout parameters, possible empty, before loading template from source file

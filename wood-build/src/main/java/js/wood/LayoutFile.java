@@ -306,7 +306,7 @@ public class LayoutFile {
 						LayoutFile.this.editables.add(attributes.getValue(i));
 					} else if (keyword(name, "template")) {
 						// wood:template, data-template, template
-						EditablePath editablePath = new EditablePath(project, compoPath.getLayoutPath(), attributes.getValue(i));
+						EditablePath editablePath = new EditablePath(compoPath.getLayoutPath(), attributes.getValue(i));
 						LayoutFile.this.templatePath = editablePath;
 						LayoutFile.this.templates.add(editablePath.getEditableName());
 					}

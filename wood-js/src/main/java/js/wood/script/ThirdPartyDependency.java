@@ -1,7 +1,5 @@
 package js.wood.script;
 
-import js.wood.Dependency;
-
 /**
  * Third party dependency.
  * 

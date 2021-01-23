@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import js.wood.Dependency;
 import js.wood.DirPath;
 import js.wood.FilePath;
 import js.wood.Project;

@@ -148,10 +148,10 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 	@Test
 	public void descriptorValues() {
 		project.scanBuildFiles();
-		CompoPath compoPath = new CompoPath(project, "page/index");
+		CompoPath compoPath = new CompoPath(project, "index");
 
 		final IVariables variables = project.getVariables().get(compoPath);
-		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/page/index/index.xml"), new IReferenceHandler() {
+		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/index/index.xml"), new IReferenceHandler() {
 			@Override
 			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
 				return variables.get(new Locale("en"), reference, sourceFile, this);

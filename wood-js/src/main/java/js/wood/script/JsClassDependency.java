@@ -1,7 +1,5 @@
 package js.wood.script;
 
-import js.wood.Dependency;
-
 /**
  * Specialized dependency for j(s)-script class.
  * 

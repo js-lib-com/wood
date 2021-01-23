@@ -96,8 +96,6 @@ public final class CT {
 	/** The name of script file used for preview. */
 	public static final String PREVIEW_SCRIPT = "preview.js";
 
-	public static final String SDK_DIR = "lib/sdk";
-
 	/** Prevent default constructor synthesis. */
 	private CT() {
 	}

@@ -1,4 +1,4 @@
-package js.wood;
+package js.wood.script;
 
 import js.util.Strings;
 

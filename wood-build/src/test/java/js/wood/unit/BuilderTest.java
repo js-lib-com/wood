@@ -213,7 +213,7 @@ public class BuilderTest extends BuilderTestCase {
 	private static void assertPageDocument(PageDocument page) {
 		Document doc = page.getDocument();
 
-		assertEquals("Index Page", doc.getByTag("title").getText());
+		assertEquals("Test Project / Index", doc.getByTag("title").getText());
 
 		EList metas = doc.findByTag("meta");
 		assertEquals(5, metas.size());
@@ -371,8 +371,8 @@ public class BuilderTest extends BuilderTestCase {
 		assertValue("../media/template-page_logo.jpg", builder, "de", reference, source);
 
 		source = new FilePath(project, "res/template/page/page.js");
-		assertValue("/en/media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("/de/media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("/root-project/en/media/template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("/root-project/de/media/template-page_logo.jpg", builder, "de", reference, source);
 	}
 
 	private static void assertValue(String expected, Builder builder, String languageTag, IReference reference, FilePath source) throws IOException {
