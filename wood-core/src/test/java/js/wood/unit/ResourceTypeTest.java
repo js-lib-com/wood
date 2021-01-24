@@ -1,6 +1,7 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,16 +11,18 @@ import js.wood.impl.ResourceType;
 
 public class ResourceTypeTest {
 	@Test
-	public void resourceTypeValueOf() {
-		assertEquals(ResourceType.STRING, ResourceType.getValueOf("string"));
-		assertEquals(ResourceType.STRING, ResourceType.getValueOf("STRING"));
-		assertEquals(ResourceType.UNKNOWN, ResourceType.getValueOf("STRINGx"));
+	public void valueOf() {
+		assertThat(ResourceType.getValueOf("string"), equalTo(ResourceType.STRING));
+		assertThat(ResourceType.getValueOf("STRING"), equalTo(ResourceType.STRING));
+		assertThat(ResourceType.getValueOf("STRINGx"), equalTo(ResourceType.UNKNOWN));
 	}
 
 	@Test
-	public void resourceTypePredicates() {
+	public void predicates() {
 		assertTrue(ResourceType.STRING.isVariable());
 		assertTrue(ResourceType.TEXT.isVariable());
+		assertTrue(ResourceType.LINK.isVariable());
+		assertTrue(ResourceType.TIP.isVariable());
 		assertTrue(ResourceType.COLOR.isVariable());
 		assertTrue(ResourceType.DIMEN.isVariable());
 		assertTrue(ResourceType.STYLE.isVariable());
