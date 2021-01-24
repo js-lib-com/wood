@@ -8,7 +8,7 @@ package js.wood.eval;
  * is, an operator provides only functional processing.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 abstract class Operator
 {

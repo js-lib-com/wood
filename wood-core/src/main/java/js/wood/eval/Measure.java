@@ -5,7 +5,7 @@ package js.wood.eval;
  * instance is a scalar.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class Measure
 {

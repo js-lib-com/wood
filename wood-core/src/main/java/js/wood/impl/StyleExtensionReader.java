@@ -50,7 +50,7 @@ import java.util.Map;
  * </table>
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 public class StyleExtensionReader extends Reader
 {
@@ -181,7 +181,7 @@ public class StyleExtensionReader extends Reader
    * States list for reader automaton.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static enum State
   {
@@ -203,7 +203,7 @@ public class StyleExtensionReader extends Reader
    * new declaration start. It collects declaration characters till end mark or EOF.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static class DeclarationBuilder
   {
@@ -271,7 +271,7 @@ public class StyleExtensionReader extends Reader
    * Current supported browser specific declarations.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static class Extensions
   {
@@ -326,7 +326,7 @@ public class StyleExtensionReader extends Reader
    * specific properties.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static class ExtensionsIterator implements Iterator<Character>
   {

@@ -17,7 +17,7 @@ import js.wood.WoodException;
  * Note that interpreter instance is reusable, there is no need to create new instance for every evaluation.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 public class Interpreter
 {

@@ -13,7 +13,7 @@ import java.util.List;
  * session.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class ArgumentsBuilder
 {

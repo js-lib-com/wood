@@ -14,13 +14,13 @@ package js.wood.eval;
  * <td><b>Sample Syntax
  * <tr>
  * <td>{@link #ADD}
- * <td>{@link AddOperator}
+ * <td>{@link AddOperatorTest}
  * <td>Generic sum for numeric values, numeric with measurement units and string concatenation
  * <td>(add 1 2 3)
  * </table>
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 enum Opcode
 {

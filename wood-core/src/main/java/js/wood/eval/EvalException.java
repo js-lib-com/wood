@@ -6,7 +6,7 @@ import js.util.Strings;
  * Thrown when evaluation logic fails for whatever reason.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class EvalException extends Exception
 {

@@ -7,7 +7,7 @@ import java.util.Locale;
  * Numeric value formatter.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class Number
 {

@@ -8,12 +8,12 @@ import java.text.StringCharacterIterator;
  * {@link Expression expression grammar}.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class Parser
 {
   /** Source expression iterator. */
-  private CharacterIterator iterator;
+  private final CharacterIterator iterator;
 
   /** Current processed expression character. */
   private char expressionChar;
@@ -97,7 +97,7 @@ class Parser
    * States set for parser finite automaton.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static enum State
   {

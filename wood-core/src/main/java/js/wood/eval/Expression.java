@@ -23,7 +23,7 @@ import js.util.Strings;
  * </pre>
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class Expression
 {

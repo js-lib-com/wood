@@ -7,7 +7,7 @@ import js.util.Strings;
  * supplied by parser, while parser is reading expression opcode.
  * 
  * @author Iulian Rotaru
- * @since 1.1
+ * @since 1.0
  */
 class OpcodeBuilder
 {

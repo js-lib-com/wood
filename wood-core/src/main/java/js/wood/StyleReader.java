@@ -300,7 +300,7 @@ public class StyleReader extends Reader
    * already contains AND operator and are ready to insert into media query block header.
    * 
    * @author Iulian Rotaru
-   * @since 1.1
+   * @since 1.0
    */
   private static class MediaQueryFactory
   {
