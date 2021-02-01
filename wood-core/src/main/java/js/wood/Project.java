@@ -12,6 +12,7 @@ import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.FilesHandler;
+import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.Reference;
@@ -25,9 +26,9 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * larger project layout, like an Eclipse project.
  * <p>
  * Current Project file system is depicted below. There are four source directories and one build target. There is also a
- * project configuration XML file, see {@link ProjectDescriptor}. It is acceptable to share directories with master project, if any.
- * For example <code>lib</code> can hold Java archives. Anyway, master project files must not use extensions expected by this
- * tool library and file name should obey syntax described by {@link FilePath}.
+ * project configuration XML file, see {@link ProjectDescriptor}. It is acceptable to share directories with master project, if
+ * any. For example <code>lib</code> can hold Java archives. Anyway, master project files must not use extensions expected by
+ * this tool library and file name should obey syntax described by {@link FilePath}.
  * 
  * <pre>
  *  /                     ; project root
@@ -70,7 +71,8 @@ public class Project {
 	private final String display;
 
 	/**
-	 * Project description. Uses project display if this value is not provided by {@link ProjectDescriptor#getDescription(String)}.
+	 * Project description. Uses project display if this value is not provided by
+	 * {@link ProjectDescriptor#getDescription(String)}.
 	 */
 	private final String description;
 
@@ -131,7 +133,6 @@ public class Project {
 		for (String exclude : descriptor.getExcludes()) {
 			excludes.add(Path.create(this, exclude.trim()));
 		}
-
 
 		switch (this.descriptor.getNamingStrategy()) {
 		case XMLNS:
@@ -297,6 +298,18 @@ public class Project {
 
 	public String getAuthor() {
 		return descriptor.getAuthor();
+	}
+
+	public MediaQueryDefinition getMediaQueryDefinition(String alias) {
+		// return descriptor.getMediaQueryDefinitions().stream().filter(query ->
+		// query.getAlias().equals(alias)).findAny().orElse(null);
+
+		for (MediaQueryDefinition query : descriptor.getMediaQueryDefinitions()) {
+			if (query.getAlias().equals(alias)) {
+				return query;
+			}
+		}
+		return null;
 	}
 
 	public List<IMetaReference> getMetaReferences() {

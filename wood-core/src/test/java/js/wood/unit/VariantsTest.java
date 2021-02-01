@@ -1,21 +1,42 @@
 package js.wood.unit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import js.wood.FilePath;
+import js.wood.Project;
 import js.wood.WoodException;
+import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.Variants;
 
+@RunWith(MockitoJUnitRunner.class)
 public class VariantsTest {
+	@Mock
+	private Project project;
+	@Mock
+	private FilePath file;
+
+	@Before
+	public void beforeTest() {
+		when(file.getProject()).thenReturn(project);
+	}
+
 	@Test
 	public void locale() {
 		Map<String, Locale> locales = new HashMap<>();
@@ -28,207 +49,74 @@ public class VariantsTest {
 		locales.put("RO-MD", new Locale("ro", "MD"));
 
 		for (String localePattern : locales.keySet()) {
-			Variants variants = new Variants(localePattern);
+			Variants variants = new Variants(file, localePattern);
 			assertThat(variants.getLocale(), equalTo(locales.get(localePattern)));
 		}
 	}
 
 	@Test(expected = WoodException.class)
 	public void locale_Multiple() {
-		new Variants("jp_ro");
+		new Variants(file, "jp_ro");
 	}
 
 	@Test
-	public void viewportWidth() {
-		Map<String, Integer> widths = new HashMap<>();
-		widths.put("w1200", 1200);
-		widths.put("w992", 992);
-		widths.put("w768", 768);
-		widths.put("w560", 560);
-		widths.put("w1234", 1234);
+	public void mediaQueries() {
+		List<MediaQueryDefinition> definitions = new ArrayList<>();
+		definitions.add(new MediaQueryDefinition("w1200", "min-width: 1200px", 0));
+		definitions.add(new MediaQueryDefinition("W992", "max-width: 992px", 0));
+		definitions.add(new MediaQueryDefinition("h560", "min-height: 560px", 0));
+		definitions.add(new MediaQueryDefinition("H1234", "max-height: 1234px", 0));
+		definitions.add(new MediaQueryDefinition("landscape", "orientation: landscape", 0));
+		definitions.add(new MediaQueryDefinition("portrait", "orientation: portrait", 0));
 
-		for (String widthPattern : widths.keySet()) {
-			Variants variants = new Variants(widthPattern);
-			assertTrue(variants.hasViewportWidth());
-			assertThat(variants.getViewportWidth(), equalTo(widths.get(widthPattern)));
-		}
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportWidth_Multiple() {
-		new Variants("w1200_w992");
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportWidth_TooFewDigits() {
-		new Variants("w99");
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportWidth_TooManyDigits() {
-		new Variants("w10000");
-	}
-
-	@Test
-	public void viewportHeight() {
-		Map<String, Integer> heights = new HashMap<>();
-		heights.put("h400", 400);
-		heights.put("h600", 600);
-		heights.put("h800", 800);
-		heights.put("h1024", 1024);
-
-		for (String heightPattern : heights.keySet()) {
-			Variants variants = new Variants(heightPattern);
-			assertThat(variants.getViewportHeight(), equalTo(heights.get(heightPattern)));
-		}
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportHeight_Multiple() {
-		new Variants("h400_h600");
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportheight_TooFewDigits() {
-		new Variants("h99");
-	}
-
-	@Test(expected = WoodException.class)
-	public void viewportHeight_TooManyDigits() {
-		new Variants("h10000");
-	}
-
-	@Test
-	public void screen() {
-		Map<String, Variants.Screen> screens = new HashMap<>();
-		screens.put("lgd", Variants.Screen.LARGE);
-		screens.put("nod", Variants.Screen.NORMAL);
-		screens.put("mdd", Variants.Screen.MEDIUM);
-		screens.put("smd", Variants.Screen.SMALL);
-		screens.put("xsd", Variants.Screen.EXTRA_SMALL);
-
-		for (String pattern : screens.keySet()) {
-			Variants variants = new Variants(pattern);
-			assertTrue(variants.hasScreen());
-			assertThat(variants.getScreen(), equalTo(screens.get(pattern)));
+		for (MediaQueryDefinition definition : definitions) {
+			when(project.getMediaQueryDefinition(definition.getAlias())).thenReturn(definition);
+			Variants variants = new Variants(file, definition.getAlias());
+			assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+			assertThat(variants.getMediaQueries().getQueries().get(0).getAlias(), equalTo(definition.getAlias()));
+			assertThat(variants.getMediaQueries().getQueries().get(0).getExpression(), equalTo(definition.getExpression()));
 		}
 	}
 
 	@Test
-	public void screen_Width() {
-		Map<String, Integer> resolutions = new HashMap<>();
-		resolutions.put("lgd", 1200);
-		resolutions.put("nod", 1200);
-		resolutions.put("mdd", 992);
-		resolutions.put("smd", 768);
-		resolutions.put("xsd", 560);
+	public void mediaQueries_Multiple() {
+		List<MediaQueryDefinition> definitions = new ArrayList<>();
+		definitions.add(new MediaQueryDefinition("w1200", "min-width: 1200px", 0));
+		definitions.add(new MediaQueryDefinition("landscape", "orientation: landscape", 1));
+		definitions.add(new MediaQueryDefinition("r300", "resolution: 300dpi", 2));
 
-		for (String name : resolutions.keySet()) {
-			Variants variants = new Variants(name);
-			assertTrue(variants.hasScreen());
-			assertThat(variants.getScreen(), notNullValue());
-			assertThat(variants.getScreen().getWidth(), equalTo(resolutions.get(name)));
-		}
+		when(project.getMediaQueryDefinition("w1200")).thenReturn(definitions.get(0));
+		when(project.getMediaQueryDefinition("landscape")).thenReturn(definitions.get(1));
+		when(project.getMediaQueryDefinition("r300")).thenReturn(definitions.get(2));
+
+		Variants variants = new Variants(file, "w1200_landscape_r300");
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(3));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 1200px ) and ( orientation: landscape ) and ( resolution: 300dpi )"));
+		assertThat(variants.getMediaQueries().getWeight(), equalTo(6L));
 	}
 
 	@Test(expected = WoodException.class)
-	public void screen_Multiple() {
-		new Variants("lgd_nod");
+	public void mediaQueries_MissingDefinition() {
+		new Variants(file, "w1200");
 	}
 
 	@Test
-	public void orientation() {
-		Map<String, Variants.Orientation> orientations = new HashMap<>();
-		orientations.put("landscape", Variants.Orientation.LANDSCAPE);
-		orientations.put("portrait", Variants.Orientation.PORTRAIT);
+	public void locale_mediaQueries() {
+		MediaQueryDefinition definition = new MediaQueryDefinition("w1200", "min-width: 1200px", 0);
+		when(project.getMediaQueryDefinition("w1200")).thenReturn(definition);
 
-		for (String pattern : orientations.keySet()) {
-			Variants variants = new Variants(pattern);
-			assertTrue(variants.hasOrientation());
-			assertThat(variants.getOrientation(), equalTo(orientations.get(pattern)));
-		}
-	}
-
-	@Test(expected = WoodException.class)
-	public void orientation_Multiple() {
-		new Variants("landscape_portrait");
-	}
-
-	@Test
-	public void locale_viewportWidth() {
-		Variants variants = new Variants("en-US_w992");
-		assertThat(variants.hasLocale(), is(true));
-		assertThat(variants.hasViewportWidth(), is(true));
-		assertThat(variants.hasViewportHeight(), is(false));
-		assertThat(variants.hasScreen(), is(false));
-		assertThat(variants.hasOrientation(), is(false));
-		assertThat(variants.getLocale(), equalTo(Locale.US));
-		assertThat(variants.getViewportWidth(), equalTo(992));
-	}
-
-	@Test
-	public void locale_viewportHeight() {
-		Variants variants = new Variants("en-US_h600");
-		assertThat(variants.hasLocale(), is(true));
-		assertThat(variants.hasViewportWidth(), is(false));
-		assertThat(variants.hasViewportHeight(), is(true));
-		assertThat(variants.hasScreen(), is(false));
-		assertThat(variants.hasOrientation(), is(false));
-		assertThat(variants.getLocale(), equalTo(Locale.US));
-		assertThat(variants.getViewportHeight(), equalTo(600));
-	}
-
-	@Test
-	public void locale_viewportWidth_viewportHeight() {
-		Variants variants = new Variants("en-US_w992_h600");
-		assertThat(variants.hasLocale(), is(true));
-		assertThat(variants.hasViewportWidth(), is(true));
-		assertThat(variants.hasViewportHeight(), is(true));
-		assertThat(variants.hasScreen(), is(false));
-		assertThat(variants.hasOrientation(), is(false));
-		assertThat(variants.getLocale(), equalTo(Locale.US));
-		assertThat(variants.getViewportWidth(), equalTo(992));
-		assertThat(variants.getViewportHeight(), equalTo(600));
-	}
-
-	@Test
-	public void locale_screen() {
-		Variants variants = new Variants("en-US_lgd");
-		assertThat(variants.hasLocale(), is(true));
-		assertThat(variants.hasViewportWidth(), is(false));
-		assertThat(variants.hasViewportHeight(), is(false));
-		assertThat(variants.hasScreen(), is(true));
-		assertThat(variants.hasOrientation(), is(false));
-		assertThat(variants.getLocale(), equalTo(Locale.US));
-		assertThat(variants.getScreen(), equalTo(Variants.Screen.LARGE));
-	}
-
-	@Test
-	public void locale_screen_orientation() {
-		Variants variants = new Variants("en-US_lgd_landscape");
-		assertThat(variants.hasLocale(), is(true));
-		assertThat(variants.hasViewportWidth(), is(false));
-		assertThat(variants.hasViewportHeight(), is(false));
-		assertThat(variants.hasScreen(), is(true));
-		assertThat(variants.hasOrientation(), is(true));
-		assertThat(variants.getLocale(), equalTo(Locale.US));
-		assertThat(variants.getScreen(), equalTo(Variants.Screen.LARGE));
-		assertThat(variants.getOrientation(), equalTo(Variants.Orientation.LANDSCAPE));
-	}
-
-	@Test(expected = WoodException.class)
-	public void invalid() {
-		new Variants("fake");
+		Variants variants = new Variants(file, "w1200_ro");
+		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 1200px )"));
+		assertThat(variants.getMediaQueries().getWeight(), equalTo(1L));
 	}
 
 	/** Null variants parameter on constructor should create empty variants instance. */
 	@Test
 	public void nullVariants() {
-		Variants variants = new Variants(null);
+		Variants variants = new Variants(file, null);
 		assertThat(variants.hasLocale(), is(false));
-		assertThat(variants.hasViewportWidth(), is(false));
-		assertThat(variants.hasViewportHeight(), is(false));
-		assertThat(variants.hasScreen(), is(false));
-		assertThat(variants.hasOrientation(), is(false));
+		assertThat(variants.getMediaQueries().getQueries(), empty());
 	}
 }

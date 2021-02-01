@@ -124,6 +124,8 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 */
 	private final List<Locale> locales = new ArrayList<Locale>();
 
+	private final List<MediaQueryDefinition> mediaQueries = new ArrayList<>();
+
 	/**
 	 * Create project descriptor instance. Every <em>WOOD</em> project should have descriptor with at least <locale> element
 	 * declared.
@@ -141,6 +143,21 @@ public final class ProjectDescriptor extends BaseDescriptor {
 		Strings.split(localeElement.getText(), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <locale> element.");
+		}
+
+		int index = 0;
+		for (Element mediaQueryElement : this.doc.findByTag("media-query")) {
+			final String alias = mediaQueryElement.getAttr("alias");
+			final String expression = mediaQueryElement.getAttr("expression");
+			mediaQueries.add(new MediaQueryDefinition(alias, expression, ++index));
+		}
+
+		if (mediaQueries.isEmpty()) {
+			// default mobile first media queries
+			mediaQueries.add(new MediaQueryDefinition("smd", "min-width: 560px", 0));
+			mediaQueries.add(new MediaQueryDefinition("mdd", "min-width: 768px", 1));
+			mediaQueries.add(new MediaQueryDefinition("lgd", "min-width: 992px", 2));
+			mediaQueries.add(new MediaQueryDefinition("xld", "min-width: 1200px", 3));
 		}
 	}
 
@@ -241,6 +258,10 @@ public final class ProjectDescriptor extends BaseDescriptor {
 
 	public NamingStrategy getNamingStrategy() {
 		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
+	}
+
+	public List<MediaQueryDefinition> getMediaQueryDefinitions() {
+		return mediaQueries;
 	}
 
 	/**

@@ -3,6 +3,8 @@ package js.wood.unit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
@@ -108,8 +110,7 @@ public class FilePathTest {
 		assertThat(layoutFile.getBaseName(), equalTo(styleFile.getBaseName()));
 		assertThat(layoutFile.getDirPath(), equalTo(styleFile.getDirPath()));
 		assertThat(layoutFile.getVariants().getLocale(), equalTo(styleFile.getVariants().getLocale()));
-		assertThat(layoutFile.getVariants().getViewportWidth(), equalTo(styleFile.getVariants().getViewportWidth()));
-		assertThat(layoutFile.getVariants().getViewportHeight(), equalTo(styleFile.getVariants().getViewportHeight()));
+		assertThat(layoutFile.getVariants().getMediaQueries(), equalTo(styleFile.getVariants().getMediaQueries()));
 	}
 
 	@Test
@@ -122,19 +123,19 @@ public class FilePathTest {
 	public void predicates() {
 		assertTrue(new FilePath(project, "res/asset/background.jpg").isMedia());
 		assertFalse(new FilePath(project, "res/compo/discography/discography.css").isMedia());
-		
+
 		assertTrue(new FilePath(project, "res/compo/discography/discography.htm").isLayout());
 		assertFalse(new FilePath(project, "res/compo/discography/discography.css").isLayout());
 
 		assertTrue(new FilePath(project, "res/compo/discography/discography.css").isStyle());
 		assertFalse(new FilePath(project, "res/compo/discography/preview.js").isStyle());
-		
+
 		assertTrue(new FilePath(project, "res/compo/discography/preview.js").isScript());
 		assertFalse(new FilePath(project, "res/compo/discography/preview.css").isScript());
-		
+
 		assertTrue(new FilePath(project, "res/compo/discography/preview.js").isPreviewScript());
 		assertFalse(new FilePath(project, "res/compo/discography/discography.js").isPreviewScript());
-		
+
 		assertTrue(new FilePath(project, "res/compo/discography/discography.xml").isComponentDescriptor());
 		assertFalse(new FilePath(project, "res/compo/discography/discography.htm").isComponentDescriptor());
 		assertFalse(new FilePath(project, "res/compo/discography/strings.xml").isComponentDescriptor());
@@ -154,36 +155,45 @@ public class FilePathTest {
 	public void getVariants() {
 		FilePath path = new FilePath(project, "res/compo/discography/strings_de.xml");
 		assertThat(path.hasVariants(), equalTo(true));
-
 		Variants variants = path.getVariants();
 		assertThat(variants, notNullValue());
 		assertThat(variants.getLocale(), equalTo(new Locale("de")));
-		assertThat(variants.getViewportWidth(), equalTo(0));
-		assertThat(variants.getViewportHeight(), equalTo(0));
-		assertThat(variants.getScreen(), equalTo(Variants.Screen.NONE));
-		assertThat(variants.getOrientation(), equalTo(Variants.Orientation.NONE));
+		assertThat(variants.getMediaQueries().isEmpty(), is(true));
 
 		path = new FilePath(project, "res/compo/discography/discography_w800.css");
 		variants = path.getVariants();
 		assertThat(variants.getLocale(), nullValue());
-		assertThat(variants.getViewportWidth(), equalTo(800));
-		assertThat(variants.getViewportHeight(), equalTo(0));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
 
 		path = new FilePath(project, "res/compo/discography/discography_h800.css");
 		variants = path.getVariants();
 		assertThat(variants.getLocale(), nullValue());
-		assertThat(variants.getViewportWidth(), equalTo(0));
-		assertThat(variants.getViewportHeight(), equalTo(800));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-height: 800px )"));
 
 		path = new FilePath(project, "res/compo/discography/colors_ro_w800.xml");
 		variants = path.getVariants();
 		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
-		assertThat(variants.getViewportWidth(), equalTo(800));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
 
 		path = new FilePath(project, "res/compo/discography/colors_w800_ro.xml");
 		variants = path.getVariants();
 		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
-		assertThat(variants.getViewportWidth(), equalTo(800));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
+
+		path = new FilePath(project, "res/compo/discography/discography_lgd.css");
+		variants = path.getVariants();
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 992px )"));
+
+		path = new FilePath(project, "res/compo/discography/colors_w800_portrait_ro.xml");
+		variants = path.getVariants();
+		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getMediaQueries().getQueries(), hasSize(2));
+		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px ) and ( orientation: portrait )"));
 	}
 
 	@Test(expected = WoodException.class)

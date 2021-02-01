@@ -99,13 +99,12 @@ public class FilePath extends Path {
 			throw new WoodException("Invalid file path |%s|.", filePath);
 		}
 
-		dirPath = new DirPath(project, matcher.group(1));
-		basename = matcher.group(2);
+		this.dirPath = new DirPath(project, matcher.group(1));
+		this.basename = matcher.group(2);
 		String extension = matcher.group(4);
-		name = Strings.concat(basename, '.', extension);
-		variants = new Variants(this, matcher.group(3));
-
-		fileType = FileType.forExtension(extension);
+		this.name = Strings.concat(this.basename, '.', extension);
+		this.variants = new Variants(this, matcher.group(3));
+		this.fileType = FileType.forExtension(extension);
 	}
 
 	/**

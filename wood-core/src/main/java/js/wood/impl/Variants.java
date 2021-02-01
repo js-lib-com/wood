@@ -3,7 +3,6 @@ package js.wood.impl;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import js.lang.BugError;
 import js.wood.FilePath;
 import js.wood.WoodException;
 
@@ -80,28 +79,10 @@ public class Variants {
 	 */
 	public static final Pattern LOCALE = Pattern.compile("^([a-z]{2})(?:\\-([A-Z]{2}))?$", Pattern.CASE_INSENSITIVE);
 
-	/** Pattern for viewport width variant. */
-	private static final Pattern VIEWPORT_WIDTH = Pattern.compile("^w(\\d{3,4})$");
-
-	/** Pattern for viewport height variant. */
-	private static final Pattern VIEWPORT_HEIGHT = Pattern.compile("^h(\\d{3,4})$");
-
 	/** Locale variant. This variant is null if not set. */
 	private final Locale locale;
 
-	/** Value for viewport maximum width variant. This variant is zero if not set. */
-	private final int viewportWidth;
-
-	/** Value for viewport maximum height variant. This variant is zero if not set. */
-	private final int viewportHeight;
-
-	/** Screen viewport width variant value, see {@link Screen} for recognized types. {@link Screen#NONE} if not set. */
-	private final Screen screen;
-
-	/**
-	 * Device orientation variant value, see {@link Orientation} for recognized types. {@link Orientation#NONE} if not set.
-	 */
-	private final Orientation orientation;
+	private final MediaQueries mediaQueries;
 
 	/** Flag true only if this variants instance is empty, that is, initialized from null variants parameter. */
 	private final boolean empty;
@@ -113,7 +94,7 @@ public class Variants {
 	 * A not recognized variant rise exception. Note that <code>file</code> parameter is used just for exception tracking and
 	 * that it can be null.
 	 * 
-	 * @param file the file qualified by given variants, used for logging,
+	 * @param file the file path decorated with given variants list,
 	 * @param variants variants list separated by {@link #SEPARATOR}, possible null.
 	 * @throws WoodException if a variant from list is not recognized.
 	 */
@@ -133,10 +114,7 @@ public class Variants {
 		}
 
 		Locale locale = null;
-		int viewportWidth = 0;
-		int viewportHeight = 0;
-		Screen screen = Screen.NONE;
-		Orientation orientation = Orientation.NONE;
+		this.mediaQueries = new MediaQueries(file.getProject());
 
 		Matcher matcher = new Matcher();
 		boolean empty = true;
@@ -153,30 +131,9 @@ public class Variants {
 				} else {
 					locale = new Locale(matcher.group(1), country);
 				}
-			} else if (matcher.match(VIEWPORT_WIDTH, variant)) {
-				// viewport width
-				if (viewportWidth != 0) {
-					throw new WoodException("Invalid variants syntax |%s|. Multiple viewport width.", variants);
-				}
-				viewportWidth = Integer.parseInt(matcher.group(1));
-			} else if (matcher.match(VIEWPORT_HEIGHT, variant)) {
-				// viewport height
-				if (viewportHeight != 0) {
-					throw new WoodException("Invalid variants syntax |%s|. Multiple viewport width.", variants);
-				}
-				viewportHeight = Integer.parseInt(matcher.group(1));
-			} else if (matcher.match(Screen.PATTERN, variant)) {
-				// screen width
-				if (screen != Screen.NONE) {
-					throw new WoodException("Invalid variants syntax |%s|. Multiple viewport width.", variants);
-				}
-				screen = Screen.forName(matcher.group(1));
-			} else if (matcher.match(Orientation.PATTERN, variant)) {
-				// device orientation
-				if (orientation != Orientation.NONE) {
-					throw new WoodException("Invalid variants syntax |%s|. Multiple viewport width.", variants);
-				}
-				orientation = Orientation.forName(matcher.group(1));
+
+			} else if (mediaQueries.add(variant)) {
+				// media query
 			} else {
 				// unknown variants
 				throw new WoodException("Not recognized variant |%s| on file |%s|.", variant, file);
@@ -184,20 +141,7 @@ public class Variants {
 		}
 
 		this.locale = locale;
-		this.viewportWidth = viewportWidth;
-		this.viewportHeight = viewportHeight;
-		this.screen = screen;
-		this.orientation = orientation;
 		this.empty = empty;
-	}
-
-	/**
-	 * Test constructor.
-	 * 
-	 * @param variants variants list separated by {@link #SEPARATOR}, possible null.
-	 */
-	public Variants(String variants) {
-		this(null, variants);
 	}
 
 	/** Empty strings used to replace null variants. */
@@ -226,44 +170,12 @@ public class Variants {
 		return locale;
 	}
 
-	/**
-	 * Get variant value for viewport maximum width.
-	 * 
-	 * @return viewport maximum width value.
-	 * @see #viewportWidth
-	 */
-	public int getViewportWidth() {
-		return viewportWidth;
+	public boolean hasMediaQueries() {
+		return !mediaQueries.isEmpty();
 	}
 
-	/**
-	 * Get variant value for viewport maximum height.
-	 * 
-	 * @return viewport maximum height value.
-	 * @see #viewportHeight
-	 */
-	public int getViewportHeight() {
-		return viewportHeight;
-	}
-
-	/**
-	 * Get value of screen viewport width variant, possible {@link Screen#NONE} for not set.
-	 * 
-	 * @return value of screen viewport width variant.
-	 * @see #screen
-	 */
-	public Screen getScreen() {
-		return screen;
-	}
-
-	/**
-	 * Get value of device orientation, possible {@link Orientation#NONE}.
-	 * 
-	 * @return value of device orientation variant.
-	 * @see #orientation
-	 */
-	public Orientation getOrientation() {
-		return orientation;
+	public MediaQueries getMediaQueries() {
+		return mediaQueries;
 	}
 
 	/**
@@ -292,46 +204,6 @@ public class Variants {
 	}
 
 	/**
-	 * Test if viewport width variant is present.
-	 * 
-	 * @return true if viewport width variant is present.
-	 * @see #viewportWidth
-	 */
-	public boolean hasViewportWidth() {
-		return viewportWidth != 0;
-	}
-
-	/**
-	 * Test if viewport height variant is present.
-	 * 
-	 * @return true if viewport height variant is present.
-	 * @see #viewportHeight
-	 */
-	public boolean hasViewportHeight() {
-		return viewportHeight != 0;
-	}
-
-	/**
-	 * Test if screen width variant is present.
-	 * 
-	 * @return true if screen width variant is present.
-	 * @see #screen
-	 */
-	public boolean hasScreen() {
-		return screen != Screen.NONE;
-	}
-
-	/**
-	 * Test if device orientation variant is present.
-	 * 
-	 * @return true if device orientation variant is present.
-	 * @see #orientation
-	 */
-	public boolean hasOrientation() {
-		return orientation != Orientation.NONE;
-	}
-
-	/**
 	 * Test if this variants instance is empty, that is, it has no value set.
 	 * 
 	 * @return true if this variants is empty.
@@ -339,119 +211,5 @@ public class Variants {
 	 */
 	public boolean isEmpty() {
 		return empty;
-	}
-
-	/**
-	 * Screen dimensions variants. This variants class offer a convenient way to use viewport width with predefined values:
-	 * <ul>
-	 * <li><b>lgd</b> large - large viewport width - large desktop, tv-set, strictly greater than 1200px
-	 * <li><b>nod</b> normal - normal viewport width - desktop, 992px to 1200px
-	 * <li><b>mdd</b> medium - medium viewport width - laptop, 768px to 992px
-	 * <li><b>smd</b> small - small viewport width - tablet, 480px to 768px
-	 * <li><b>xsd</b> extra-small - extra small viewport width - phone, less than or equal 560px
-	 * <ul>
-	 * 
-	 * @author Iulian Rotaru
-	 * @since 1.0
-	 */
-	public static enum Screen {
-		/** Neutral value. */
-		NONE(0),
-
-		/** Large viewport width - large desktop, tv-set, strictly greater than 1200px. */
-		LARGE(1200),
-
-		/** Normal viewport width - desktop, 992px to 1200px. */
-		NORMAL(1200),
-
-		/** Medium viewport width - laptop, 768px to 992px. */
-		MEDIUM(992),
-
-		/** Small viewport width - tablet, 480px to 768px. */
-		SMALL(768),
-
-		/** Extra small viewport width - phone, less than or equal 560px. */
-		EXTRA_SMALL(560);
-
-		private int width;
-
-		private Screen(int width) {
-			this.width = width;
-		}
-
-		public int getWidth() {
-			return width;
-		}
-
-		/** Pattern for screen class variant. */
-		private static final Pattern PATTERN = Pattern.compile("^(lgd|nod|mdd|smd|xsd)$");
-
-		/**
-		 * Create screen class constant for name. Return {@link #NONE} if <code>screen</code> parameter is not recognized.
-		 * 
-		 * @param screen screen variant name.
-		 * @return screen class constant.
-		 */
-		private static Screen forName(String screen) {
-			// takes care to keep this method literals in sync with pattern constant
-
-			switch (screen) {
-			case "lgd":
-				return LARGE;
-			case "nod":
-				return Screen.NORMAL;
-			case "mdd":
-				return MEDIUM;
-			case "smd":
-				return SMALL;
-			case "xsd":
-				return EXTRA_SMALL;
-
-			default:
-				// screen is already matched against PATTERN
-				throw new BugError("Invalid screen pattern |%s|.", screen);
-			}
-		}
-	}
-
-	/**
-	 * Device orientation variant values.
-	 * 
-	 * @author Iulian Rotaru
-	 * @since 1.0
-	 */
-	public static enum Orientation {
-		/** Device orientation value not recognized. */
-		NONE,
-
-		/** Device is used horizontally, that is, horizontal dimension is larger than the vertical one. */
-		LANDSCAPE,
-
-		/** Device is used vertically, vertical dimension is larger than the horizontal one. */
-		PORTRAIT;
-
-		/** Pattern for device orientation variant. */
-		private static final Pattern PATTERN = Pattern.compile("^(landscape|portrait)$");
-
-		/**
-		 * Create device orientation constant for given name. Return {@link #NONE} if <code>orientation</code> parameter is not
-		 * recognized.
-		 * 
-		 * @param orientation orientation value.
-		 * @return device orientation constant.
-		 */
-		private static Orientation forName(String orientation) {
-			// takes care to keep this method literals in sync with pattern constant
-			switch (orientation) {
-			case "landscape":
-				return LANDSCAPE;
-			case "portrait":
-				return PORTRAIT;
-
-			default:
-				// orientation is already matched against PATTERN
-				throw new BugError("Invalid device orientation pattern |%s|.", orientation);
-			}
-		}
 	}
 }

@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 	<locale>en</locale>
+
+	<media-queries>
+		<media-query alias="w800" expression="min-width: 800px" />
+		<media-query alias="w1200" expression="min-width: 1200px" />
+		<media-query alias="h600" expression="min-height: 600px" />
+		<media-query alias="xsd" expression="min-width: 567px" />
+		<media-query alias="smd" expression="min-width: 672px" />
+		<media-query alias="mdd" expression="min-width: 992px" />
+		<media-query alias="landscape" expression="orientation: landscape" />
+		<media-query alias="portrait" expression="orientation: portrait" />
+	</media-queries>
 </project>

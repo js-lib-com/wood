@@ -1,78 +1,90 @@
 package js.wood.unit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Map;
+import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import js.util.Classes;
 import js.util.Files;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.StyleReader;
 
-public class StyleReaderTest extends WoodTestCase {
+public class StyleReaderTest {
 	private Project project;
 
-	private FilePath filePath(String path) {
+	@Before
+	public void beforeTest() {
+		project = new Project("src/test/resources/styles");
+	}
+
+	@Test
+	public void constructor() {
+		FilePath styleFile = new FilePath(project, "res/page/page.css");
+		StyleReader reader = new StyleReader(styleFile);
+
+		assertNotNull(Classes.getFieldValue(reader, "reader"));
+		assertEquals("BASE_CONTENT", Classes.getFieldValue(reader, "state").toString());
+
+		List<FilePath> variants = Classes.getFieldValue(reader, "variants");
+		assertThat(variants, notNullValue());
+		assertThat(variants.size(), equalTo(14));
+
+		assertThat(variants, hasItem(key("res/page/page_lgd.css")));
+		assertThat(variants, hasItem(key("res/page/page_nod.css")));
+
+		assertThat(variants, hasItem(key("res/page/page_mdd.css")));
+		assertThat(variants, hasItem(key("res/page/page_mdd_portrait.css")));
+		assertThat(variants, hasItem(key("res/page/page_mdd_landscape.css")));
+
+		assertThat(variants, hasItem(key("res/page/page_smd.css")));
+		assertThat(variants, hasItem(key("res/page/page_smd_portrait.css")));
+		assertThat(variants, hasItem(key("res/page/page_smd_landscape.css")));
+
+		assertThat(variants, hasItem(key("res/page/page_xsd.css")));
+		assertThat(variants, hasItem(key("res/page/page_xsd_portrait.css")));
+		assertThat(variants, hasItem(key("res/page/page_xsd_landscape.css")));
+
+		assertThat(variants, hasItem(key("res/page/page_w1200.css")));
+		assertThat(variants, hasItem(key("res/page/page_w800.css")));
+		assertThat(variants, hasItem(key("res/page/page_h600.css")));
+	}
+
+	private FilePath key(String path) {
 		return new FilePath(project, path);
 	}
 
 	@Test
-	public void styleReaderConstructor() {
-		project = project("styles");
-		FilePath styleFile = filePath("res/page/page.css");
-		StyleReader reader = new StyleReader(styleFile);
-
-		assertNotNull(field(reader, "reader"));
-		assertEquals("BASE_CONTENT", field(reader, "state").toString());
-
-		Map<FilePath, String> variants = field(reader, "variants");
-		assertNotNull(variants);
-		assertEquals(12, variants.size());
-
-		assertTrue(variants.keySet().contains(filePath("res/page/page_mdd.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_mdd_portrait.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_mdd_landscape.css")));
-
-		assertTrue(variants.keySet().contains(filePath("res/page/page_smd.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_smd_portrait.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_smd_landscape.css")));
-
-		assertTrue(variants.keySet().contains(filePath("res/page/page_xsd.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_xsd_portrait.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_xsd_landscape.css")));
-
-		assertTrue(variants.keySet().contains(filePath("res/page/page_w1200.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_w800.css")));
-		assertTrue(variants.keySet().contains(filePath("res/page/page_h600.css")));
-	}
-
-	@Test
-	public void styleReaderProcessing() throws IOException {
-		project = project("styles");
-		FilePath styleFile = filePath("res/page/page.css");
+	public void processing() throws IOException {
+		FilePath styleFile = new FilePath(project, "res/page/page.css");
 		StyleReader reader = new StyleReader(styleFile);
 
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 		String style = writer.toString();
+		System.out.println(style);
 
-		assertTrue(style.contains("@style/dialog"));
-		assertTrue(style.contains("width: 960px;"));
-		assertTrue(style.contains("width: @eval(add @dimen/mobile-width @dimen/desktop-width);"));
-		assertTrue(style.contains("@media screen and (max-width : 1200px) {"));
-		assertTrue(style.contains("width: @dimen/desktop-width;"));
-		assertTrue(style.contains("@media screen and (max-width : 800px) {"));
-		assertTrue(style.contains("width: @dimen/mobile-width;"));
-		assertTrue(style.contains("@media screen and (max-height : 600px) {"));
-		assertTrue(style.contains("height: @dimen/mobile-height;"));
-		// assertTrue(style.contains("@media screen and (max-device-width : 767px) and (orientation: portrait) {"));
-		// assertTrue(style.contains("@media screen and (max-device-width : 767px) {"));
-		// assertTrue(style.contains("@media screen and (min-device-width : 768px) {"));
+		assertThat(style, containsString("@style/dialog"));
+		assertThat(style, containsString("width: 960px;"));
+		assertThat(style, containsString("width: @eval(add @dimen/mobile-width @dimen/desktop-width);"));
+		assertThat(style, containsString("@media screen and ( min-width: 1200px ) {"));
+		assertThat(style, containsString("width: @dimen/desktop-width;"));
+		assertThat(style, containsString("@media screen and ( min-width: 800px ) {"));
+		assertThat(style, containsString("width: @dimen/mobile-width;"));
+		assertThat(style, containsString("@media screen and ( min-height: 600px ) {"));
+		assertThat(style, containsString("height: @dimen/mobile-height;"));
+		assertThat(style, containsString("@media screen and ( min-height: 768px ) and ( orientation: portrait ) {"));
+		assertThat(style, containsString("@media screen and ( min-height: 768px ) {"));
 	}
 }

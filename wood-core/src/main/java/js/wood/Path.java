@@ -46,9 +46,6 @@ public abstract class Path {
 	/** Wrapped Java file include project root. */
 	protected final File file;
 
-	/** Cached value for instance hash code. */
-	private final int hashCode;
-
 	/**
 	 * Create path instance, initialize value and wrapped file and compute instance hash code. Uses {@link #value} to compute
 	 * hash code.
@@ -63,7 +60,6 @@ public abstract class Path {
 		this.project = project;
 		this.value = value;
 		this.file = new File(project.getProjectDir(), value);
-		this.hashCode = CT.PRIME + value.hashCode();
 	}
 
 	/**
@@ -128,33 +124,27 @@ public abstract class Path {
 		return value;
 	}
 
-	/**
-	 * Get instance hash code.
-	 * 
-	 * @return instance hash code.
-	 * @see #hashCode
-	 */
 	@Override
 	public int hashCode() {
-		return hashCode;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
 	}
 
-	/**
-	 * Two path instances are considered equal if they have the same path values. Note that object class is not considered; for
-	 * example, instances of {@link CompoPath} and {@link DirPath} are equals if have the same value.
-	 * 
-	 * @param other path instance to test for equality.
-	 * @return true if given object is equal with this one.
-	 */
 	@Override
-	public boolean equals(Object other) {
-		if (this == other)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (other == null)
+		if (obj == null)
 			return false;
-		// compare only hash code, which is based on value, no matter the actual class
-		// a CompoPath is equals a DirPath is have the same value
-		return hashCode() == other.hashCode();
+		Path other = (Path) obj;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 
 	/**
