@@ -27,12 +27,12 @@ import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
-public class ProjectTest extends WoodTestCase implements IReferenceHandler {
+public class ProjectTest implements IReferenceHandler {
 	private Project project;
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 	}
 
 	private FilePath filePath(String path) {
@@ -45,10 +45,10 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	@Test
 	public void initialization() throws FileNotFoundException {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 
 		assertEquals(new File("src/test/resources/project"), project.getProjectDir());
-		assertNotNull(field(project, "descriptor"));
+		assertNotNull(Classes.getFieldValue(project, "descriptor"));
 
 		assertEquals(CT.ASSETS_DIR + "/", project.getAssetsDir().toString());
 		assertEquals("res/asset/favicon.ico", project.getFavicon().toString());
@@ -63,7 +63,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	@Test
 	public void themeStylesScanner() throws Exception {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 		FilesHandler handler = Classes.newInstance("js.wood.Project$ThemeStylesScanner", project);
 
 		for (String file : new String[] { "res/page/index/index.css", //
@@ -87,14 +87,18 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
 		Variables variables = new Variables(sourcePath.getDirPath());
 		if (project.getAssetsDir().exists()) {
-			invoke(variables, "load", project.getAssetsDir());
+			try {
+				Classes.invoke(variables, "load", sourcePath.getProject().getAssetsDir());
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
 		}
 		return variables.get(null, reference, sourcePath, this);
 	}
 
 	@Test
 	public void getMediaFile() throws FileNotFoundException {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "logo");
@@ -109,7 +113,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	@Test
 	public void getMediaFileFromSubdirectory() throws FileNotFoundException {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "icon/logo");
 		assertMedia("res/template/page/icon/logo.png", null, reference, source);
@@ -117,7 +121,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	@Test
 	public void getMediaFileWithCompoName() {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "page");
 		assertMedia("res/template/page/page.jpg", null, reference, source);
@@ -129,7 +133,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 
 	@Test
 	public void isExcluded() {
-		project = project("project");
+		project = new Project("src/test/resources/project");
 		assertTrue(project.isExcluded(dirPath("res/page/about")));
 		assertFalse(project.isExcluded(dirPath("res/page/index")));
 	}
@@ -140,7 +144,7 @@ public class ProjectTest extends WoodTestCase implements IReferenceHandler {
 	@Test
 	public void badConstructor() {
 		try {
-			project("fake-project");
+			new Project("src/test/resources/fake-project");
 			fail("Bad directory should rise illegal argument exception.");
 		} catch (Exception e) {
 			assertTrue(e instanceof IllegalArgumentException);

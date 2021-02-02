@@ -27,7 +27,7 @@ import js.wood.WOOD;
 import js.wood.WoodException;
 import js.wood.impl.Variables;
 
-public class ComponentTest extends WoodTestCase {
+public class ComponentTest {
 	@Test
 	public void simpleLayout() {
 		Component compo = getCompo("simple/layout");
@@ -197,7 +197,7 @@ public class ComponentTest extends WoodTestCase {
 
 	@Test
 	public void referenceHandler() {
-		Project project = project("components");
+		Project project = new Project("src/test/resources/components");
 		CompoPath path = new CompoPath(project, "references");
 		final List<IReference> references = new ArrayList<>();
 
@@ -305,7 +305,7 @@ public class ComponentTest extends WoodTestCase {
 		assertEquals("Update", children.item(2).getText());
 		assertEquals("Delete", children.item(3).getText());
 	}
-	
+
 	// ------------------------------------------------------
 	// Exceptional conditions
 
@@ -379,7 +379,7 @@ public class ComponentTest extends WoodTestCase {
 	public void missingScript() {
 		try {
 			getCompo("exception/missing-script");
-			//fail("Missing script reference should rise exception.");
+			// fail("Missing script reference should rise exception.");
 		} catch (Exception e) {
 			assertTrue(e instanceof WoodException);
 			assertTrue(e.getMessage().startsWith("Broken script reference."));
@@ -401,7 +401,7 @@ public class ComponentTest extends WoodTestCase {
 	// Helper methods
 
 	private static Component getCompo(String path) {
-		Project project = project("components");
+		Project project = new Project("src/test/resources/components");
 		return createCompo(project, new CompoPath(project, path));
 	}
 
@@ -411,7 +411,11 @@ public class ComponentTest extends WoodTestCase {
 			public String onResourceReference(IReference reference, FilePath sourcePath) {
 				Variables variables = new Variables(sourcePath.getDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
-					invoke(variables, "load", path.getProject().getAssetsDir());
+					try {
+						Classes.invoke(variables, "load", path.getProject().getAssetsDir());
+					} catch (Exception e) {
+						throw new IllegalStateException(e);
+					}
 				}
 				return variables.get(new Locale("en"), reference, sourcePath, this);
 			}
@@ -419,5 +423,9 @@ public class ComponentTest extends WoodTestCase {
 
 		compo.scan(false);
 		return compo;
+	}
+
+	private static <T> T field(Object object, String field) {
+		return Classes.getFieldValue(object, field);
 	}
 }
