@@ -225,7 +225,7 @@ public class PreviewTest extends PreviewTestCase implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
 		if (reference.isVariable()) {
-			IVariables variables = new Variables(project, sourceFile.getDirPath());
+			IVariables variables = new Variables(sourceFile.getDirPath());
 			if (project.getAssetsDir().exists()) {
 				invoke(variables, "load", project.getAssetsDir());
 			}

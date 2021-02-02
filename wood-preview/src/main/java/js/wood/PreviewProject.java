@@ -24,7 +24,7 @@ public class PreviewProject extends Project {
 	}
 
 	public IVariables getVariables(DirPath dir) {
-		return new Variables(this, dir);
+		return new Variables(dir);
 	}
 
 	/**

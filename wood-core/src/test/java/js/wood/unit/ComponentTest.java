@@ -409,7 +409,7 @@ public class ComponentTest extends WoodTestCase {
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(IReference reference, FilePath sourcePath) {
-				Variables variables = new Variables(project, sourcePath.getDirPath());
+				Variables variables = new Variables(sourcePath.getDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
 					invoke(variables, "load", path.getProject().getAssetsDir());
 				}

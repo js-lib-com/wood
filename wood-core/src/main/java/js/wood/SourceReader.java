@@ -86,25 +86,25 @@ import js.wood.impl.Variables;
 public final class SourceReader extends Reader
 {
   /** Source file define the scope of resource references. */
-  private FilePath sourceFile;
+  private final FilePath sourceFile;
 
   /** Layout parameters map or null if source file is not an widget or template layout. */
   private LayoutParameters layoutParameters;
 
   /** External defined reference handler in charge with resource processing. */
-  private IReferenceHandler referenceHandler;
+  private final IReferenceHandler referenceHandler;
 
   /** Expression interpreter. */
-  private Interpreter interpreter;
+  private final Interpreter interpreter;
 
   /** Resource references resolver. */
-  private ReferencesResolver resolver;
+  private final ReferencesResolver resolver;
 
   /** External defined reader, decorated by this source reader instance. */
-  private Reader reader;
+  private final Reader reader;
 
   /** Resource reference builder. */
-  private MetaBuilder metaBuilder;
+  private final MetaBuilder metaBuilder;
 
   /** Current state determine how every character is processed. */
   private State state;
@@ -341,10 +341,10 @@ public final class SourceReader extends Reader
     /** Mark for expression end. */
     private static final char EXPRESSION_END = ')';
 
-    private FilePath sourceFile;
+    private final FilePath sourceFile;
 
     /** Internal characters collector for reference value. */
-    private StringBuilder builder = new StringBuilder();
+    private final StringBuilder builder = new StringBuilder();
 
     /** Store reference separator index for reference instance creation, see {@link #getReference()}. */
     private int separatorIndex;

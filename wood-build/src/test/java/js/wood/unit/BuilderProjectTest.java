@@ -164,7 +164,7 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
-		Variables variables = new Variables(project, sourcePath.getDirPath());
+		Variables variables = new Variables(sourcePath.getDirPath());
 		if (project.getAssetsDir().exists()) {
 			invoke(variables, "load", project.getAssetsDir());
 		}

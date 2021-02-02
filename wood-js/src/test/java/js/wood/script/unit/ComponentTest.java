@@ -4,14 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
 import org.junit.Test;
 
 import js.util.Classes;
-import js.util.Files;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.FilePath;
@@ -52,14 +50,14 @@ public class ComponentTest {
 
 	private static Component getCompo(String path) {
 		Project project = project("components");
-		return createCompo(project, new CompoPath(project, path));
+		return createCompo(new CompoPath(project, path));
 	}
 
-	private static Component createCompo(final Project project, final CompoPath path) {
+	private static Component createCompo(final CompoPath path) {
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(IReference reference, FilePath sourcePath) {
-				Variables variables = new Variables(project, sourcePath.getDirPath());
+				Variables variables = new Variables(sourcePath.getDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
 					invoke(variables, "load", path.getProject().getAssetsDir());
 				}

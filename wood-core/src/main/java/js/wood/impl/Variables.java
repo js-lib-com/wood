@@ -97,9 +97,9 @@ public class Variables implements IVariables
    * 
    * @param dirPath directory to scan for variable files.
    */
-  public Variables(Project project, DirPath dirPath)
+  public Variables(DirPath dirPath)
   {
-    this(project);
+    this(dirPath.getProject());
     load(dirPath);
   }
 
