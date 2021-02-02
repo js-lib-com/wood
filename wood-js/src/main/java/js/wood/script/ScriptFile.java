@@ -67,7 +67,6 @@ public final class ScriptFile {
 		this();
 		this.sourceFile = sourceFile;
 		this.hashCode = sourceFile.hashCode();
-		System.out.println(sourceFile.toString());
 
 		/*
 		// scan for script file dependencies only if discovery is enabled

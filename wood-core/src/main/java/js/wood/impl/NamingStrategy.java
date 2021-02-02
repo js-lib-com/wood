@@ -29,6 +29,7 @@ package js.wood.impl;
  * per project.
  * 
  * @author Iulian Rotaru
+ * @since 1.0
  */
 public enum NamingStrategy
 {

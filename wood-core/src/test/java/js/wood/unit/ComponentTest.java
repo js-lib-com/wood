@@ -52,9 +52,6 @@ public class ComponentTest extends WoodTestCase {
 		Element layout = compo.getLayout();
 
 		Element editable = layout.getByTag("section");
-		System.out.println(editable.trace());
-		System.out.println(editable.getAttr("w:editable"));
-
 		assertEquals("body", layout.getTag());
 
 		EList headings = layout.findByTag("h1");
@@ -63,9 +60,7 @@ public class ComponentTest extends WoodTestCase {
 		assertEquals("Content", headings.item(1).getText());
 
 		editable = layout.getByTag("section");
-		System.out.println(editable.trace());
 		assertNotNull(editable);
-		System.out.println(editable.getAttrNS(WOOD.NS, "editable"));
 		assertFalse(editable.hasAttrNS(WOOD.NS, "editable"));
 	}
 

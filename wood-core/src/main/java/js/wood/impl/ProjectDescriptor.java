@@ -3,9 +3,12 @@ package js.wood.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import js.dom.Document;
@@ -90,9 +93,6 @@ import js.wood.WoodException;
  *      &lt;language&gt;en, ro&lt;/language&gt;
  *      
  *      &lt;site-dir&gt;build/site&lt;/site-dir&gt;
- *  
- *      &lt;analytics&gt;UA-12345678-1&lt;/analytics&gt;
- *      &lt;facebook&gt;123456789012345&lt;/facebook&gt;
  *   
  *      &lt;metas&gt;
  *          &lt;meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" /&gt;
@@ -124,7 +124,7 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 */
 	private final List<Locale> locales = new ArrayList<Locale>();
 
-	private final List<MediaQueryDefinition> mediaQueries = new ArrayList<>();
+	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
 
 	/**
 	 * Create project descriptor instance. Every <em>WOOD</em> project should have descriptor with at least <locale> element
@@ -149,7 +149,9 @@ public final class ProjectDescriptor extends BaseDescriptor {
 		for (Element mediaQueryElement : this.doc.findByTag("media-query")) {
 			final String alias = mediaQueryElement.getAttr("alias");
 			final String expression = mediaQueryElement.getAttr("expression");
-			mediaQueries.add(new MediaQueryDefinition(alias, expression, ++index));
+			if (!mediaQueries.add(new MediaQueryDefinition(alias, expression, ++index))) {
+				throw new WoodException("Redefinition of the media query alias |%s|.", alias);
+			}
 		}
 
 		if (mediaQueries.isEmpty()) {
@@ -184,13 +186,6 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * @return locale instance for the language tag.
 	 */
 	private static final Locale locale(String languageTag) {
-		// TODO: study if to replace this logic with Locale.Builder.setLanguageTag(java.lang.String)
-		// WOOD locale is a subset of BCP language tag
-
-		// Locale.Builder builder = new Locale.Builder();
-		// builder.setLanguageTag(languageTag);
-		// return builder.build();
-
 		Matcher matcher = Variants.LOCALE.matcher(languageTag);
 		if (!matcher.find()) {
 			throw new WoodException("Invalid language tag format |%s| into project config.", languageTag);
@@ -221,6 +216,11 @@ public final class ProjectDescriptor extends BaseDescriptor {
 		return text("name", defaultValue);
 	}
 
+	/**
+	 * Get project theme or null if none declared on project descriptor.
+	 * 
+	 * @return project theme, possible null.
+	 */
 	public String getTheme() {
 		return text("theme", null);
 	}
@@ -240,7 +240,7 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
 	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
 	 * 
-	 * @return project configured locales.
+	 * @return unmodifiable list of project locales.
 	 * @see #locales
 	 */
 	public List<Locale> getLocales() {
@@ -256,25 +256,48 @@ public final class ProjectDescriptor extends BaseDescriptor {
 		return locales.get(0);
 	}
 
+	/**
+	 * Get naming strategy used to declare <em>WOOD</em> operators. Supported values are defined by {@link NamingStrategy}
+	 * enumeration.
+	 * <p>
+	 * If no naming strategy is declared on project descriptor uses {@link NamingStrategy#XMLNS}.
+	 * 
+	 * @return naming strategy for <em>WOOD</em> operators.
+	 */
 	public NamingStrategy getNamingStrategy() {
 		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
 	}
 
-	public List<MediaQueryDefinition> getMediaQueryDefinitions() {
-		return mediaQueries;
+	/**
+	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
+	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
+	 * <p>
+	 * If no media query definition are declared on project descriptor uses next default values:
+	 * <ul>
+	 * <li>smd - min-width: 560px
+	 * <li>mdd - min-width: 768px
+	 * <li>lgd - min-width: 992px
+	 * <li>xld - min-width: 1200px
+	 * </ul>
+	 * Default values are the classic screen breakpoints used by <code>mobile first</code> layout styling.
+	 * 
+	 * @return unmodifiable collection of media query definitions declared on this descriptor, or default definitions.
+	 */
+	public Collection<MediaQueryDefinition> getMediaQueryDefinitions() {
+		return Collections.unmodifiableCollection(mediaQueries);
 	}
 
 	/**
 	 * Get the list of paths excluded from build process. Returned list is empty if <code>excludes</code> element is not
 	 * present.
 	 * 
-	 * @return excluded paths list, possible empty.
+	 * @return unmodifiable excluded paths list, possible empty.
 	 */
 	public List<String> getExcludes() {
 		Element el = doc.getByTag("excludes");
 		if (el == null) {
 			return Collections.emptyList();
 		}
-		return Strings.split(el.getText(), ',', ' ');
+		return Collections.unmodifiableList(Strings.split(el.getText(), ',', ' '));
 	}
 }

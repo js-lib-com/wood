@@ -14,6 +14,4 @@
 		<media-query alias="landscape" expression="orientation: landscape" />
 		<media-query alias="portrait" expression="orientation: portrait" />
 	</media-queries>
-	
-	<!-- res/compo/page_smd_landscape.css -->
 </project>

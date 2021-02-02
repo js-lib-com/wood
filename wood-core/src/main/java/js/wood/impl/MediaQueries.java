@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import js.util.Params;
 import js.util.Strings;
 import js.wood.Project;
+import js.wood.WoodException;
 
 public class MediaQueries implements Comparable<MediaQueries> {
 	private final Project project;
@@ -15,13 +17,17 @@ public class MediaQueries implements Comparable<MediaQueries> {
 		this.project = project;
 	}
 
-	public boolean add(String variant) {
-		MediaQueryDefinition query = project.getMediaQueryDefinition(variant);
-		if (query != null) {
-			queries.add(query);
-			return true;
+	public boolean add(String alias) {
+		Params.notNullOrEmpty(alias, "Alias");
+		MediaQueryDefinition query = project.getMediaQueryDefinition(alias);
+		if (query == null) {
+			return false;
 		}
-		return false;
+		if(queries.contains(query)) {
+			throw new WoodException("Media query defintion override for alias |%s|.", alias);
+		}
+		queries.add(query);
+		return true;
 	}
 
 	public boolean isEmpty() {

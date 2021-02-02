@@ -73,7 +73,6 @@ public class StyleReaderTest {
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 		String style = writer.toString();
-		System.out.println(style);
 
 		assertThat(style, containsString("@style/dialog"));
 		assertThat(style, containsString("width: 960px;"));

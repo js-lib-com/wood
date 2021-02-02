@@ -765,7 +765,6 @@ public class BuilderTest extends BuilderTestCase {
 		page.addScript("script/index.js", false);
 
 		String doc = stringify(page.getDocument());
-		System.out.println(doc);
 		assertTrue(doc.contains("<META content=\"author\" name=\"Author\"></META>"));
 		assertTrue(doc.contains("<TITLE>title</TITLE>"));
 		assertTrue(doc.contains("<META content=\"description\" name=\"Description\"></META>"));
