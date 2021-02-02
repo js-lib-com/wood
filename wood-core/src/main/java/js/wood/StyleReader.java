@@ -12,7 +12,6 @@ import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
-import js.wood.impl.StyleExtensionReader;
 
 /**
  * Style file reader adds style variants, as media queries sections, to given base style file. This class is used in conjunction
@@ -84,7 +83,7 @@ public class StyleReader extends Reader {
 	 */
 	public StyleReader(FilePath styleFile) {
 		Params.isFalse(styleFile.hasVariants(), "Style reader decorates a base style file and supplied file is a variant.");
-		this.reader = new StyleExtensionReader(styleFile.getReader());
+		this.reader = styleFile.getReader();
 		this.state = State.BASE_CONTENT;
 
 		final String styleFileBasename = styleFile.getBaseName();
@@ -143,7 +142,7 @@ public class StyleReader extends Reader {
 				}
 				FilePath variantsEntry = variantsIterator.next();
 				// prepare next reader; current one was already closed so is safe to replace it wit a new one
-				reader = new StyleExtensionReader(variantsEntry.getReader());
+				reader = variantsEntry.getReader();
 
 				// prepare source and source index for variant header copy
 				// variants entry contains prepared media expressions ready to be inserted into media block header

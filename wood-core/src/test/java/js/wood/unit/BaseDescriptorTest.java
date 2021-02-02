@@ -22,7 +22,7 @@ import js.wood.IMetaReference;
 import js.wood.IScriptReference;
 import js.wood.impl.BaseDescriptor;
 
-public class BaseDescriptorTest extends WoodTestCase {
+public class BaseDescriptorTest {
 	private BaseDescriptor descriptor;
 
 	@Before
