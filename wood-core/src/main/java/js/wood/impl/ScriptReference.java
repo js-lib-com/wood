@@ -34,13 +34,6 @@ public class ScriptReference implements IScriptReference {
 		this.source = source;
 	}
 
-	public ScriptReference(String source, String integrity, String crossOrigin, boolean defer) {
-		this.source = source;
-		this.integrity = integrity;
-		this.crossOrigin = crossOrigin;
-		this.defer = defer;
-	}
-
 	@Override
 	public String getSource() {
 		return source;
