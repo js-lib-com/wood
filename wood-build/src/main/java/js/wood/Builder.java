@@ -207,8 +207,6 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
 		}
 
-		DefaultAttributes.update(pageDocument.getDocument());
-
 		buildFS.writePage(page, pageDocument);
 	}
 

@@ -123,7 +123,6 @@ public final class Preview {
 			addScript(doc, previewScript);
 		}
 
-		DefaultAttributes.update(doc);
 		doc.serialize(writer, true);
 	}
 
