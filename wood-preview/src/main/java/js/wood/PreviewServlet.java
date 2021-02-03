@@ -95,8 +95,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	/** Variables cache initialized before every component preview processing. */
 	private static VariablesCache variablesCache = new VariablesCache();
 
-	private Json json;
-
 	/**
 	 * Servlet instance initialization. This hook is invoked by Servlet container when first create preview Servlet instance.
 	 * Since this Servlet is declared <code>load-on-startup</code> this initialization occurs at application deployment.
@@ -110,7 +108,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		super.init(config);
 		ServletContext context = config.getServletContext();
 		project = new PreviewProject(context.getInitParameter(PROJECT_DIR_PARAM));
-		json = Classes.loadService(Json.class);
 	}
 
 	/**
@@ -265,6 +262,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		httpResponse.setStatus(responseCode);
 		httpResponse.setContentType(APPLICATION_JSON);
 
+		Json json = Classes.loadService(Json.class);
 		StringWriter buffer = new StringWriter();
 		json.stringify(buffer, throwable);
 

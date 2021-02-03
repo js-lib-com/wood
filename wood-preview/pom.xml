@@ -53,12 +53,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.js-lib</groupId>
-			<artifactId>wood-js</artifactId>
-			<version>1.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.js-lib</groupId>
 			<artifactId>js-json</artifactId>
 			<version>2.0.0</version>
 			<scope>test</scope>
