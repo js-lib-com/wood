@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import js.util.Params;
 import js.util.Strings;
@@ -120,6 +121,7 @@ public class Project {
 		this.projectDir = new File(projectPath);
 		Params.isDirectory(this.projectDir, "Project directory");
 		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
+		this.excludes = descriptor.getExcludes().stream().map(exclude -> Path.create(this, exclude.trim())).collect(Collectors.toList());
 
 		this.resourcesDir = new DirPath(this, CT.RESOURCE_DIR);
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
@@ -128,11 +130,6 @@ public class Project {
 		this.name = descriptor.getName(this.projectDir.getName());
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.name));
 		this.description = descriptor.getDescription(this.display);
-
-		this.excludes = new ArrayList<>();
-		for (String exclude : descriptor.getExcludes()) {
-			excludes.add(Path.create(this, exclude.trim()));
-		}
 
 		switch (this.descriptor.getNamingStrategy()) {
 		case XMLNS:
@@ -324,7 +321,7 @@ public class Project {
 	public List<ILinkReference> getLinkReferences() {
 		return descriptor.getLinks();
 	}
-
+	
 	public List<IScriptReference> getScriptReferences() {
 		return descriptor.getScripts();
 	}

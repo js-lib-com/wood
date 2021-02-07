@@ -5,6 +5,8 @@ public interface IMetaReference {
 
 	String getHttpEquiv();
 
+	String getProperty();
+
 	String getContent();
 
 	String getCharset();

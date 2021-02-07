@@ -9,7 +9,7 @@ public class LinkReference implements ILinkReference {
 	private String relationship;
 	private String media;
 	private String referrerPolicy;
-	private boolean disabled;
+	private String disabled;
 	private String type;
 	private String asType;
 	private String prefetch;
@@ -66,12 +66,12 @@ public class LinkReference implements ILinkReference {
 		return referrerPolicy;
 	}
 
-	public void setDisabled(boolean disabled) {
+	public void setDisabled(String disabled) {
 		this.disabled = disabled;
 	}
 
 	@Override
-	public boolean isDisabled() {
+	public String getDisabled() {
 		return disabled;
 	}
 

@@ -17,7 +17,7 @@ public interface ILinkReference {
 
 	String getIntegrity();
 
-	boolean isDisabled();
+	String getDisabled();
 
 	String getAsType();
 

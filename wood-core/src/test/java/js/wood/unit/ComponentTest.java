@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -309,92 +308,39 @@ public class ComponentTest {
 	// ------------------------------------------------------
 	// Exceptional conditions
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void badLayoutName() {
-		try {
-			getCompo("exception/bad-layout-name");
-			fail("Bad layout name should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().contains("The system cannot find the file specified"));
-		}
+		getCompo("exception/bad-layout-name");
 	}
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void missingTemplateCompo() {
-		try {
-			getCompo("exception/missing-template-compo");
-			fail("Missing template component should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().contains("Missing component path"));
-		}
+		getCompo("exception/missing-template-compo");
 	}
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void missingWidgetCompo() {
-		try {
-			getCompo("exception/missing-widget-compo");
-			fail("Missing widget component should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().contains("Missing component path"));
-		}
+		getCompo("exception/missing-widget-compo");
 	}
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void circularTemplateReference() {
-		try {
-			getCompo("exception/circular-template-reference");
-			fail("Circular template reference should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().contains("Circular templates references suspicion."));
-		}
+		getCompo("exception/circular-template-reference");
 	}
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void circularWidgetReference() {
-		try {
-			getCompo("exception/circular-widget-reference");
-			fail("Cicular widget reference should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().startsWith("Circular templates references suspicion."));
-		}
+		getCompo("exception/circular-widget-reference");
 	}
 
-	@Test
+	@Test(expected = WoodException.class)
 	public void emptyLayout() {
-		try {
-			getCompo("exception/empty-layout");
-			fail("Empty layout should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().startsWith("Empty layout"));
-		}
+		getCompo("exception/empty-layout");
 	}
 
-	@Test
-	public void missingScript() {
-		try {
-			getCompo("exception/missing-script");
-			// fail("Missing script reference should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().startsWith("Broken script reference."));
-		}
-	}
-
-	@Test
+	@Test(expected = WoodException.class)
 	public void missingEditable() {
-		try {
-			getCompo("exception/missing-editable/content");
-			fail("Missing editable should rise exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof WoodException);
-			assertTrue(e.getMessage().contains("Missing editable"));
-		}
+		getCompo("exception/missing-editable/content");
 	}
 
 	// ------------------------------------------------------

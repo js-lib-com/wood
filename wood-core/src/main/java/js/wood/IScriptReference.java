@@ -5,11 +5,11 @@ public interface IScriptReference {
 
 	String getType();
 
-	boolean isAsync();
+	String getAsync();
 	
-	boolean isDefer();
+	String getDefer();
 
-	boolean isNoModule();
+	String getNoModule();
 	
 	String getNonce();
 	

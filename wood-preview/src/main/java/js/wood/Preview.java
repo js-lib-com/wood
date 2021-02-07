@@ -131,6 +131,8 @@ public final class Preview {
 
 		final String name = meta.getName();
 		final String httpEquiv = meta.getHttpEquiv();
+		final String property = meta.getProperty();
+
 		Element metaElement = null;
 		if (name != null) {
 			metaElement = head.getByAttr("name", name);
@@ -138,12 +140,16 @@ public final class Preview {
 		if (httpEquiv != null) {
 			metaElement = head.getByAttr("http-equiv", httpEquiv);
 		}
+		if (property != null) {
+			metaElement = head.getByAttr("property", property);
+		}
 		if (metaElement == null) {
 			metaElement = doc.createElement("meta");
 		}
 
 		setAttr(metaElement, "name", name);
 		setAttr(metaElement, "http-equiv", httpEquiv);
+		setAttr(metaElement, "property", property);
 		setAttr(metaElement, "content", meta.getContent());
 		setAttr(metaElement, "charset", meta.getCharset());
 
@@ -165,11 +171,7 @@ public final class Preview {
 		setAttr(linkElement, "referrerpolicy", link.getReferrerPolicy());
 		setAttr(linkElement, "crossorigin", link.getCrossOrigin());
 		setAttr(linkElement, "integrity", link.getIntegrity());
-
-		if (link.isDisabled()) {
-			linkElement.setAttr("disabled", "true");
-		}
-
+		setAttr(linkElement, "disabled", link.getDisabled());
 		setAttr(linkElement, "as", link.getAsType());
 		setAttr(linkElement, "sizes", link.getSizes());
 		setAttr(linkElement, "imagesizes", link.getImageSizes());
@@ -224,16 +226,9 @@ public final class Preview {
 		}
 
 		setAttr(scriptElement, "type", script.getType(), "text/javascript");
-		if (script.isAsync()) {
-			scriptElement.setAttr("async", "true");
-		}
-		if (script.isDefer()) {
-			scriptElement.setAttr("defer", "true");
-		}
-		if (script.isNoModule()) {
-			scriptElement.setAttr("nomodule", "true");
-		}
-
+		setAttr(scriptElement, "async", script.getAsync());
+		setAttr(scriptElement, "defer", script.getDefer());
+		setAttr(scriptElement, "nomodule", script.getNoModule());
 		setAttr(scriptElement, "nonce", script.getNonce());
 		setAttr(scriptElement, "referrerpolicy", script.getReferrerPolicy());
 		setAttr(scriptElement, "crossorigin", script.getCrossOrigin());

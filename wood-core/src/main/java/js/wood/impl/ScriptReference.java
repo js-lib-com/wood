@@ -21,9 +21,9 @@ public class ScriptReference implements IScriptReference {
 	private final String source;
 
 	private String type;
-	private boolean async;
-	private boolean defer;
-	private boolean noModule;
+	private String async;
+	private String defer;
+	private String noModule;
 	private String nonce;
 	private String referrerPolicy;
 	private String integrity;
@@ -48,30 +48,30 @@ public class ScriptReference implements IScriptReference {
 		return type;
 	}
 
-	public void setAsync(boolean async) {
+	public void setAsync(String async) {
 		this.async = async;
 	}
 
 	@Override
-	public boolean isAsync() {
+	public String getAsync() {
 		return async;
 	}
 
-	public void setDefer(boolean defer) {
+	public void setDefer(String defer) {
 		this.defer = defer;
 	}
 
 	@Override
-	public boolean isDefer() {
+	public String getDefer() {
 		return defer;
 	}
 
-	public void setNoModule(boolean noModule) {
+	public void setNoModule(String noModule) {
 		this.noModule = noModule;
 	}
 
 	@Override
-	public boolean isNoModule() {
+	public String getNoModule() {
 		return noModule;
 	}
 
