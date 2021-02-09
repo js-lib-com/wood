@@ -1,6 +1,7 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -26,9 +27,8 @@ public class LayoutReaderTest {
 
 		DocumentBuilder builder = new DocumentBuilderImpl();
 		Document doc = builder.parseXML(stringWriter.toString());
-		assertEquals("layout", doc.getRoot().getTag());
-		assertEquals("header 1", doc.getRoot().getByTag("h1").getText());
-		assertEquals("header 2", doc.getRoot().getByTag("h2").getText());
+		assertThat(doc.getRoot().getTag(), equalTo("layout"));
+		assertThat(doc.getRoot().getByTag("h1").getText(), equalTo("header 1"));
+		assertThat(doc.getRoot().getByTag("h2").getText(), equalTo("header 2"));
 	}
-
 }

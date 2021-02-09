@@ -1,8 +1,10 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -47,18 +49,18 @@ public class ProjectTest implements IReferenceHandler {
 	public void initialization() throws FileNotFoundException {
 		project = new Project("src/test/resources/project");
 
-		assertEquals(new File("src/test/resources/project"), project.getProjectDir());
-		assertNotNull(Classes.getFieldValue(project, "descriptor"));
+		assertThat(project.getProjectDir(), equalTo(new File("src/test/resources/project")));
+		assertThat(Classes.getFieldValue(project, "descriptor"), notNullValue());
 
-		assertEquals(CT.ASSETS_DIR + "/", project.getAssetsDir().toString());
-		assertEquals("res/asset/favicon.ico", project.getFavicon().toString());
+		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR + "/"));
+		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
 
-		assertEquals("project", project.getName());
-		assertEquals("Test Project", project.getDisplay());
-		assertEquals("Project used as fixture for unit testing.", project.getDescription());
+		assertThat(project.getName(), equalTo("project"));
+		assertThat(project.getDisplay(), equalTo("Test Project"));
+		assertThat(project.getDescription(), equalTo("Project used as fixture for unit testing."));
 
 		assertTrue(project.getThemeStyles().isEmpty());
-		assertEquals(4, project.getLocales().size());
+		assertThat(project.getLocales(), hasSize(4));
 	}
 
 	@Test
@@ -76,7 +78,7 @@ public class ProjectTest implements IReferenceHandler {
 		}
 
 		List<FilePath> styles = project.getThemeStyles();
-		assertEquals(4, styles.size());
+		assertThat(styles, hasSize(4));
 		assertTrue(styles.contains(filePath("res/theme/reset.css")));
 		assertTrue(styles.contains(filePath("res/theme/fx.css")));
 		assertTrue(styles.contains(filePath("res/theme/form.css")));
@@ -128,7 +130,7 @@ public class ProjectTest implements IReferenceHandler {
 	}
 
 	private void assertMedia(String expected, String language, Reference reference, FilePath source) {
-		assertEquals(expected, project.getMediaFile(language != null ? new Locale(language) : null, reference, source).value());
+		assertThat(project.getMediaFile(language != null ? new Locale(language) : null, reference, source).value(), equalTo(expected));
 	}
 
 	@Test

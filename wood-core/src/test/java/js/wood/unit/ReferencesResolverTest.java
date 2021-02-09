@@ -1,6 +1,7 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.io.IOException;
 
@@ -34,6 +35,6 @@ public class ReferencesResolverTest {
 			}
 		});
 
-		assertEquals("<h1>resource value</h1>", value);
+		assertThat(value, equalTo("<h1>resource value</h1>"));
 	}
 }

@@ -1,9 +1,11 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -31,16 +33,16 @@ public class ComponentTest {
 	public void simpleLayout() {
 		Component compo = getCompo("simple/layout");
 
-		assertEquals("res/simple/layout/layout.htm", field(compo, "baseLayoutPath").toString());
-		assertEquals("layout", compo.getName());
-		assertEquals("Components / Layout", compo.getDisplay());
-		assertEquals("Components / Layout", compo.getDescription());
-		assertEquals("layout.htm", compo.getLayoutFileName());
+		assertThat(field(compo, "baseLayoutPath").toString(), equalTo("res/simple/layout/layout.htm"));
+		assertThat(compo.getName(), equalTo("layout"));
+		assertThat(compo.getDisplay(), equalTo("Components / Layout"));
+		assertThat(compo.getDescription(), equalTo("Components / Layout"));
+		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
 
 		Element layout = compo.getLayout();
-		assertNotNull(layout);
-		assertEquals("body", layout.getTag());
-		assertEquals("Simple Layout", layout.getByTag("h1").getText());
+		assertThat(layout, notNullValue());
+		assertThat(layout.getTag(), equalTo("body"));
+		assertThat(layout.getByTag("h1").getText(), equalTo("Simple Layout"));
 
 		assertTrue(compo.getStyleFiles().isEmpty());
 	}
@@ -51,15 +53,15 @@ public class ComponentTest {
 		Element layout = compo.getLayout();
 
 		Element editable = layout.getByTag("section");
-		assertEquals("body", layout.getTag());
+		assertThat(layout.getTag(), equalTo("body"));
 
 		EList headings = layout.findByTag("h1");
-		assertEquals(2, headings.size());
-		assertEquals("Template", headings.item(0).getText());
-		assertEquals("Content", headings.item(1).getText());
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content"));
 
 		editable = layout.getByTag("section");
-		assertNotNull(editable);
+		assertThat(editable, notNullValue());
 		assertFalse(editable.hasAttrNS(WOOD.NS, "editable"));
 	}
 
@@ -69,10 +71,10 @@ public class ComponentTest {
 		Element layout = compo.getLayout();
 
 		EList inputs = layout.findByTag("input");
-		assertEquals(3, inputs.size());
-		assertEquals("user-name", inputs.item(0).getAttr("name"));
-		assertEquals("address", inputs.item(1).getAttr("name"));
-		assertEquals("password", inputs.item(2).getAttr("name"));
+		assertThat(inputs.size(), equalTo(3));
+		assertThat(inputs.item(0).getAttr("name"), equalTo("user-name"));
+		assertThat(inputs.item(1).getAttr("name"), equalTo("address"));
+		assertThat(inputs.item(2).getAttr("name"), equalTo("password"));
 	}
 
 	@Test
@@ -80,13 +82,13 @@ public class ComponentTest {
 		Component compo = getCompo("templates-hierarchy/compo");
 		Element layout = compo.getLayout();
 
-		assertEquals("body", layout.getTag());
+		assertThat(layout.getTag(), equalTo("body"));
 
 		EList headings = layout.findByTag("h1");
-		assertEquals(3, headings.size());
-		assertEquals("Grand Parent", headings.item(0).getText());
-		assertEquals("Parent", headings.item(1).getText());
-		assertEquals("Child", headings.item(2).getText());
+		assertThat(headings.size(), equalTo(3));
+		assertThat(headings.item(0).getText(), equalTo("Grand Parent"));
+		assertThat(headings.item(1).getText(), equalTo("Parent"));
+		assertThat(headings.item(2).getText(), equalTo("Child"));
 	}
 
 	@Test
@@ -95,9 +97,9 @@ public class ComponentTest {
 		Element layout = compo.getLayout();
 
 		EList headings = layout.findByTag("h1");
-		assertEquals(2, headings.size());
-		assertEquals("Component", headings.item(0).getText());
-		assertEquals("Widget", headings.item(1).getText());
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Component"));
+		assertThat(headings.item(1).getText(), equalTo("Widget"));
 	}
 
 	@Test
@@ -106,12 +108,12 @@ public class ComponentTest {
 		Element layout = compo.getLayout();
 
 		EList headings = layout.findByTag("h1");
-		assertEquals(5, headings.size());
-		assertEquals("Component", headings.item(0).getText());
-		assertEquals("Child One", headings.item(1).getText());
-		assertEquals("Nephew One", headings.item(2).getText());
-		assertEquals("Child Two", headings.item(3).getText());
-		assertEquals("Nephew Two", headings.item(4).getText());
+		assertThat(headings.size(), equalTo(5));
+		assertThat(headings.item(0).getText(), equalTo("Component"));
+		assertThat(headings.item(1).getText(), equalTo("Child One"));
+		assertThat(headings.item(2).getText(), equalTo("Nephew One"));
+		assertThat(headings.item(3).getText(), equalTo("Child Two"));
+		assertThat(headings.item(4).getText(), equalTo("Nephew Two"));
 	}
 
 	@Test
@@ -120,18 +122,18 @@ public class ComponentTest {
 		Element layout = compo.getLayout();
 
 		Element section = layout.getByTag("section");
-		assertEquals("template compo", section.getAttr("class"));
-		assertEquals("js.wood.Title", section.getAttr("data-format"));
-		assertEquals("section-id", section.getAttr("id"));
+		assertThat(section.getAttr("class"), equalTo("template compo"));
+		assertThat(section.getAttr("data-format"), equalTo("js.wood.Title"));
+		assertThat(section.getAttr("id"), equalTo("section-id"));
 
 		Element div = layout.getByTag("div");
-		assertEquals("widget compo", div.getAttr("class"));
-		assertEquals("js.wood.Widget", div.getAttr("data-class"));
-		assertEquals("compo-id", div.getAttr("id"));
+		assertThat(div.getAttr("class"), equalTo("widget compo"));
+		assertThat(div.getAttr("data-class"), equalTo("js.wood.Widget"));
+		assertThat(div.getAttr("id"), equalTo("compo-id"));
 
 		// template and widget does not overwrite compo attributes; names are not changed
-		assertEquals("section", section.getAttr("name"));
-		assertEquals("div", div.getAttr("name"));
+		assertThat(section.getAttr("name"), equalTo("section"));
+		assertThat(div.getAttr("name"), equalTo("div"));
 	}
 
 	@Test
@@ -139,7 +141,7 @@ public class ComponentTest {
 		Component compo = getCompo("attributes-entity/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("div");
-		assertEquals("P&G", div.getAttr("name"));
+		assertThat(div.getAttr("name"), equalTo("P&G"));
 	}
 
 	@Test
@@ -147,7 +149,7 @@ public class ComponentTest {
 		Component compo = getCompo("parameter/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("h1");
-		assertEquals("Widget Title", div.getText());
+		assertThat(div.getText(), equalTo("Widget Title"));
 	}
 
 	@Test
@@ -155,8 +157,8 @@ public class ComponentTest {
 		Component compo = getCompo("parameter-entity/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("h1");
-		assertEquals("P&G", div.getAttr("data-name"));
-		assertEquals("P&G", div.getText());
+		assertThat(div.getAttr("data-name"), equalTo("P&G"));
+		assertThat(div.getText(), equalTo("P&G"));
 	}
 
 	@Test
@@ -164,10 +166,10 @@ public class ComponentTest {
 		Component compo = getCompo("styles/compo");
 		List<FilePath> styles = compo.getStyleFiles();
 
-		assertEquals(3, styles.size());
-		assertEquals("res/styles/widget/widget.css", styles.get(0).toString());
-		assertEquals("res/styles/template/template.css", styles.get(1).toString());
-		assertEquals("res/styles/compo/compo.css", styles.get(2).toString());
+		assertThat(styles.size(), equalTo(3));
+		assertThat(styles.get(0).toString(), equalTo("res/styles/widget/widget.css"));
+		assertThat(styles.get(1).toString(), equalTo("res/styles/template/template.css"));
+		assertThat(styles.get(2).toString(), equalTo("res/styles/compo/compo.css"));
 	}
 
 	/**
@@ -209,10 +211,10 @@ public class ComponentTest {
 		});
 		compo.scan(false);
 
-		assertEquals(3, references.size());
-		assertEquals("@string/title", references.get(0).toString());
-		assertEquals("@image/logo", references.get(1).toString());
-		assertEquals("@text/message", references.get(2).toString());
+		assertThat(references.size(), equalTo(3));
+		assertThat(references.get(0).toString(), equalTo("@string/title"));
+		assertThat(references.get(1).toString(), equalTo("@image/logo"));
+		assertThat(references.get(2).toString(), equalTo("@text/message"));
 	}
 
 	@Test
@@ -223,86 +225,83 @@ public class ComponentTest {
 		assertNotNull(layout);
 	}
 
-	// ------------------------------------------------------
-	// Integration test
-
 	@Test
 	public void fullComponent() {
 		Component compo = getCompo("full/compo");
 		Element layout = Classes.getFieldValue(compo, "layout");
 
-		assertNotNull(layout);
-		assertEquals("body", layout.getTag());
+		assertThat(layout, notNullValue());
+		assertThat(layout.getTag(), equalTo("body"));
 		EList children = layout.getChildren();
-		assertEquals(4, children.size());
-		assertEquals("header", children.item(0).getTag());
-		assertEquals("nav", children.item(1).getTag());
-		assertEquals("section", children.item(2).getTag());
-		assertEquals("footer", children.item(3).getTag());
+		assertThat(children.size(), equalTo(4));
+		assertThat(children.item(0).getTag(), equalTo("header"));
+		assertThat(children.item(1).getTag(), equalTo("nav"));
+		assertThat(children.item(2).getTag(), equalTo("section"));
+		assertThat(children.item(3).getTag(), equalTo("footer"));
 
 		Element mainSection = children.item(2);
 		String mainSectionCssClass = mainSection.getAttr("class");
 		assertTrue(mainSectionCssClass.contains("main"));
 		assertTrue(mainSectionCssClass.contains("rounded-box"));
-		assertNull(mainSection.getAttr("data-editable"));
+		assertThat(mainSection.getAttr("data-editable"), nullValue());
 
 		children = mainSection.getChildren();
-		assertEquals(3, children.size());
-		assertEquals("section", children.item(0).getTag());
-		assertEquals("h1", children.item(1).getTag());
-		assertEquals("section", children.item(2).getTag());
+		assertThat(children.size(), equalTo(3));
+		assertThat(children.item(0).getTag(), equalTo("section"));
+		assertThat(children.item(1).getTag(), equalTo("h1"));
+		assertThat(children.item(2).getTag(), equalTo("section"));
 
 		Element sideBar = children.item(0);
-		assertEquals("side-bar", sideBar.getAttr("class"));
+		assertThat(sideBar.getAttr("class"), equalTo("side-bar"));
 
 		Element heading = children.item(1);
-		assertEquals("child-caption", heading.getAttr("class"));
-		assertEquals("js.wood.Title", heading.getAttr("data-class"));
-		assertNull(heading.getAttr("data-editable"));
-		assertEquals("caption-id", heading.getAttr("id"));
-		assertEquals("Child Caption", heading.getText());
+		assertThat(heading.getAttr("class"), equalTo("child-caption"));
+		assertThat(heading.getAttr("data-class"), equalTo("js.wood.Title"));
+		assertThat(heading.getAttr("data-editable"), nullValue());
+		assertThat(heading.getAttr("id"), equalTo("caption-id"));
+		assertThat(heading.getText(), equalTo("Child Caption"));
 
 		Element content = children.item(2);
 		String contentCssClass = content.getAttr("class");
 		assertTrue(contentCssClass.contains("child-content"));
 		assertTrue(contentCssClass.contains("content"));
-		assertNull(content.getAttr("data-editable"));
-		assertEquals("content-id", content.getAttr("id"));
+		assertThat(content.getAttr("data-editable"), nullValue());
+		assertThat(content.getAttr("id"), equalTo("content-id"));
 
 		children = content.getChildren();
-		assertEquals(2, children.size());
-		assertEquals("h2", children.item(0).getTag());
-		assertEquals("section", children.item(1).getTag());
+		assertThat(children.size(), equalTo(2));
+		assertThat(children.item(0).getTag(), equalTo("h2"));
+		assertThat(children.item(1).getTag(), equalTo("section"));
 
 		heading = children.item(0);
-		assertEquals("Child Content", heading.getText());
+		assertThat(heading.getText(), equalTo("Child Content"));
 
 		Element section = children.item(1);
 		String sectionCssClass = section.getAttr("class");
 		assertTrue(sectionCssClass.contains("child"));
 		assertTrue(sectionCssClass.contains("rounded-box"));
-		assertNull(section.getAttr("data-widget"));
-		assertEquals("child-id", section.getAttr("id"));
+		assertThat(section.getAttr("data-widget"), nullValue());
+		assertThat(section.getAttr("id"), equalTo("child-id"));
 
 		children = section.getChildren();
-		assertEquals(4, children.size());
-		assertEquals("h3", children.item(0).getTag());
-		assertEquals("ul", children.item(3).getTag());
+		assertThat(children.size(), equalTo(4));
+		assertThat(children.item(0).getTag(), equalTo("h3"));
+		assertThat(children.item(3).getTag(), equalTo("ul"));
 
 		Element ul = children.item(3);
 		String ulCssClass = ul.getAttr("class");
 		assertTrue(ulCssClass.contains("nephew"));
 		assertTrue(ulCssClass.contains("menu"));
-		assertEquals("js.wood.Menu", ul.getAttr("data-class"));
-		assertNull(ul.getAttr("data-widget"));
-		assertEquals("nephew-id", ul.getAttr("id"));
+		assertThat(ul.getAttr("data-class"), equalTo("js.wood.Menu"));
+		assertThat(ul.getAttr("data-widget"), nullValue());
+		assertThat(ul.getAttr("id"), equalTo("nephew-id"));
 
 		children = ul.getChildren();
-		assertEquals(4, children.size());
-		assertEquals("Create", children.item(0).getText());
-		assertEquals("Read", children.item(1).getText());
-		assertEquals("Update", children.item(2).getText());
-		assertEquals("Delete", children.item(3).getText());
+		assertThat(children.size(), equalTo(4));
+		assertThat(children.item(0).getText(), equalTo("Create"));
+		assertThat(children.item(1).getText(), equalTo("Read"));
+		assertThat(children.item(2).getText(), equalTo("Update"));
+		assertThat(children.item(3).getText(), equalTo("Delete"));
 	}
 
 	// ------------------------------------------------------
