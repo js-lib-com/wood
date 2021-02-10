@@ -1,9 +1,12 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,26 +14,21 @@ import org.junit.Test;
 import js.wood.FilePath;
 import js.wood.PreviewProject;
 
-public class PreviewProjectTest extends PreviewTestCase {
+public class PreviewProjectTest {
 	private PreviewProject project;
 
 	@Before
 	public void beforeTest() {
-		project = project("project");
+		project = new PreviewProject("src/test/resources/project");
 	}
 
 	@Test
 	public void previewThemeStyles() {
 		List<FilePath> styles = project.getThemeStyles();
-		assertEquals(4, styles.size());
+		assertThat(styles, notNullValue());
+		assertThat(styles, hasSize(4));
 
-		assertTrue(styles.contains(filePath("res/theme/reset.css")));
-		assertTrue(styles.contains(filePath("res/theme/fx.css")));
-		assertTrue(styles.contains(filePath("res/theme/form.css")));
-		assertTrue(styles.contains(filePath("res/theme/style.css")));
-	}
-
-	private FilePath filePath(String path) {
-		return new FilePath(project, path);
+		List<String> fileNames = styles.stream().map(file -> file.value()).collect(Collectors.toList());
+		assertThat(fileNames, contains("res/theme/form.css", "res/theme/fx.css", "res/theme/reset.css", "res/theme/style.css"));
 	}
 }
