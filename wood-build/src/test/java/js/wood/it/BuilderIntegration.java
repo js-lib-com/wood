@@ -1,6 +1,8 @@
 package js.wood.it;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -10,16 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
+import js.util.Strings;
 import js.wood.Builder;
-import js.wood.BuilderTestCase;
 
-import org.junit.Test;
-
-public class BuilderIntegration extends BuilderTestCase {
+public class BuilderIntegration {
 	private static final String[] LANGUAGES = new String[] { "de", "en", "fr", "ro" };
 
 	private static final Map<String, String> TITLES = new HashMap<String, String>();
@@ -126,7 +128,7 @@ public class BuilderIntegration extends BuilderTestCase {
 
 		for (String language : LANGUAGES) {
 			for (String dir : FILES_COUNT.keySet()) {
-				assertEquals((int) FILES_COUNT.get(dir), file(buildDir, language, dir).list().length);
+				assertThat(file(buildDir, language, dir).list().length, equalTo((int) FILES_COUNT.get(dir)));
 			}
 
 			for (String file : FILES) {
@@ -135,12 +137,12 @@ public class BuilderIntegration extends BuilderTestCase {
 
 			DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 			Document page = documentBuilder.loadHTML(file(buildDir, language, "index.htm"));
-			assertEquals(TITLES.get(language), page.getByTag("title").getText());
+			assertThat(page.getByTag("title").getText(), equalTo(TITLES.get(language)));
 
 			EList styles = page.findByTag("link");
-			assertEquals(STYLES.length, styles.size());
+			assertThat(styles.size(), equalTo(STYLES.length));
 			for (int i = 0; i < STYLES.length; ++i) {
-				assertStyle(STYLES[i], styles, i);
+				assertThat(styles.item(i).getAttr("href"), equalTo(STYLES[i]));
 			}
 
 			EList elist = page.findByTag("script");
@@ -148,7 +150,7 @@ public class BuilderIntegration extends BuilderTestCase {
 			for (int i = 0; i < elist.size(); ++i) {
 				scripts.add(elist.item(i).getAttr("src"));
 			}
-			assertEquals(10, scripts.size());
+			assertThat(scripts, hasSize(10));
 
 			assertTrue(scripts.indexOf("script/hc.page.Index.js") > scripts.indexOf("script/js-lib.js"));
 			assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/js-lib.js"));
@@ -169,16 +171,28 @@ public class BuilderIntegration extends BuilderTestCase {
 			assertTrue(scripts.contains("script/js.hood.TopMenu.js"));
 
 			EList images = page.findByTag("img");
-			assertEquals(IMAGES.length, images.size());
+			assertThat(images.size(), equalTo(IMAGES.length));
 			for (int i = 0; i < IMAGES.length; ++i) {
-				assertImage(IMAGES[i], images, i);
+				assertThat(images.item(i).getAttr("src"), equalTo(IMAGES[i]));
 			}
 
 			EList anchors = page.findByTag("a");
-			assertEquals(ANCHORS.length, anchors.size());
+			assertThat(anchors.size(), equalTo(ANCHORS.length));
 			for (int i = 0; i < ANCHORS.length; ++i) {
-				assertAnchor(ANCHORS[i], anchors, i);
+				assertThat(anchors.item(i).getText(), equalTo(ANCHORS[i]));
 			}
 		}
+	}
+
+	private static String path(String fileName) {
+		return "src/test/resources/" + fileName;
+	}
+
+	private static File file(String fileName) {
+		return new File(new File("src/test/resources"), fileName);
+	}
+
+	private static File file(File dir, String... segments) {
+		return new File(dir, Strings.join(segments, '/'));
 	}
 }

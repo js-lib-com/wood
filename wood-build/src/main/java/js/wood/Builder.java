@@ -41,19 +41,23 @@ public class Builder implements IReferenceHandler {
 	private static final Log log = LogFactory.getLog(Builder.class);
 
 	/** Project instance. */
-	private BuilderProject project;
+	private final BuilderProject project;
 
 	/** Project discovered pages. */
-	private Collection<CompoPath> pages = new ArrayList<>();
+	private final Collection<CompoPath> pages = new ArrayList<>();
 
 	/** Cache for resource variables. */
-	private Map<DirPath, IVariables> variables;
+	private final Map<DirPath, IVariables> variables;
 
 	/** Current processing build file system, that is, build site directory. */
-	private BuildFS buildFS;
+	private final BuildFS buildFS;
 
 	/** Current processing locale variant. */
 	private Locale locale;
+
+	public Builder(String projectPath) {
+		this(projectPath, null);
+	}
 
 	/**
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
@@ -61,9 +65,9 @@ public class Builder implements IReferenceHandler {
 	 * 
 	 * @param projectPath path to project root directory.
 	 */
-	public Builder(String projectPath) {
-		log.trace("Builder(String)");
-		this.project = new BuilderProject(projectPath);
+	public Builder(String projectPath, File siteDir) {
+		log.trace("Builder(String, File)");
+		this.project = new BuilderProject(projectPath, siteDir);
 		this.project.scanBuildFiles();
 
 		// scan project layout files then initialize pages list and global variables map
@@ -78,6 +82,26 @@ public class Builder implements IReferenceHandler {
 	}
 
 	/**
+	 * Test constructor.
+	 * 
+	 * @param project
+	 */
+	public Builder(BuilderProject project) {
+		this.project = project;
+		this.project.scanBuildFiles();
+
+		// scan project layout files then initialize pages list and global variables map
+		for (LayoutFile layoutFile : this.project.getLayouts()) {
+			if (layoutFile.isPage()) {
+				this.pages.add(layoutFile.getCompoPath());
+			}
+		}
+
+		this.variables = this.project.getVariables();
+		this.buildFS = new DefaultBuildFS(project);
+	}
+	
+	/**
 	 * Set build number.
 	 * 
 	 * @param buildNumber build number.
@@ -87,18 +111,9 @@ public class Builder implements IReferenceHandler {
 	}
 
 	/**
-	 * Set site build directory.
-	 * 
-	 * @param siteDir site build directory, relative to project root.
-	 */
-	public void setSiteDir(File siteDir) {
-		project.setSiteDir(siteDir);
-	}
-
-	/**
 	 * Get the site build directory path, relative to project. Returned value is that from project configuration - see
-	 * {@link Project#getSiteDir(String)}, or default value {@link CT#DEF_SITE_DIR}. Path is guaranteed to have trailing
-	 * file separator.
+	 * {@link Project#getSiteDir(String)}, or default value {@link CT#DEF_SITE_DIR}. Path is guaranteed to have trailing file
+	 * separator.
 	 * 
 	 * @return site build path.
 	 */

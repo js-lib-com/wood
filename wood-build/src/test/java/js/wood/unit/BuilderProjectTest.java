@@ -1,8 +1,10 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -17,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import js.util.Classes;
+import js.util.Files;
 import js.wood.BuilderProject;
-import js.wood.BuilderTestCase;
 import js.wood.CT;
 import js.wood.CompoPath;
 import js.wood.DirPath;
@@ -33,25 +35,26 @@ import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
-public class BuilderProjectTest extends BuilderTestCase implements IReferenceHandler {
+public class BuilderProjectTest implements IReferenceHandler {
 	private BuilderProject project;
 
 	@Before
-	public void beforeTest() {
-		project = project("scripts");
+	public void beforeTest() throws IOException {
+		project = new BuilderProject("src/test/resources/project");
+		if (project.getSiteDir().exists()) {
+			Files.removeFilesHierarchy(project.getSiteDir());
+		}
 	}
 
 	@Test
 	public void initialization() throws FileNotFoundException {
-		project = project("project");
-		assertEquals(new File(project.getProjectDir(), CT.DEF_SITE_DIR), project.getSiteDir());
-		assertEquals("build/site/", project.getSitePath());
+		assertThat(project.getSiteDir(), equalTo(new File(project.getProjectDir(), CT.DEF_SITE_DIR)));
+		assertThat(project.getSitePath(), equalTo("build/site/"));
 		assertTrue(project.getLayouts().isEmpty());
 	}
 
 	@Test
 	public void layoutsScanner() throws Exception {
-		project = project("project");
 		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$LayoutsScanner", project);
 
 		for (String file : new String[] { "res/page/index/strings.xml", //
@@ -64,14 +67,13 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 		}
 
 		Set<LayoutFile> layouts = project.getLayouts();
-		assertEquals(2, layouts.size());
+		assertThat(layouts, hasSize(2));
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/page/index/index.htm"))));
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/template/page/page.htm"))));
 	}
 
 	@Test
 	public void variablesScanner() throws Exception {
-		project = project("project");
 		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$VariablesScanner", project);
 
 		for (String file : new String[] { "res/page/index/strings.xml", //
@@ -87,19 +89,18 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 		Map<DirPath, IVariables> projectVariables = project.getVariables();
 		assertFalse(projectVariables.isEmpty());
 
-		assertNotNull(projectVariables.get(dirPath("res/asset")));
-		assertNotNull(projectVariables.get(dirPath("res/theme")));
+		assertThat(projectVariables.get(dirPath("res/asset")), notNullValue());
+		assertThat(projectVariables.get(dirPath("res/theme")), notNullValue());
 
 		IVariables dirVariables = projectVariables.get(dirPath("res/page/index"));
-		assertNotNull(dirVariables);
-		assertNotNull(field(dirVariables, "assetVariables"));
+		assertThat(dirVariables, notNullValue());
 
 		FilePath source = filePath("res/page/index/index.htm");
-		assertEquals("Index Page", variable(dirVariables, source, "en", ResourceType.STRING, "title"));
-		assertEquals("Indexseite", variable(dirVariables, source, "de", ResourceType.STRING, "title"));
+		assertThat(variable(dirVariables, source, "en", ResourceType.STRING, "title"), equalTo("Index Page"));
+		assertThat(variable(dirVariables, source, "de", ResourceType.STRING, "title"), equalTo("Indexseite"));
 		// if a locale has not a variable uses default locale, in this case 'en'
-		assertEquals("Index Page", variable(dirVariables, source, "jp", ResourceType.STRING, "title"));
-		assertEquals("#000000", variable(dirVariables, source, "en", ResourceType.COLOR, "page-header-bg"));
+		assertThat(variable(dirVariables, source, "jp", ResourceType.STRING, "title"), equalTo("Index Page"));
+		assertThat(variable(dirVariables, source, "en", ResourceType.COLOR, "page-header-bg"), equalTo("#000000"));
 	}
 
 	private String variable(IVariables variables, FilePath source, String language, ResourceType type, String name) {
@@ -108,7 +109,6 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 
 	@Test
 	public void emptyVariablesScanner() throws Exception {
-		project = project("project");
 		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$VariablesScanner", project);
 
 		DirPath dir = dirPath("res/template/sidebar");
@@ -118,16 +118,11 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 		assertFalse(projectVariables.isEmpty());
 
 		IVariables dirVariables = projectVariables.get(dir);
-		assertNotNull(dirVariables);
-		assertNotNull(field(dirVariables, "assetVariables"));
-
-		Map<?, ?> languageValues = field(dirVariables, "localeValues");
-		assertTrue(languageValues.isEmpty());
+		assertThat(dirVariables, notNullValue());
 	}
 
 	@Test
 	public void pagesDiscovery() throws IOException {
-		project = project("project");
 		project.scanBuildFiles();
 
 		final Set<LayoutFile> expected = new HashSet<LayoutFile>();
@@ -147,6 +142,7 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 
 	@Test
 	public void descriptorValues() {
+		project = new BuilderProject("src/test/resources/scripts");
 		project.scanBuildFiles();
 		CompoPath compoPath = new CompoPath(project, "index");
 
@@ -158,15 +154,19 @@ public class BuilderProjectTest extends BuilderTestCase implements IReferenceHan
 			}
 		});
 
-		assertEquals("Index Page", descriptor.getDisplay(null));
-		assertEquals("Index page description.", descriptor.getDescription(null));
+		assertThat(descriptor.getDisplay(null), equalTo("Index Page"));
+		assertThat(descriptor.getDescription(null), equalTo("Index page description."));
 	}
 
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
 		Variables variables = new Variables(sourcePath.getDirPath());
 		if (project.getAssetsDir().exists()) {
-			invoke(variables, "load", project.getAssetsDir());
+			try {
+				Classes.invoke(variables, "load", project.getAssetsDir());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return variables.get(null, reference, sourcePath, this);
 	}

@@ -1,8 +1,10 @@
 package js.wood.unit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -14,19 +16,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 import js.util.Classes;
+import js.util.Files;
 import js.wood.BuilderProject;
 import js.wood.CompoPath;
 import js.wood.FilePath;
 import js.wood.LayoutFile;
 import js.wood.WoodException;
-import js.wood.BuilderTestCase;
 
-public class LayoutFileTest extends BuilderTestCase {
+public class LayoutFileTest {
 	private BuilderProject project;
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = project("layout-file");
+		project = new BuilderProject("src/test/resources/layout-file");
+		if (project.getSiteDir().exists()) {
+			Files.removeFilesHierarchy(project.getSiteDir());
+		}
 	}
 
 	private FilePath filePath(String path) {
@@ -37,62 +42,62 @@ public class LayoutFileTest extends BuilderTestCase {
 	public void content() {
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/page/index/index.htm"));
 
-		assertEquals("res/page/index/", layoutFile.getCompoPath().value());
+		assertThat(layoutFile.getCompoPath().value(), equalTo("res/page/index/"));
 		assertFalse((boolean) Classes.getFieldValue(layoutFile, "hasBody"));
 
 		Set<String> editables = Classes.getFieldValue(layoutFile, "editables");
 		assertTrue(editables.isEmpty());
 
 		Set<String> templates = Classes.getFieldValue(layoutFile, "templates");
-		assertEquals(1, templates.size());
-		assertEquals("page-body", templates.iterator().next());
+		assertThat(templates, hasSize(1));
+		assertThat(templates.iterator().next(), equalTo("page-body"));
 
 		CompoPath templatePath = Classes.getFieldValue(layoutFile, "templatePath");
-		assertEquals("res/template/sidebar-page/", templatePath.value());
+		assertThat(templatePath.value(), equalTo("res/template/sidebar-page/"));
 	}
 
 	@Test
 	public void template() {
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/template/sidebar-page/sidebar-page.htm"));
 
-		assertEquals("res/template/sidebar-page/", layoutFile.getCompoPath().value());
+		assertThat(layoutFile.getCompoPath().value(), equalTo("res/template/sidebar-page/"));
 		assertFalse((boolean) Classes.getFieldValue(layoutFile, "hasBody"));
 
 		Set<String> editables = Classes.getFieldValue(layoutFile, "editables");
-		assertEquals(1, editables.size());
-		assertEquals("sidebar", editables.iterator().next());
+		assertThat(editables, hasSize(1));
+		assertThat(editables.iterator().next(), equalTo("sidebar"));
 
 		Set<String> templates = Classes.getFieldValue(layoutFile, "templates");
-		assertEquals(1, templates.size());
-		assertEquals("page-body", templates.iterator().next());
+		assertThat(templates, hasSize(1));
+		assertThat(templates.iterator().next(), equalTo("page-body"));
 
 		CompoPath templatePath = Classes.getFieldValue(layoutFile, "templatePath");
-		assertEquals("res/template/page/", templatePath.value());
+		assertThat(templatePath.value(), equalTo("res/template/page/"));
 	}
 
 	@Test
 	public void pageTemplate() {
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/template/page/page.htm"));
 
-		assertEquals("res/template/page/", layoutFile.getCompoPath().value());
+		assertThat(layoutFile.getCompoPath().value(), equalTo("res/template/page/"));
 		assertTrue((boolean) Classes.getFieldValue(layoutFile, "hasBody"));
 
 		Set<String> editables = Classes.getFieldValue(layoutFile, "editables");
-		assertEquals(1, editables.size());
-		assertEquals("page-body", editables.iterator().next());
+		assertThat(editables, hasSize(1));
+		assertThat(editables.iterator().next(), equalTo("page-body"));
 
 		Set<String> templates = Classes.getFieldValue(layoutFile, "templates");
 		assertTrue(templates.isEmpty());
 
 		CompoPath templatePath = Classes.getFieldValue(layoutFile, "templatePath");
-		assertNull(templatePath);
+		assertThat(templatePath, nullValue());
 	}
 
 	@Test
 	public void widget() {
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/compo/widget/widget.htm"));
 
-		assertEquals("res/compo/widget/", layoutFile.getCompoPath().value());
+		assertThat(layoutFile.getCompoPath().value(), equalTo("res/compo/widget/"));
 		assertFalse((boolean) Classes.getFieldValue(layoutFile, "hasBody"));
 
 		Set<String> editables = Classes.getFieldValue(layoutFile, "editables");
@@ -101,25 +106,25 @@ public class LayoutFileTest extends BuilderTestCase {
 		Set<String> templates = Classes.getFieldValue(layoutFile, "templates");
 		assertTrue(templates.isEmpty());
 
-		assertNull(Classes.getFieldValue(layoutFile, "templatePath"));
+		assertThat(Classes.getFieldValue(layoutFile, "templatePath"), nullValue());
 	}
 
 	@Test
 	public void singleIndex() {
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/page/single-index/single-index.htm"));
 
-		assertEquals("res/page/single-index/", layoutFile.getCompoPath().value());
+		assertThat(layoutFile.getCompoPath().value(), equalTo("res/page/single-index/"));
 		assertFalse((boolean) Classes.getFieldValue(layoutFile, "hasBody"));
 
 		Set<String> editables = Classes.getFieldValue(layoutFile, "editables");
 		assertTrue(editables.isEmpty());
 
 		Set<String> templates = Classes.getFieldValue(layoutFile, "templates");
-		assertEquals(1, templates.size());
-		assertEquals("page-body", templates.iterator().next());
+		assertThat(templates, hasSize(1));
+		assertThat(templates.iterator().next(), equalTo("page-body"));
 
 		CompoPath templatePath = Classes.getFieldValue(layoutFile, "templatePath");
-		assertEquals("res/template/page/", templatePath.value());
+		assertThat(templatePath.value(), equalTo("res/template/page/"));
 	}
 
 	@Test
@@ -127,7 +132,7 @@ public class LayoutFileTest extends BuilderTestCase {
 		layoutFiles(project, "res/template/sidebar-page/sidebar-page.htm", "res/template/page/page.htm");
 
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/page/index/index.htm"));
-		assertNull(Classes.getFieldValue(layoutFile, "isPage"));
+		assertThat(Classes.getFieldValue(layoutFile, "isPage"), nullValue());
 		assertTrue(layoutFile.isPage());
 	}
 
@@ -136,7 +141,7 @@ public class LayoutFileTest extends BuilderTestCase {
 		layoutFiles(project, "res/template/page/page.htm");
 
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/template/sidebar-page/sidebar-page.htm"));
-		assertNull(Classes.getFieldValue(layoutFile, "isPage"));
+		assertThat(Classes.getFieldValue(layoutFile, "isPage"), nullValue());
 		assertFalse(layoutFile.isPage());
 	}
 
@@ -145,7 +150,7 @@ public class LayoutFileTest extends BuilderTestCase {
 		layoutFiles(project);
 
 		LayoutFile layoutFile = new LayoutFile(project, filePath("res/template/page/page.htm"));
-		assertNull(Classes.getFieldValue(layoutFile, "isPage"));
+		assertThat(Classes.getFieldValue(layoutFile, "isPage"), nullValue());
 		assertFalse(layoutFile.isPage());
 	}
 
@@ -194,8 +199,8 @@ public class LayoutFileTest extends BuilderTestCase {
 	}
 
 	private void layoutFiles(BuilderProject project, String... paths) {
-		Collection<LayoutFile> layouts = new HashSet<LayoutFile>();
-		field(project, "layouts", layouts);
+		Collection<LayoutFile> layouts = new HashSet<>();
+		Classes.setFieldValue(project, "layouts", layouts);
 		for (String path : paths) {
 			layouts.add(new LayoutFile(project, filePath(path)));
 		}

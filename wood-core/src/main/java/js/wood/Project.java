@@ -2,10 +2,8 @@ package js.wood;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import js.util.Params;
@@ -321,7 +319,7 @@ public class Project {
 	public List<ILinkReference> getLinkReferences() {
 		return descriptor.getLinks();
 	}
-	
+
 	public List<IScriptReference> getScriptReferences() {
 		return descriptor.getScripts();
 	}
@@ -413,15 +411,5 @@ public class Project {
 	 */
 	public boolean hasNamespace() {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
-	}
-
-	private Map<String, Object> attributes = new HashMap<>();
-
-	public void setAttribute(String name, Object value) {
-		attributes.put(name, value);
-	}
-
-	public Object getAttribute(String name) {
-		return attributes.get(name);
 	}
 }

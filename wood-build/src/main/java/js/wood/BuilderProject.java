@@ -16,17 +16,23 @@ public class BuilderProject extends Project {
 	 * Project layout files are HTM files describing user interface elements. By convention layout base name is the same as
 	 * component directory name.
 	 */
-	private Set<LayoutFile> layouts = new HashSet<>();
+	private final Set<LayoutFile> layouts;
 
 	/** Cache for resource variables. */
-	private Map<DirPath, Variables> variables = new HashMap<>();
+	private final Map<DirPath, Variables> variables;
 
 	/** Site build directory, usually part of master project build. */
-	private File siteDir;
+	private final File siteDir;
 
-	public BuilderProject(String projectPath) throws IllegalArgumentException {
+	public BuilderProject(String projectPath) {
+		this(projectPath, null);
+	}
+
+	public BuilderProject(String projectPath, File siteDir) {
 		super(projectPath);
-		this.siteDir = new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
+		this.layouts = new HashSet<>();
+		this.variables = new HashMap<>();
+		this.siteDir = siteDir != null ? siteDir : new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
 		if (!this.siteDir.exists()) {
 			this.siteDir.mkdir();
 		}
@@ -43,22 +49,6 @@ public class BuilderProject extends Project {
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
 		scanner.scan(new DirPath(this, CT.LIBRARY_DIR));
 		scanner.scan(new DirPath(this, CT.GENERATED_DIR));
-
-		/*
-		 * // scan for dependencies after all script files loaded, but only if discovery is enabled if (scriptDependencyStrategy
-		 * == ScriptDependencyStrategy.DISCOVERY) { for (ScriptFile scriptFile : scripts.values()) {
-		 * scriptFile.scanDependencies(classScripts); } }
-		 */
-	}
-
-	/**
-	 * Set site build directory. This method is designed for builder instance customization.
-	 * 
-	 * @param siteDir site build directory, relative to project root.
-	 * @see siteDir
-	 */
-	public void setSiteDir(File siteDir) {
-		this.siteDir = siteDir;
 	}
 
 	/**
