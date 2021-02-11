@@ -54,9 +54,6 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @version draft
  */
 public class Project {
-	// ------------------------------------------------------
-	// Project instance
-
 	/**
 	 * Project name is used for internal representation. This value may be supplied by {@link ProjectDescriptor#getName(String)}
 	 * with default to project directory name.
@@ -108,16 +105,14 @@ public class Project {
 	private final IOperatorsHandler operatorsHandler;
 
 	/**
-	 * Construct not initialized project instance. Initialize project instance state. Load project configuration and create
-	 * directories, if missing.
+	 * Construct and initialize project instance. Created instance is immutable.
 	 * 
-	 * @param projectPath path to project root directory.
+	 * @param projectDir path to existing project root directory.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
-	public Project(String projectPath) throws IllegalArgumentException {
-		Params.notNullOrEmpty(projectPath, "Project directory");
-		this.projectDir = new File(projectPath);
-		Params.isDirectory(this.projectDir, "Project directory");
+	public Project(File projectDir) throws IllegalArgumentException {
+		Params.isDirectory(projectDir, "Project directory");
+		this.projectDir = projectDir;
 		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> Path.create(this, exclude.trim())).collect(Collectors.toList());
 

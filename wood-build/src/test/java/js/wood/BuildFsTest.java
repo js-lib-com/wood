@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -28,7 +28,7 @@ public class BuildFsTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new BuilderProject("src/test/resources/project");
+		project = new BuilderProject(new File("src/test/resources/project"));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class BuildFsTest {
 	@Test
 	public void writeFavicon() throws IOException {
 		resetProjectLocales(project);
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		assertFalse(exists("favicon.ico"));
 		assertThat(buildFS.writeFavicon(null, new FilePath(project, "res/asset/favicon.ico")), equalTo("../img/favicon.ico"));
@@ -70,7 +70,7 @@ public class BuildFsTest {
 	@Test
 	public void writeMedia() throws IOException {
 		resetProjectLocales(project);
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 		buildFS.setLocale(new Locale("en"));
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
@@ -78,24 +78,37 @@ public class BuildFsTest {
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
 		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background.jpg"));
 		assertTrue(exists("img/background.jpg"));
+	}
 
-		buildFS.setBuildNumber(4);
+
+	@Test
+	public void writeMedia_BuildNumber() throws IOException {
+		resetProjectLocales(project);
+		BuildFS buildFS = new TestBuildFS(project, 4);
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background-004.jpg"));
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background-004.jpg"));
 		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background-004.jpg"));
 		assertTrue(exists("img/background-004.jpg"));
 	}
-
+	
 	@Test
 	public void writeStyle() throws IOException {
 		resetProjectLocales(project);
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style.css"));
 		assertTrue(exists("css/style.css"));
+	}
+	
+	@Test
+	public void writeStyle_BuildNumber() throws IOException {
+		resetProjectLocales(project);
+		BuildFS buildFS = new TestBuildFS(project, 4);
+		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
-		buildFS.setBuildNumber(4);
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style-004.css"));
 		assertTrue(exists("css/style-004.css"));
 	}
@@ -103,19 +116,26 @@ public class BuildFsTest {
 	@Test
 	public void writeScript() throws IOException {
 		resetProjectLocales(project);
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
 		assertTrue(exists("js/Index.js"));
-		buildFS.setBuildNumber(4);
+	}
+
+	@Test
+	public void writeScript_BuildNumber() throws IOException {
+		resetProjectLocales(project);
+		BuildFS buildFS = new TestBuildFS(project, 4);
+		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
+
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index-004.js"));
 		assertTrue(exists("js/Index-004.js"));
 	}
 
 	@Test
 	public void dirFactory() throws Exception {
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		buildFS.setLocale(new Locale("en"));
 		assertDir("src/test/resources/project/build/site/en/images", buildFS, "images");
@@ -125,7 +145,7 @@ public class BuildFsTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void nullLocale() {
-		BuildFS buildFS = new TestBuildFS(project);
+		BuildFS buildFS = new TestBuildFS(project, 0);
 		resetProjectLocales(project);
 		buildFS.setLocale(null);
 	}
@@ -135,8 +155,8 @@ public class BuildFsTest {
 	}
 
 	private static class TestBuildFS extends BuildFS {
-		public TestBuildFS(BuilderProject project) {
-			super(project);
+		public TestBuildFS(BuilderProject project, int buildNumber) {
+			super(project, buildNumber);
 		}
 
 		@Override

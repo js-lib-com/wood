@@ -121,7 +121,7 @@ public class BuilderIntegration {
 
 	@Test
 	public void buildIntegration() throws IOException {
-		Builder builder = new Builder(path("project"));
+		Builder builder = new Builder(new File("src/test/resources/project"));
 		builder.build();
 
 		File buildDir = file("project/build/site/");
@@ -182,10 +182,6 @@ public class BuilderIntegration {
 				assertThat(anchors.item(i).getText(), equalTo(ANCHORS[i]));
 			}
 		}
-	}
-
-	private static String path(String fileName) {
-		return "src/test/resources/" + fileName;
 	}
 
 	private static File file(String fileName) {

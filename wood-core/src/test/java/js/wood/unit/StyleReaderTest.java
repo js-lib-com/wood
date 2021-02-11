@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
@@ -26,7 +27,7 @@ public class StyleReaderTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/styles");
+		project = new Project(new File("src/test/resources/styles"));
 	}
 
 	@Test

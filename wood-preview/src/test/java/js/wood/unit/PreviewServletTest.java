@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -138,18 +139,18 @@ public class PreviewServletTest {
 	public void image() throws Throwable {
 		exercise("images", "/test/res/compo/logo.png");
 		byte[] image = responseStream.toByteArray();
-		assertThat(image[1], equalTo((byte)'P'));
-		assertThat(image[2], equalTo((byte)'N'));
-		assertThat(image[3], equalTo((byte)'G'));
+		assertThat(image[1], equalTo((byte) 'P'));
+		assertThat(image[2], equalTo((byte) 'N'));
+		assertThat(image[3], equalTo((byte) 'G'));
 	}
 
 	@Test
 	public void imageVariant() throws Throwable {
 		exercise("images-variant", "/test/res/asset/logo_ro.png");
 		byte[] image = responseStream.toByteArray();
-		assertThat(image[1], equalTo((byte)'P'));
-		assertThat(image[2], equalTo((byte)'N'));
-		assertThat(image[3], equalTo((byte)'G'));
+		assertThat(image[1], equalTo((byte) 'P'));
+		assertThat(image[2], equalTo((byte) 'N'));
+		assertThat(image[3], equalTo((byte) 'G'));
 	}
 
 	@Test(expected = ServletException.class)
@@ -159,7 +160,7 @@ public class PreviewServletTest {
 
 	@Test
 	public void resourceReference() {
-		project = new PreviewProject("src/test/resources/project");
+		project = new PreviewProject(new File("src/test/resources/project"));
 		PreviewServlet servlet = new PreviewServlet();
 		Classes.setFieldValue(servlet, "project", project);
 
@@ -174,7 +175,7 @@ public class PreviewServletTest {
 
 	@Test(expected = WoodException.class)
 	public void badVariableOnResourceReference() {
-		project = new PreviewProject("src/test/resources/project");
+		project = new PreviewProject(new File("src/test/resources/project"));
 		PreviewServlet servlet = new PreviewServlet();
 		Classes.setFieldValue(servlet, "project", project);
 
@@ -185,7 +186,7 @@ public class PreviewServletTest {
 
 	@Test(expected = WoodException.class)
 	public void servletBadMediaOnResourceReference() {
-		project = new PreviewProject("src/test/resources/project");
+		project = new PreviewProject(new File("src/test/resources/project"));
 		PreviewServlet servlet = new PreviewServlet();
 		Classes.setFieldValue(servlet, "project", project);
 

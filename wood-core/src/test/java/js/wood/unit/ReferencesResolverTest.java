@@ -3,6 +3,7 @@ package js.wood.unit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
@@ -19,7 +20,7 @@ public class ReferencesResolverTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/resources");
+		project = new Project(new File("src/test/resources/resources"));
 	}
 
 	@Test

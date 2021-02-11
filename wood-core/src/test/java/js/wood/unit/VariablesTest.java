@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -28,7 +29,7 @@ public class VariablesTest implements IReferenceHandler {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/resources");
+		project = new Project(new File("src/test/resources/resources"));
 	}
 
 	private DirPath dirPath(String path) {

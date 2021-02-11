@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,7 +27,7 @@ public class DefaultBuildFsTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new BuilderProject("src/test/resources/project");
+		project = new BuilderProject(new File("src/test/resources/project"));
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class DefaultBuildFsTest {
 
 	private static class DefaultBuildFsProxy extends DefaultBuildFS {
 		public DefaultBuildFsProxy(BuilderProject project) {
-			super(project);
+			super(project, 0);
 		}
 
 		@Override

@@ -24,15 +24,15 @@ public class BuilderProject extends Project {
 	/** Site build directory, usually part of master project build. */
 	private final File siteDir;
 
-	public BuilderProject(String projectPath) {
-		this(projectPath, null);
+	public BuilderProject(File projectDir) {
+		this(projectDir, null);
 	}
 
-	public BuilderProject(String projectPath, File siteDir) {
-		super(projectPath);
+	public BuilderProject(File projectDir, File siteDir) {
+		super(projectDir);
 		this.layouts = new HashSet<>();
 		this.variables = new HashMap<>();
-		this.siteDir = siteDir != null ? siteDir : new File(projectPath, descriptor.getSiteDir(CT.DEF_SITE_DIR));
+		this.siteDir = siteDir != null ? siteDir : new File(projectDir, descriptor.getSiteDir(CT.DEF_SITE_DIR));
 		if (!this.siteDir.exists()) {
 			this.siteDir.mkdir();
 		}

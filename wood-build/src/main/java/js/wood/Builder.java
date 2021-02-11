@@ -55,19 +55,20 @@ public class Builder implements IReferenceHandler {
 	/** Current processing locale variant. */
 	private Locale locale;
 
-	public Builder(String projectPath) {
-		this(projectPath, null);
+	public Builder(File projectDir) {
+		this(projectDir, null, 0);
 	}
 
 	/**
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
 	 * and script files and initialize project pages and variables map. Create build FS instance.
 	 * 
-	 * @param projectPath path to project root directory.
+	 * @param projectDir path to existing project root directory,
+	 * @param siteDir
 	 */
-	public Builder(String projectPath, File siteDir) {
-		log.trace("Builder(String, File)");
-		this.project = new BuilderProject(projectPath, siteDir);
+	public Builder(File projectDir, File siteDir, int buildNumber) {
+		log.trace("Builder(File, File, int)");
+		this.project = new BuilderProject(projectDir, siteDir);
 		this.project.scanBuildFiles();
 
 		// scan project layout files then initialize pages list and global variables map
@@ -78,7 +79,7 @@ public class Builder implements IReferenceHandler {
 		}
 
 		this.variables = this.project.getVariables();
-		this.buildFS = new DefaultBuildFS(project);
+		this.buildFS = new DefaultBuildFS(project, buildNumber);
 	}
 
 	/**
@@ -87,6 +88,16 @@ public class Builder implements IReferenceHandler {
 	 * @param project
 	 */
 	public Builder(BuilderProject project) {
+		this(project, new DefaultBuildFS(project, 0));
+	}
+
+	/**
+	 * Test constructor.
+	 * 
+	 * @param project
+	 * @param buildFS
+	 */
+	public Builder(BuilderProject project, BuildFS buildFS) {
 		this.project = project;
 		this.project.scanBuildFiles();
 
@@ -98,16 +109,7 @@ public class Builder implements IReferenceHandler {
 		}
 
 		this.variables = this.project.getVariables();
-		this.buildFS = new DefaultBuildFS(project);
-	}
-	
-	/**
-	 * Set build number.
-	 * 
-	 * @param buildNumber build number.
-	 */
-	public void setBuildNumber(int buildNumber) {
-		buildFS.setBuildNumber(buildNumber);
+		this.buildFS = buildFS;
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class Builder implements IReferenceHandler {
 	 * @param compoPath page component path.
 	 * @throws IOException if files operation fails.
 	 */
-	private void buildPage(CompoPath compoPath) throws IOException {
+	void buildPage(CompoPath compoPath) throws IOException {
 		log.debug("Build page |%s|.", compoPath);
 
 		Component page = new Component(compoPath, this);
@@ -268,6 +270,32 @@ public class Builder implements IReferenceHandler {
 		}
 		return null;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test Support
+
+	BuilderProject getProject() {
+		return project;
+	}
+
+	BuildFS getBuildFS() {
+		return buildFS;
+	}
+
+	Collection<CompoPath> getPages() {
+		return pages;
+	}
+
+	Map<DirPath, IVariables> getVariables() {
+		return variables;
+	}
+
+	void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Internal Types
 
 	private static class ThemeStyles {
 		public final FilePath reset;

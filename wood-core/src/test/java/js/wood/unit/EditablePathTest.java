@@ -22,7 +22,7 @@ public class EditablePathTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 	}
 
 	@Test

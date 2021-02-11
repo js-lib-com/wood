@@ -26,7 +26,7 @@ public class PathTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 	}
 
 	@Test

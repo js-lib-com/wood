@@ -1,5 +1,6 @@
 package js.wood;
 
+import java.io.File;
 import java.util.List;
 
 import js.wood.impl.Variables;
@@ -7,8 +8,8 @@ import js.wood.impl.Variables;
 public class PreviewProject extends Project {
 	private final String previewName;
 
-	public PreviewProject(String projectPath) throws IllegalArgumentException {
-		super(projectPath);
+	public PreviewProject(File projectDir) throws IllegalArgumentException {
+		super(projectDir);
 		String name = this.getName();
 		this.previewName = name.isEmpty() ? "preview" : name + "-preview";
 	}

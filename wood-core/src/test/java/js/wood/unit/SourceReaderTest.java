@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class SourceReaderTest implements IReferenceHandler {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project("src/test/resources/resources");
+		project = new Project(new File("src/test/resources/resources"));
 	}
 
 	private FilePath filePath(String path) {

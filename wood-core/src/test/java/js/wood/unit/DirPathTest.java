@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ public class DirPathTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 	}
 
 	@Test

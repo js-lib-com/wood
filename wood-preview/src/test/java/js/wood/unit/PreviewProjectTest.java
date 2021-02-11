@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ public class PreviewProjectTest {
 
 	@Before
 	public void beforeTest() {
-		project = new PreviewProject("src/test/resources/project");
+		project = new PreviewProject(new File("src/test/resources/project"));
 	}
 
 	@Test

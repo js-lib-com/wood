@@ -36,7 +36,10 @@ public abstract class BuildFS {
 	/**
 	 * Build number or 0 if not set. Specialized write methods take care to append build number, of course if set.
 	 */
-	private int buildNumber;
+	private final int buildNumber;
+
+	/** Processed files cache to avoid multiple processing of the same file. */
+	private final List<File> processedFiles = new ArrayList<>();
 
 	/**
 	 * Current processing locale for multi-locale build. Locale language tag is inserted into directory paths and context
@@ -44,28 +47,26 @@ public abstract class BuildFS {
 	 */
 	private Locale locale;
 
-	/** Processed files cache to avoid multiple processing of the same file. */
-	private List<File> processedFiles = new ArrayList<File>();
+	/**
+	 * 
+	 * @param project
+	 * @param buildNumber
+	 * @throws IllegalArgumentException if build number is not positive.
+	 */
+	public BuildFS(BuilderProject project, int buildNumber) {
+		Params.notNull(project, "Builder project");
+		Params.positive(buildNumber, "Build number");
+		this.project = project;
+		this.buildNumber = buildNumber;
+	}
 
 	/**
-	 * Create build file system instance for given project.
+	 * Test constructor.
 	 * 
 	 * @param project project reference.
 	 */
 	public BuildFS(BuilderProject project) {
-		this.project = project;
-	}
-
-	/**
-	 * Set optional build number.
-	 * 
-	 * @param buildNumber build number.
-	 * @throws IllegalArgumentException if build number is not positive.
-	 * @see #buildNumber
-	 */
-	public void setBuildNumber(int buildNumber) {
-		Params.positive(buildNumber, "Build number");
-		this.buildNumber = buildNumber;
+		this(project, 0);
 	}
 
 	/**

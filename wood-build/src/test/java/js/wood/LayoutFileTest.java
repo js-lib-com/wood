@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -8,6 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class LayoutFileTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new BuilderProject("src/test/resources/layout-file");
+		project = new BuilderProject(new File("src/test/resources/layout-file"));
 		if (project.getSiteDir().exists()) {
 			Files.removeFilesHierarchy(project.getSiteDir());
 		}

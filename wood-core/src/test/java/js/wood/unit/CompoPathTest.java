@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,7 @@ public class CompoPathTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 	}
 
 	@Test

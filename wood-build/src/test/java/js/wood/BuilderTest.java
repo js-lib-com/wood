@@ -1,13 +1,15 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,42 +24,30 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.util.Classes;
+import js.util.Files;
 import js.util.Strings;
-import js.wood.BuildFS;
-import js.wood.Builder;
-import js.wood.BuilderProject;
-import js.wood.BuilderTestCase;
-import js.wood.CompoPath;
-import js.wood.Component;
-import js.wood.DefaultBuildFS;
-import js.wood.DirPath;
-import js.wood.FilePath;
-import js.wood.IReference;
-import js.wood.IVariables;
-import js.wood.PageDocument;
-import js.wood.Project;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 
-public class BuilderTest extends BuilderTestCase {
+public class BuilderTest {
 	@Test
 	public void constructor() throws FileNotFoundException {
-		Builder builder = new Builder(path("project"));
+		Builder builder = new Builder(projectDir("project"));
 
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = builder.getProject();
 		assertNotNull(project);
 
-		BuildFS buildFS = field(builder, "buildFS");
+		BuildFS buildFS = builder.getBuildFS();
 		assertNotNull(buildFS);
 
-		Collection<CompoPath> pages = field(builder, "pages");
+		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
 		assertEquals(3, pages.size());
 		assertTrue(pages.contains(new CompoPath(project, "page/index")));
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
 
-		Map<DirPath, IVariables> variables = field(builder, "variables");
+		Map<DirPath, IVariables> variables = builder.getVariables();
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -67,22 +57,22 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void constructor_RootContext() throws FileNotFoundException {
-		Builder builder = new Builder(path("root-project"));
+		Builder builder = new Builder(projectDir("root-project"));
 
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = builder.getProject();
 		assertNotNull(project);
 
-		BuildFS buildFS = field(builder, "buildFS");
+		BuildFS buildFS = builder.getBuildFS();
 		assertNotNull(buildFS);
 
-		Collection<CompoPath> pages = field(builder, "pages");
+		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
 		assertEquals(3, pages.size());
 		assertTrue(pages.contains(new CompoPath(project, "page/index")));
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
 
-		Map<DirPath, IVariables> variables = field(builder, "variables");
+		Map<DirPath, IVariables> variables = builder.getVariables();
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -92,14 +82,13 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void build() throws IOException {
-		Builder builder = new Builder(path("project"));
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = project("project");
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<Locale>();
 		final List<String> pageFileNames = new ArrayList<String>();
 
-		BuildFS buildFS = new DefaultBuildFS(project) {
+		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -111,7 +100,7 @@ public class BuilderTest extends BuilderTestCase {
 				pageFileNames.add(compo.getLayoutFileName());
 			}
 		};
-		field(builder, "buildFS", buildFS);
+		Builder builder = new Builder(project, buildFS);
 		builder.build();
 
 		assertEquals(4, locales.size());
@@ -132,14 +121,13 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void build_RootContext() throws IOException {
-		Builder builder = new Builder(path("root-project"));
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = project("root-project");
 
 		// initialize probes
-		final List<Locale> locales = new ArrayList<Locale>();
-		final List<String> pageFileNames = new ArrayList<String>();
+		final List<Locale> locales = new ArrayList<>();
+		final List<String> pageFileNames = new ArrayList<>();
 
-		BuildFS buildFS = new DefaultBuildFS(project) {
+		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -151,7 +139,8 @@ public class BuilderTest extends BuilderTestCase {
 				pageFileNames.add(compo.getLayoutFileName());
 			}
 		};
-		field(builder, "buildFS", buildFS);
+
+		Builder builder = new Builder(project, buildFS);
 		builder.build();
 
 		assertEquals(4, locales.size());
@@ -172,19 +161,19 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void buildPage() throws Exception {
-		Builder builder = new Builder(path("project"));
-		Locale locale = new Locale("en");
-		field(builder, "locale", locale);
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = project("project");
 
-		BuildFS buildFS = new DefaultBuildFS(project) {
+		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
 			public void writePage(Component compo, PageDocument page) throws IOException {
 				assertPageDocument(page);
 			}
 		};
+
+		Builder builder = new Builder(project, buildFS);
+		Locale locale = new Locale("en");
+		builder.setLocale(locale);
 		buildFS.setLocale(locale);
-		field(builder, "buildFS", buildFS);
 
 		CompoPath indexPage = new CompoPath(project, "page/index");
 		Classes.invoke(builder, "buildPage", indexPage);
@@ -192,19 +181,19 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void buildPage_RootContext() throws Exception {
-		Builder builder = new Builder(path("project"));
-		Locale locale = new Locale("en");
-		field(builder, "locale", locale);
-		BuilderProject project = field(builder, "project");
+		BuilderProject project = project("project");
 
-		BuildFS buildFS = new DefaultBuildFS(project) {
+		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
 			public void writePage(Component compo, PageDocument page) throws IOException {
 				assertPageDocument(page);
 			}
 		};
+
+		Builder builder = new Builder(project, buildFS);
+		Locale locale = new Locale("en");
+		builder.setLocale(locale);
 		buildFS.setLocale(locale);
-		field(builder, "buildFS", buildFS);
 
 		CompoPath indexPage = new CompoPath(project, "page/index");
 		Classes.invoke(builder, "buildPage", indexPage);
@@ -262,8 +251,8 @@ public class BuilderTest extends BuilderTestCase {
 		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/js-lib.js"));
 		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/hc.view.VideoPlayer.js"));
 		assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js-lib.js"));
-		//assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js.compo.Dialog.js"));
-		//assertTrue(scripts.indexOf("script/js.compo.Dialog.js") > scripts.indexOf("script/js-lib.js"));
+		// assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js.compo.Dialog.js"));
+		// assertTrue(scripts.indexOf("script/js.compo.Dialog.js") > scripts.indexOf("script/js-lib.js"));
 
 		assertTrue(scripts.contains("script/js-lib.js"));
 		assertTrue(scripts.contains("script/js.compo.Dialog.js"));
@@ -305,8 +294,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void resourceReference() throws IOException {
-		Builder builder = new Builder(path("project"));
-		Project project = field(builder, "project");
+		Builder builder = new Builder(projectDir("project"));
+		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
 		IReference reference = new Reference(source, ResourceType.STRING, "title");
@@ -341,8 +330,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void resourceReference_RootContext() throws IOException {
-		Builder builder = new Builder(path("root-project"));
-		Project project = field(builder, "project");
+		Builder builder = new Builder(projectDir("root-project"));
+		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
 		IReference reference = new Reference(source, ResourceType.STRING, "title");
@@ -377,8 +366,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	private static void assertValue(String expected, Builder builder, String languageTag, IReference reference, FilePath source) throws IOException {
 		Locale locale = new Locale(languageTag);
-		field(builder, "locale", locale);
-		BuildFS buildFS = field(builder, "buildFS");
+		builder.setLocale(locale);
+		BuildFS buildFS = builder.getBuildFS();
 		buildFS.setLocale(locale);
 
 		assertEquals(expected, builder.onResourceReference(reference, source));
@@ -386,8 +375,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void strings() throws IOException {
-		Builder builder = new Builder(path("strings"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("strings"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -471,8 +460,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void styles() throws Exception {
-		Builder builder = new Builder(path("styles"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("styles"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -509,8 +498,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void styleMixin() throws IOException {
-		Builder builder = new Builder(path("styles"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("styles"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -527,8 +516,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void scripts() throws IOException {
-		Builder builder = new Builder(path("scripts"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("scripts"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -560,8 +549,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void thirdPartyScripts() throws Exception {
-		Builder builder = new Builder(path("scripts"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("scripts"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -588,8 +577,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void images() throws IOException {
-		Builder builder = new Builder(path("images"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("images"));
+		BuilderProject project = builder.getProject();
 		File buildDir = project.getSiteDir();
 
 		builder.build();
@@ -630,8 +619,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void expression() throws IOException {
-		Builder builder = new Builder(path("project"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("project"));
+		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 		builder.build();
 
@@ -642,8 +631,8 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void expression_RootContext() throws IOException {
-		Builder builder = new Builder(path("root-project"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("root-project"));
+		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 		builder.build();
 
@@ -684,13 +673,12 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void buildNumber() throws Exception {
-		Builder builder = new Builder(path("project"));
-		field(builder, "locale", new Locale("en"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("project"), new File(projectDir("project"), "build/site"), 1);
+		builder.setLocale(new Locale("en"));
+		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 
-		builder.setBuildNumber(1);
-		invoke(builder, "buildPage", new CompoPath(project, "page/index"));
+		builder.buildPage(new CompoPath(project, "page/index"));
 
 		File buildDir = project.getSiteDir();
 		assertFile(buildDir, "index-001.htm");
@@ -710,13 +698,12 @@ public class BuilderTest extends BuilderTestCase {
 
 	@Test
 	public void buildNumber_RootContext() throws Exception {
-		Builder builder = new Builder(path("root-project"));
-		field(builder, "locale", new Locale("en"));
-		BuilderProject project = field(builder, "project");
+		Builder builder = new Builder(projectDir("root-project"), new File(projectDir("project"), "build/site"), 1);
+		builder.setLocale(new Locale("en"));
+		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 
-		builder.setBuildNumber(1);
-		invoke(builder, "buildPage", new CompoPath(project, "page/index"));
+		builder.buildPage(new CompoPath(project, "page/index"));
 
 		File buildDir = project.getSiteDir();
 		assertFile(buildDir, "index-001.htm");
@@ -789,5 +776,66 @@ public class BuilderTest extends BuilderTestCase {
 		page = new PageDocument(compo);
 		page.addSDKScript(project.getFile("lib/sdk/analytics.js"), null);
 		assertFalse(stringify(page.getDocument()).contains("UI-12345678"));
+	}
+
+	private static File projectDir(String dirName) {
+		return new File("src/test/resources/" + dirName);
+	}
+
+	private static void assertStyle(String expected, EList styles, int index) {
+		assertEquals(expected, styles.item(index).getAttr("href"));
+	}
+
+	private static void assertAnchor(String expected, EList anchors, int index) {
+		assertEquals(expected, anchors.item(index).getText());
+	}
+
+	private static void assertImage(String expected, EList images, int index) {
+		assertEquals(expected, images.item(index).getAttr("src"));
+	}
+
+	private static void assertScript(String expected, EList scripts, int index) {
+		assertEquals(expected, scripts.item(index).getAttr("src"));
+	}
+
+	private static IReferenceHandler nullReferenceHandler() {
+		return new IReferenceHandler() {
+			@Override
+			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
+				return "null";
+			}
+
+			@Override
+			public String toString() {
+				return "null reference handler";
+			}
+		};
+	}
+
+	private static void resetProjectLocales(Project project) {
+		List<Locale> locales = new ArrayList<Locale>();
+		locales.add(new Locale("en"));
+		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
+	}
+
+	private static String stringify(Document document) throws IOException {
+		StringWriter writer = new StringWriter();
+		document.serialize(writer);
+		return writer.toString();
+	}
+
+	private static BuilderProject project(String projectDir) {
+		try {
+			BuilderProject project = new BuilderProject(new File("src/test/resources/" + projectDir));
+			if (project.getSiteDir().exists()) {
+				Files.removeFilesHierarchy(project.getSiteDir());
+			}
+			return project;
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Fail to create project instance.");
+		}
+
+		throw new IllegalStateException();
 	}
 }

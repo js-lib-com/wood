@@ -107,7 +107,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ServletContext context = config.getServletContext();
-		project = new PreviewProject(context.getInitParameter(PROJECT_DIR_PARAM));
+		project = new PreviewProject(new File(context.getInitParameter(PROJECT_DIR_PARAM)));
 	}
 
 	/**

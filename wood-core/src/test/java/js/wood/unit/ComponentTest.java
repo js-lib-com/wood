@@ -8,6 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -198,7 +199,7 @@ public class ComponentTest {
 
 	@Test
 	public void referenceHandler() {
-		Project project = new Project("src/test/resources/components");
+		Project project = new Project(new File("src/test/resources/components"));
 		CompoPath path = new CompoPath(project, "references");
 		final List<IReference> references = new ArrayList<>();
 
@@ -346,7 +347,7 @@ public class ComponentTest {
 	// Helper methods
 
 	private static Component getCompo(String path) {
-		Project project = new Project("src/test/resources/components");
+		Project project = new Project(new File("src/test/resources/components"));
 		return createCompo(project, new CompoPath(project, path));
 	}
 

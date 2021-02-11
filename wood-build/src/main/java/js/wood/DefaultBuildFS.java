@@ -40,9 +40,10 @@ public class DefaultBuildFS extends BuildFS {
 	 * Create default build file system instance for given project.
 	 * 
 	 * @param project project reference.
+	 * @param buildNumber
 	 */
-	public DefaultBuildFS(BuilderProject project) {
-		super(project);
+	public DefaultBuildFS(BuilderProject project, int buildNumber) {
+		super(project, buildNumber);
 	}
 
 	/**

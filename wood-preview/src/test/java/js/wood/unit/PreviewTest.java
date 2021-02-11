@@ -214,7 +214,7 @@ public class PreviewTest implements IReferenceHandler {
 	}
 
 	private Document exercisePreview(String projectDirName, String pathValue) throws IOException {
-		project = new PreviewProject("src/test/resources/" + projectDirName);
+		project = new PreviewProject(new File("src/test/resources/" + projectDirName));
 
 		CompoPath path = new CompoPath(project, pathValue);
 		Component component = new Component(path.getLayoutPath(), this);

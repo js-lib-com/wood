@@ -34,7 +34,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 	}
 
 	private FilePath filePath(String path) {
@@ -47,7 +47,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void initialization() throws FileNotFoundException {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 
 		assertThat(project.getProjectDir(), equalTo(new File("src/test/resources/project")));
 		assertThat(Classes.getFieldValue(project, "descriptor"), notNullValue());
@@ -65,7 +65,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void themeStylesScanner() throws Exception {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 		FilesHandler handler = Classes.newInstance("js.wood.Project$ThemeStylesScanner", project);
 
 		for (String file : new String[] { "res/page/index/index.css", //
@@ -100,7 +100,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void getMediaFile() throws FileNotFoundException {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "logo");
@@ -115,7 +115,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void getMediaFileFromSubdirectory() throws FileNotFoundException {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "icon/logo");
 		assertMedia("res/template/page/icon/logo.png", null, reference, source);
@@ -123,7 +123,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void getMediaFileWithCompoName() {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 		FilePath source = filePath("res/template/page/page.htm");
 		Reference reference = new Reference(source, ResourceType.IMAGE, "page");
 		assertMedia("res/template/page/page.jpg", null, reference, source);
@@ -135,7 +135,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Test
 	public void isExcluded() {
-		project = new Project("src/test/resources/project");
+		project = new Project(new File("src/test/resources/project"));
 		assertTrue(project.isExcluded(dirPath("res/page/about")));
 		assertFalse(project.isExcluded(dirPath("res/page/index")));
 	}
@@ -146,7 +146,7 @@ public class ProjectTest implements IReferenceHandler {
 	@Test
 	public void badConstructor() {
 		try {
-			new Project("src/test/resources/fake-project");
+			new Project(new File("src/test/resources/fake-project"));
 			fail("Bad directory should rise illegal argument exception.");
 		} catch (Exception e) {
 			assertTrue(e instanceof IllegalArgumentException);

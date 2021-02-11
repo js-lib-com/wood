@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -40,7 +40,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Before
 	public void beforeTest() throws IOException {
-		project = new BuilderProject("src/test/resources/project");
+		project = new BuilderProject(new File("src/test/resources/project"));
 		if (project.getSiteDir().exists()) {
 			Files.removeFilesHierarchy(project.getSiteDir());
 		}
@@ -142,7 +142,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Test
 	public void descriptorValues() {
-		project = new BuilderProject("src/test/resources/scripts");
+		project = new BuilderProject(new File("src/test/resources/scripts"));
 		project.scanBuildFiles();
 		CompoPath compoPath = new CompoPath(project, "index");
 
