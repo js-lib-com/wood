@@ -13,7 +13,16 @@ import js.util.Strings;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Variables;
 
+/**
+ * WOOD {@link Project} extension for build process.
+ * 
+ * @author Iulian Rotaru
+ * @since 1.0
+ */
 public class BuilderProject extends Project {
+	/** Site build directory, usually part of master project build. */
+	private final File siteDir;
+
 	/**
 	 * Project layout files are HTM files describing user interface elements. By convention layout base name is the same as
 	 * component directory name.
@@ -23,30 +32,31 @@ public class BuilderProject extends Project {
 	/** Cache for resource variables. */
 	private final Map<DirPath, Variables> variables;
 
-	/** Site build directory, usually part of master project build. */
-	private final File siteDir;
-
+	/**
+	 * Test constructor.
+	 * 
+	 * @param projectDir project root directory.
+	 */
 	public BuilderProject(File projectDir) {
 		this(projectDir, null);
 	}
 
 	public BuilderProject(File projectDir, File siteDir) {
 		super(projectDir);
-		this.layouts = new HashSet<>();
-		this.variables = new HashMap<>();
 		this.siteDir = siteDir != null ? siteDir : new File(projectDir, descriptor.getSiteDir(CT.DEF_SITE_DIR));
 		if (!this.siteDir.exists()) {
 			this.siteDir.mkdir();
 		}
+		this.layouts = new HashSet<>();
+		this.variables = new HashMap<>();
 	}
 
 	/**
-	 * Scan for build files and cache resulted meta data. This method is specifically designed for builder class; preview
-	 * process does not use cache.
+	 * Scan for build files and cache resulted meta data. This scanner looks for files in next directories: <code>res</code>,
+	 * <code>script</code>, <code>lib</code> and <code>gen</code>, all direct child of project root directory.
 	 */
 	public void scanBuildFiles() {
 		FilesScanner scanner = new FilesScanner();
-
 		scanner.scan(new DirPath(this, CT.RESOURCE_DIR));
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
 		scanner.scan(new DirPath(this, CT.LIBRARY_DIR));

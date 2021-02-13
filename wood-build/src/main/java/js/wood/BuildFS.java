@@ -17,56 +17,48 @@ import js.util.Params;
  * <p>
  * BuildFS is the target of the building process. It supplies specialized write methods whereas actual directory and file names
  * are solved by subclasses, concrete implementations. All write methods take care to avoid multiple processing of the same
- * file. Also append build number to target file name, if {@link #buildNumber} was set via {@link #setBuildNumber(int)}.
+ * file. Also append build number to target file name, if {@link #buildNumber} is non zero.
  * <p>
- * If project is multi-locale, BuildFS is locale sensitive. There is optional {@link #setLocale(Locale)} that is used for
- * multi-locale build to store current processing locale. Both {@link #createAbsoluteUrlPath(String)} and
- * {@link #createDirectory(String)} insert locale language tag, of course for multi-locale build. Locale language tag is BCP
- * encoded: language is always lower case and country, if present, upper case separated by hyphen.
+ * If project is multi-locale, BuildFS is locale sensitive. There is optional {@link #setLocale(Locale)} that is used, for
+ * multi-locale build, to store current processing locale. When compute paths insert locale language tag. Locale language tag is
+ * BCP encoded: language is always lower case and country, if present, upper case separated by hyphen.
  * <p>
  * Build file system implementations are not thread safe. Do not use BuildFS instances into a concurrent context.
  * 
  * @author Iulian Rotaru
- * @version final
+ * @since 1.0
  */
 public abstract class BuildFS {
 	/** Project reference. */
 	private final BuilderProject project;
 
 	/**
-	 * Build number or 0 if not set. Specialized write methods take care to append build number, of course if set.
+	 * Build number or 0 if not set. Specialized write methods take care to append build number to target file name.
 	 */
 	private final int buildNumber;
 
 	/** Processed files cache to avoid multiple processing of the same file. */
-	private final List<File> processedFiles = new ArrayList<>();
+	private final List<File> processedFiles;
 
 	/**
-	 * Current processing locale for multi-locale build. Locale language tag is inserted into directory paths and context
-	 * absolute URLs. Locale language tag is formatted BCP, the format supported by HTML <code>lang</code> attribute.
+	 * Current processing locale for multi-locale build. Locale language tag is inserted into directory paths and URL absolute
+	 * paths. For projects without multi-locale support this field is always null.
 	 */
 	private Locale locale;
 
 	/**
+	 * Protected constructor.
 	 * 
-	 * @param project
-	 * @param buildNumber
-	 * @throws IllegalArgumentException if build number is not positive.
+	 * @param project builder project,
+	 * @param buildNumber optional build number, 0 if not used.
+	 * @throws IllegalArgumentException if project parameter is null or build number is negative.
 	 */
-	public BuildFS(BuilderProject project, int buildNumber) {
+	protected BuildFS(BuilderProject project, int buildNumber) {
 		Params.notNull(project, "Builder project");
 		Params.positive(buildNumber, "Build number");
 		this.project = project;
 		this.buildNumber = buildNumber;
-	}
-
-	/**
-	 * Test constructor.
-	 * 
-	 * @param project project reference.
-	 */
-	public BuildFS(BuilderProject project) {
-		this(project, 0);
+		this.processedFiles = new ArrayList<>();
 	}
 
 	/**
@@ -84,23 +76,24 @@ public abstract class BuildFS {
 	/**
 	 * Serialize page document to pages directory. Target file name is derived from page component name argument; uses
 	 * {@link #formatPageName(String)} to format it. Stores target file into {@link #processedFiles} in order to avoid multiple
-	 * processing. Also takes care to append {@link #buildNumber} , if set.
+	 * processing. Also takes care to append {@link #buildNumber}, if set.
 	 * 
-	 * @param compo page component,
-	 * @param page page document.
+	 * @param page page component,
+	 * @param pageDocument page document.
 	 * @throws IOException if write fails.
 	 */
-	public void writePage(Component compo, PageDocument page) throws IOException {
-		File targetFile = new File(getPageDir(compo), insertBuildNumber(formatPageName(compo.getLayoutFileName())));
+	public void writePage(PageDocument pageDocument) throws IOException {
+		final Component page = pageDocument.getComponent();
+		File targetFile = new File(getPageDir(page), insertBuildNumber(formatPageName(page.getLayoutFileName())));
 		if (!processedFiles.contains(targetFile)) {
-			page.getDocument().serialize(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"), true);
+			pageDocument.getDocument().serialize(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"), true);
 			processedFiles.add(targetFile);
 		}
 	}
 
 	/**
-	 * Write favicon to media directory. Target file name is the source favicon file name. Stores target file into
-	 * {@link #processedFiles} in order to avoid multiple processing.
+	 * Write favicon to media directory. Target file name is the file name of the source favicon parameter. Stores target file
+	 * into {@link #processedFiles} in order to avoid multiple processing.
 	 * <p>
 	 * Returns favicon URL path, relative to site page location. Returned URL path is ready to be inserted into page document.
 	 * 
@@ -117,7 +110,7 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
-	// ------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 	// Media files
 
 	/**
@@ -167,11 +160,12 @@ public abstract class BuildFS {
 	 * {@link #formatMediaName(FilePath)}. Stores target file into {@link #processedFiles} in order to avoid multiple
 	 * processing. Also takes care to append {@link #buildNumber}, if set.
 	 * <p>
-	 * Returns context absolute URL path for written media file, see {@link #createAbsoluteUrlPath(String)}. Returned URL path
-	 * is ready to be inserted into page document.
+	 * Returns context absolute URL path for written media file. Returned URL path is ready to be inserted into page document.
+	 * Context absolute path starts with path separator but does not include protocol, host and port. Anyway, it includes
+	 * context name, that is, application name. It is an absolute path relative to server document root.
 	 * 
-	 * @param mediaFile media file.
-	 * @return media file URL path.
+	 * @param mediaFile media file path.
+	 * @return media file URL absolute path.
 	 * @throws IOException if media file write fails.
 	 */
 	public String writeScriptMedia(FilePath mediaFile) throws IOException {
@@ -181,18 +175,7 @@ public abstract class BuildFS {
 			Files.copy(mediaFile.toFile(), targetFile);
 			processedFiles.add(targetFile);
 		}
-		return createAbsoluteUrlPath(mediaName);
-	}
 
-	/**
-	 * Create context absolute URL path for the given file. Context absolute path starts with path separator but does not
-	 * include protocol, host and port. Anyway, it includes context name, that is, application name. It is an absolute path
-	 * relative to server document root.
-	 * 
-	 * @param fileName file name.
-	 * @return context absolute URL path.
-	 */
-	private String createAbsoluteUrlPath(String fileName) {
 		StringBuilder builder = new StringBuilder();
 		// project name can be empty for root context
 		if (!project.getName().isEmpty()) {
@@ -200,13 +183,13 @@ public abstract class BuildFS {
 			builder.append(project.getName());
 		}
 		builder.append(Path.SEPARATOR);
-		if (project.isMultiLocale()) {
+		if (locale != null) {
 			builder.append(locale.toLanguageTag());
 			builder.append(Path.SEPARATOR);
 		}
 		builder.append(getMediaDir().getName());
 		builder.append(Path.SEPARATOR);
-		builder.append(fileName);
+		builder.append(mediaName);
 		return builder.toString();
 	}
 
@@ -268,7 +251,7 @@ public abstract class BuildFS {
 	}
 
 	// ------------------------------------------------------
-	// Helper methods
+	// Private helper methods
 
 	/**
 	 * Insert build number into file name. {@link #buildNumber Build number} should be already set before invoking this method.
@@ -382,7 +365,7 @@ public abstract class BuildFS {
 		File dir = project.getSiteDir();
 
 		// if project is multi-locale create a sub-directory with name equal with locale language tag
-		if (project.isMultiLocale()) {
+		if (locale != null) {
 			dir = new File(dir, locale.toLanguageTag());
 		}
 

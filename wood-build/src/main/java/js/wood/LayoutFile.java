@@ -20,7 +20,7 @@ import js.wood.impl.LayoutReader;
 /**
  * Component layout file contains meta-data about layout. Using this class is a two steps process: first parses layout document
  * and initializes instance state, the second is to detect if layout file is a page. First step is performed by constructor
- * whereas the second by {@link #isPage()}. Instances of this class are immutable.
+ * whereas the second by {@link #isPage()}.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -38,26 +38,26 @@ public class LayoutFile {
 	/** Parent component path. */
 	private final CompoPath compoPath;
 
-	/** The path of super template or null if there is no template reference declared by this layout. */
-	private CompoPath templatePath;
-
-	/** True if this layout file has body element. */
-	private boolean hasBody;
-
 	/**
 	 * Name of editable elements declared by this layout file, possible empty. Note that if a layout has editable elements it is
 	 * a template.
 	 */
-	private final Set<String> editables = new HashSet<String>();
+	private final Set<String> editables = new HashSet<>();
 
 	/** Name of editable elements from templates referenced by this layout, possible empty. */
-	private final Set<String> templates = new HashSet<String>();
+	private final Set<String> templates = new HashSet<>();
 
 	/** Cached value for instance hash code. Initialized from file path. */
 	private final int hashCode;
 
 	/** Cached value for string representation. */
 	private final String string;
+
+	/** The path of super template or null if there is no template reference declared by this layout. */
+	private CompoPath templatePath;
+
+	/** True if this layout file has body element. */
+	private boolean hasBody;
 
 	/**
 	 * Construct immutable instance of layout file designated by given file path. Uses SAX parser to synchronously parse layout
@@ -152,8 +152,8 @@ public class LayoutFile {
 			return false;
 		}
 
-		Set<String> hierarchyTemplates = new HashSet<String>();
-		Set<String> hierarchyEditables = new HashSet<String>();
+		Set<String> hierarchyTemplates = new HashSet<>();
+		Set<String> hierarchyEditables = new HashSet<>();
 		boolean bodyFound = scanTemplatesHierarchy(this, hierarchyTemplates, hierarchyEditables, 0);
 
 		if (!hierarchyEditables.equals(hierarchyTemplates)) {

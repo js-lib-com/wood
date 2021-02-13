@@ -7,21 +7,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import js.util.Classes;
-import js.wood.BuildFS;
-import js.wood.BuilderProject;
-import js.wood.Component;
-import js.wood.FilePath;
-import js.wood.IReference;
-import js.wood.IReferenceHandler;
-import js.wood.Project;
+import js.util.Files;
 
 public class BuildFsTest {
 	private BuilderProject project;
@@ -29,37 +23,65 @@ public class BuildFsTest {
 	@Before
 	public void beforeTest() throws Exception {
 		project = new BuilderProject(new File("src/test/resources/project"));
+		Files.removeFilesHierarchy(new File("src/test/resources/project/build"));
 	}
 
 	@Test
 	public void writePage() throws IOException {
-		// resetProjectLocales(project);
-		// BuildFS buildFS = new TestBuildFS(project);
-		// PageDocument page = newInstance(PageDocument.class);
-		//
-		// buildFS.writePage(null, page, "index.htm");
-		// assertTrue(exists("htm/index.htm"));
-		// assertFalse(exists("en/htm/index.htm"));
-		//
-		// buildFS.setLanguage("ro");
-		// buildFS.writePage(page, "index.htm");
-		// assertTrue(exists("ro/htm/index.htm"));
-		//
-		// buildFS.setBuildNumber(4);
-		// buildFS.setLanguage(null);
-		//
-		// buildFS.writePage(page, "index.htm");
-		// assertTrue(exists("htm/index-004.htm"));
-		// assertFalse(exists("en/htm/index-004.htm"));
-		//
-		// buildFS.setLanguage("ro");
-		// buildFS.writePage(page, "index.htm");
-		// assertTrue(exists("ro/htm/index-004.htm"));
+		BuildFS buildFS = new TestBuildFS(project, 0);
+
+		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		compo.scan();
+		PageDocument page = new PageDocument(compo);
+
+		buildFS.writePage(page);
+		assertTrue(exists("htm/index.htm"));
+	}
+
+	@Test
+	public void writePage_Twice() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+
+		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		compo.scan();
+		PageDocument page = new PageDocument(compo);
+
+		buildFS.writePage(page);
+		assertTrue(exists("htm/index.htm"));
+		new File(project.getSiteDir(), "htm/index.htm").delete();
+
+		// second attempt to write page in the same build FS instance is ignored
+		buildFS.writePage(page);
+		assertFalse(exists("htm/index.htm"));
+	}
+
+	@Test
+	public void writePage_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+
+		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		compo.scan();
+		PageDocument page = new PageDocument(compo);
+
+		buildFS.setLocale(new Locale("ro"));
+		buildFS.writePage(page);
+		assertTrue(exists("ro/htm/index.htm"));
+	}
+
+	@Test
+	public void writePage_BuildNumber() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 4);
+
+		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		compo.scan();
+		PageDocument page = new PageDocument(compo);
+
+		buildFS.writePage(page);
+		assertTrue(exists("htm/index-004.htm"));
 	}
 
 	@Test
 	public void writeFavicon() throws IOException {
-		resetProjectLocales(project);
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		assertFalse(exists("favicon.ico"));
@@ -68,44 +90,110 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writeMedia() throws IOException {
-		resetProjectLocales(project);
+	public void writePageMedia() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
-		buildFS.setLocale(new Locale("en"));
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
-		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
-		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background.jpg"));
 		assertTrue(exists("img/background.jpg"));
 	}
 
+	@Test
+	public void writePageMedia_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		buildFS.setLocale(new Locale("ro"));
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
+		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
+		assertTrue(exists("ro/img/background.jpg"));
+	}
 
 	@Test
-	public void writeMedia_BuildNumber() throws IOException {
-		resetProjectLocales(project);
+	public void writePageMedia_BuildNumber() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 4);
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background-004.jpg"));
+		assertTrue(exists("img/background-004.jpg"));
+	}
+
+	@Test
+	public void writeStyleMedia() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
+		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
+		assertTrue(exists("img/background.jpg"));
+	}
+
+	@Test
+	public void writeStyleMedia_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		buildFS.setLocale(new Locale("ro"));
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
+		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
+		assertTrue(exists("ro/img/background.jpg"));
+	}
+
+	@Test
+	public void writeStyleMedia_BuildNumber() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 4);
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background-004.jpg"));
+		assertTrue(exists("img/background-004.jpg"));
+	}
+
+	@Test
+	public void writeScriptMedia() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
+		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background.jpg"));
+		assertTrue(exists("img/background.jpg"));
+	}
+
+	@Test
+	public void writeScriptMedia_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		buildFS.setLocale(new Locale("ro"));
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
+		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/ro/img/background.jpg"));
+		assertTrue(exists("ro/img/background.jpg"));
+	}
+
+	@Test
+	public void writeScriptMedia_BuildNumber() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 4);
+		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
+
 		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background-004.jpg"));
 		assertTrue(exists("img/background-004.jpg"));
 	}
-	
+
 	@Test
 	public void writeStyle() throws IOException {
-		resetProjectLocales(project);
 		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style.css"));
 		assertTrue(exists("css/style.css"));
 	}
-	
+
+	@Test
+	public void writeStyle_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		buildFS.setLocale(new Locale("ro"));
+		FilePath styleFile = new FilePath(project, "res/theme/style.css");
+
+		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style.css"));
+		assertTrue(exists("ro/css/style.css"));
+	}
+
 	@Test
 	public void writeStyle_BuildNumber() throws IOException {
-		resetProjectLocales(project);
 		BuildFS buildFS = new TestBuildFS(project, 4);
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
@@ -115,7 +203,6 @@ public class BuildFsTest {
 
 	@Test
 	public void writeScript() throws IOException {
-		resetProjectLocales(project);
 		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
 
@@ -124,8 +211,17 @@ public class BuildFsTest {
 	}
 
 	@Test
+	public void writeScript_Locale() throws IOException {
+		BuildFS buildFS = new TestBuildFS(project, 0);
+		buildFS.setLocale(new Locale("ro"));
+		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
+
+		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
+		assertTrue(exists("ro/js/Index.js"));
+	}
+
+	@Test
 	public void writeScript_BuildNumber() throws IOException {
-		resetProjectLocales(project);
 		BuildFS buildFS = new TestBuildFS(project, 4);
 		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
 
@@ -136,17 +232,28 @@ public class BuildFsTest {
 	@Test
 	public void dirFactory() throws Exception {
 		BuildFS buildFS = new TestBuildFS(project, 0);
-
-		buildFS.setLocale(new Locale("en"));
-		assertDir("src/test/resources/project/build/site/en/images", buildFS, "images");
+		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/project/build/site/images"));
 		buildFS.setLocale(new Locale("ro"));
-		assertDir("src/test/resources/project/build/site/ro/images", buildFS, "images");
+		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/project/build/site/ro/images"));
+	}
+
+	private static Matcher<File> isDir(String path) {
+		return new BaseMatcher<File>() {
+			@Override
+			public boolean matches(Object item) {
+				return item.equals(new File(path.replace('/', File.separatorChar))) && ((File) item).isDirectory();
+			}
+
+			@Override
+			public void describeTo(Description description) {
+				description.appendText(path);
+			}
+		};
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void nullLocale() {
 		BuildFS buildFS = new TestBuildFS(project, 0);
-		resetProjectLocales(project);
 		buildFS.setLocale(null);
 	}
 
@@ -198,16 +305,6 @@ public class BuildFsTest {
 		protected String formatMediaName(FilePath mediaFile) {
 			return mediaFile.getName();
 		}
-	}
-
-	private static void assertDir(String expected, BuildFS buildFS, String dirName) throws Exception {
-		assertThat(Classes.invoke(buildFS, BuildFS.class, "createDirectory", dirName).toString().replace('\\', '/'), equalTo(expected));
-	}
-
-	private static void resetProjectLocales(Project project) {
-		List<Locale> locales = new ArrayList<Locale>();
-		locales.add(new Locale("en"));
-		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
 	}
 
 	private static IReferenceHandler nullReferenceHandler() {

@@ -131,7 +131,7 @@ public class Component {
 		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 
-	public void scan(boolean includePreviewScript) {
+	public void scan() {
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);

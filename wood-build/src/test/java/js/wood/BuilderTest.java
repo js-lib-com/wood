@@ -95,8 +95,8 @@ public class BuilderTest {
 			}
 
 			@Override
-			public void writePage(Component compo, PageDocument page) throws IOException {
-				pageFileNames.add(compo.getLayoutFileName());
+			public void writePage(PageDocument page) throws IOException {
+				pageFileNames.add(page.getComponent().getLayoutFileName());
 			}
 		};
 		Builder builder = new Builder(project, buildFS);
@@ -134,8 +134,8 @@ public class BuilderTest {
 			}
 
 			@Override
-			public void writePage(Component compo, PageDocument page) throws IOException {
-				pageFileNames.add(compo.getLayoutFileName());
+			public void writePage(PageDocument page) throws IOException {
+				pageFileNames.add(page.getComponent().getLayoutFileName());
 			}
 		};
 
@@ -164,7 +164,7 @@ public class BuilderTest {
 
 		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
-			public void writePage(Component compo, PageDocument page) throws IOException {
+			public void writePage(PageDocument page) throws IOException {
 				assertPageDocument(page);
 			}
 		};
@@ -184,7 +184,7 @@ public class BuilderTest {
 
 		BuildFS buildFS = new DefaultBuildFS(project, 0) {
 			@Override
-			public void writePage(Component compo, PageDocument page) throws IOException {
+			public void writePage(PageDocument page) throws IOException {
 				assertPageDocument(page);
 			}
 		};

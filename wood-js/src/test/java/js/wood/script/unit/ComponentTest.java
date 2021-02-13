@@ -66,7 +66,7 @@ public class ComponentTest {
 			}
 		});
 
-		compo.scan(false);
+		compo.scan();
 		return compo;
 	}
 

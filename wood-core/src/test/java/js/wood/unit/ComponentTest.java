@@ -210,7 +210,7 @@ public class ComponentTest {
 				return reference.toString();
 			}
 		});
-		compo.scan(false);
+		compo.scan();
 
 		assertThat(references.size(), equalTo(3));
 		assertThat(references.get(0).toString(), equalTo("@string/title"));
@@ -367,7 +367,7 @@ public class ComponentTest {
 			}
 		});
 
-		compo.scan(false);
+		compo.scan();
 		return compo;
 	}
 

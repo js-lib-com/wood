@@ -167,7 +167,7 @@ public class Builder implements IReferenceHandler {
 
 		Component page = new Component(compoPath, this);
 		currentCompo.set(page);
-		page.scan(false);
+		page.scan();
 		PageDocument pageDocument = new PageDocument(page);
 
 		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
@@ -224,7 +224,7 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
 		}
 
-		buildFS.writePage(page, pageDocument);
+		buildFS.writePage(pageDocument);
 	}
 
 	/**

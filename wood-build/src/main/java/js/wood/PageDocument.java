@@ -19,7 +19,7 @@ import js.util.Params;
  * @since 1.0
  */
 public class PageDocument {
-	private final BuilderProject project;
+	private final Component component;
 
 	/** X(HT)ML document. */
 	private final Document doc;
@@ -37,7 +37,7 @@ public class PageDocument {
 	 */
 	public PageDocument(Component component) {
 		Params.notNull(component, "Component");
-		this.project = (BuilderProject) component.getProject();
+		this.component = component;
 
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		this.doc = builder.createHTML();
@@ -51,6 +51,15 @@ public class PageDocument {
 
 		this.html.addChild(this.doc.importElement(component.getLayout()));
 		this.html.addText("\r\n");
+	}
+
+	/**
+	 * Get page component for which this page document is created.
+	 * 
+	 * @return parent page component.
+	 */
+	public Component getComponent() {
+		return component;
 	}
 
 	/**
@@ -174,7 +183,7 @@ public class PageDocument {
 		Params.notNull(link, "Link reference");
 		final String href = link.getHref();
 		Params.notNullOrEmpty(href, "Link HREF");
-		
+
 		Element linkElement = doc.createElement("link", "href", href);
 
 		setAttr(linkElement, "hreflang", link.getHreflang());
@@ -216,7 +225,7 @@ public class PageDocument {
 	 * <p>
 	 * If {@link IScriptReference#getSource()} is a file path relative this project, as accepted by
 	 * {@link FilePath#accept(String)}, invoke {@link Handler#handle(Object)} with {@link FilePath} created from script source
-	 * attribute. Handler returned value is used to replace current script source. 
+	 * attribute. Handler returned value is used to replace current script source.
 	 * <p>
 	 * If script is embedded, see {@link IScriptReference#isEmbedded()}, load script as text content to created script element,
 	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptReference#getSource()} is project relative path
@@ -232,6 +241,7 @@ public class PageDocument {
 		Params.notNull(script.getSource(), "The source of script");
 		Params.notNull(handler, "File handler");
 
+		final BuilderProject project = (BuilderProject) component.getProject();
 		String src = script.getSource();
 		Element scriptElement = doc.createElement("script");
 		if (!script.isEmbedded()) {
