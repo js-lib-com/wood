@@ -1,23 +1,19 @@
 package js.wood;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.EList;
 import js.dom.Element;
-import js.io.VariablesWriter;
 import js.lang.Handler;
 import js.util.Classes;
-import js.util.Files;
-import js.util.Strings;
+import js.util.Params;
 
 /**
- * HTML page document created on build process and serialized on build directory. This class just supplies specialized setters
+ * HTML page document created by build process and serialized to build directory. This class just supplies specialized setters
  * for page DOM document. Is the caller responsibility to ensure proper order when invoke setters.
+ * <p>
+ * Page document class has no mutable state and is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -26,60 +22,56 @@ public class PageDocument {
 	private final BuilderProject project;
 
 	/** X(HT)ML document. */
-	private Document doc;
+	private final Document doc;
 
 	/** HTML root element. */
-	private Element html;
+	private final Element html;
 
 	/** HTML head element. */
-	private Element head;
-
-	/** HTML body element. */
-	private Element body;
-
-	/** Create empty page document without body content. Testing constructor. */
-	@SuppressWarnings("unused")
-	private PageDocument(BuilderProject project) {
-		init();
-		this.project = project;
-		this.body = doc.createElement("body");
-		this.html.addChild(this.body);
-		this.html.addText("\r\n");
-	}
+	private final Element head;
 
 	/**
-	 * Create X(HT)ML document instance, add head element and copy layout from component into body.
+	 * Create X(HT)ML document instance, add head element and copy component layout as HTML body.
 	 * 
 	 * @param component component instance containing body layout.
 	 */
 	public PageDocument(Component component) {
-		init();
+		Params.notNull(component, "Component");
 		this.project = (BuilderProject) component.getProject();
-		this.body = this.doc.importElement(component.getLayout());
-		this.html.addChild(this.body);
+
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+		this.doc = builder.createHTML();
+		this.html = this.doc.getRoot();
+		this.html.addText("\r\n");
+
+		this.head = this.doc.createElement("head");
+		this.html.addChild(this.head);
+		this.html.addText("\r\n");
+		this.head.addText("\r\n");
+
+		this.html.addChild(this.doc.importElement(component.getLayout()));
 		this.html.addText("\r\n");
 	}
 
 	/**
-	 * Instance initialization creates empty X(HT)ML document and head element.
+	 * Return this page document.
+	 * 
+	 * @return this page document.
+	 * @see #doc
 	 */
-	private void init() {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		doc = builder.createHTML();
-		html = doc.getRoot();
-		html.addText("\r\n");
-		head = doc.createElement("head");
-		html.addChild(head);
-		html.addText("\r\n");
-		head.addText("\r\n");
+	public Document getDocument() {
+		return doc;
 	}
 
 	/**
-	 * Set <code>lang</code> attribute value for HTML root element.
+	 * Set <code>lang</code> attribute value to HTML root element. Given language should be ISO 639-1 code; it is caller
+	 * responsibility to provide the correct value.
 	 * 
-	 * @param language langauge value.
+	 * @param language non null ISO 639-1 language code.
+	 * @throws IllegalArgumentException if language parameter is null or empty.
 	 */
 	public void setLanguage(String language) {
+		Params.notNullOrEmpty(language, "Language");
 		html.setAttr("lang", language);
 	}
 
@@ -87,108 +79,80 @@ public class PageDocument {
 	 * Set document content type. This tool library always uses <code>text/html; charset=UTF-8</code> but this policy is
 	 * enforced by {@link Builder}.
 	 * 
-	 * @param contentType content type.
+	 * @param contentType non null content type value.
+	 * @throws IllegalArgumentException if content type parameter is null or empty.
 	 */
 	public void setContentType(String contentType) {
+		Params.notNullOrEmpty(contentType, "Content type");
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", contentType));
 		head.addText("\r\n");
 	}
 
 	/**
-	 * Set page author. If given <code>author</code> is null this method does nothing. Delegates
-	 * {@link #addMetaData(String, String, String, String)} with name <code>Author</code>.
+	 * Set page author. Add meta element to page head, with name <code>Author</code> and provided author value as content.
 	 * 
-	 * @param author page author, possible null.
+	 * @param author page author, null not accepted.
+	 * @throws IllegalArgumentException if author parameter is null or empty.
 	 */
 	public void setAuthor(String author) {
-		if (author != null) {
-			addMetaData("name", "Author", "content", author);
-		}
+		Params.notNullOrEmpty(author, "Author");
+		head.addChild(doc.createElement("meta", "name", "Author", "content", author));
+		head.addText("\r\n");
 	}
 
 	/**
-	 * Set page header title. If given <code>title</code> is null this method does nothing.
+	 * Set page header title. Add <code>title</code> element to this page header.
 	 * 
-	 * @param title page title, possible null.
+	 * @param title page title, null not accepted.
+	 * @throws IllegalArgumentException if title parameter is null or empty.
 	 */
 	public void setTitle(String title) {
-		if (title != null) {
-			head.addChild(doc.createElement("title").setText(title));
-			head.addText("\r\n");
-		}
+		Params.notNullOrEmpty(title, "Title");
+		head.addChild(doc.createElement("title").setText(title));
+		head.addText("\r\n");
 	}
 
 	/**
-	 * Add page description meta element. Delegates {@link #addMetaData(String, String, String, String)} with name
-	 * <code>Description</code>. If <code>description</code> parameter is null this setter does nothing.
+	 * Add page description meta element. Create meta element and append it to page head, with name <code>Description</code> and
+	 * provided description value as content.
 	 * 
-	 * @param description page description.
+	 * @param description page description, null not accepted.
+	 * @throws IllegalArgumentException if description parameter is null or empty.
 	 */
 	public void setDescription(String description) {
-		if (description != null) {
-			addMetaData("name", "Description", "content", description);
-		}
+		Params.notNullOrEmpty(description, "Description");
+		head.addChild(doc.createElement("meta", "name", "Description", "content", description));
+		head.addText("\r\n");
 	}
 
 	/**
-	 * Add link for page favorite icon.
+	 * Add link for page favorite icon. Append link element to page head, with <code>rel</code> attribute set to
+	 * <code>shortcut icon</code> and <code>type</code> attribute set to <code>image/x-icon</code>. Provided favicon path is set
+	 * to <code>href</code> attribute.
 	 * 
 	 * @param path path to favorite icon.
+	 * @throws IllegalArgumentException if favicon path parameter is null or empty.
 	 */
 	public void addFavicon(String path) {
+		Params.notNullOrEmpty(path, "Favicon path");
 		head.addChild(doc.createElement("link", "href", path, "rel", "shortcut icon", "type", "image/x-icon"));
 		head.addText("\r\n");
 	}
 
 	/**
-	 * Add meta element to header. A meta element is in fact a name/value pair but attribute names differ for certain meta
-	 * types. After meta element add new line.
+	 * Add meta element to this page head. Create <code>meta</code> element and set all attributes provided by meta reference
+	 * parameter. There is no validation on meta reference; attributes are set exactly as provided.
 	 * 
-	 * @param metaName name of attribute storing the <code>name</code>,
-	 * @param metaValue value of attribute storing the <code>name</code>,
-	 * @param dataName name of attribute storing the <code>value</code>,
-	 * @param dataValue value of attribute storing the <code>value</code>.
+	 * @param meta non null meta reference.
+	 * @throws IllegalArgumentException if meta reference parameter is null or empty.
 	 */
-	private void addMetaData(String metaName, String metaValue, String dataName, String dataValue) {
-		head.addChild(doc.createElement("meta", metaName, metaValue, dataName, dataValue));
-		head.addText("\r\n");
-	}
-
-	/**
-	 * Add meta elements to document header. This method import and append meta elements, as they are, to this document header
-	 * in the order from given list. Is legal for <code>metas</code> list parameter to be empty.
-	 * 
-	 * @param metas meta elements.
-	 */
-	public void setMetas(EList metas) {
-		for (Element meta : metas) {
-			head.addChild(meta);
-			head.addText("\r\n");
-		}
-	}
-
 	public void addMeta(IMetaReference meta) {
-		final String name = meta.getName();
-		final String httpEquiv = meta.getHttpEquiv();
-		final String property = meta.getProperty();
+		Params.notNull(meta, "Meta reference");
 
-		Element metaElement = null;
-		if (name != null) {
-			metaElement = head.getByAttr("name", name);
-		}
-		if (httpEquiv != null) {
-			metaElement = head.getByAttr("http-equiv", httpEquiv);
-		}
-		if (property != null) {
-			metaElement = head.getByAttr("property", httpEquiv);
-		}
-		if (metaElement == null) {
-			metaElement = doc.createElement("meta");
-		}
-
-		setAttr(metaElement, "name", name);
-		setAttr(metaElement, "http-equiv", httpEquiv);
-		setAttr(metaElement, "property", property);
+		Element metaElement = doc.createElement("meta");
+		setAttr(metaElement, "name", meta.getName());
+		setAttr(metaElement, "http-equiv", meta.getHttpEquiv());
+		setAttr(metaElement, "property", meta.getProperty());
 		setAttr(metaElement, "content", meta.getContent());
 		setAttr(metaElement, "charset", meta.getCharset());
 
@@ -196,13 +160,22 @@ public class PageDocument {
 		head.addText("\r\n");
 	}
 
+	/**
+	 * Add link element to this page head. Create <code>link</code> element and set all attributes provided by link reference
+	 * parameter. There is no validation on link reference; attributes are set exactly as provided.
+	 * <p>
+	 * This setter is not used only for external style sheets; all standard links attributes are supported. See
+	 * {@link ILinkReference} for a list of supported attributes.
+	 * 
+	 * @param link non null link reference.
+	 * @throws IllegalArgumentException if link reference parameter is null or <code>href</code> attribute is null or empty.
+	 */
 	public void addLink(ILinkReference link) {
+		Params.notNull(link, "Link reference");
 		final String href = link.getHref();
-		Element linkElement = head.getByAttr("href", href);
-		if (linkElement == null) {
-			linkElement = doc.createElement("link");
-		}
-		linkElement.setAttr("href", href);
+		Params.notNullOrEmpty(href, "Link HREF");
+		
+		Element linkElement = doc.createElement("link", "href", href);
 
 		setAttr(linkElement, "hreflang", link.getHreflang());
 		setAttr(linkElement, "rel", link.getRelationship(), "stylesheet");
@@ -222,13 +195,45 @@ public class PageDocument {
 		head.addText("\r\n");
 	}
 
+	/**
+	 * Append style link element to this page head. Create <code>link</code> element with <code>rel</code> attribute set to
+	 * <code>stylesheet</code> and <code>type</code> attribute set to <code>text/css</code>. Provided style file path is set to
+	 * <code>href</code> attribute.
+	 * 
+	 * @param href style file URL path.
+	 * @throws IllegalArgumentException if hyper-reference parameter is null or empty.
+	 */
+	public void addStyle(String href) {
+		Params.notNullOrEmpty(href, "Style HREF");
+		head.addChild(doc.createElement("link", "href", href, "rel", "stylesheet", "type", "text/css"));
+		head.addText("\r\n");
+	}
+
+	/**
+	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script reference
+	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See {@link IScriptReference}
+	 * for a list of supported attributes.
+	 * <p>
+	 * If {@link IScriptReference#getSource()} is a file path relative this project, as accepted by
+	 * {@link FilePath#accept(String)}, invoke {@link Handler#handle(Object)} with {@link FilePath} created from script source
+	 * attribute. Handler returned value is used to replace current script source. 
+	 * <p>
+	 * If script is embedded, see {@link IScriptReference#isEmbedded()}, load script as text content to created script element,
+	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptReference#getSource()} is project relative path
+	 * of the script file from where text content is loaded.
+	 * 
+	 * @param script script reference,
+	 * @param handler file handler.
+	 * @throws IllegalArgumentException if script or handler parameter is null or script source is missing.
+	 * @throws IOException if script is embedded and script content loading fails.
+	 */
 	public void addScript(IScriptReference script, Handler<String, FilePath> handler) throws IOException {
+		Params.notNull(script, "Script reference");
+		Params.notNull(script.getSource(), "The source of script");
+		Params.notNull(handler, "File handler");
+
 		String src = script.getSource();
-		assert src != null;
-		Element scriptElement = head.getByAttr("src", src);
-		if (scriptElement == null) {
-			scriptElement = doc.createElement("script");
-		}
+		Element scriptElement = doc.createElement("script");
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
 				src = handler.handle(project.getFile(src));
@@ -246,13 +251,22 @@ public class PageDocument {
 		setAttr(scriptElement, "integrity", script.getIntegrity());
 
 		if (script.isEmbedded()) {
-			scriptElement.setText(Strings.load(project.getFile(script.getSource()).toFile()));
+			scriptElement.setText(project.loadFile(src));
 		}
 
 		head.addChild(scriptElement);
 		head.addText("\r\n");
 	}
 
+	/**
+	 * Add named attribute to DOM element with given value. Attribute value can be null in which case optional default value is
+	 * used. If value parameter is null and default value is not provided this method does nothing.
+	 * 
+	 * @param element target DOM element,
+	 * @param name attribute name,
+	 * @param value attribute value, possible null,
+	 * @param defaultValue optional default value, used when <code>value</code> is null.
+	 */
 	private static void setAttr(Element element, String name, String value, String... defaultValue) {
 		if (value == null && defaultValue.length == 1) {
 			value = defaultValue[0];
@@ -260,79 +274,5 @@ public class PageDocument {
 		if (value != null) {
 			element.setAttr(name, value);
 		}
-	}
-
-	/**
-	 * Append style link element to this document head.
-	 * 
-	 * @param path style file URL path.
-	 */
-	public void addStyle(String path) {
-		head.addChild(doc.createElement("link", "href", path, "rel", "stylesheet", "type", "text/css"));
-		head.addText("\r\n");
-	}
-
-	/**
-	 * Add script links on this document body end, in the order from given list.
-	 * 
-	 * @param paths URL paths list to script files.
-	 */
-	public void addScripts(Set<String> paths) {
-		for (String path : paths) {
-			addScript(path, false);
-		}
-	}
-
-	/**
-	 * Add script link to body end or on head if <code>appendToHead</code> parameter is true. Path parameter can be both
-	 * relative to site or absolute URL for scripts stored on foreign servers.
-	 * 
-	 * @param path script source path, relative to site or absolute URL,
-	 * @param appendToHead append to document head.
-	 */
-	public void addScript(String path, boolean appendToHead) {
-		Element parent = appendToHead ? head : body;
-		parent.addChild(doc.createElement("script", "src", path, "type", "text/javascript"));
-		parent.addText("\r\n");
-	}
-
-	public void addSDKScript(FilePath scriptPath, String sdkid) {
-		Map<String, String> variables = new HashMap<String, String>();
-		variables.put("sdk-id", sdkid);
-
-		VariablesWriter writer = new VariablesWriter(variables);
-		try {
-			Files.copy(scriptPath.getReader(), writer);
-		} catch (IOException e) {
-			throw new WoodException(e);
-		}
-
-		Element script = doc.createElement("script", "type", "text/javascript");
-		script.setRichText("\r\n" + writer.toString());
-
-		head.addChild(script);
-		head.addText("\r\n");
-	}
-
-	public void addChildren(String parentTag, EList children, String keyAttr) {
-		Element parent = doc.getByTag(parentTag);
-		for (Element child : children) {
-			String keyValue = child.getAttr(keyAttr);
-			if (parent.getByAttr(keyAttr, keyValue) != null) {
-				continue;
-			}
-			parent.addChild(child);
-			parent.addText("\r\n");
-		}
-	}
-
-	/**
-	 * Return this page document.
-	 * 
-	 * @return this page document.
-	 * @see #doc
-	 */
-	public Document getDocument() {
-		return doc;
 	}
 }

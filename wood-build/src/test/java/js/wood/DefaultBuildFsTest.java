@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -15,12 +15,6 @@ import org.junit.Test;
 
 import js.util.Classes;
 import js.util.Strings;
-import js.wood.Builder;
-import js.wood.BuilderProject;
-import js.wood.Component;
-import js.wood.DefaultBuildFS;
-import js.wood.FilePath;
-import js.wood.Project;
 
 public class DefaultBuildFsTest {
 	private BuilderProject project;
@@ -32,8 +26,10 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void layout() throws IOException {
+		List<Locale> locales = Arrays.asList(new Locale("en"));
+		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
+		
 		Builder builder = new Builder(project);
-		resetProjectLocales(project);
 		builder.build();
 
 		assertTrue(dir("build/site").exists());
@@ -64,13 +60,13 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void pageName() {
-		DefaultBuildFsProxy buildFS = new DefaultBuildFsProxy(project);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project, 0);
 		assertThat(buildFS.formatPageName("index.htm"), equalTo("index.htm"));
 	}
 
 	@Test
 	public void styleName() {
-		DefaultBuildFsProxy buildFS = new DefaultBuildFsProxy(project);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project, 0);
 
 		assertThat(buildFS.formatStyleName(new FilePath(project, "res/page/index/index.css")), equalTo("page-index.css"));
 		assertThat(buildFS.formatStyleName(new FilePath(project, "res/theme/style.css")), equalTo("theme-style.css"));
@@ -84,7 +80,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void scriptName() {
-		DefaultBuildFsProxy buildFS = new DefaultBuildFsProxy(project);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project, 0);
 
 		assertThat(buildFS.formatScriptName(new FilePath(project, "script/hc/page/Index.js")), equalTo("hc.page.Index.js"));
 		assertThat(buildFS.formatScriptName(new FilePath(project, "lib/paging.js")), equalTo("paging.js"));
@@ -94,7 +90,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void mediaName() {
-		DefaultBuildFsProxy buildFS = new DefaultBuildFsProxy(project);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project, 0);
 
 		assertThat(buildFS.formatMediaName(new FilePath(project, "res/page/index/background.png")), equalTo("page-index_background.png"));
 		assertThat(buildFS.formatMediaName(new FilePath(project, "res/page/index/index.png")), equalTo("page-index_index.png"));
@@ -104,57 +100,5 @@ public class DefaultBuildFsTest {
 		assertThat(buildFS.formatMediaName(new FilePath(project, "res/asset/background.png")), equalTo("asset_background.png"));
 		assertThat(buildFS.formatMediaName(new FilePath(project, "script/js/wood/player/background.png")), equalTo("js-wood-player_background.png"));
 		assertThat(buildFS.formatMediaName(new FilePath(project, "lib/paging/background.png")), equalTo("lib-paging_background.png"));
-	}
-
-	private static class DefaultBuildFsProxy extends DefaultBuildFS {
-		public DefaultBuildFsProxy(BuilderProject project) {
-			super(project, 0);
-		}
-
-		@Override
-		protected File getPageDir(Component page) {
-			return super.getPageDir(page);
-		}
-
-		@Override
-		protected File getStyleDir() {
-			return super.getStyleDir();
-		}
-
-		@Override
-		protected File getScriptDir() {
-			return super.getScriptDir();
-		}
-
-		@Override
-		protected File getMediaDir() {
-			return super.getMediaDir();
-		}
-
-		@Override
-		protected String formatPageName(String pageName) {
-			return super.formatPageName(pageName);
-		}
-
-		@Override
-		protected String formatStyleName(FilePath styleFile) {
-			return super.formatStyleName(styleFile);
-		}
-
-		@Override
-		protected String formatScriptName(FilePath scriptFile) {
-			return super.formatScriptName(scriptFile);
-		}
-
-		@Override
-		protected String formatMediaName(FilePath mediaFile) {
-			return super.formatMediaName(mediaFile);
-		}
-	}
-
-	private static void resetProjectLocales(Project project) {
-		List<Locale> locales = new ArrayList<Locale>();
-		locales.add(new Locale("en"));
-		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
 	}
 }

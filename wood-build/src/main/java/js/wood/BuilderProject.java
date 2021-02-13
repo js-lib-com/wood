@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import js.util.Files;
+import js.util.Strings;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Variables;
 
@@ -99,6 +101,10 @@ public class BuilderProject extends Project {
 	 */
 	public Map<DirPath, IVariables> getVariables() {
 		return Collections.unmodifiableMap(variables);
+	}
+
+	public String loadFile(String path) throws IOException {
+		return Strings.load(getFile(path).toFile());
 	}
 
 	/**
@@ -218,4 +224,8 @@ public class BuilderProject extends Project {
 			}
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests Support
+
 }

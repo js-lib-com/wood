@@ -122,7 +122,7 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * The first declared locale is always the default one; this holds true even if there is a single locale declared. Note that
 	 * default locale is used for resources without locale variant.
 	 */
-	private final List<Locale> locales = new ArrayList<Locale>();
+	private final List<Locale> locales = new ArrayList<>();
 
 	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
 

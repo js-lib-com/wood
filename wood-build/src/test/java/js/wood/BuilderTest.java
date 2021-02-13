@@ -9,7 +9,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -725,59 +724,6 @@ public class BuilderTest {
 		assertTrue(new File(buildDir, path).exists());
 	}
 
-	// ------------------------------------------------------
-	// PageDocument
-
-	@Test
-	public void pageDocumentSetters() throws IOException {
-		DocumentBuilder builder = new DocumentBuilderImpl();
-		Document metas = builder.parseXML("" + //
-				"<metas>" + //
-				"   <meta http-equiv='X-UA-Compatible' content='IE=9; IE=8; IE=7; IE=EDGE' />" + //
-				"</metas>");
-
-		BuilderProject project = project("scripts");
-		project.scanBuildFiles();
-
-		CompoPath compoPath = new CompoPath(project, "index");
-		Component compo = new Component(compoPath, nullReferenceHandler());
-		compo.scan(false);
-
-		PageDocument page = new PageDocument(compo);
-		page.setTitle("title");
-		page.setAuthor("author");
-		page.setDescription("description");
-		page.setMetas(metas.getRoot().getChildren());
-		page.addStyle("style/index.css");
-		page.addScript("script/index.js", false);
-
-		String doc = stringify(page.getDocument());
-		assertTrue(doc.contains("<META content=\"author\" name=\"Author\"></META>"));
-		assertTrue(doc.contains("<TITLE>title</TITLE>"));
-		assertTrue(doc.contains("<META content=\"description\" name=\"Description\"></META>"));
-		assertTrue(doc.contains("<META content=\"IE=9; IE=8; IE=7; IE=EDGE\" http-equiv=\"X-UA-Compatible\"></META>"));
-		assertTrue(doc.contains("<LINK href=\"style/index.css\" rel=\"stylesheet\" type=\"text/css\"></LINK>"));
-		assertTrue(doc.contains("<SCRIPT src=\"script/index.js\" type=\"text/javascript\"></SCRIPT>"));
-	}
-
-	@Test
-	public void pageDocumentIncludeAnalyticsScript() throws IOException {
-		BuilderProject project = project("scripts");
-		project.scanBuildFiles();
-
-		CompoPath compoPath = new CompoPath(project, "index");
-		Component compo = new Component(compoPath, nullReferenceHandler());
-		compo.scan(false);
-
-		PageDocument page = new PageDocument(compo);
-		page.addSDKScript(project.getFile("lib/sdk/analytics.js"), "UI-12345678");
-		assertTrue(stringify(page.getDocument()).contains("UI-12345678"));
-
-		page = new PageDocument(compo);
-		page.addSDKScript(project.getFile("lib/sdk/analytics.js"), null);
-		assertFalse(stringify(page.getDocument()).contains("UI-12345678"));
-	}
-
 	private static File projectDir(String dirName) {
 		return new File("src/test/resources/" + dirName);
 	}
@@ -798,30 +744,10 @@ public class BuilderTest {
 		assertEquals(expected, scripts.item(index).getAttr("src"));
 	}
 
-	private static IReferenceHandler nullReferenceHandler() {
-		return new IReferenceHandler() {
-			@Override
-			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
-				return "null";
-			}
-
-			@Override
-			public String toString() {
-				return "null reference handler";
-			}
-		};
-	}
-
 	private static void resetProjectLocales(Project project) {
 		List<Locale> locales = new ArrayList<Locale>();
 		locales.add(new Locale("en"));
 		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
-	}
-
-	private static String stringify(Document document) throws IOException {
-		StringWriter writer = new StringWriter();
-		document.serialize(writer);
-		return writer.toString();
 	}
 
 	private static BuilderProject project(String projectDir) {
