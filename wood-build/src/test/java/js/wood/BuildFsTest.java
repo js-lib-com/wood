@@ -23,7 +23,7 @@ public class BuildFsTest {
 	@Before
 	public void beforeTest() throws Exception {
 		project = new BuilderProject(new File("src/test/resources/project"));
-		Files.removeFilesHierarchy(new File("src/test/resources/project/build"));
+		Files.removeFilesHierarchy(project.getSiteDir());
 	}
 
 	@Test

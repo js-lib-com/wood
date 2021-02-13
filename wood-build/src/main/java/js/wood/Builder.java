@@ -132,7 +132,9 @@ public class Builder implements IReferenceHandler {
 	public void build() throws IOException {
 		for (Locale locale : project.getLocales()) {
 			this.locale = locale;
-			buildFS.setLocale(locale);
+			if (project.isMultiLocale()) {
+				buildFS.setLocale(locale);
+			}
 
 			for (CompoPath page : pages) {
 				buildPage(page);
