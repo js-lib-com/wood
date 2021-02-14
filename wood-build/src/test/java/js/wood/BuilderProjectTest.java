@@ -41,14 +41,14 @@ public class BuilderProjectTest implements IReferenceHandler {
 	@Before
 	public void beforeTest() throws IOException {
 		project = new BuilderProject(new File("src/test/resources/project"));
-		if (project.getBuildDir().exists()) {
-			Files.removeFilesHierarchy(project.getBuildDir());
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		if (buildDir.exists()) {
+			Files.removeFilesHierarchy(buildDir);
 		}
 	}
 
 	@Test
 	public void initialization() throws FileNotFoundException {
-		assertThat(project.getBuildDir(), equalTo(new File(project.getProjectDir(), CT.DEF_BUILD_DIR)));
 		assertTrue(project.getLayoutFiles().isEmpty());
 	}
 
@@ -156,7 +156,6 @@ public class BuilderProjectTest implements IReferenceHandler {
 		assertThat(descriptor.getDisplay(null), equalTo("Index Page"));
 		assertThat(descriptor.getDescription(null), equalTo("Index page description."));
 	}
-
 
 	@Test
 	public void isExcluded() {

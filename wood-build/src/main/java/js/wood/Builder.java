@@ -1,5 +1,6 @@
 package js.wood;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +63,7 @@ public class Builder implements IReferenceHandler {
 	 */
 	public Builder(BuilderConfig config) {
 		log.trace("Builder(BuilderConfig)");
-		this.project = new BuilderProject(config.getProjectDir(), config.getBuildDir());
+		this.project = new BuilderProject(config.getProjectDir());
 		this.project.scan();
 
 		// scan project layout files then initialize pages list and global variables map
@@ -82,7 +83,7 @@ public class Builder implements IReferenceHandler {
 	 * @param project
 	 */
 	public Builder(BuilderProject project) {
-		this(project, new DefaultBuildFS(project.getBuildDir(), 0));
+		this(project, new DefaultBuildFS(new File(project.getProjectDir(), CT.DEF_BUILD_DIR), 0));
 	}
 
 	/**
@@ -153,7 +154,7 @@ public class Builder implements IReferenceHandler {
 		Component pageComponent = new Component(compoPath, this);
 		currentCompo.set(pageComponent);
 		pageComponent.scan();
-		
+
 		PageDocument pageDocument = new PageDocument(pageComponent);
 		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");

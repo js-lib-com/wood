@@ -226,17 +226,6 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get site build directory path, relative to project root. Return default value if <code>site-dir</code> element is
-	 * missing.
-	 * 
-	 * @param defaultValue default value.
-	 * @return site build directory path or default value.
-	 */
-	public String getBuildDir(String defaultValue) {
-		return text("site-dir", defaultValue);
-	}
-
-	/**
 	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
 	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
 	 * 

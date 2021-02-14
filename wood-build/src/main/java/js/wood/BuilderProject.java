@@ -19,9 +19,6 @@ import js.wood.impl.Variables;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	/** Site build directory, usually part of master project build. */
-	private final File buildDir;
-
 	/**
 	 * Project layout files are HTM files describing user interface elements. By convention layout base name is the same as
 	 * component directory name.
@@ -37,15 +34,7 @@ class BuilderProject extends Project {
 	 * @param projectDir project root directory.
 	 */
 	public BuilderProject(File projectDir) {
-		this(projectDir, null);
-	}
-
-	public BuilderProject(File projectDir, File buildDir) {
 		super(projectDir);
-		this.buildDir = buildDir != null ? buildDir : new File(projectDir, this.descriptor.getBuildDir(CT.DEF_BUILD_DIR));
-		if (!this.buildDir.exists()) {
-			this.buildDir.mkdir();
-		}
 		this.layouts = new HashSet<>();
 		this.variables = new HashMap<>();
 	}
@@ -60,16 +49,6 @@ class BuilderProject extends Project {
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
 		scanner.scan(new DirPath(this, CT.LIBRARY_DIR));
 		scanner.scan(new DirPath(this, CT.GENERATED_DIR));
-	}
-
-	/**
-	 * Get site build directory.
-	 * 
-	 * @return site build directory.
-	 * @see #buildDir
-	 */
-	public File getBuildDir() {
-		return buildDir;
 	}
 
 	/**

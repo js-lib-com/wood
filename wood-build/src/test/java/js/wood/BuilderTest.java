@@ -83,12 +83,13 @@ public class BuilderTest {
 	@Test
 	public void build() throws IOException {
 		BuilderProject project = project("project");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<>();
 		final List<String> pageFileNames = new ArrayList<>();
 
-		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
+		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -122,12 +123,13 @@ public class BuilderTest {
 	@Test
 	public void build_RootContext() throws IOException {
 		BuilderProject project = project("root-project");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<>();
 		final List<String> pageFileNames = new ArrayList<>();
 
-		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
+		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -162,8 +164,9 @@ public class BuilderTest {
 	@Test
 	public void buildPage() throws Exception {
 		BuilderProject project = project("project");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
-		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
+		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
 			public void writePage(Component page, Document document) throws IOException {
 				assertPageDocument(document);
@@ -182,8 +185,9 @@ public class BuilderTest {
 	@Test
 	public void buildPage_RootContext() throws Exception {
 		BuilderProject project = project("project");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
-		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
+		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
 			public void writePage(Component page, Document document) throws IOException {
 				assertPageDocument(document);
@@ -375,7 +379,7 @@ public class BuilderTest {
 	public void strings() throws IOException {
 		Builder builder = builder("strings");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -460,7 +464,7 @@ public class BuilderTest {
 	public void styles() throws Exception {
 		Builder builder = builder("styles");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -498,7 +502,7 @@ public class BuilderTest {
 	public void styleMixin() throws IOException {
 		Builder builder = builder("styles");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -516,7 +520,7 @@ public class BuilderTest {
 	public void scripts() throws IOException {
 		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -549,7 +553,7 @@ public class BuilderTest {
 	public void thirdPartyScripts() throws Exception {
 		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -577,7 +581,7 @@ public class BuilderTest {
 	public void images() throws IOException {
 		Builder builder = builder("images");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -622,7 +626,8 @@ public class BuilderTest {
 		resetProjectLocales(project);
 		builder.build();
 
-		File style = new File(project.getBuildDir(), "style/template-page.css");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File style = new File(buildDir, "style/template-page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
@@ -634,7 +639,8 @@ public class BuilderTest {
 		resetProjectLocales(project);
 		builder.build();
 
-		File style = new File(project.getBuildDir(), "style/template-page.css");
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File style = new File(buildDir, "style/template-page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
@@ -647,7 +653,7 @@ public class BuilderTest {
 
 		builder.buildPage(new CompoPath(project, "page/index"));
 
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");
 		assertFile(buildDir, "media/template-page_logo-001.jpg");
 		assertFile(buildDir, "script/js-lib-001.js");
@@ -671,7 +677,7 @@ public class BuilderTest {
 
 		builder.buildPage(new CompoPath(project, "page/index"));
 
-		File buildDir = project.getBuildDir();
+		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");
 		assertFile(buildDir, "media/template-page_logo-001.jpg");
 		assertFile(buildDir, "script/js-lib-001.js");
@@ -716,8 +722,9 @@ public class BuilderTest {
 	private static BuilderProject project(String projectDir) {
 		try {
 			BuilderProject project = new BuilderProject(new File("src/test/resources/" + projectDir));
-			if (project.getBuildDir().exists()) {
-				Files.removeFilesHierarchy(project.getBuildDir());
+			File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+			if (buildDir.exists()) {
+				Files.removeFilesHierarchy(buildDir);
 			}
 			return project;
 		} catch (IOException e) {

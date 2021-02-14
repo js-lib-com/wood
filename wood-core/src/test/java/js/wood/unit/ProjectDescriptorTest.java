@@ -31,7 +31,6 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getAuthor(), equalTo("j(s)-lib"));
 		assertThat(descriptor.getName(null), equalTo("project"));
 		assertThat(descriptor.getTheme(), equalTo("material"));
-		assertThat(descriptor.getBuildDir(null), equalTo("build/site"));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 	}
 
@@ -57,7 +56,6 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getAuthor(), equalTo("WOOD"));
 		assertThat(descriptor.getName(null), nullValue());
 		assertThat(descriptor.getTheme(), nullValue());
-		assertThat(descriptor.getBuildDir(null), nullValue());
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getExcludes(), emptyIterable());
 	}
