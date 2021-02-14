@@ -1,13 +1,14 @@
 package js.wood;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,8 +31,8 @@ import js.wood.impl.ResourceType;
 
 public class BuilderTest {
 	@Test
-	public void constructor() throws FileNotFoundException {
-		Builder builder = new Builder(projectDir("project"));
+	public void constructor() throws IOException {
+		Builder builder = builder("project");
 
 		BuilderProject project = builder.getProject();
 		assertNotNull(project);
@@ -41,7 +42,7 @@ public class BuilderTest {
 
 		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
-		assertEquals(3, pages.size());
+		assertThat(pages, hasSize(3));
 		assertTrue(pages.contains(new CompoPath(project, "page/index")));
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
@@ -55,8 +56,8 @@ public class BuilderTest {
 	}
 
 	@Test
-	public void constructor_RootContext() throws FileNotFoundException {
-		Builder builder = new Builder(projectDir("root-project"));
+	public void constructor_RootContext() throws IOException {
+		Builder builder = builder("root-project");
 
 		BuilderProject project = builder.getProject();
 		assertNotNull(project);
@@ -66,7 +67,7 @@ public class BuilderTest {
 
 		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
-		assertEquals(3, pages.size());
+		assertThat(pages, hasSize(3));
 		assertTrue(pages.contains(new CompoPath(project, "page/index")));
 		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
@@ -84,10 +85,10 @@ public class BuilderTest {
 		BuilderProject project = project("project");
 
 		// initialize probes
-		final List<Locale> locales = new ArrayList<Locale>();
-		final List<String> pageFileNames = new ArrayList<String>();
+		final List<Locale> locales = new ArrayList<>();
+		final List<String> pageFileNames = new ArrayList<>();
 
-		BuildFS buildFS = new DefaultBuildFS(project, 0) {
+		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -95,26 +96,26 @@ public class BuilderTest {
 			}
 
 			@Override
-			public void writePage(PageDocument page) throws IOException {
-				pageFileNames.add(page.getComponent().getLayoutFileName());
+			public void writePage(Component page, Document document) throws IOException {
+				pageFileNames.add(page.getLayoutFileName());
 			}
 		};
 		Builder builder = new Builder(project, buildFS);
 		builder.build();
 
-		assertEquals(4, locales.size());
+		assertThat(locales, hasSize(4));
 
 		assertTrue(locales.contains(new Locale("en")));
 		assertTrue(locales.contains(new Locale("de")));
 		assertTrue(locales.contains(new Locale("fr")));
 		assertTrue(locales.contains(new Locale("ro")));
 
-		assertEquals(12, pageFileNames.size());
+		assertThat(pageFileNames, hasSize(12));
 		Collections.sort(pageFileNames);
 
 		String[] expectedFileNames = new String[] { "index.htm", "video-player.htm", "videos.htm" };
 		for (int i = 0; i < 12; ++i) {
-			assertEquals(expectedFileNames[i / 4], pageFileNames.get(i));
+			assertThat(pageFileNames.get(i), equalTo(expectedFileNames[i / 4]));
 		}
 	}
 
@@ -126,7 +127,7 @@ public class BuilderTest {
 		final List<Locale> locales = new ArrayList<>();
 		final List<String> pageFileNames = new ArrayList<>();
 
-		BuildFS buildFS = new DefaultBuildFS(project, 0) {
+		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
 			@Override
 			public void setLocale(Locale locale) {
 				super.setLocale(locale);
@@ -134,27 +135,27 @@ public class BuilderTest {
 			}
 
 			@Override
-			public void writePage(PageDocument page) throws IOException {
-				pageFileNames.add(page.getComponent().getLayoutFileName());
+			public void writePage(Component page, Document document) throws IOException {
+				pageFileNames.add(page.getLayoutFileName());
 			}
 		};
 
 		Builder builder = new Builder(project, buildFS);
 		builder.build();
 
-		assertEquals(4, locales.size());
+		assertThat(locales, hasSize(4));
 
 		assertTrue(locales.contains(new Locale("en")));
 		assertTrue(locales.contains(new Locale("de")));
 		assertTrue(locales.contains(new Locale("fr")));
 		assertTrue(locales.contains(new Locale("ro")));
 
-		assertEquals(12, pageFileNames.size());
+		assertThat(pageFileNames, hasSize(12));
 		Collections.sort(pageFileNames);
 
 		String[] expectedFileNames = new String[] { "index.htm", "video-player.htm", "videos.htm" };
 		for (int i = 0; i < 12; ++i) {
-			assertEquals(expectedFileNames[i / 4], pageFileNames.get(i));
+			assertThat(pageFileNames.get(i), equalTo(expectedFileNames[i / 4]));
 		}
 	}
 
@@ -162,10 +163,10 @@ public class BuilderTest {
 	public void buildPage() throws Exception {
 		BuilderProject project = project("project");
 
-		BuildFS buildFS = new DefaultBuildFS(project, 0) {
+		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
 			@Override
-			public void writePage(PageDocument page) throws IOException {
-				assertPageDocument(page);
+			public void writePage(Component page, Document document) throws IOException {
+				assertPageDocument(document);
 			}
 		};
 
@@ -182,10 +183,10 @@ public class BuilderTest {
 	public void buildPage_RootContext() throws Exception {
 		BuilderProject project = project("project");
 
-		BuildFS buildFS = new DefaultBuildFS(project, 0) {
+		BuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0) {
 			@Override
-			public void writePage(PageDocument page) throws IOException {
-				assertPageDocument(page);
+			public void writePage(Component page, Document document) throws IOException {
+				assertPageDocument(document);
 			}
 		};
 
@@ -198,27 +199,25 @@ public class BuilderTest {
 		Classes.invoke(builder, "buildPage", indexPage);
 	}
 
-	private static void assertPageDocument(PageDocument page) {
-		Document doc = page.getDocument();
-
-		assertEquals("Test Project / Index", doc.getByTag("title").getText());
+	private static void assertPageDocument(Document doc) {
+		assertThat(doc.getByTag("title").getText(), equalTo("Test Project / Index"));
 
 		EList metas = doc.findByTag("meta");
-		assertEquals(5, metas.size());
+		assertThat(metas.size(), equalTo(5));
 
-		assertEquals("text/html; charset=UTF-8", metas.item(0).getAttr("content"));
-		assertEquals("Content-Type", metas.item(0).getAttr("http-equiv"));
-		assertEquals("j(s)-lib", metas.item(1).getAttr("content"));
-		assertEquals("Author", metas.item(1).getAttr("name"));
-		assertEquals("Index page description.", metas.item(2).getAttr("content"));
-		assertEquals("Description", metas.item(2).getAttr("name"));
-		assertEquals("IE=9; IE=8; IE=7; IE=EDGE", metas.item(3).getAttr("content"));
-		assertEquals("X-UA-Compatible", metas.item(3).getAttr("http-equiv"));
-		assertEquals("width=device-width, initial-scale=1.0, maximum-scale=1.0", metas.item(4).getAttr("content"));
-		assertEquals("viewport", metas.item(4).getAttr("name"));
+		assertThat(metas.item(0).getAttr("content"), equalTo("text/html; charset=UTF-8"));
+		assertThat(metas.item(0).getAttr("http-equiv"), equalTo("Content-Type"));
+		assertThat(metas.item(1).getAttr("content"), equalTo("j(s)-lib"));
+		assertThat(metas.item(1).getAttr("name"), equalTo("Author"));
+		assertThat(metas.item(2).getAttr("content"), equalTo("Index page description."));
+		assertThat(metas.item(2).getAttr("name"), equalTo("Description"));
+		assertThat(metas.item(3).getAttr("content"), equalTo("IE=9; IE=8; IE=7; IE=EDGE"));
+		assertThat(metas.item(3).getAttr("http-equiv"), equalTo("X-UA-Compatible"));
+		assertThat(metas.item(4).getAttr("content"), equalTo("width=device-width, initial-scale=1.0, maximum-scale=1.0"));
+		assertThat(metas.item(4).getAttr("name"), equalTo("viewport"));
 
 		EList styles = doc.findByTag("link");
-		assertEquals(13, styles.size());
+		assertThat(styles.size(), equalTo(13));
 
 		int index = 0;
 		assertStyle("media/favicon.ico", styles, index++);
@@ -244,7 +243,7 @@ public class BuilderTest {
 		for (int i = 0; i < elist.size(); ++i) {
 			scripts.add(elist.item(i).getAttr("src"));
 		}
-		assertEquals(10, scripts.size());
+		assertThat(scripts, hasSize(10));
 
 		assertTrue(scripts.indexOf("script/hc.page.Index.js") > scripts.indexOf("script/js-lib.js"));
 		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/js-lib.js"));
@@ -265,7 +264,7 @@ public class BuilderTest {
 		assertTrue(scripts.contains("script/js.hood.TopMenu.js"));
 
 		EList anchors = doc.findByTag("a");
-		assertEquals(8, anchors.size());
+		assertThat(anchors.size(), equalTo(8));
 
 		index = 0;
 		assertAnchor("Logout", anchors, index++);
@@ -278,7 +277,7 @@ public class BuilderTest {
 		assertAnchor("User Profile", anchors, index++);
 
 		EList images = doc.findByTag("img");
-		assertEquals(8, images.size());
+		assertThat(images.size(), equalTo(8));
 
 		index = 0;
 		assertImage("media/template-page_logo.jpg", images, index++);
@@ -293,7 +292,7 @@ public class BuilderTest {
 
 	@Test
 	public void resourceReference() throws IOException {
-		Builder builder = new Builder(projectDir("project"));
+		Builder builder = builder("project");
 		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
@@ -329,7 +328,7 @@ public class BuilderTest {
 
 	@Test
 	public void resourceReference_RootContext() throws IOException {
-		Builder builder = new Builder(projectDir("root-project"));
+		Builder builder = builder("root-project");
 		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
@@ -369,14 +368,14 @@ public class BuilderTest {
 		BuildFS buildFS = builder.getBuildFS();
 		buildFS.setLocale(locale);
 
-		assertEquals(expected, builder.onResourceReference(reference, source));
+		assertThat(builder.onResourceReference(reference, source), equalTo(expected));
 	}
 
 	@Test
 	public void strings() throws IOException {
-		Builder builder = new Builder(projectDir("strings"));
+		Builder builder = builder("strings");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -446,22 +445,22 @@ public class BuilderTest {
 	}
 
 	private static void assertString(String expected, Document doc, String xpath) {
-		assertEquals(expected, doc.getByXPath(xpath).getText());
+		assertThat(doc.getByXPath(xpath).getText(), equalTo(expected));
 	}
 
 	private static void assertText(String expected, Document doc, String xpath) {
-		assertEquals(expected, doc.getByXPath(xpath).getRichText());
+		assertThat(doc.getByXPath(xpath).getRichText(), equalTo(expected));
 	}
 
 	private static void assertTooltip(String expected, Document doc, String xpath) {
-		assertEquals(expected, doc.getByXPath(xpath).getAttr("title"));
+		assertThat(doc.getByXPath(xpath).getAttr("title"), equalTo(expected));
 	}
 
 	@Test
 	public void styles() throws Exception {
-		Builder builder = new Builder(projectDir("styles"));
+		Builder builder = builder("styles");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -479,7 +478,7 @@ public class BuilderTest {
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
 		EList styles = doc.findByTag("link");
-		assertEquals(7, styles.size());
+		assertThat(styles.size(), equalTo(7));
 
 		int index = 0;
 		assertStyle("style/theme-reset.css", styles, index++);
@@ -497,9 +496,9 @@ public class BuilderTest {
 
 	@Test
 	public void styleMixin() throws IOException {
-		Builder builder = new Builder(projectDir("styles"));
+		Builder builder = builder("styles");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -515,9 +514,9 @@ public class BuilderTest {
 
 	@Test
 	public void scripts() throws IOException {
-		Builder builder = new Builder(projectDir("scripts"));
+		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -532,7 +531,7 @@ public class BuilderTest {
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
 		EList scripts = doc.findByTag("script");
-		assertEquals(5, scripts.size());
+		assertThat(scripts.size(), equalTo(5));
 
 		int index = 0;
 		assertScript("script/js-lib.js", scripts, index++);
@@ -548,9 +547,9 @@ public class BuilderTest {
 
 	@Test
 	public void thirdPartyScripts() throws Exception {
-		Builder builder = new Builder(projectDir("scripts"));
+		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -565,7 +564,7 @@ public class BuilderTest {
 		Document doc = documentBuilder.loadHTML(pageFile);
 		doc.dump();
 		EList scripts = doc.findByTag("script");
-		assertEquals(4, scripts.size());
+		assertThat(scripts.size(), equalTo(4));
 
 		int index = 0;
 		assertScript("http://maps.google.com/maps/api/js?sensor=false", scripts, index++);
@@ -576,9 +575,9 @@ public class BuilderTest {
 
 	@Test
 	public void images() throws IOException {
-		Builder builder = new Builder(projectDir("images"));
+		Builder builder = builder("images");
 		BuilderProject project = builder.getProject();
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 
 		builder.build();
 
@@ -618,68 +617,37 @@ public class BuilderTest {
 
 	@Test
 	public void expression() throws IOException {
-		Builder builder = new Builder(projectDir("project"));
+		Builder builder = builder("project");
 		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 		builder.build();
 
-		File style = new File(project.getSiteDir(), "style/template-page.css");
+		File style = new File(project.getBuildDir(), "style/template-page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
 
 	@Test
 	public void expression_RootContext() throws IOException {
-		Builder builder = new Builder(projectDir("root-project"));
+		Builder builder = builder("root-project");
 		BuilderProject project = builder.getProject();
 		resetProjectLocales(project);
 		builder.build();
 
-		File style = new File(project.getSiteDir(), "style/template-page.css");
+		File style = new File(project.getBuildDir(), "style/template-page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
 
 	@Test
-	public void sitePathTrailingSeparator() {
-		BuilderProject project = project("project");
-		assertTrue(project.getSitePath().endsWith("/"));
-	}
-
-	@Test
-	public void sitePathTrailingSeparator_RootContext() {
-		BuilderProject project = project("root-project");
-		assertTrue(project.getSitePath().endsWith("/"));
-	}
-
-	@Test
-	public void isExcluded() {
-		BuilderProject project = project("project");
-		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
-		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
-		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
-		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
-	}
-
-	@Test
-	public void isExcluded_RootContext() {
-		BuilderProject project = project("root-project");
-		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
-		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
-		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
-		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
-	}
-
-	@Test
 	public void buildNumber() throws Exception {
-		Builder builder = new Builder(projectDir("project"), new File(projectDir("project"), "build/site"), 1);
+		Builder builder = builder("project", 1);
 		builder.setLocale(new Locale("en"));
 		BuilderProject project = builder.getProject();
-		resetProjectLocales(project);
 
 		builder.buildPage(new CompoPath(project, "page/index"));
 
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 		assertFile(buildDir, "index-001.htm");
 		assertFile(buildDir, "media/template-page_logo-001.jpg");
 		assertFile(buildDir, "script/js-lib-001.js");
@@ -697,14 +665,13 @@ public class BuilderTest {
 
 	@Test
 	public void buildNumber_RootContext() throws Exception {
-		Builder builder = new Builder(projectDir("root-project"), new File(projectDir("project"), "build/site"), 1);
+		Builder builder = builder("root-project", 1);
 		builder.setLocale(new Locale("en"));
 		BuilderProject project = builder.getProject();
-		resetProjectLocales(project);
 
 		builder.buildPage(new CompoPath(project, "page/index"));
 
-		File buildDir = project.getSiteDir();
+		File buildDir = project.getBuildDir();
 		assertFile(buildDir, "index-001.htm");
 		assertFile(buildDir, "media/template-page_logo-001.jpg");
 		assertFile(buildDir, "script/js-lib-001.js");
@@ -724,24 +691,20 @@ public class BuilderTest {
 		assertTrue(new File(buildDir, path).exists());
 	}
 
-	private static File projectDir(String dirName) {
-		return new File("src/test/resources/" + dirName);
-	}
-
 	private static void assertStyle(String expected, EList styles, int index) {
-		assertEquals(expected, styles.item(index).getAttr("href"));
+		assertThat(styles.item(index).getAttr("href"), equalTo(expected));
 	}
 
 	private static void assertAnchor(String expected, EList anchors, int index) {
-		assertEquals(expected, anchors.item(index).getText());
+		assertThat(anchors.item(index).getText(), equalTo(expected));
 	}
 
 	private static void assertImage(String expected, EList images, int index) {
-		assertEquals(expected, images.item(index).getAttr("src"));
+		assertThat(images.item(index).getAttr("src"), equalTo(expected));
 	}
 
 	private static void assertScript(String expected, EList scripts, int index) {
-		assertEquals(expected, scripts.item(index).getAttr("src"));
+		assertThat(scripts.item(index).getAttr("src"), equalTo(expected));
 	}
 
 	private static void resetProjectLocales(Project project) {
@@ -753,8 +716,8 @@ public class BuilderTest {
 	private static BuilderProject project(String projectDir) {
 		try {
 			BuilderProject project = new BuilderProject(new File("src/test/resources/" + projectDir));
-			if (project.getSiteDir().exists()) {
-				Files.removeFilesHierarchy(project.getSiteDir());
+			if (project.getBuildDir().exists()) {
+				Files.removeFilesHierarchy(project.getBuildDir());
 			}
 			return project;
 		} catch (IOException e) {
@@ -763,5 +726,16 @@ public class BuilderTest {
 		}
 
 		throw new IllegalStateException();
+	}
+
+	private static Builder builder(String projectDir, int... buildNumber) throws IOException {
+		BuilderConfig config = new BuilderConfig();
+		config.setProjectDir(new File("src/test/resources/" + projectDir));
+		config.setBuildDir(new File(config.getProjectDir(), "build/site"));
+		Files.removeFilesHierarchy(config.getBuildDir());
+		if (buildNumber.length == 1) {
+			config.setBuildNumber(buildNumber[0]);
+		}
+		return new Builder(config);
 	}
 }

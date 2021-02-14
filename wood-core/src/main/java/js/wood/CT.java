@@ -70,7 +70,7 @@ public final class CT {
 	public static final String GENERATED_DIR = "gen";
 
 	/** Default site build directory used when project configuration file does not include it. */
-	public static final String DEF_SITE_DIR = "build/site";
+	public static final String DEF_BUILD_DIR = "build/site";
 
 	/** Project assets directory stores global variables and media files. */
 	public static final String ASSETS_DIR = RESOURCE_DIR + "/asset";

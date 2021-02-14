@@ -1,6 +1,5 @@
 package js.wood;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,8 +18,7 @@ import js.wood.impl.Reference;
  * files.
  * <p>
  * Using this class is pretty straightforward: create instance providing project directory then just invoke {@link #build()}.
- * Optionally, one may set the build number. Build site directory is controlled by build process and is project configurable; it
- * can be obtaining via {@link #getSitePath()}.
+ * Optionally, one may set the build number.
  * 
  * <pre>
  * Builder builder = new Builder(projectDir);
@@ -55,10 +53,6 @@ public class Builder implements IReferenceHandler {
 	/** Current processing locale variant. */
 	private Locale locale;
 
-	public Builder(File projectDir) {
-		this(projectDir, null, 0);
-	}
-
 	/**
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
 	 * and script files and initialize project pages and variables map. Create build FS instance.
@@ -66,20 +60,20 @@ public class Builder implements IReferenceHandler {
 	 * @param projectDir path to existing project root directory,
 	 * @param siteDir
 	 */
-	public Builder(File projectDir, File siteDir, int buildNumber) {
-		log.trace("Builder(File, File, int)");
-		this.project = new BuilderProject(projectDir, siteDir);
-		this.project.scanBuildFiles();
+	public Builder(BuilderConfig config) {
+		log.trace("Builder(BuilderConfig)");
+		this.project = new BuilderProject(config.getProjectDir(), config.getBuildDir());
+		this.project.scan();
 
 		// scan project layout files then initialize pages list and global variables map
-		for (LayoutFile layoutFile : this.project.getLayouts()) {
+		for (LayoutFile layoutFile : this.project.getLayoutFiles()) {
 			if (layoutFile.isPage()) {
 				this.pages.add(layoutFile.getCompoPath());
 			}
 		}
 
 		this.variables = this.project.getVariables();
-		this.buildFS = new DefaultBuildFS(project, buildNumber);
+		this.buildFS = new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber());
 	}
 
 	/**
@@ -88,7 +82,7 @@ public class Builder implements IReferenceHandler {
 	 * @param project
 	 */
 	public Builder(BuilderProject project) {
-		this(project, new DefaultBuildFS(project, 0));
+		this(project, new DefaultBuildFS(project.getBuildDir(), 0));
 	}
 
 	/**
@@ -99,10 +93,10 @@ public class Builder implements IReferenceHandler {
 	 */
 	public Builder(BuilderProject project, BuildFS buildFS) {
 		this.project = project;
-		this.project.scanBuildFiles();
+		this.project.scan();
 
 		// scan project layout files then initialize pages list and global variables map
-		for (LayoutFile layoutFile : this.project.getLayouts()) {
+		for (LayoutFile layoutFile : this.project.getLayoutFiles()) {
 			if (layoutFile.isPage()) {
 				this.pages.add(layoutFile.getCompoPath());
 			}
@@ -110,17 +104,6 @@ public class Builder implements IReferenceHandler {
 
 		this.variables = this.project.getVariables();
 		this.buildFS = buildFS;
-	}
-
-	/**
-	 * Get the site build directory path, relative to project. Returned value is that from project configuration - see
-	 * {@link Project#getSiteDir(String)}, or default value {@link CT#DEF_SITE_DIR}. Path is guaranteed to have trailing file
-	 * separator.
-	 * 
-	 * @return site build path.
-	 */
-	public String getSitePath() {
-		return project.getSitePath();
 	}
 
 	/**
@@ -167,26 +150,26 @@ public class Builder implements IReferenceHandler {
 	void buildPage(CompoPath compoPath) throws IOException {
 		log.debug("Build page |%s|.", compoPath);
 
-		Component page = new Component(compoPath, this);
-		currentCompo.set(page);
-		page.scan();
-		PageDocument pageDocument = new PageDocument(page);
-
+		Component pageComponent = new Component(compoPath, this);
+		currentCompo.set(pageComponent);
+		pageComponent.scan();
+		
+		PageDocument pageDocument = new PageDocument(pageComponent);
 		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");
-		pageDocument.setTitle(page.getDisplay());
+		pageDocument.setTitle(pageComponent.getDisplay());
 		pageDocument.setAuthor(project.getAuthor());
-		pageDocument.setDescription(page.getDescription());
+		pageDocument.setDescription(pageComponent.getDescription());
 
 		for (IMetaReference meta : project.getMetaReferences()) {
 			pageDocument.addMeta(meta);
 		}
-		for (IMetaReference meta : page.getMetaReferences()) {
+		for (IMetaReference meta : pageComponent.getMetaReferences()) {
 			pageDocument.addMeta(meta);
 		}
 
 		if (project.getFavicon().exists()) {
-			pageDocument.addFavicon(buildFS.writeFavicon(page, project.getFavicon()));
+			pageDocument.addFavicon(buildFS.writeFavicon(pageComponent, project.getFavicon()));
 		}
 
 		// links order:
@@ -200,33 +183,33 @@ public class Builder implements IReferenceHandler {
 		for (ILinkReference link : project.getLinkReferences()) {
 			pageDocument.addLink(link);
 		}
-		for (ILinkReference link : page.getLinkReferences()) {
+		for (ILinkReference link : pageComponent.getLinkReferences()) {
 			pageDocument.addLink(link);
 		}
 
 		ThemeStyles themeStyles = new ThemeStyles(project.getThemeStyles());
 		if (themeStyles.reset != null) {
-			pageDocument.addStyle(buildFS.writeStyle(page, themeStyles.reset, this));
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.reset, this));
 		}
 		if (themeStyles.fx != null) {
-			pageDocument.addStyle(buildFS.writeStyle(page, themeStyles.fx, this));
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.fx, this));
 		}
 		for (FilePath styleFile : themeStyles.styles) {
-			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
 		}
 
-		for (FilePath styleFile : page.getStyleFiles()) {
-			pageDocument.addStyle(buildFS.writeStyle(page, styleFile, this));
+		for (FilePath styleFile : pageComponent.getStyleFiles()) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
 		}
 
 		for (IScriptReference script : project.getScriptReferences()) {
-			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
+			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
 		}
-		for (IScriptReference script : page.getScriptReferences()) {
-			pageDocument.addScript(script, file -> buildFS.writeScript(page, file, this));
+		for (IScriptReference script : pageComponent.getScriptReferences()) {
+			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
 		}
 
-		buildFS.writePage(pageDocument);
+		buildFS.writePage(pageComponent, pageDocument.getDocument());
 	}
 
 	/**
@@ -266,7 +249,7 @@ public class Builder implements IReferenceHandler {
 			return buildFS.writeStyleMedia(mediaFile);
 
 		case SCRIPT:
-			return buildFS.writeScriptMedia(mediaFile);
+			return buildFS.writeScriptMedia(project.getName(), mediaFile);
 
 		default:
 		}

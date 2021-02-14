@@ -30,8 +30,8 @@ public class LayoutFileTest {
 	@Before
 	public void beforeTest() throws Exception {
 		project = new BuilderProject(new File("src/test/resources/layout-file"));
-		if (project.getSiteDir().exists()) {
-			Files.removeFilesHierarchy(project.getSiteDir());
+		if (project.getBuildDir().exists()) {
+			Files.removeFilesHierarchy(project.getBuildDir());
 		}
 	}
 

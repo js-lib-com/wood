@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import js.dom.Document;
 import js.util.Files;
 import js.util.Params;
 
@@ -30,7 +31,7 @@ import js.util.Params;
  */
 public abstract class BuildFS {
 	/** Project reference. */
-	private final BuilderProject project;
+	private final File buildDir;
 
 	/**
 	 * Build number or 0 if not set. Specialized write methods take care to append build number to target file name.
@@ -53,10 +54,10 @@ public abstract class BuildFS {
 	 * @param buildNumber optional build number, 0 if not used.
 	 * @throws IllegalArgumentException if project parameter is null or build number is negative.
 	 */
-	protected BuildFS(BuilderProject project, int buildNumber) {
-		Params.notNull(project, "Builder project");
+	protected BuildFS(File buildDir, int buildNumber) {
+		Params.notNull(buildDir, "Build directory");
 		Params.positive(buildNumber, "Build number");
-		this.project = project;
+		this.buildDir = buildDir;
 		this.buildNumber = buildNumber;
 		this.processedFiles = new ArrayList<>();
 	}
@@ -82,11 +83,10 @@ public abstract class BuildFS {
 	 * @param pageDocument page document.
 	 * @throws IOException if write fails.
 	 */
-	public void writePage(PageDocument pageDocument) throws IOException {
-		final Component page = pageDocument.getComponent();
+	public void writePage(Component page, Document document) throws IOException {
 		File targetFile = new File(getPageDir(page), insertBuildNumber(formatPageName(page.getLayoutFileName())));
 		if (!processedFiles.contains(targetFile)) {
-			pageDocument.getDocument().serialize(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"), true);
+			document.serialize(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"), true);
 			processedFiles.add(targetFile);
 		}
 	}
@@ -164,11 +164,16 @@ public abstract class BuildFS {
 	 * Context absolute path starts with path separator but does not include protocol, host and port. Anyway, it includes
 	 * context name, that is, application name. It is an absolute path relative to server document root.
 	 * 
+	 * @param contextName web context name included in returned URL absolute path,
 	 * @param mediaFile media file path.
 	 * @return media file URL absolute path.
+	 * @throws IllegalArgumentException if context name or media file parameter is null.
 	 * @throws IOException if media file write fails.
 	 */
-	public String writeScriptMedia(FilePath mediaFile) throws IOException {
+	public String writeScriptMedia(String contextName, FilePath mediaFile) throws IOException {
+		Params.notNull(contextName, "Context name");
+		Params.notNull(mediaFile, "Media file path");
+
 		String mediaName = insertBuildNumber(formatMediaName(mediaFile));
 		File targetFile = new File(getMediaDir(), mediaName);
 		if (!processedFiles.contains(targetFile)) {
@@ -177,10 +182,10 @@ public abstract class BuildFS {
 		}
 
 		StringBuilder builder = new StringBuilder();
-		// project name can be empty for root context
-		if (!project.getName().isEmpty()) {
+		// context name can be empty for root context
+		if (!contextName.isEmpty()) {
 			builder.append(Path.SEPARATOR);
-			builder.append(project.getName());
+			builder.append(contextName);
 		}
 		builder.append(Path.SEPARATOR);
 		if (locale != null) {
@@ -362,7 +367,8 @@ public abstract class BuildFS {
 	 * @return created directory.
 	 */
 	protected File createDirectory(String dirName) {
-		File dir = project.getSiteDir();
+		// clone build directory since need to keep it unchanged
+		File dir = new File(buildDir.getPath());
 
 		// if project is multi-locale create a sub-directory with name equal with locale language tag
 		if (locale != null) {

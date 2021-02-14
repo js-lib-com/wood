@@ -232,7 +232,7 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * @param defaultValue default value.
 	 * @return site build directory path or default value.
 	 */
-	public String getSiteDir(String defaultValue) {
+	public String getBuildDir(String defaultValue) {
 		return text("site-dir", defaultValue);
 	}
 

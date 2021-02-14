@@ -23,7 +23,7 @@ public class BuildFsTest {
 	@Before
 	public void beforeTest() throws Exception {
 		project = new BuilderProject(new File("src/test/resources/project"));
-		Files.removeFilesHierarchy(project.getSiteDir());
+		Files.removeFilesHierarchy(project.getBuildDir());
 	}
 
 	@Test
@@ -34,7 +34,7 @@ public class BuildFsTest {
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
-		buildFS.writePage(page);
+		buildFS.writePage(compo, page.getDocument());
 		assertTrue(exists("htm/index.htm"));
 	}
 
@@ -46,12 +46,12 @@ public class BuildFsTest {
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
-		buildFS.writePage(page);
+		buildFS.writePage(compo, page.getDocument());
 		assertTrue(exists("htm/index.htm"));
-		new File(project.getSiteDir(), "htm/index.htm").delete();
+		new File(project.getBuildDir(), "htm/index.htm").delete();
 
 		// second attempt to write page in the same build FS instance is ignored
-		buildFS.writePage(page);
+		buildFS.writePage(compo, page.getDocument());
 		assertFalse(exists("htm/index.htm"));
 	}
 
@@ -64,7 +64,7 @@ public class BuildFsTest {
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.setLocale(new Locale("ro"));
-		buildFS.writePage(page);
+		buildFS.writePage(compo, page.getDocument());
 		assertTrue(exists("ro/htm/index.htm"));
 	}
 
@@ -76,7 +76,7 @@ public class BuildFsTest {
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
-		buildFS.writePage(page);
+		buildFS.writePage(compo, page.getDocument());
 		assertTrue(exists("htm/index-004.htm"));
 	}
 
@@ -150,7 +150,7 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
-		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background.jpg"));
+		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/img/background.jpg"));
 		assertTrue(exists("img/background.jpg"));
 	}
 
@@ -160,7 +160,7 @@ public class BuildFsTest {
 		buildFS.setLocale(new Locale("ro"));
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
-		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/ro/img/background.jpg"));
+		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/ro/img/background.jpg"));
 		assertTrue(exists("ro/img/background.jpg"));
 	}
 
@@ -169,7 +169,7 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 4);
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
-		assertThat(buildFS.writeScriptMedia(mediaFile), equalTo("/project/img/background-004.jpg"));
+		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/img/background-004.jpg"));
 		assertTrue(exists("img/background-004.jpg"));
 	}
 
@@ -258,12 +258,12 @@ public class BuildFsTest {
 	}
 
 	private boolean exists(String fileName) {
-		return new File(project.getSiteDir(), fileName).exists();
+		return new File(project.getBuildDir(), fileName).exists();
 	}
 
 	private static class TestBuildFS extends BuildFS {
 		public TestBuildFS(BuilderProject project, int buildNumber) {
-			super(project, buildNumber);
+			super(project.getBuildDir(), buildNumber);
 		}
 
 		@Override

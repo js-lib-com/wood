@@ -33,17 +33,17 @@ import js.util.Strings;
  * </pre>
  * 
  * @author Iulian Rotaru
- * @version final
+ * @since 1.0
  */
-public class DefaultBuildFS extends BuildFS {
+class DefaultBuildFS extends BuildFS {
 	/**
 	 * Create default build file system instance for given project.
 	 * 
 	 * @param project project reference.
 	 * @param buildNumber
 	 */
-	public DefaultBuildFS(BuilderProject project, int buildNumber) {
-		super(project, buildNumber);
+	public DefaultBuildFS(File buildDir, int buildNumber) {
+		super(buildDir, buildNumber);
 	}
 
 	/**

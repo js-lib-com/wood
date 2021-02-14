@@ -18,7 +18,7 @@ import js.util.Params;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class PageDocument {
+class PageDocument {
 	private final Component component;
 
 	/** X(HT)ML document. */

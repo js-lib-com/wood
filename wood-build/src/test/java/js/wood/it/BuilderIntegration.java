@@ -20,6 +20,7 @@ import js.dom.EList;
 import js.dom.w3c.DocumentBuilderImpl;
 import js.util.Strings;
 import js.wood.Builder;
+import js.wood.BuilderConfig;
 
 public class BuilderIntegration {
 	private static final String[] LANGUAGES = new String[] { "de", "en", "fr", "ro" };
@@ -121,7 +122,9 @@ public class BuilderIntegration {
 
 	@Test
 	public void buildIntegration() throws IOException {
-		Builder builder = new Builder(new File("src/test/resources/project"));
+		BuilderConfig config = new BuilderConfig();
+		config.setProjectDir(new File("src/test/resources/project"));
+		Builder builder = new Builder(config);
 		builder.build();
 
 		File buildDir = file("project/build/site/");

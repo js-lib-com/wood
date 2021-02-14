@@ -41,16 +41,15 @@ public class BuilderProjectTest implements IReferenceHandler {
 	@Before
 	public void beforeTest() throws IOException {
 		project = new BuilderProject(new File("src/test/resources/project"));
-		if (project.getSiteDir().exists()) {
-			Files.removeFilesHierarchy(project.getSiteDir());
+		if (project.getBuildDir().exists()) {
+			Files.removeFilesHierarchy(project.getBuildDir());
 		}
 	}
 
 	@Test
 	public void initialization() throws FileNotFoundException {
-		assertThat(project.getSiteDir(), equalTo(new File(project.getProjectDir(), CT.DEF_SITE_DIR)));
-		assertThat(project.getSitePath(), equalTo("build/site/"));
-		assertTrue(project.getLayouts().isEmpty());
+		assertThat(project.getBuildDir(), equalTo(new File(project.getProjectDir(), CT.DEF_BUILD_DIR)));
+		assertTrue(project.getLayoutFiles().isEmpty());
 	}
 
 	@Test
@@ -66,7 +65,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 			handler.onFile(filePath(file));
 		}
 
-		Set<LayoutFile> layouts = project.getLayouts();
+		Set<LayoutFile> layouts = project.getLayoutFiles();
 		assertThat(layouts, hasSize(2));
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/page/index/index.htm"))));
 		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/template/page/page.htm"))));
@@ -123,7 +122,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Test
 	public void pagesDiscovery() throws IOException {
-		project.scanBuildFiles();
+		project.scan();
 
 		final Set<LayoutFile> expected = new HashSet<LayoutFile>();
 		expected.add(new LayoutFile(project, filePath("res/page/index/index.htm")));
@@ -131,7 +130,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 		expected.add(new LayoutFile(project, filePath("res/page/videos/videos.htm")));
 
 		final Set<LayoutFile> found = new HashSet<>();
-		for (LayoutFile layoutFile : project.getLayouts()) {
+		for (LayoutFile layoutFile : project.getLayoutFiles()) {
 			if (layoutFile.isPage()) {
 				found.add(layoutFile);
 			}
@@ -143,7 +142,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 	@Test
 	public void descriptorValues() {
 		project = new BuilderProject(new File("src/test/resources/scripts"));
-		project.scanBuildFiles();
+		project.scan();
 		CompoPath compoPath = new CompoPath(project, "index");
 
 		final IVariables variables = project.getVariables().get(compoPath);
@@ -156,6 +155,25 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 		assertThat(descriptor.getDisplay(null), equalTo("Index Page"));
 		assertThat(descriptor.getDescription(null), equalTo("Index page description."));
+	}
+
+
+	@Test
+	public void isExcluded() {
+		project = new BuilderProject(new File("src/test/resources/project"));
+		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
+		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
+		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
+		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
+	}
+
+	@Test
+	public void isExcluded_RootContext() {
+		project = new BuilderProject(new File("src/test/resources/root-project"));
+		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
+		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
+		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
+		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
 	}
 
 	@Override

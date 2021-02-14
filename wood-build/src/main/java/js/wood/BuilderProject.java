@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import js.util.Files;
 import js.util.Strings;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Variables;
@@ -19,9 +18,9 @@ import js.wood.impl.Variables;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class BuilderProject extends Project {
+class BuilderProject extends Project {
 	/** Site build directory, usually part of master project build. */
-	private final File siteDir;
+	private final File buildDir;
 
 	/**
 	 * Project layout files are HTM files describing user interface elements. By convention layout base name is the same as
@@ -41,11 +40,11 @@ public class BuilderProject extends Project {
 		this(projectDir, null);
 	}
 
-	public BuilderProject(File projectDir, File siteDir) {
+	public BuilderProject(File projectDir, File buildDir) {
 		super(projectDir);
-		this.siteDir = siteDir != null ? siteDir : new File(projectDir, descriptor.getSiteDir(CT.DEF_SITE_DIR));
-		if (!this.siteDir.exists()) {
-			this.siteDir.mkdir();
+		this.buildDir = buildDir != null ? buildDir : new File(projectDir, this.descriptor.getBuildDir(CT.DEF_BUILD_DIR));
+		if (!this.buildDir.exists()) {
+			this.buildDir.mkdir();
 		}
 		this.layouts = new HashSet<>();
 		this.variables = new HashMap<>();
@@ -55,7 +54,7 @@ public class BuilderProject extends Project {
 	 * Scan for build files and cache resulted meta data. This scanner looks for files in next directories: <code>res</code>,
 	 * <code>script</code>, <code>lib</code> and <code>gen</code>, all direct child of project root directory.
 	 */
-	public void scanBuildFiles() {
+	public void scan() {
 		FilesScanner scanner = new FilesScanner();
 		scanner.scan(new DirPath(this, CT.RESOURCE_DIR));
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
@@ -67,20 +66,10 @@ public class BuilderProject extends Project {
 	 * Get site build directory.
 	 * 
 	 * @return site build directory.
-	 * @see #siteDir
+	 * @see #buildDir
 	 */
-	public File getSiteDir() {
-		return siteDir;
-	}
-
-	/**
-	 * Get the path, relative to project root, of the site build directory. Returned value is guaranteed to have trailing file
-	 * separator.
-	 * 
-	 * @return site build path.
-	 */
-	public String getSitePath() {
-		return Files.getRelativePath(projectDir, siteDir, true) + Path.SEPARATOR;
+	public File getBuildDir() {
+		return buildDir;
 	}
 
 	/**
@@ -98,7 +87,7 @@ public class BuilderProject extends Project {
 	 * @return project layout files.
 	 * @see #layouts
 	 */
-	public Set<LayoutFile> getLayouts() {
+	public Set<LayoutFile> getLayoutFiles() {
 		return Collections.unmodifiableSet(layouts);
 	}
 

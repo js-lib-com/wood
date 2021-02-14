@@ -25,7 +25,7 @@ import js.wood.impl.LayoutReader;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class LayoutFile {
+class LayoutFile {
 	/** Class logger. */
 	private static final Log log = LogFactory.getLog(LayoutFile.class);
 
@@ -205,7 +205,7 @@ public class LayoutFile {
 	 * @return template layout file.
 	 */
 	private LayoutFile getTemplateFile(CompoPath templateCompo) {
-		for (LayoutFile file : project.getLayouts()) {
+		for (LayoutFile file : project.getLayoutFiles()) {
 			if (file.getCompoPath().equals(templateCompo)) {
 				return (LayoutFile)file;
 			}
