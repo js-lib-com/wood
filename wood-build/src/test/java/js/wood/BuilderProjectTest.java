@@ -2,33 +2,20 @@ package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import js.util.Classes;
 import js.util.Files;
-import js.wood.BuilderProject;
-import js.wood.CT;
-import js.wood.CompoPath;
-import js.wood.DirPath;
-import js.wood.FilePath;
-import js.wood.IReference;
-import js.wood.IReferenceHandler;
-import js.wood.IVariables;
-import js.wood.LayoutFile;
 import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Reference;
@@ -45,30 +32,6 @@ public class BuilderProjectTest implements IReferenceHandler {
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
-	}
-
-	@Test
-	public void initialization() throws FileNotFoundException {
-		assertTrue(project.getLayoutFiles().isEmpty());
-	}
-
-	@Test
-	public void layoutsScanner() throws Exception {
-		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$LayoutsScanner", project);
-
-		for (String file : new String[] { "res/page/index/strings.xml", //
-				"res/page/index/index.htm", //
-				"res/page/index/fake.hml", //
-				"res/template/page/logo.xml", //
-				"res/template/page/page.htm", //
-				"res/template/page/page.css" }) {
-			handler.onFile(filePath(file));
-		}
-
-		Set<LayoutFile> layouts = project.getLayoutFiles();
-		assertThat(layouts, hasSize(2));
-		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/page/index/index.htm"))));
-		assertTrue(layouts.contains(new LayoutFile(project, filePath("res/template/page/page.htm"))));
 	}
 
 	@Test
@@ -122,21 +85,6 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Test
 	public void pagesDiscovery() throws IOException {
-		project.scan();
-
-		final Set<LayoutFile> expected = new HashSet<LayoutFile>();
-		expected.add(new LayoutFile(project, filePath("res/page/index/index.htm")));
-		expected.add(new LayoutFile(project, filePath("res/page/video-player/video-player.htm")));
-		expected.add(new LayoutFile(project, filePath("res/page/videos/videos.htm")));
-
-		final Set<LayoutFile> found = new HashSet<>();
-		for (LayoutFile layoutFile : project.getLayoutFiles()) {
-			if (layoutFile.isPage()) {
-				found.add(layoutFile);
-			}
-		}
-
-		assertTrue(expected.equals(found));
 	}
 
 	@Test

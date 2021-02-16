@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import js.util.Files;
 import js.util.Strings;
@@ -25,12 +23,6 @@ import js.wood.impl.Variables;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	/**
-	 * Project layout files are HTM files describing user interface elements. By convention layout base name is the same as
-	 * component directory name.
-	 */
-	private final Set<LayoutFile> layouts;
-
 	/** Cache for resource variables. */
 	private final Map<DirPath, Variables> variables;
 
@@ -41,7 +33,6 @@ class BuilderProject extends Project {
 	 */
 	public BuilderProject(File projectDir) {
 		super(projectDir);
-		this.layouts = new HashSet<>();
 		this.variables = new HashMap<>();
 	}
 
@@ -112,16 +103,6 @@ class BuilderProject extends Project {
 	}
 
 	/**
-	 * Get project layout files, in no particular order. Returned collection is not modifiable.
-	 * 
-	 * @return project layout files.
-	 * @see #layouts
-	 */
-	public Set<LayoutFile> getLayoutFiles() {
-		return Collections.unmodifiableSet(layouts);
-	}
-
-	/**
 	 * Get project variables mapped to parent directories. Returned map is not modifiable. Every variables instance from map has
 	 * a reference to project asset variables, used when variables miss a reference value.
 	 * 
@@ -144,7 +125,7 @@ class BuilderProject extends Project {
 	 */
 	private class FilesScanner {
 		/** Specialized file handlers. */
-		private FilesHandler[] handlers = new FilesHandler[] { new LayoutsScanner(), new ThemeStylesScanner(), new VariablesScanner() };
+		private FilesHandler[] handlers = new FilesHandler[] { new ThemeStylesScanner(), new VariablesScanner() };
 
 		/**
 		 * Scan given directory recursively till no more sub-directories.
@@ -168,25 +149,6 @@ class BuilderProject extends Project {
 					}
 				}
 			});
-		}
-	}
-
-	/**
-	 * Scanner for layout files. Layouts are HTM files describing UI elements.
-	 * 
-	 * @author Iulian Rotaru
-	 * @since 1.0
-	 */
-	private class LayoutsScanner extends FilesHandler {
-		/**
-		 * Add layout files to {@link Project#layouts} cache. By convention layout base name is the same as component name; also
-		 * file should be layout, see {@link FilePath#isLayout()}.
-		 */
-		@Override
-		public void onFile(FilePath file) throws Exception {
-			if (file.isLayout() && file.isBaseName(file.getParentDirPath().getName()) && !file.isExcluded()) {
-				layouts.add(new LayoutFile(BuilderProject.this, file));
-			}
 		}
 	}
 
