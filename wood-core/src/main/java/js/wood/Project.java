@@ -75,6 +75,12 @@ public class Project {
 	protected final File projectDir;
 
 	/**
+	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
+	 * project directory root.
+	 */
+	protected final ProjectDescriptor descriptor;
+
+	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
 	 */
@@ -85,12 +91,6 @@ public class Project {
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
 	protected final DirPath themeDir;
-
-	/**
-	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
-	 * project directory root.
-	 */
-	protected final ProjectDescriptor descriptor;
 
 	/** List of paths excluded from build process. Configurable per project, see {@link ProjectDescriptor#getExcludes()}. */
 	private final List<Path> excludes;
@@ -314,10 +314,12 @@ public class Project {
 	 */
 	public FilePath getMediaFile(Locale locale, IReference reference, FilePath source) {
 		DirPath dir = source.getParentDirPath();
+		boolean isComponentSource = dir.isComponent();
 		if (reference.hasPath()) {
 			dir = dir.getSubdirPath(reference.getPath());
 		}
-		FilePath file = mediaFile(dir, reference.getName(), locale);
+		// search media in source directory only if directory is a component
+		FilePath file = isComponentSource ? mediaFile(dir, reference.getName(), locale) : null;
 
 		if (file == null) {
 			dir = assetsDir;

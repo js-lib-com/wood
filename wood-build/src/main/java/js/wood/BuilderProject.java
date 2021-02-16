@@ -117,7 +117,7 @@ class BuilderProject extends Project {
 	 * @return project variables.
 	 * @see #variables
 	 */
-	public Map<DirPath, IVariables> getVariables() {
+	public Map<DirPath, Variables> getVariables() {
 		return Collections.unmodifiableMap(variables);
 	}
 
@@ -207,7 +207,6 @@ class BuilderProject extends Project {
 
 			Variables dirVariables = new Variables(BuilderProject.this);
 			dirVariables.setAssetVariables(assetVariables);
-			dirVariables.setThemeVariables(themeVariables);
 			variables.put(dir, dirVariables);
 		}
 

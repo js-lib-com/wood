@@ -9,6 +9,7 @@ import java.util.Map;
 import js.log.Log;
 import js.log.LogFactory;
 import js.wood.impl.Reference;
+import js.wood.impl.Variables;
 
 /**
  * Project builder for user interface resources. Builder acts as a bridge between {@link Project} and {@link BuildFS}. It reads
@@ -44,7 +45,7 @@ public class Builder implements IReferenceHandler {
 	private final Collection<CompoPath> pages;
 
 	/** Cache for resource variables. */
-	private final Map<DirPath, IVariables> variables;
+	private final Map<DirPath, Variables> variables;
 
 	/** Current processing build file system, that is, build site directory. */
 	private final BuildFS buildFS;
@@ -216,7 +217,7 @@ public class Builder implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath source) throws IOException, WoodException {
 		if (reference.isVariable()) {
-			IVariables dirVariables = variables.get(source.getParentDirPath());
+			Variables dirVariables = variables.get(source.getParentDirPath());
 			if (dirVariables == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", source, reference);
 			}
@@ -261,7 +262,7 @@ public class Builder implements IReferenceHandler {
 		return pages;
 	}
 
-	Map<DirPath, IVariables> getVariables() {
+	Map<DirPath, Variables> getVariables() {
 		return variables;
 	}
 

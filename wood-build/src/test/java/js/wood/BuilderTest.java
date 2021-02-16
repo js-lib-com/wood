@@ -28,6 +28,7 @@ import js.util.Files;
 import js.util.Strings;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
+import js.wood.impl.Variables;
 
 public class BuilderTest {
 	@Test
@@ -47,7 +48,7 @@ public class BuilderTest {
 		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
 
-		Map<DirPath, IVariables> variables = builder.getVariables();
+		Map<DirPath, Variables> variables = builder.getVariables();
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -72,7 +73,7 @@ public class BuilderTest {
 		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
 
-		Map<DirPath, IVariables> variables = builder.getVariables();
+		Map<DirPath, Variables> variables = builder.getVariables();
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
@@ -593,7 +594,7 @@ public class BuilderTest {
 		String[] styleImages = new String[] { "compo_background.jpg", //
 				"lib-compo_background.jpg", //
 				"template_background.jpg", //
-				"theme_background.jpg", //
+				"asset_background.jpg", //
 				"widget_background.jpg" };
 
 		for (String image : layoutImages) {
@@ -611,7 +612,7 @@ public class BuilderTest {
 		assertStyleImage("../media/compo_background.jpg", buildDir, "compo.css");
 		assertStyleImage("../media/lib-compo_background.jpg", buildDir, "lib-compo.css");
 		assertStyleImage("../media/template_background.jpg", buildDir, "template.css");
-		assertStyleImage("../media/theme_background.jpg", buildDir, "theme-style.css");
+		assertStyleImage("../media/asset_background.jpg", buildDir, "theme-style.css");
 		assertStyleImage("../media/widget_background.jpg", buildDir, "widget.css");
 	}
 

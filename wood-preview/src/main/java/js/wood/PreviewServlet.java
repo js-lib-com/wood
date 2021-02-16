@@ -27,6 +27,7 @@ import js.rmi.BusinessException;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
+import js.wood.impl.Variables;
 
 /**
  * Preview servlet allows access from browser to project components and related files. This allows to use browser for components
@@ -279,13 +280,10 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	private static class VariablesCache {
 		/** Components variables. */
-		private Map<Path, IVariables> compoVariables = new HashMap<>();
+		private Map<Path, Variables> compoVariables = new HashMap<>();
 
 		/** Project asset variables. */
-		private IVariables assetVariables;
-
-		/** Theme variables. */
-		private IVariables themeVariables;
+		private Variables assetVariables;
 
 		/**
 		 * Initialize variables cache by cleaning component variables hash and rescanning assets and site styles directories.
@@ -295,7 +293,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		public synchronized void update(PreviewProject project) {
 			compoVariables.clear();
 			assetVariables = project.getVariables(project.getAssetsDir());
-			themeVariables = project.getVariables(project.getThemeDir());
 		}
 
 		/**
@@ -305,12 +302,11 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		 * @param sourcePath component source file.
 		 * @return component variables.
 		 */
-		public synchronized IVariables getVariables(PreviewProject project, FilePath sourcePath) {
-			IVariables variables = compoVariables.get(sourcePath.getParentDirPath());
+		public synchronized Variables getVariables(PreviewProject project, FilePath sourcePath) {
+			Variables variables = compoVariables.get(sourcePath.getParentDirPath());
 			if (variables == null) {
 				variables = project.getVariables(sourcePath.getParentDirPath());
 				variables.setAssetVariables(assetVariables);
-				variables.setThemeVariables(themeVariables);
 				compoVariables.put(sourcePath.getParentDirPath(), variables);
 			}
 			return variables;

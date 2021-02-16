@@ -233,6 +233,11 @@ public class DirPath extends Path {
 		}
 	}
 
+	public boolean isComponent() {
+		File layoutFile = new File(file, getName() + CT.DOT_LAYOUT_EXT);
+		return layoutFile.exists();
+	}
+
 	/**
 	 * Test if this directory is the project assets directory. Project assets are global variables and media files.
 	 * 

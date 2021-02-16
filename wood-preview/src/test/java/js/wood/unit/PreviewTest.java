@@ -29,7 +29,6 @@ import js.wood.Component;
 import js.wood.FilePath;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
-import js.wood.IVariables;
 import js.wood.Preview;
 import js.wood.PreviewProject;
 import js.wood.impl.Variables;
@@ -199,7 +198,7 @@ public class PreviewTest implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
 		if (reference.isVariable()) {
-			IVariables variables = new Variables(sourceFile.getParentDirPath());
+			Variables variables = new Variables(sourceFile.getParentDirPath());
 			if (project.getAssetsDir().exists()) {
 				try {
 					Classes.invoke(variables, "load", project.getAssetsDir());

@@ -48,13 +48,13 @@ public class BuilderProjectTest implements IReferenceHandler {
 			handler.onFile(filePath);
 		}
 
-		Map<DirPath, IVariables> projectVariables = project.getVariables();
+		Map<DirPath, Variables> projectVariables = project.getVariables();
 		assertFalse(projectVariables.isEmpty());
 
 		assertThat(projectVariables.get(dirPath("res/asset")), notNullValue());
 		assertThat(projectVariables.get(dirPath("res/theme")), notNullValue());
 
-		IVariables dirVariables = projectVariables.get(dirPath("res/page/index"));
+		Variables dirVariables = projectVariables.get(dirPath("res/page/index"));
 		assertThat(dirVariables, notNullValue());
 
 		FilePath source = filePath("res/page/index/index.htm");
@@ -65,7 +65,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 		assertThat(variable(dirVariables, source, "en", ResourceType.COLOR, "page-header-bg"), equalTo("#000000"));
 	}
 
-	private String variable(IVariables variables, FilePath source, String language, ResourceType type, String name) {
+	private String variable(Variables variables, FilePath source, String language, ResourceType type, String name) {
 		return variables.get(new Locale(language), new Reference(source, type, name), source, this);
 	}
 
@@ -76,10 +76,10 @@ public class BuilderProjectTest implements IReferenceHandler {
 		DirPath dir = dirPath("res/template/sidebar");
 		handler.onDirectory(dir);
 
-		Map<DirPath, IVariables> projectVariables = project.getVariables();
+		Map<DirPath, Variables> projectVariables = project.getVariables();
 		assertFalse(projectVariables.isEmpty());
 
-		IVariables dirVariables = projectVariables.get(dir);
+		Variables dirVariables = projectVariables.get(dir);
 		assertThat(dirVariables, notNullValue());
 	}
 
@@ -93,7 +93,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 		project.scan();
 		CompoPath compoPath = new CompoPath(project, "res/index");
 
-		final IVariables variables = project.getVariables().get(compoPath);
+		final Variables variables = project.getVariables().get(compoPath);
 		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/index/index.xml"), new IReferenceHandler() {
 			@Override
 			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {

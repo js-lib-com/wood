@@ -23,7 +23,7 @@ public class PreviewProject extends Project {
 		return previewName;
 	}
 
-	public IVariables getVariables(DirPath dir) {
+	public Variables getVariables(DirPath dir) {
 		return new Variables(dir);
 	}
 
