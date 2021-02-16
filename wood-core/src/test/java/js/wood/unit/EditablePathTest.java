@@ -28,7 +28,7 @@ public class EditablePathTest {
 	@Test
 	public void constructor() {
 		FilePath layoutPath = new FilePath(project, "res/page/index/index.htm");
-		EditablePath path = new EditablePath(layoutPath, "template/page#page-body");
+		EditablePath path = new EditablePath(layoutPath, "res/template/page#page-body");
 		
 		assertThat(path.getLayoutPath().value(), equalTo("res/template/page/page.htm"));
 		assertThat(path.value(), equalTo("res/template/page/"));
@@ -54,7 +54,7 @@ public class EditablePathTest {
 	@Test
 	public void toFile() {
 		FilePath layoutPath = new FilePath(project, "res/page/index/index.htm");
-		EditablePath path = new EditablePath(layoutPath, "template/page#page-body");
+		EditablePath path = new EditablePath(layoutPath, "res/template/page#page-body");
 		assertThat(path.toFile(), equalTo(new File("src/test/resources/project/res/template/page")));
 	}
 	

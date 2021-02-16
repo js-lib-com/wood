@@ -91,7 +91,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 	public void descriptorValues() {
 		project = new BuilderProject(new File("src/test/resources/scripts"));
 		project.scan();
-		CompoPath compoPath = new CompoPath(project, "index");
+		CompoPath compoPath = new CompoPath(project, "res/index");
 
 		final IVariables variables = project.getVariables().get(compoPath);
 		ComponentDescriptor descriptor = new ComponentDescriptor(project.getFile("res/index/index.xml"), new IReferenceHandler() {
@@ -108,19 +108,19 @@ public class BuilderProjectTest implements IReferenceHandler {
 	@Test
 	public void isExcluded() {
 		project = new BuilderProject(new File("src/test/resources/project"));
-		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
+		assertTrue(project.isExcluded(new CompoPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
-		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
+		assertFalse(project.isExcluded(new CompoPath(project, "res/page/index")));
 	}
 
 	@Test
 	public void isExcluded_RootContext() {
 		project = new BuilderProject(new File("src/test/resources/root-project"));
-		assertTrue(project.isExcluded(new CompoPath(project, "page/about")));
+		assertTrue(project.isExcluded(new CompoPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
-		assertFalse(project.isExcluded(new CompoPath(project, "page/index")));
+		assertFalse(project.isExcluded(new CompoPath(project, "res/page/index")));
 	}
 
 	@Override

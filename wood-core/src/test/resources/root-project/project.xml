@@ -21,5 +21,5 @@
 		<font>http://fonts.googleapis.com/css?family=Great+Vibes</font>
 	</fonts>
 
-	<excludes>page/about</excludes>
+	<excludes>res/page/about</excludes>
 </project>

@@ -20,5 +20,5 @@
 		<link href="http://fonts.googleapis.com/css?family=Great+Vibes" rel="stylesheet" type="text/css" />
 	</links>
 
-	<excludes>page/about</excludes>
+	<excludes>res/page/about</excludes>
 </project>

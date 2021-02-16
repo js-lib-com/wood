@@ -57,9 +57,6 @@ public final class CT {
 	// ------------------------------------------------------
 	// Project directories relative to project root
 
-	/** UI resources stores application components. */
-	public static final String RESOURCE_DIR = "res";
-
 	/** Project library for third party components and script libraries. */
 	public static final String LIBRARY_DIR = "lib";
 
@@ -73,10 +70,10 @@ public final class CT {
 	public static final String DEF_BUILD_DIR = "build/site";
 
 	/** Project assets directory stores global variables and media files. */
-	public static final String ASSETS_DIR = RESOURCE_DIR + "/asset";
+	public static final String ASSETS_DIR = "res/asset";
 
 	/** Site theme directory for styles related to UI primitive elements design and theme variables. */
-	public static final String THEME_DIR = RESOURCE_DIR + "/theme";
+	public static final String THEME_DIR = "res/theme";
 
 	// ------------------------------------------------------
 	// Dynamic generated files

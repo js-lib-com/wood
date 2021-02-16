@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import js.util.Strings;
 import js.wood.impl.EditablePath;
 
 /**
@@ -75,8 +74,7 @@ import js.wood.impl.EditablePath;
 public class CompoPath extends DirPath {
 	/** Component path pattern. */
 	protected static final Pattern PATTERN = Pattern.compile("^(" + //
-			"(?:(res|lib)/)?" + // source directory
-			"(?:[\\w-]+/)*" + // path segments
+			"(?:[\\w-]+/)+" + // path segments
 			"[\\w-]+" + // component name
 			")/?$", //
 			Pattern.CASE_INSENSITIVE);
@@ -114,9 +112,8 @@ public class CompoPath extends DirPath {
 	}
 
 	/**
-	 * Return normalized path value with source directory forced to UI resources, if missing. Component syntax allows for
-	 * optional source directory with default to UI resources. This method takes care to insert it, if missing. Also check path
-	 * syntax against {@link #PATTERN} and throws exception if invalid.
+	 * Check component path syntax and return normalized value. In this context normalization means removing trailing path
+	 * separator, if present. Syntax is matched against {@link #PATTERN component path pattern}.
 	 * 
 	 * @param compoPath component path value.
 	 * @return normalized path value.
@@ -127,9 +124,7 @@ public class CompoPath extends DirPath {
 		if (!matcher.find()) {
 			throw new WoodException("Invalid component path |%s|.", compoPath);
 		}
-		String path = matcher.group(1);
-		String sourceDir = matcher.group(2);
-		return sourceDir != null ? path : Strings.concat(CT.RESOURCE_DIR, Path.SEPARATOR, path);
+		return matcher.group(1);
 	}
 
 	/**

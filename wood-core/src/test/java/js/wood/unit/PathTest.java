@@ -62,7 +62,7 @@ public class PathTest {
 
 	@Test
 	public void toFile() throws Throwable {
-		assertPath("src/test/resources/project/res/compo/discography", "compo/discography", CompoPath.class);
+		assertPath("src/test/resources/project/res/compo/discography", "res/compo/discography", CompoPath.class);
 		assertPath("src/test/resources/project/lib/js-lib/js-lib.js", "lib/js-lib/js-lib.js", TestPath.class);
 		assertPath("src/test/resources/project/script/hc/view/DiscographyView.js", "script/hc/view/DiscographyView.js", TestPath.class);
 		assertPath("src/test/resources/project/gen/js/controller/MainController.js", "gen/js/controller/MainController.js", TestPath.class);

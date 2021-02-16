@@ -33,7 +33,7 @@ public class BuildFsTest {
 	public void writePage() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
-		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		Component compo = new Component(new CompoPath(project, "res/page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
@@ -45,7 +45,7 @@ public class BuildFsTest {
 	public void writePage_Twice() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
-		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		Component compo = new Component(new CompoPath(project, "res/page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
@@ -63,7 +63,7 @@ public class BuildFsTest {
 	public void writePage_Locale() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
-		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		Component compo = new Component(new CompoPath(project, "res/page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
@@ -76,7 +76,7 @@ public class BuildFsTest {
 	public void writePage_BuildNumber() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 4);
 
-		Component compo = new Component(new CompoPath(project, "page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
+		Component compo = new Component(new CompoPath(project, "res/page/index"), (IReference reference, FilePath sourceFile) -> sourceFile.value());
 		compo.scan();
 		PageDocument page = new PageDocument(compo);
 

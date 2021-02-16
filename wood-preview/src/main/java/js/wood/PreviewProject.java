@@ -35,8 +35,7 @@ public class PreviewProject extends Project {
 	 */
 	public List<FilePath> getThemeStyles() {
 		themeStyles.clear();
-		DirPath dir = new DirPath(this, CT.THEME_DIR);
-		dir.files(new ThemeStylesScanner());
+		getThemeDir().files(new ThemeStylesScanner());
 		return themeStyles;
 	}
 }

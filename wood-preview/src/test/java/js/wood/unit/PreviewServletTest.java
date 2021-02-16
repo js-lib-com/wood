@@ -63,14 +63,14 @@ public class PreviewServletTest {
 
 	@Test
 	public void layout() throws Exception {
-		exercise("project", "/test/page/index");
+		exercise("project", "/test/res/page/index");
 		DocumentBuilder builder = new DocumentBuilderImpl();
 		assertIndexPage(builder.parseHTML(responseWriter.toString()));
 	}
 
 	@Test
 	public void compoPreview() throws Exception {
-		exercise("styles", "/test/compo");
+		exercise("styles", "/test/res/compo");
 		DocumentBuilder builder = new DocumentBuilderImpl();
 		Document doc = builder.parseHTML(responseWriter.toString());
 

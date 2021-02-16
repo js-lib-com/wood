@@ -113,7 +113,7 @@ public class PreviewTest implements IReferenceHandler {
 
 	@Test
 	public void previewStrings() throws IOException {
-		Document doc = exercisePreview("strings", "compo");
+		Document doc = exercisePreview("strings", "res/compo");
 		assertThat(doc.getByTag("h1").getText(), equalTo("Component Legend"));
 		assertThat(doc.getByTag("p").getAttr("title"), equalTo("component tooltip"));
 	}
@@ -190,7 +190,7 @@ public class PreviewTest implements IReferenceHandler {
 
 	@Test
 	public void previewProjectIndexPage() throws IOException {
-		assertIndexPage(exercisePreview("project", "page/index"));
+		assertIndexPage(exercisePreview("project", "res/page/index"));
 	}
 
 	// ------------------------------------------------------

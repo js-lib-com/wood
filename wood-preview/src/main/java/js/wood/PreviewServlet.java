@@ -385,7 +385,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		// [ compos, dialogs, sixqs, site, controller, MainController, getCategoriesSelect.rmi]
 
 		// remove path parts that are directories into project resources
-		File resourcesPath = project.getResourcesDir().toFile();
+		File resourcesPath = project.getProjectDir();
 		for (;;) {
 			resourcesPath = new File(resourcesPath, pathParts.get(0));
 			if (!resourcesPath.isDirectory()) {

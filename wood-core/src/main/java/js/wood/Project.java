@@ -75,8 +75,6 @@ public class Project {
 	/** Project directory. All project file are included here, no external references allowed. */
 	protected final File projectDir;
 
-	private final DirPath resourcesDir;
-
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
@@ -116,7 +114,6 @@ public class Project {
 		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> Path.create(this, exclude.trim())).collect(Collectors.toList());
 
-		this.resourcesDir = new DirPath(this, CT.RESOURCE_DIR);
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
 
@@ -183,10 +180,6 @@ public class Project {
 	 */
 	public File getProjectDir() {
 		return projectDir;
-	}
-
-	public DirPath getResourcesDir() {
-		return resourcesDir;
 	}
 
 	/**

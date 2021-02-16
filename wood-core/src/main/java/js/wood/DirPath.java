@@ -46,7 +46,7 @@ import js.wood.impl.FilesHandler;
  */
 public class DirPath extends Path {
 	/** Pattern for directory path. */
-	private static final Pattern PATTERN = Pattern.compile("^(res|lib|script|gen)((?:/\\.?[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PATTERN = Pattern.compile("^([a-z]+)((?:/\\.?[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
 
 	/** Source directory. */
 	private final String sourceDir;
@@ -231,16 +231,6 @@ public class DirPath extends Path {
 		} catch (Exception e) {
 			throw (e instanceof WoodException) ? (WoodException) e : new WoodException(e);
 		}
-	}
-
-	/**
-	 * Test if this directory is the project UI resources directory. UI resources directory is the code base for application
-	 * components.
-	 * 
-	 * @return true if this directory is project UI resources.
-	 */
-	public boolean isResources() {
-		return CT.RESOURCE_DIR.equals(sourceDir);
 	}
 
 	/**

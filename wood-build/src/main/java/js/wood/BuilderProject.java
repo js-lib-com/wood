@@ -42,7 +42,7 @@ class BuilderProject extends Project {
 	 */
 	public void scan() {
 		FilesScanner scanner = new FilesScanner();
-		scanner.scan(new DirPath(this, CT.RESOURCE_DIR));
+		scanner.scan(new DirPath(this, "res"));
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
 		scanner.scan(new DirPath(this, CT.LIBRARY_DIR));
 		scanner.scan(new DirPath(this, CT.GENERATED_DIR));

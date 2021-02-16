@@ -276,8 +276,6 @@ public class DirPathTest {
 	public void predicates() {
 		assertTrue(new DirPath(project, "res/asset").isAssets());
 		assertTrue(new DirPath(project, "res/theme").isTheme());
-		assertTrue(new DirPath(project, "res/asset/").isResources());
-		assertTrue(new DirPath(project, "res/compo/discography").isResources());
 		assertTrue(new DirPath(project, "gen/js/tools").isGenerated());
 		assertTrue(new DirPath(project, "lib/js-lib/").isLibrary());
 
@@ -294,9 +292,10 @@ public class DirPathTest {
 		assertTrue(DirPath.accept("lib/video-player"));
 		assertTrue(DirPath.accept("script/js/wood/test"));
 		assertTrue(DirPath.accept("gen/js/wood/controller"));
+		assertTrue(DirPath.accept("java/js/wood/test"));
+		
 		assertFalse(DirPath.accept("lib/video-player/video-player.htm"));
 		assertFalse(DirPath.accept("lib/video-player#body"));
-		assertFalse(DirPath.accept("java/js/wood/test"));
 	}
 
 }

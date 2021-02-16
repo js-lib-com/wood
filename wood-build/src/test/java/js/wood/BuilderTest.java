@@ -43,9 +43,9 @@ public class BuilderTest {
 		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
 		assertThat(pages, hasSize(3));
-		assertTrue(pages.contains(new CompoPath(project, "page/index")));
-		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
-		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/index")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
 
 		Map<DirPath, IVariables> variables = builder.getVariables();
 		assertNotNull(variables);
@@ -68,9 +68,9 @@ public class BuilderTest {
 		Collection<CompoPath> pages = builder.getPages();
 		assertNotNull(pages);
 		assertThat(pages, hasSize(3));
-		assertTrue(pages.contains(new CompoPath(project, "page/index")));
-		assertTrue(pages.contains(new CompoPath(project, "page/video-player")));
-		assertTrue(pages.contains(new CompoPath(project, "page/videos")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/index")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
 
 		Map<DirPath, IVariables> variables = builder.getVariables();
 		assertNotNull(variables);
@@ -178,7 +178,7 @@ public class BuilderTest {
 		builder.setLocale(locale);
 		buildFS.setLocale(locale);
 
-		CompoPath indexPage = new CompoPath(project, "page/index");
+		CompoPath indexPage = new CompoPath(project, "res/page/index");
 		Classes.invoke(builder, "buildPage", indexPage);
 	}
 
@@ -199,7 +199,7 @@ public class BuilderTest {
 		builder.setLocale(locale);
 		buildFS.setLocale(locale);
 
-		CompoPath indexPage = new CompoPath(project, "page/index");
+		CompoPath indexPage = new CompoPath(project, "res/page/index");
 		Classes.invoke(builder, "buildPage", indexPage);
 	}
 
@@ -651,7 +651,7 @@ public class BuilderTest {
 		builder.setLocale(new Locale("en"));
 		BuilderProject project = builder.getProject();
 
-		builder.buildPage(new CompoPath(project, "page/index"));
+		builder.buildPage(new CompoPath(project, "res/page/index"));
 
 		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");
@@ -675,7 +675,7 @@ public class BuilderTest {
 		builder.setLocale(new Locale("en"));
 		BuilderProject project = builder.getProject();
 
-		builder.buildPage(new CompoPath(project, "page/index"));
+		builder.buildPage(new CompoPath(project, "res/page/index"));
 
 		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");

@@ -2,18 +2,14 @@ package js.wood.unit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import js.util.Classes;
 import js.wood.CompoPath;
 import js.wood.DirPath;
 import js.wood.FilePath;
@@ -30,32 +26,9 @@ public class CompoPathTest {
 	}
 
 	@Test
-	public void pattern() {
-		Pattern pattern = Classes.getFieldValue(CompoPath.class, "PATTERN");
-		assertThat(pattern, notNullValue());
-
-		assertPattern(pattern, "res/compo", "res/compo", "res");
-		assertPattern(pattern, "compo", "compo", null);
-		assertPattern(pattern, "res/path/compo", "res/path/compo", "res");
-		assertPattern(pattern, "path/compo", "path/compo", null);
-
-		assertPattern(pattern, "res/compo/", "res/compo", "res");
-		assertPattern(pattern, "compo/", "compo", null);
-		assertPattern(pattern, "res/path/compo/", "res/path/compo", "res");
-		assertPattern(pattern, "path/compo/", "path/compo", null);
-	}
-
-	private static void assertPattern(Pattern pattern, String value, String... groups) {
-		Matcher m = pattern.matcher(value);
-		assertThat(m.find(), equalTo(true));
-		assertThat(m.group(1), equalTo(groups[0]));
-		assertThat(m.group(2), equalTo(groups[1]));
-	}
-
-	@Test
 	public void constructor() {
 		assertCompoPath("res/compo/discography", "res/compo/discography/discography.htm", "res/compo/discography/", "discography");
-		assertCompoPath("compo/discography", "res/compo/discography/discography.htm", "res/compo/discography/", "discography");
+		assertCompoPath("res/compo/discography", "res/compo/discography/discography.htm", "res/compo/discography/", "discography");
 	}
 
 	private void assertCompoPath(String pathValue, String layout, String value, String name) {
@@ -111,7 +84,7 @@ public class CompoPathTest {
 
 	@Test
 	public void accept() {
-		assertTrue(CompoPath.accept("compo"));
+		assertFalse(CompoPath.accept("compo"));
 		assertTrue(CompoPath.accept("res/compo"));
 		assertTrue(CompoPath.accept("path/compo"));
 		assertTrue(CompoPath.accept("res/path/compo"));

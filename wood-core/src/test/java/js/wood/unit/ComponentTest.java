@@ -32,7 +32,7 @@ import js.wood.impl.Variables;
 public class ComponentTest {
 	@Test
 	public void simpleLayout() {
-		Component compo = getCompo("simple/layout");
+		Component compo = getCompo("res/simple/layout");
 
 		assertThat(field(compo, "baseLayoutPath").toString(), equalTo("res/simple/layout/layout.htm"));
 		assertThat(compo.getName(), equalTo("layout"));
@@ -50,7 +50,7 @@ public class ComponentTest {
 
 	@Test
 	public void simpleTemplate() {
-		Component compo = getCompo("simple/template/compo");
+		Component compo = getCompo("res/simple/template/compo");
 		Element layout = compo.getLayout();
 
 		Element editable = layout.getByTag("section");
@@ -68,7 +68,7 @@ public class ComponentTest {
 
 	@Test
 	public void variableTemplate() {
-		Component compo = getCompo("variable-template/compo");
+		Component compo = getCompo("res/variable-template/compo");
 		Element layout = compo.getLayout();
 
 		EList inputs = layout.findByTag("input");
@@ -80,7 +80,7 @@ public class ComponentTest {
 
 	@Test
 	public void templatesHierarchy() {
-		Component compo = getCompo("templates-hierarchy/compo");
+		Component compo = getCompo("res/templates-hierarchy/compo");
 		Element layout = compo.getLayout();
 
 		assertThat(layout.getTag(), equalTo("body"));
@@ -94,7 +94,7 @@ public class ComponentTest {
 
 	@Test
 	public void simpleWidget() {
-		Component compo = getCompo("simple/widget/compo");
+		Component compo = getCompo("res/simple/widget/compo");
 		Element layout = compo.getLayout();
 
 		EList headings = layout.findByTag("h1");
@@ -105,7 +105,7 @@ public class ComponentTest {
 
 	@Test
 	public void widgetsTree() {
-		Component compo = getCompo("widgets-tree/compo");
+		Component compo = getCompo("res/widgets-tree/compo");
 		Element layout = compo.getLayout();
 
 		EList headings = layout.findByTag("h1");
@@ -119,7 +119,7 @@ public class ComponentTest {
 
 	@Test
 	public void attributes() {
-		Component compo = getCompo("attributes/compo");
+		Component compo = getCompo("res/attributes/compo");
 		Element layout = compo.getLayout();
 
 		Element section = layout.getByTag("section");
@@ -139,7 +139,7 @@ public class ComponentTest {
 
 	@Test
 	public void attributesWithEntity() {
-		Component compo = getCompo("attributes-entity/compo");
+		Component compo = getCompo("res/attributes-entity/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("div");
 		assertThat(div.getAttr("name"), equalTo("P&G"));
@@ -147,7 +147,7 @@ public class ComponentTest {
 
 	@Test
 	public void widgetParameter() {
-		Component compo = getCompo("parameter/compo");
+		Component compo = getCompo("res/parameter/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("h1");
 		assertThat(div.getText(), equalTo("Widget Title"));
@@ -155,7 +155,7 @@ public class ComponentTest {
 
 	@Test
 	public void widgetParameterWithEntity() {
-		Component compo = getCompo("parameter-entity/compo");
+		Component compo = getCompo("res/parameter-entity/compo");
 		Element layout = compo.getLayout();
 		Element div = layout.getByTag("h1");
 		assertThat(div.getAttr("data-name"), equalTo("P&G"));
@@ -164,7 +164,7 @@ public class ComponentTest {
 
 	@Test
 	public void stylesInclusion() {
-		Component compo = getCompo("styles/compo");
+		Component compo = getCompo("res/styles/compo");
 		List<FilePath> styles = compo.getStyleFiles();
 
 		assertThat(styles.size(), equalTo(3));
@@ -178,7 +178,7 @@ public class ComponentTest {
 	 */
 	@Test
 	public void objectReferencesErasure() {
-		for (String compoPath : new String[] { "simple/widget/compo", "simple/template/compo", "widgets-tree/compo", "templates-hierarchy/compo", "scripts/page-script" }) {
+		for (String compoPath : new String[] { "res/simple/widget/compo", "res/simple/template/compo", "res/widgets-tree/compo", "res/templates-hierarchy/compo", "res/scripts/page-script" }) {
 			Component compo = getCompo(compoPath);
 			Element layout = compo.getLayout();
 			layout.getDocument().dump();
@@ -200,7 +200,7 @@ public class ComponentTest {
 	@Test
 	public void referenceHandler() {
 		Project project = new Project(new File("src/test/resources/components"));
-		CompoPath path = new CompoPath(project, "references");
+		CompoPath path = new CompoPath(project, "res/references");
 		final List<IReference> references = new ArrayList<>();
 
 		Component compo = new Component(path, new IReferenceHandler() {
@@ -220,7 +220,7 @@ public class ComponentTest {
 
 	@Test
 	public void inline() {
-		Component compo = getCompo("inline");
+		Component compo = getCompo("res/inline");
 
 		Element layout = compo.getLayout();
 		assertNotNull(layout);
@@ -228,7 +228,7 @@ public class ComponentTest {
 
 	@Test
 	public void fullComponent() {
-		Component compo = getCompo("full/compo");
+		Component compo = getCompo("res/full/compo");
 		Element layout = Classes.getFieldValue(compo, "layout");
 
 		assertThat(layout, notNullValue());

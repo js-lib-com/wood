@@ -5,5 +5,5 @@
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en</locale>
 
-	<excludes>exception/bad-type</excludes>
+	<excludes>res/exception/bad-type</excludes>
 </project>
