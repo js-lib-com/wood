@@ -6,10 +6,6 @@
 	<display>Test Project</display>
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en, de, fr, ro</locale>
-	<design>material</design>
-	<site-dir>build/site</site-dir>
-
-	<analytics>UA-12345678-1</analytics>
 
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />

@@ -1,14 +1,20 @@
 package js.wood;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import js.util.Files;
 import js.util.Strings;
+import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.Variables;
 
@@ -49,6 +55,51 @@ class BuilderProject extends Project {
 		scanner.scan(new DirPath(this, CT.SCRIPT_DIR));
 		scanner.scan(new DirPath(this, CT.LIBRARY_DIR));
 		scanner.scan(new DirPath(this, CT.GENERATED_DIR));
+	}
+
+	public Collection<CompoPath> getPages() throws IOException {
+		Collection<CompoPath> pages = new ArrayList<>();
+		scanPages(getProjectDir(), pages);
+		return pages;
+	}
+
+	private void scanPages(File currentDir, Collection<CompoPath> pages) throws IOException {
+		for (File file : currentDir.listFiles()) {
+			// ignores hidden files and directories
+			if (file.getName().charAt(0) == '.') {
+				continue;
+			}
+			// if directory go depth-first
+			if (file.isDirectory()) {
+				scanPages(file, pages);
+				continue;
+			}
+
+			// detect page descriptor file
+			// by convention page descriptor basename is the same as its parent directory name
+			if (!Files.basename(file).equals(file.getParentFile().getName())) {
+				continue;
+			}
+			// accept only XML files
+			if (FileType.forExtension(Files.getExtension(file)) != FileType.XML) {
+				continue;
+			}
+			// accept only XML root 'page'
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line = reader.readLine();
+				if (line.startsWith("<?")) {
+					line = reader.readLine();
+					if (!line.startsWith("<page>")) {
+						continue;
+					}
+				}
+			}
+			CompoPath compoPath = new CompoPath(this, Files.getRelativePath(projectDir, file.getParentFile(), true));
+			if (!compoPath.isExcluded()) {
+				pages.add(compoPath);
+			}
+		}
+
 	}
 
 	/**
@@ -133,7 +184,7 @@ class BuilderProject extends Project {
 		 */
 		@Override
 		public void onFile(FilePath file) throws Exception {
-			if (file.isLayout() && file.isBaseName(file.getDirPath().getName()) && !file.isExcluded()) {
+			if (file.isLayout() && file.isBaseName(file.getParentDirPath().getName()) && !file.isExcluded()) {
 				layouts.add(new LayoutFile(BuilderProject.this, file));
 			}
 		}
@@ -198,7 +249,7 @@ class BuilderProject extends Project {
 		@Override
 		public void onFile(FilePath file) throws Exception {
 			if (file.isVariables() && !file.isExcluded()) {
-				variables.get(file.getDirPath()).load(file);
+				variables.get(file.getParentDirPath()).load(file);
 			}
 		}
 	}

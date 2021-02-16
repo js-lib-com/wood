@@ -87,7 +87,7 @@ public class StyleReader extends Reader {
 		this.state = State.BASE_CONTENT;
 
 		final String styleFileBasename = styleFile.getBaseName();
-		styleFile.getDirPath().files(FileType.STYLE, new FilesHandler() {
+		styleFile.getParentDirPath().files(FileType.STYLE, new FilesHandler() {
 			@Override
 			public boolean accept(FilePath file) {
 				return file.getBaseName().equals(styleFileBasename);

@@ -87,7 +87,7 @@ public final class ScriptFile {
 	 * @return package directory path.
 	 */
 	public DirPath getPackagePath() {
-		return sourceFile.getDirPath();
+		return sourceFile.getParentDirPath();
 	}
 
 	/**

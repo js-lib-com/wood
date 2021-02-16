@@ -127,7 +127,7 @@ public class Component {
 		this.name = layoutPath.getBaseName();
 		this.display = Strings.toTitleCase(name);
 
-		FilePath descriptorFile = layoutPath.getDirPath().getFilePath(layoutPath.getDirPath().getName() + CT.DOT_XML_EXT);
+		FilePath descriptorFile = layoutPath.getParentDirPath().getFilePath(layoutPath.getParentDirPath().getName() + CT.DOT_XML_EXT);
 		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 
@@ -413,7 +413,7 @@ public class Component {
 	 * @return component style preview file.
 	 */
 	public FilePath getPreviewStyle() {
-		return baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_STYLE);
+		return baseLayoutPath.getParentDirPath().getFilePath(CT.PREVIEW_STYLE);
 	}
 
 	/**
@@ -426,7 +426,7 @@ public class Component {
 	 * @return component script preview file or null if not defined.
 	 */
 	public IScriptReference getPreviewScript() {
-		FilePath file = baseLayoutPath.getDirPath().getFilePath(CT.PREVIEW_SCRIPT);
+		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(CT.PREVIEW_SCRIPT);
 		return file.exists() ? new ScriptReference(file.value()) : null;
 	}
 

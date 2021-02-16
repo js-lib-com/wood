@@ -73,7 +73,7 @@ public class FilePathTest {
 	private void assertFilePath(String pathValue, String path, String fileName, FileType fileType, String language) {
 		FilePath p = new FilePath(project, pathValue);
 		assertThat(p.value(), equalTo(pathValue));
-		assertThat(p.getDirPath().value(), equalTo(path));
+		assertThat(p.getParentDirPath().value(), equalTo(path));
 		assertThat(p.getName(), equalTo(fileName));
 		assertThat(p.getType(), equalTo(fileType));
 		assertThat(p.getVariants(), notNullValue());
@@ -108,7 +108,7 @@ public class FilePathTest {
 		assertThat(layoutFile.isLayout(), equalTo(true));
 		assertThat(styleFile.isStyle(), equalTo(true));
 		assertThat(layoutFile.getBaseName(), equalTo(styleFile.getBaseName()));
-		assertThat(layoutFile.getDirPath(), equalTo(styleFile.getDirPath()));
+		assertThat(layoutFile.getParentDirPath(), equalTo(styleFile.getParentDirPath()));
 		assertThat(layoutFile.getVariants().getLocale(), equalTo(styleFile.getVariants().getLocale()));
 		assertThat(layoutFile.getVariants().getMediaQueries(), equalTo(styleFile.getVariants().getMediaQueries()));
 	}
@@ -116,7 +116,7 @@ public class FilePathTest {
 	@Test
 	public void getDirPath() {
 		FilePath path = new FilePath(project, "res/asset/background.jpg");
-		assertThat(path.getDirPath().value(), equalTo("res/asset/"));
+		assertThat(path.getParentDirPath().value(), equalTo("res/asset/"));
 	}
 
 	@Test

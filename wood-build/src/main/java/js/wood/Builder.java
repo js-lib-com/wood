@@ -43,7 +43,7 @@ public class Builder implements IReferenceHandler {
 	private final BuilderProject project;
 
 	/** Project discovered pages. */
-	private final Collection<CompoPath> pages = new ArrayList<>();
+	private final Collection<CompoPath> pages;
 
 	/** Cache for resource variables. */
 	private final Map<DirPath, IVariables> variables;
@@ -60,19 +60,14 @@ public class Builder implements IReferenceHandler {
 	 * 
 	 * @param projectDir path to existing project root directory,
 	 * @param siteDir
+	 * @throws IOException 
 	 */
-	public Builder(BuilderConfig config) {
+	public Builder(BuilderConfig config) throws IOException {
 		log.trace("Builder(BuilderConfig)");
 		this.project = new BuilderProject(config.getProjectDir());
 		this.project.scan();
 
-		// scan project layout files then initialize pages list and global variables map
-		for (LayoutFile layoutFile : this.project.getLayoutFiles()) {
-			if (layoutFile.isPage()) {
-				this.pages.add(layoutFile.getCompoPath());
-			}
-		}
-
+		this.pages = this.project.getPages();
 		this.variables = this.project.getVariables();
 		this.buildFS = new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber());
 	}
@@ -81,8 +76,9 @@ public class Builder implements IReferenceHandler {
 	 * Test constructor.
 	 * 
 	 * @param project
+	 * @throws IOException 
 	 */
-	public Builder(BuilderProject project) {
+	public Builder(BuilderProject project) throws IOException {
 		this(project, new DefaultBuildFS(new File(project.getProjectDir(), CT.DEF_BUILD_DIR), 0));
 	}
 
@@ -91,18 +87,13 @@ public class Builder implements IReferenceHandler {
 	 * 
 	 * @param project
 	 * @param buildFS
+	 * @throws IOException 
 	 */
-	public Builder(BuilderProject project, BuildFS buildFS) {
+	public Builder(BuilderProject project, BuildFS buildFS) throws IOException {
 		this.project = project;
 		this.project.scan();
 
-		// scan project layout files then initialize pages list and global variables map
-		for (LayoutFile layoutFile : this.project.getLayoutFiles()) {
-			if (layoutFile.isPage()) {
-				this.pages.add(layoutFile.getCompoPath());
-			}
-		}
-
+		this.pages = this.project.getPages();
 		this.variables = this.project.getVariables();
 		this.buildFS = buildFS;
 	}
@@ -227,7 +218,7 @@ public class Builder implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath source) throws IOException, WoodException {
 		if (reference.isVariable()) {
-			IVariables dirVariables = variables.get(source.getDirPath());
+			IVariables dirVariables = variables.get(source.getParentDirPath());
 			if (dirVariables == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", source, reference);
 			}

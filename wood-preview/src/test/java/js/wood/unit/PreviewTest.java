@@ -199,7 +199,7 @@ public class PreviewTest implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
 		if (reference.isVariable()) {
-			IVariables variables = new Variables(sourceFile.getDirPath());
+			IVariables variables = new Variables(sourceFile.getParentDirPath());
 			if (project.getAssetsDir().exists()) {
 				try {
 					Classes.invoke(variables, "load", project.getAssetsDir());
@@ -210,7 +210,7 @@ public class PreviewTest implements IReferenceHandler {
 			return variables.get(new Locale("en"), reference, sourceFile, this);
 		}
 
-		return Strings.concat(Strings.join(sourceFile.getDirPath().getPathSegments(), '-'), '-', reference.getName(), ".png");
+		return Strings.concat(Strings.join(sourceFile.getParentDirPath().getPathSegments(), '-'), '-', reference.getName(), ".png");
 	}
 
 	private Document exercisePreview(String projectDirName, String pathValue) throws IOException {

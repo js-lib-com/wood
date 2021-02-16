@@ -71,7 +71,7 @@ public class FilePath extends Path {
 			Pattern.CASE_INSENSITIVE);
 
 	/** This file parent directory. */
-	private final DirPath dirPath;
+	private final DirPath parentDirPath;
 
 	/** File base name is the file name without variants and extension. Leading file separator is not included. */
 	private final String basename;
@@ -99,7 +99,7 @@ public class FilePath extends Path {
 			throw new WoodException("Invalid file path |%s|.", filePath);
 		}
 
-		this.dirPath = new DirPath(project, matcher.group(1));
+		this.parentDirPath = new DirPath(project, matcher.group(1));
 		this.basename = matcher.group(2);
 		String extension = matcher.group(4);
 		this.name = Strings.concat(this.basename, '.', extension);
@@ -150,10 +150,10 @@ public class FilePath extends Path {
 	 * Get this file parent directory.
 	 * 
 	 * @return parent directory.
-	 * @see #dirPath
+	 * @see #parentDirPath
 	 */
-	public DirPath getDirPath() {
-		return dirPath;
+	public DirPath getParentDirPath() {
+		return parentDirPath;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class FilePath extends Path {
 	 * @return true if this file is a component descriptor.
 	 */
 	public boolean isComponentDescriptor() {
-		return fileType == FileType.XML && basename.equals(dirPath.getName());
+		return fileType == FileType.XML && basename.equals(parentDirPath.getName());
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class FilePath extends Path {
 	 * @return true if this file is resource variables.
 	 */
 	public boolean isVariables() {
-		return fileType == FileType.XML && !basename.equals(dirPath.getName());
+		return fileType == FileType.XML && !basename.equals(parentDirPath.getName());
 	}
 
 	/**

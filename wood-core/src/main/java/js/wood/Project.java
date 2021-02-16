@@ -173,8 +173,10 @@ public class Project {
 	}
 
 	/**
-	 * Get this project file system root. Project root directory contains all project files including Java code base and project
-	 * user interface resources.
+	 * Get absolute path to this project root. Project root directory contains all WOOD project files.
+	 * <p>
+	 * Although is good practice to not mix user interface with server logic it is allowed for project directory to contain
+	 * server side code base, e.g. Java files. Files that are not recognized by WOOD tools are silently ignored.
 	 * 
 	 * @return project root directory.
 	 * @see #projectDir
@@ -242,7 +244,7 @@ public class Project {
 	public boolean isExcluded(Path path) {
 		if (path instanceof FilePath) {
 			FilePath filePath = (FilePath) path;
-			return excludes.contains(filePath) || excludes.contains(filePath.getDirPath());
+			return excludes.contains(filePath) || excludes.contains(filePath.getParentDirPath());
 		}
 		return excludes.contains(path);
 	}
@@ -276,7 +278,7 @@ public class Project {
 		 */
 		@Override
 		public void onFile(FilePath file) throws Exception {
-			if (!file.getDirPath().isTheme()) {
+			if (!file.getParentDirPath().isTheme()) {
 				return;
 			}
 			// do not include style variants since are included by preview servlet within media query sections
@@ -348,7 +350,7 @@ public class Project {
 	 * @return media file or null.
 	 */
 	public FilePath getMediaFile(Locale locale, IReference reference, FilePath source) {
-		DirPath dir = source.getDirPath();
+		DirPath dir = source.getParentDirPath();
 		if (reference.hasPath()) {
 			dir = dir.getSubdirPath(reference.getPath());
 		}

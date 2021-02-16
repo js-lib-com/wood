@@ -87,7 +87,7 @@ public class ProjectTest implements IReferenceHandler {
 
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
-		Variables variables = new Variables(sourcePath.getDirPath());
+		Variables variables = new Variables(sourcePath.getParentDirPath());
 		if (project.getAssetsDir().exists()) {
 			try {
 				Classes.invoke(variables, "load", sourcePath.getProject().getAssetsDir());

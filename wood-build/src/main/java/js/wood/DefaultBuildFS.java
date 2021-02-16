@@ -129,7 +129,7 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatStyleName(FilePath styleFile) {
-		DirPath dir = styleFile.getDirPath();
+		DirPath dir = styleFile.getParentDirPath();
 		List<String> segments = dir.getPathSegments();
 		if (dir.isLibrary()) {
 			segments.add(0, CT.LIBRARY_DIR);
@@ -171,7 +171,7 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatScriptName(FilePath scriptFile) {
-		DirPath dir = scriptFile.getDirPath();
+		DirPath dir = scriptFile.getParentDirPath();
 
 		if (dir.isLibrary()) {
 			List<String> segments = dir.getPathSegments();
@@ -225,7 +225,7 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatMediaName(FilePath mediaFile) {
-		DirPath dir = mediaFile.getDirPath();
+		DirPath dir = mediaFile.getParentDirPath();
 		List<String> segments = dir.getPathSegments();
 		if (dir.isLibrary()) {
 			segments.add(0, CT.LIBRARY_DIR);

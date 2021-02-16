@@ -68,7 +68,7 @@ class LayoutFile {
 	 */
 	public LayoutFile(BuilderProject project, FilePath filePath) throws WoodException {
 		this.project = project;
-		this.compoPath = new CompoPath(project, filePath.getDirPath().value());
+		this.compoPath = new CompoPath(project, filePath.getParentDirPath().value());
 		this.hashCode = filePath.hashCode();
 		this.string = filePath.toString();
 

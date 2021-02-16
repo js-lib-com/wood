@@ -124,7 +124,7 @@ public class DirPath extends Path {
 	}
 
 	/**
-	 * Get iterable instance for this directory files.
+	 * Get a new iterable instance on this directory child files. Note that child sub-directories are not included.
 	 * <p>
 	 * This method is designed to work with for-each Java loop as in snippet below.
 	 * 

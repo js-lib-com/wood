@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <page>
-	<title>Videos</title>
-	<description>Videos description.</description>
+	<title>Video Player</title>
+	<description>Video player description.</description>
 	<security-role>player</security-role>
 </page>

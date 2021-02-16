@@ -81,7 +81,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 				"res/asset/colors.xml", //
 				"res/asset/favicon.ico" }) {
 			FilePath filePath = filePath(file);
-			handler.onDirectory(filePath.getDirPath());
+			handler.onDirectory(filePath.getParentDirPath());
 			handler.onFile(filePath);
 		}
 
@@ -177,7 +177,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
-		Variables variables = new Variables(sourcePath.getDirPath());
+		Variables variables = new Variables(sourcePath.getParentDirPath());
 		if (project.getAssetsDir().exists()) {
 			try {
 				Classes.invoke(variables, "load", project.getAssetsDir());

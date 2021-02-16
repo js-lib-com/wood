@@ -145,7 +145,7 @@ public class SourceReaderTest implements IReferenceHandler {
 	@Override
 	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
 		if (reference.isVariable()) {
-			Variables variables = new Variables(sourcePath.getDirPath());
+			Variables variables = new Variables(sourcePath.getParentDirPath());
 			if (project.getAssetsDir().exists()) {
 				invoke(variables, "load", project.getAssetsDir());
 			}

@@ -245,7 +245,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		builder.append(Path.SEPARATOR);
 		builder.append(project.getPreviewName());
 		builder.append(Path.SEPARATOR);
-		builder.append(mediaFile.getDirPath().value());
+		builder.append(mediaFile.getParentDirPath().value());
 		builder.append(mediaFile.getName());
 		return builder.toString();
 	}
@@ -306,12 +306,12 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		 * @return component variables.
 		 */
 		public synchronized IVariables getVariables(PreviewProject project, FilePath sourcePath) {
-			IVariables variables = compoVariables.get(sourcePath.getDirPath());
+			IVariables variables = compoVariables.get(sourcePath.getParentDirPath());
 			if (variables == null) {
-				variables = project.getVariables(sourcePath.getDirPath());
+				variables = project.getVariables(sourcePath.getParentDirPath());
 				variables.setAssetVariables(assetVariables);
 				variables.setThemeVariables(themeVariables);
-				compoVariables.put(sourcePath.getDirPath(), variables);
+				compoVariables.put(sourcePath.getParentDirPath(), variables);
 			}
 			return variables;
 		}

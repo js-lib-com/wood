@@ -355,7 +355,7 @@ public class ComponentTest {
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(IReference reference, FilePath sourcePath) {
-				Variables variables = new Variables(sourcePath.getDirPath());
+				Variables variables = new Variables(sourcePath.getParentDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
 					try {
 						Classes.invoke(variables, "load", path.getProject().getAssetsDir());

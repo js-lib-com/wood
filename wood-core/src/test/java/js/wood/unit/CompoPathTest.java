@@ -85,7 +85,7 @@ public class CompoPathTest {
 		CompoPath compo = new CompoPath(project, "res/compo/discography");
 		FilePath file = compo.getFilePath("picture.png");
 		assertThat(file.value(), equalTo("res/compo/discography/picture.png"));
-		assertThat(file.getDirPath().value(), equalTo("res/compo/discography/"));
+		assertThat(file.getParentDirPath().value(), equalTo("res/compo/discography/"));
 		assertThat(file.getName(), equalTo("picture.png"));
 	}
 
