@@ -2,9 +2,7 @@ package js.wood;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -179,7 +177,7 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addLink(link);
 		}
 
-		ThemeStyles themeStyles = new ThemeStyles(project.getThemeStyles());
+		ThemeStyles themeStyles = project.getThemeStyles();
 		if (themeStyles.reset != null) {
 			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.reset, this));
 		}
@@ -269,35 +267,5 @@ public class Builder implements IReferenceHandler {
 
 	void setLocale(Locale locale) {
 		this.locale = locale;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Internal Types
-
-	private static class ThemeStyles {
-		public final FilePath reset;
-		public final FilePath fx;
-		public final List<FilePath> styles = new ArrayList<>();
-
-		public ThemeStyles(List<FilePath> themeStyles) {
-			FilePath reset = null;
-			FilePath fx = null;
-			for (FilePath style : themeStyles) {
-				switch (style.getName()) {
-				case CT.RESET_CSS:
-					reset = style;
-					break;
-
-				case CT.FX_CSS:
-					fx = style;
-					break;
-
-				default:
-					this.styles.add(style);
-				}
-			}
-			this.reset = reset;
-			this.fx = fx;
-		}
 	}
 }

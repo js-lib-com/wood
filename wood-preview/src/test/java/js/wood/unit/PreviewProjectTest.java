@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
-import js.wood.FilePath;
 import js.wood.PreviewProject;
+import js.wood.ThemeStyles;
 
 public class PreviewProjectTest {
 	private PreviewProject project;
@@ -25,11 +25,13 @@ public class PreviewProjectTest {
 
 	@Test
 	public void previewThemeStyles() {
-		List<FilePath> styles = project.getThemeStyles();
+		ThemeStyles styles = project.getThemeStyles();
 		assertThat(styles, notNullValue());
-		assertThat(styles, hasSize(4));
-
-		List<String> fileNames = styles.stream().map(file -> file.value()).collect(Collectors.toList());
-		assertThat(fileNames, contains("res/theme/form.css", "res/theme/fx.css", "res/theme/reset.css", "res/theme/style.css"));
+		assertThat(styles.reset, notNullValue());
+		assertThat(styles.fx, notNullValue());
+		assertThat(styles.styles, hasSize(2));
+		
+		List<String> fileNames = styles.styles.stream().map(file -> file.value()).collect(Collectors.toList());
+		assertThat(fileNames, contains("res/theme/form.css", "res/theme/style.css"));
 	}
 }

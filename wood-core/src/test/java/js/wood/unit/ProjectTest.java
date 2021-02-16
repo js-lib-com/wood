@@ -11,7 +11,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.Before;
@@ -24,7 +23,6 @@ import js.wood.FilePath;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
-import js.wood.impl.FilesHandler;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
@@ -59,30 +57,7 @@ public class ProjectTest implements IReferenceHandler {
 		assertThat(project.getDisplay(), equalTo("Test Project"));
 		assertThat(project.getDescription(), equalTo("Project used as fixture for unit testing."));
 
-		assertTrue(project.getThemeStyles().isEmpty());
 		assertThat(project.getLocales(), hasSize(4));
-	}
-
-	@Test
-	public void themeStylesScanner() throws Exception {
-		project = new Project(new File("src/test/resources/project"));
-		FilesHandler handler = Classes.newInstance("js.wood.Project$ThemeStylesScanner", project);
-
-		for (String file : new String[] { "res/page/index/index.css", //
-				"res/theme/form.css", //
-				"res/theme/style.css", //
-				"res/theme/reset.css", //
-				"res/theme/fx.css", //
-				"res/theme/background.jpg" }) {
-			handler.onFile(filePath(file));
-		}
-
-		List<FilePath> styles = project.getThemeStyles();
-		assertThat(styles, hasSize(4));
-		assertTrue(styles.contains(filePath("res/theme/reset.css")));
-		assertTrue(styles.contains(filePath("res/theme/fx.css")));
-		assertTrue(styles.contains(filePath("res/theme/form.css")));
-		assertTrue(styles.contains(filePath("res/theme/style.css")));
 	}
 
 	@Override

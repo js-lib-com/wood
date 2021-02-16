@@ -1,7 +1,6 @@
 package js.wood;
 
 import java.io.File;
-import java.util.List;
 
 import js.wood.impl.Variables;
 
@@ -33,9 +32,8 @@ public class PreviewProject extends Project {
 	 * 
 	 * @return site style files.
 	 */
-	public List<FilePath> getThemeStyles() {
-		themeStyles.clear();
-		getThemeDir().files(new ThemeStylesScanner());
-		return themeStyles;
+	@Override
+	public ThemeStyles getThemeStyles() {
+		return new ThemeStyles(getThemeDir());
 	}
 }

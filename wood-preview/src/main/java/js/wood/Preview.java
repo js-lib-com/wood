@@ -2,8 +2,6 @@ package js.wood;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -96,7 +94,7 @@ public final class Preview {
 			addLink(doc, link);
 		}
 
-		ThemeStyles themeStyles = new ThemeStyles(project.getThemeStyles());
+		ThemeStyles themeStyles = project.getThemeStyles();
 		if (themeStyles.reset != null) {
 			addStyle(doc, absoluteUrlPath(themeStyles.reset));
 		}
@@ -265,32 +263,5 @@ public final class Preview {
 		builder.append(Path.SEPARATOR);
 		builder.append(filePath);
 		return builder.toString();
-	}
-
-	private static class ThemeStyles {
-		public final FilePath reset;
-		public final FilePath fx;
-		public final List<FilePath> styles = new ArrayList<>();
-
-		public ThemeStyles(List<FilePath> themeStyles) {
-			FilePath reset = null;
-			FilePath fx = null;
-			for (FilePath style : themeStyles) {
-				switch (style.getName()) {
-				case CT.RESET_CSS:
-					reset = style;
-					break;
-
-				case CT.FX_CSS:
-					fx = style;
-					break;
-
-				default:
-					this.styles.add(style);
-				}
-			}
-			this.reset = reset;
-			this.fx = fx;
-		}
 	}
 }

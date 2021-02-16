@@ -1,16 +1,15 @@
 package js.wood;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import js.lang.BugError;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
-import js.wood.impl.FilesHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
@@ -252,35 +251,6 @@ public class Project {
 		return new FilePath(this, path);
 	}
 
-	// ------------------------------------------------------
-	// Build files scanner and cache
-
-	/**
-	 * Style files stored on project theme directory. These files contains global styles regarding UI primitive elements.
-	 */
-	protected List<FilePath> themeStyles = new ArrayList<>();
-
-	/**
-	 * Scanner for style files stored into theme directory.
-	 * 
-	 * @author Iulian Rotaru
-	 */
-	protected class ThemeStylesScanner extends FilesHandler {
-		/**
-		 * Add style files residing in site styles directory to {@link Project#themeStyles} cache.
-		 */
-		@Override
-		public void onFile(FilePath file) throws Exception {
-			if (!file.getParentDirPath().isTheme()) {
-				return;
-			}
-			// do not include style variants since are included by preview servlet within media query sections
-			if (!file.hasVariants() && file.isStyle()) {
-				themeStyles.add(file);
-			}
-		}
-	}
-
 	public String getAuthor() {
 		return descriptor.getAuthor();
 	}
@@ -320,8 +290,8 @@ public class Project {
 	 * @return site styles.
 	 * @see #themeStyles
 	 */
-	public List<FilePath> getThemeStyles() {
-		return themeStyles;
+	public ThemeStyles getThemeStyles() {
+		throw new BugError("Abstract method invoked.");
 	}
 
 	// ------------------------------------------------------

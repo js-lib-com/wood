@@ -23,6 +23,8 @@ import js.wood.impl.Variables;
  * @since 1.0
  */
 class BuilderProject extends Project {
+	private final ThemeStyles themeStyles;
+
 	/** Cache for resource variables. */
 	private final Map<DirPath, Variables> variables;
 
@@ -33,6 +35,7 @@ class BuilderProject extends Project {
 	 */
 	public BuilderProject(File projectDir) {
 		super(projectDir);
+		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.variables = new HashMap<>();
 	}
 
@@ -102,6 +105,11 @@ class BuilderProject extends Project {
 		return descriptor.getLocales().size() > 1;
 	}
 
+	@Override
+	public ThemeStyles getThemeStyles() {
+		return themeStyles;
+	}
+
 	/**
 	 * Get project variables mapped to parent directories. Returned map is not modifiable. Every variables instance from map has
 	 * a reference to project asset variables, used when variables miss a reference value.
@@ -125,7 +133,7 @@ class BuilderProject extends Project {
 	 */
 	private class FilesScanner {
 		/** Specialized file handlers. */
-		private FilesHandler[] handlers = new FilesHandler[] { new ThemeStylesScanner(), new VariablesScanner() };
+		private FilesHandler[] handlers = new FilesHandler[] { new VariablesScanner() };
 
 		/**
 		 * Scan given directory recursively till no more sub-directories.
