@@ -27,10 +27,10 @@ import js.util.Strings;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Preview;
 import js.wood.PreviewProject;
+import js.wood.Reference;
 import js.wood.impl.Variables;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -196,7 +196,7 @@ public class PreviewTest implements IReferenceHandler {
 	// Preview helpers
 
 	@Override
-	public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
+	public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
 		if (reference.isVariable()) {
 			Variables variables = new Variables(sourceFile.getParentDirPath());
 			if (project.getAssetsDir().exists()) {

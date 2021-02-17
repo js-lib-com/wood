@@ -16,9 +16,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import js.util.Strings;
 import js.wood.DirPath;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.SourceReader;
 import js.wood.WoodException;
 
@@ -148,7 +148,7 @@ public class Variables {
 	 * @return variable value.
 	 * @throws WoodException if variable value not found.
 	 */
-	public String get(Locale locale, IReference reference, FilePath source, IReferenceHandler handler) throws WoodException {
+	public String get(Locale locale, Reference reference, FilePath source, IReferenceHandler handler) throws WoodException {
 		String value = null;
 
 		// 1. attempt to get value from this variables instance, for specified language

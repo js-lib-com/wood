@@ -38,7 +38,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 		final Variables variables = project.getVariables().get(compoPath);
 		ComponentDescriptor descriptor = new ComponentDescriptor(new FilePath(project, "res/index/index.xml"), new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
+			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
 				return variables.get(new Locale("en"), reference, sourceFile, this);
 			}
 		});
@@ -48,7 +48,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 	}
 
 	@Override
-	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
+	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException {
 		Variables variables = new Variables(sourcePath.getParentDirPath());
 		if (project.getAssetsDir().exists()) {
 			try {

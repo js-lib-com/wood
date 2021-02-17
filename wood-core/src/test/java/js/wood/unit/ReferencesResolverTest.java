@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.impl.ReferencesResolver;
 
 public class ReferencesResolverTest {
@@ -31,7 +31,7 @@ public class ReferencesResolverTest {
 		ReferencesResolver resolver = new ReferencesResolver();
 		value = resolver.parse(value, sourceFile, new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
+			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
 				return "resource value";
 			}
 		});

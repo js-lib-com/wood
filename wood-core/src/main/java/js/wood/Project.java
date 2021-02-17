@@ -13,7 +13,6 @@ import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.Reference;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -297,7 +296,7 @@ public class Project {
 	 * @param source source file using media resource.
 	 * @return media file or null.
 	 */
-	public FilePath getMediaFile(Locale locale, IReference reference, FilePath source) {
+	public FilePath getMediaFile(Locale locale, Reference reference, FilePath source) {
 		DirPath dir = source.getParentDirPath();
 		boolean isComponentSource = dir.isComponent();
 		if (reference.hasPath()) {

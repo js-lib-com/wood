@@ -21,13 +21,12 @@ import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.SourceReader;
 import js.wood.WoodException;
 import js.wood.impl.LayoutParameters;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
@@ -75,7 +74,7 @@ public class SourceReaderTest implements IReferenceHandler {
 
 		SourceReader reader = new SourceReader(sourceFile, new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourceFile) throws IOException {
+			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
 				assertThat(((Reference) reference).getResourceType(), equalTo(ResourceType.STRING));
 				assertThat(reference.getName(), equalTo("title"));
 				assertThat(sourceFile.value(), equalTo("res/compo/compo.htm"));
@@ -143,7 +142,7 @@ public class SourceReaderTest implements IReferenceHandler {
 	// Internal helpers
 
 	@Override
-	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
+	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException {
 		if (reference.isVariable()) {
 			Variables variables = new Variables(sourcePath.getParentDirPath());
 			if (project.getAssetsDir().exists()) {

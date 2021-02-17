@@ -2,6 +2,8 @@ package js.wood;
 
 import java.io.IOException;
 
+import js.wood.impl.ReferencesResolver;
+
 /**
  * Resource reference handler invoked by {@link SourceReader} and {@link ReferencesResolver} when discover a reference.
  * It is designed for the benefit of building and preview processes that uses it for resources processing - variables
@@ -29,5 +31,5 @@ public interface IReferenceHandler
    * @throws IOException if handler IO operations fail.
    * @throws WoodException if handler is not able to process the reference.
    */
-  String onResourceReference(IReference reference, FilePath sourceFile) throws IOException, WoodException;
+  String onResourceReference(Reference reference, FilePath sourceFile) throws IOException, WoodException;
 }

@@ -6,7 +6,6 @@ import java.io.Reader;
 import js.util.Params;
 import js.wood.eval.Interpreter;
 import js.wood.impl.LayoutParameters;
-import js.wood.impl.Reference;
 import js.wood.impl.ReferencesResolver;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;

@@ -1,8 +1,8 @@
 package js.wood;
 
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +27,6 @@ import js.dom.w3c.DocumentBuilderImpl;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
@@ -302,7 +301,7 @@ public class BuilderTest {
 		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		IReference reference = new Reference(source, ResourceType.STRING, "title");
+		Reference reference = new Reference(source, ResourceType.STRING, "title");
 
 		assertValue("Index Page", builder, "en", reference, source);
 		assertValue("Indexseite", builder, "de", reference, source);
@@ -338,7 +337,7 @@ public class BuilderTest {
 		Project project = builder.getProject();
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		IReference reference = new Reference(source, ResourceType.STRING, "title");
+		Reference reference = new Reference(source, ResourceType.STRING, "title");
 
 		assertValue("Index Page", builder, "en", reference, source);
 		assertValue("Indexseite", builder, "de", reference, source);
@@ -368,7 +367,7 @@ public class BuilderTest {
 		assertValue("/root-project/de/media/res-template-page_logo.jpg", builder, "de", reference, source);
 	}
 
-	private static void assertValue(String expected, Builder builder, String languageTag, IReference reference, FilePath source) throws IOException {
+	private static void assertValue(String expected, Builder builder, String languageTag, Reference reference, FilePath source) throws IOException {
 		Locale locale = new Locale(languageTag);
 		builder.setLocale(locale);
 		BuildFS buildFS = builder.getBuildFS();
@@ -591,7 +590,7 @@ public class BuilderTest {
 		for (String image : layoutImages) {
 			assertTrue(layout.contains(image));
 		}
-		
+
 		assertThat(Strings.load(new File(buildDir, "style/res_compo.css")), containsString("../media/res-compo_background.jpg"));
 		assertThat(Strings.load(new File(buildDir, "style/lib_compo.css")), containsString("../media/lib-compo_background.jpg"));
 		assertThat(Strings.load(new File(buildDir, "style/res_template.css")), containsString("../media/res-template_background.jpg"));

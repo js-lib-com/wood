@@ -8,7 +8,6 @@ import java.util.Map;
 
 import js.log.Log;
 import js.log.LogFactory;
-import js.wood.impl.Reference;
 import js.wood.impl.Variables;
 
 /**
@@ -201,7 +200,7 @@ public class Builder implements IReferenceHandler {
 	 * @throws WoodException if directory variables or media file is missing.
 	 */
 	@Override
-	public String onResourceReference(IReference reference, FilePath source) throws IOException, WoodException {
+	public String onResourceReference(Reference reference, FilePath source) throws IOException, WoodException {
 		if (locale == null) {
 			throw new IllegalStateException("Builder locale not initialized.");
 		}

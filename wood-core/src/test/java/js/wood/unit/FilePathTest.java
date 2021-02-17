@@ -22,9 +22,9 @@ import org.junit.Test;
 import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.WoodException;
 import js.wood.impl.FileType;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variants;
 

@@ -1,10 +1,7 @@
-package js.wood.impl;
+package js.wood;
 
 import js.util.Params;
-import js.wood.CT;
-import js.wood.FilePath;
-import js.wood.IReference;
-import js.wood.WoodException;
+import js.wood.impl.ResourceType;
 
 /**
  * Immutable resource reference. Simply put, a reference is a pointer from a source file to a resource, be it variable
@@ -63,7 +60,7 @@ import js.wood.WoodException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class Reference implements IReference
+public class Reference
 {
   /** Mark for reference start. */
   public static final char MARK = '@';
@@ -184,7 +181,6 @@ public class Reference implements IReference
    * @return resource name.
    * @see #name
    */
-  @Override
   public String getName()
   {
     return name;
@@ -196,7 +192,6 @@ public class Reference implements IReference
    * @return true if reference contains path.
    * @see #path
    */
-  @Override
   public boolean hasPath()
   {
     return path != null;
@@ -208,7 +203,6 @@ public class Reference implements IReference
    * @return reference path.
    * @see #path
    */
-  @Override
   public String getPath()
   {
     return path;
@@ -220,7 +214,6 @@ public class Reference implements IReference
    * @return true if resource is a variable.
    * @see ResourceType#isVariable()
    */
-  @Override
   public boolean isVariable()
   {
     return resourceType.isVariable();

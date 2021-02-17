@@ -226,7 +226,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 * @return resource variable values or media file source.
 	 */
 	@Override
-	public String onResourceReference(IReference reference, FilePath source) {
+	public String onResourceReference(Reference reference, FilePath source) {
 		Locale previewLocale = new Locale("en");
 		if (reference.isVariable()) {
 			String value = variables.get(previewLocale, reference, source, this);

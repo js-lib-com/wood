@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import js.wood.Reference;
 import js.wood.WoodException;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 
 public class ReferenceTest {

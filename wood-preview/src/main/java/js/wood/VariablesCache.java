@@ -43,7 +43,7 @@ public class VariablesCache {
 	 * @param sourcePath component source file.
 	 * @return component variables.
 	 */
-	public String get(Locale locale, IReference reference, FilePath sourcePath, IReferenceHandler handler) {
+	public String get(Locale locale, Reference reference, FilePath sourcePath, IReferenceHandler handler) {
 		Variables variables = variablesMap.get(sourcePath.getParentDirPath());
 		if (variables == null) {
 			synchronized (this) {

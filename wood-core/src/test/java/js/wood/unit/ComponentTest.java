@@ -22,9 +22,9 @@ import js.util.Classes;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.WOOD;
 import js.wood.WoodException;
 import js.wood.impl.Variables;
@@ -201,11 +201,11 @@ public class ComponentTest {
 	public void referenceHandler() {
 		Project project = new Project(new File("src/test/resources/components"));
 		CompoPath path = new CompoPath(project, "res/references");
-		final List<IReference> references = new ArrayList<>();
+		final List<Reference> references = new ArrayList<>();
 
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourcePath) {
+			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				references.add(reference);
 				return reference.toString();
 			}
@@ -354,7 +354,7 @@ public class ComponentTest {
 	private static Component createCompo(final Project project, final CompoPath path) {
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourcePath) {
+			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				Variables variables = new Variables(sourcePath.getParentDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
 					try {

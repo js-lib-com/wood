@@ -18,10 +18,9 @@ import org.junit.Test;
 import js.util.Classes;
 import js.wood.CT;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
-import js.wood.impl.Reference;
+import js.wood.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
@@ -55,7 +54,7 @@ public class ProjectTest implements IReferenceHandler {
 	}
 
 	@Override
-	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException {
+	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException {
 		Variables variables = new Variables(sourcePath.getParentDirPath());
 		if (project.getAssetsDir().exists()) {
 			try {

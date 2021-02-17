@@ -173,7 +173,7 @@ public class FilePath extends Path {
 	 * @return true if reference name equals this file base name.
 	 * @see #basename
 	 */
-	public boolean isBaseName(IReference reference) {
+	public boolean isBaseName(Reference reference) {
 		return isBaseName(reference.getName());
 	}
 

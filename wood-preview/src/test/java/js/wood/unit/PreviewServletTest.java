@@ -37,9 +37,9 @@ import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.PreviewProject;
 import js.wood.PreviewServlet;
+import js.wood.Reference;
 import js.wood.VariablesCache;
 import js.wood.WoodException;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 
 public class PreviewServletTest {

@@ -18,11 +18,10 @@ import js.util.Classes;
 import js.util.Strings;
 import js.wood.DirPath;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.WoodException;
-import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
@@ -119,7 +118,7 @@ public class VariablesTest implements IReferenceHandler {
 	}
 
 	@Override
-	public String onResourceReference(IReference reference, FilePath sourcePath) throws IOException, WoodException {
+	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException, WoodException {
 		if (reference.isVariable()) {
 			Variables variables = new Variables(sourcePath.getParentDirPath());
 			if (project.getAssetsDir().exists()) {

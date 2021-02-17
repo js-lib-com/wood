@@ -13,9 +13,9 @@ import js.util.Classes;
 import js.wood.CompoPath;
 import js.wood.Component;
 import js.wood.FilePath;
-import js.wood.IReference;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
+import js.wood.Reference;
 import js.wood.WoodException;
 import js.wood.impl.Variables;
 
@@ -57,7 +57,7 @@ public class ComponentTest {
 	private static Component createCompo(final CompoPath path) {
 		Component compo = new Component(path, new IReferenceHandler() {
 			@Override
-			public String onResourceReference(IReference reference, FilePath sourcePath) {
+			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				Variables variables = new Variables(sourcePath.getParentDirPath());
 				if (path.getProject().getAssetsDir().exists()) {
 					invoke(variables, "load", path.getProject().getAssetsDir());
