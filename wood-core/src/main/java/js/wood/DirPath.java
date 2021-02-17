@@ -46,13 +46,15 @@ import js.wood.impl.FilesHandler;
  */
 public class DirPath extends Path {
 	/** Pattern for directory path. */
-	private static final Pattern PATTERN = Pattern.compile("^([a-z]+)((?:/\\.?[a-z0-9-]+)*)/?$", Pattern.CASE_INSENSITIVE);
-
-	/** Source directory. */
-	private final String sourceDir;
+	private static final Pattern PATTERN = Pattern.compile("^[a-z]+(?:/\\.?[a-z0-9-]+)*/?$", Pattern.CASE_INSENSITIVE);
 
 	/** Directory path segments does not include source directory. */
-	private final ArrayList<String> pathSegments;
+	private final List<String> pathSegments;
+
+	public DirPath(Project project) {
+		super(project);
+		pathSegments = Collections.emptyList();
+	}
 
 	/**
 	 * Create an immutable directory path instance. It is not legal to use absolute paths, that is, path to start with file
@@ -68,8 +70,7 @@ public class DirPath extends Path {
 		if (!matcher.find()) {
 			throw new WoodException("Directory path parameter |%s| is invalid.", dirPath);
 		}
-		sourceDir = matcher.group(1);
-		pathSegments = new ArrayList<>(Strings.split(matcher.group(2), Path.SEPARATOR));
+		pathSegments = new ArrayList<>(Strings.split(dirPath, Path.SEPARATOR));
 	}
 
 	/**
@@ -88,10 +89,8 @@ public class DirPath extends Path {
 	 * @return directory path segments.
 	 * @see #pathSegments
 	 */
-	@SuppressWarnings("unchecked")
 	public List<String> getPathSegments() {
-		// returns a clone because list can be changed by caller logic
-		return (List<String>) pathSegments.clone();
+		return Collections.unmodifiableList(pathSegments);
 	}
 
 	/**
@@ -217,10 +216,15 @@ public class DirPath extends Path {
 				}
 				if (file.isDirectory()) {
 					// takes care to create DirPath relative to project
-					handler.onDirectory(new DirPath(project, Files.getRelativePath(project.getProjectDir(), file, true)));
+					handler.onDirectory(new DirPath(project, Files.getRelativePath(project.getProjectRoot(), file, true)));
 					continue;
 				}
-				FilePath filePath = project.getFile(Files.getRelativePath(project.getProjectDir(), file, true));
+				if (isRoot()) {
+					// if this directory path is the project root do not process files
+					continue;
+				}
+				
+				FilePath filePath = project.getFile(Files.getRelativePath(project.getProjectRoot(), file, true));
 				if (!handler.accept(filePath)) {
 					continue;
 				}
@@ -236,6 +240,10 @@ public class DirPath extends Path {
 	public boolean isComponent() {
 		File layoutFile = new File(file, getName() + CT.DOT_LAYOUT_EXT);
 		return layoutFile.exists();
+	}
+
+	public boolean isRoot() {
+		return value == null;
 	}
 
 	/**
@@ -255,25 +263,6 @@ public class DirPath extends Path {
 	 */
 	public boolean isTheme() {
 		return value.startsWith(CT.THEME_DIR);
-	}
-
-	/**
-	 * Test if path directory denotes project library. Library directory holds third party components and script libraries.
-	 * 
-	 * @return true if this directory is project library.
-	 */
-	public boolean isLibrary() {
-		return CT.LIBRARY_DIR.equals(sourceDir);
-	}
-
-	/**
-	 * Test if this path designates project generated files directory. Generated files directory contains mostly scripts for
-	 * HTTP-RMI stubs.
-	 * 
-	 * @return true if directory is project generated.
-	 */
-	public boolean isGenerated() {
-		return CT.GENERATED_DIR.equalsIgnoreCase(sourceDir);
 	}
 
 	/**
@@ -395,7 +384,7 @@ public class DirPath extends Path {
 		 */
 		@Override
 		public FilePath next() {
-			return project.getFile(Files.getRelativePath(project.getProjectDir(), files[index], true));
+			return project.getFile(Files.getRelativePath(project.getProjectRoot(), files[index], true));
 		}
 
 		/**

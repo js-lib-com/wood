@@ -4,7 +4,6 @@ body {
 
 header {
 	position: absolute;
-	@style/compo
 	text-align: center;
 	min-height: @eval(add @dimen/page-header-height 2);
 }

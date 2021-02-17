@@ -41,12 +41,6 @@ public class Builder implements IReferenceHandler {
 	/** Project instance. */
 	private final BuilderProject project;
 
-	/** Project discovered pages. */
-	private final Collection<CompoPath> pages;
-
-	/** Cache for resource variables. */
-	private final Map<DirPath, Variables> variables;
-
 	/** Current processing build file system, that is, build site directory. */
 	private final BuildFS buildFS;
 
@@ -59,15 +53,11 @@ public class Builder implements IReferenceHandler {
 	 * 
 	 * @param projectDir path to existing project root directory,
 	 * @param siteDir
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public Builder(BuilderConfig config) throws IOException {
 		log.trace("Builder(BuilderConfig)");
-		this.project = new BuilderProject(config.getProjectDir());
-		this.project.scan();
-
-		this.pages = this.project.getPages();
-		this.variables = this.project.getVariables();
+		this.project = new BuilderProject(config.getProjectDir(), config.getBuildDir());
 		this.buildFS = new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber());
 	}
 
@@ -75,10 +65,10 @@ public class Builder implements IReferenceHandler {
 	 * Test constructor.
 	 * 
 	 * @param project
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public Builder(BuilderProject project) throws IOException {
-		this(project, new DefaultBuildFS(new File(project.getProjectDir(), CT.DEF_BUILD_DIR), 0));
+		this(project, new DefaultBuildFS(new File(project.getProjectRoot(), CT.DEF_BUILD_DIR), 0));
 	}
 
 	/**
@@ -86,14 +76,10 @@ public class Builder implements IReferenceHandler {
 	 * 
 	 * @param project
 	 * @param buildFS
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public Builder(BuilderProject project, BuildFS buildFS) throws IOException {
 		this.project = project;
-		this.project.scan();
-
-		this.pages = this.project.getPages();
-		this.variables = this.project.getVariables();
 		this.buildFS = buildFS;
 	}
 
@@ -110,7 +96,7 @@ public class Builder implements IReferenceHandler {
 				buildFS.setLocale(locale);
 			}
 
-			for (CompoPath page : pages) {
+			for (CompoPath page : project.getPages()) {
 				buildPage(page);
 			}
 		}
@@ -216,15 +202,22 @@ public class Builder implements IReferenceHandler {
 	 */
 	@Override
 	public String onResourceReference(IReference reference, FilePath source) throws IOException, WoodException {
+		if (locale == null) {
+			throw new IllegalStateException("Builder locale not initialized.");
+		}
 		if (reference.isVariable()) {
-			Variables dirVariables = variables.get(source.getParentDirPath());
-			if (dirVariables == null) {
+			String value = null;
+			Variables dirVariables = project.getVariables().get(source.getParentDirPath());
+			if (dirVariables != null) {
+				value = dirVariables.get(locale, reference, source, this);
+			}
+			if (value == null) {
+				value = project.getAssetVariables().get(locale, reference, source, this);
+			}
+			if (value == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", source, reference);
 			}
-			if (locale == null) {
-				throw new IllegalStateException("Builder locale not initialized.");
-			}
-			return dirVariables.get(locale, reference, source, this);
+			return value;
 		}
 
 		FilePath mediaFile = project.getMediaFile(locale, reference, source);
@@ -259,11 +252,11 @@ public class Builder implements IReferenceHandler {
 	}
 
 	Collection<CompoPath> getPages() {
-		return pages;
+		return project.getPages();
 	}
 
 	Map<DirPath, Variables> getVariables() {
-		return variables;
+		return project.getVariables();
 	}
 
 	void setLocale(Locale locale) {

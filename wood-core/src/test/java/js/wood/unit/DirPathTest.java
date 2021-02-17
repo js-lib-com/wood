@@ -8,9 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -19,13 +17,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import js.util.Classes;
 import js.wood.DirPath;
 import js.wood.FilePath;
 import js.wood.Project;
@@ -42,40 +37,20 @@ public class DirPathTest {
 	}
 
 	@Test
-	public void pattern() {
-		Pattern pattern = Classes.getFieldValue(DirPath.class, "PATTERN");
-		assertNotNull(pattern);
-
-		assertPattern(pattern, "res/compo", "res", "/compo");
-		assertPattern(pattern, "lib/js-lib", "lib", "/js-lib");
-		assertPattern(pattern, "res/path/compo/", "res", "/path/compo");
-		assertPattern(pattern, "gen/js/wood/test", "gen", "/js/wood/test");
-		assertPattern(pattern, "script/js/wood/test", "script", "/js/wood/test");
-	}
-
-	private static void assertPattern(Pattern pattern, String value, String sourceDir, String segments) {
-		Matcher m = pattern.matcher(value);
-		assertTrue("Invalid directory path value: " + value, m.find());
-		assertEquals("Source directory not found.", sourceDir, m.group(1));
-		assertEquals("Path segments not found.", segments, m.group(2));
-	}
-
-	@Test
 	public void constructor() {
-		assertDirPath("res/", "res/", "res", "res");
-		assertDirPath("res/path/compo", "res/path/compo/", "res", "compo");
-		assertDirPath("res/path/compo/", "res/path/compo/", "res", "compo");
-		assertDirPath("res/compo/video-player", "res/compo/video-player/", "res", "video-player");
-		assertDirPath("lib/js-lib", "lib/js-lib/", "lib", "js-lib");
-		assertDirPath("script/js/wood/test", "script/js/wood/test/", "script", "test");
-		assertDirPath("gen/js/wood/test", "gen/js/wood/test/", "gen", "test");
+		assertDirPath("res/", "res/", "res");
+		assertDirPath("res/path/compo", "res/path/compo/", "compo");
+		assertDirPath("res/path/compo/", "res/path/compo/", "compo");
+		assertDirPath("res/compo/video-player", "res/compo/video-player/", "video-player");
+		assertDirPath("lib/js-lib", "lib/js-lib/", "js-lib");
+		assertDirPath("script/js/wood/test", "script/js/wood/test/", "test");
+		assertDirPath("gen/js/wood/test", "gen/js/wood/test/", "test");
 	}
 
-	private void assertDirPath(String pathValue, String value, String sourceDir, String name) {
+	private void assertDirPath(String pathValue, String value, String name) {
 		DirPath dir = new DirPath(project, pathValue);
 		assertThat(dir.value(), equalTo(value));
 		assertThat(dir.toString(), equalTo(value));
-		assertThat(Classes.getFieldValue(dir, "sourceDir").toString(), equalTo(sourceDir));
 		assertThat(dir.getName(), equalTo(name));
 	}
 
@@ -95,15 +70,16 @@ public class DirPathTest {
 	public void segments() {
 		DirPath dir = new DirPath(project, "script/js/tools/wood/tests/");
 		assertThat(dir.getPathSegments(), notNullValue());
-		assertThat(dir.getPathSegments(), hasSize(4));
-		assertThat(dir.getPathSegments(), hasItems("js", "tools", "wood", "tests"));
+		assertThat(dir.getPathSegments(), hasSize(5));
+		assertThat(dir.getPathSegments(), hasItems("script", "js", "tools", "wood", "tests"));
 	}
 
 	@Test
 	public void segments_SourceDirectoryOnly() {
 		DirPath dir = new DirPath(project, "script/");
 		assertThat(dir.getPathSegments(), notNullValue());
-		assertThat(dir.getPathSegments(), empty());
+		assertThat(dir.getPathSegments(), hasSize(1));
+		assertThat(dir.getPathSegments(), hasItems("script"));
 	}
 
 	@Test
@@ -276,14 +252,10 @@ public class DirPathTest {
 	public void predicates() {
 		assertTrue(new DirPath(project, "res/asset").isAssets());
 		assertTrue(new DirPath(project, "res/theme").isTheme());
-		assertTrue(new DirPath(project, "gen/js/tools").isGenerated());
-		assertTrue(new DirPath(project, "lib/js-lib/").isLibrary());
 
 		assertFalse(new DirPath(project, "res/asset").isTheme());
 		assertFalse(new DirPath(project, "res/theme").isAssets());
 		assertFalse(new DirPath(project, "res/compo/discography").isAssets());
-		assertFalse(new DirPath(project, "gen/js/tools").isLibrary());
-		assertFalse(new DirPath(project, "lib/js-lib/").isGenerated());
 	}
 
 	@Test
@@ -293,7 +265,7 @@ public class DirPathTest {
 		assertTrue(DirPath.accept("script/js/wood/test"));
 		assertTrue(DirPath.accept("gen/js/wood/controller"));
 		assertTrue(DirPath.accept("java/js/wood/test"));
-		
+
 		assertFalse(DirPath.accept("lib/video-player/video-player.htm"));
 		assertFalse(DirPath.accept("lib/video-player#body"));
 	}

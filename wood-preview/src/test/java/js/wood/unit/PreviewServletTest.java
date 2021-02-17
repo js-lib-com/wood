@@ -37,6 +37,7 @@ import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.PreviewProject;
 import js.wood.PreviewServlet;
+import js.wood.VariablesCache;
 import js.wood.WoodException;
 import js.wood.impl.Reference;
 import js.wood.impl.ResourceType;
@@ -49,7 +50,7 @@ public class PreviewServletTest {
 	@Test
 	public void contextInitialization() throws Exception {
 		HttpServletResponse httpResponse = exercise("styles", "/test/res/page/page.css");
-		assertNotNull(project.getProjectDir());
+		assertNotNull(project.getProjectRoot());
 
 		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
 		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
@@ -102,10 +103,6 @@ public class PreviewServletTest {
 		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
 
 		assertTrue(style.startsWith("body {"));
-		assertTrue(style.contains("background-color: #001122;"));
-		assertTrue(style.contains("color: white;"));
-		assertTrue(style.contains("width: 50%;"));
-		assertTrue(style.contains("height: 80px;"));
 	}
 
 	@Test
@@ -161,8 +158,11 @@ public class PreviewServletTest {
 	@Test
 	public void resourceReference() {
 		project = new PreviewProject(new File("src/test/resources/project"));
+		VariablesCache variables = new VariablesCache(project);
+
 		PreviewServlet servlet = new PreviewServlet();
 		Classes.setFieldValue(servlet, "project", project);
+		Classes.setFieldValue(servlet, "variables", variables);
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
 		Reference reference = new Reference(source, ResourceType.STRING, "title");
@@ -173,15 +173,18 @@ public class PreviewServletTest {
 		assertThat(servlet.onResourceReference(reference, source), equalTo("/project-preview/res/template/page/logo.jpg"));
 	}
 
-	@Test(expected = WoodException.class)
+	@Test
 	public void badVariableOnResourceReference() {
 		project = new PreviewProject(new File("src/test/resources/project"));
+		VariablesCache variables = new VariablesCache(project);
+
 		PreviewServlet servlet = new PreviewServlet();
 		Classes.setFieldValue(servlet, "project", project);
+		Classes.setFieldValue(servlet, "variables", variables);
 
 		FilePath source = new FilePath(project, "res/page/index/index.htm");
 		Reference reference = new Reference(source, ResourceType.STRING, "fake-variable");
-		servlet.onResourceReference(reference, source);
+		assertThat(servlet.onResourceReference(reference, source), equalTo(reference.toString()));
 	}
 
 	@Test(expected = WoodException.class)
@@ -233,7 +236,7 @@ public class PreviewServletTest {
 			}
 		});
 
-		Classes.invoke(Classes.getFieldValue(servlet, "variablesCache"), "update", project);
+		Classes.invoke(Classes.getFieldValue(servlet, "variables"), "update");
 		servlet.service(httpRequest, httpResponse);
 		return httpResponse;
 	}

@@ -47,7 +47,7 @@ public class ProjectTest implements IReferenceHandler {
 	public void initialization() throws FileNotFoundException {
 		project = new Project(new File("src/test/resources/project"));
 
-		assertThat(project.getProjectDir(), equalTo(new File("src/test/resources/project")));
+		assertThat(project.getProjectRoot(), equalTo(new File("src/test/resources/project")));
 		assertThat(Classes.getFieldValue(project, "descriptor"), notNullValue());
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR + "/"));

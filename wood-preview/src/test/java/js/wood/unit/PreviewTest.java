@@ -178,13 +178,13 @@ public class PreviewTest implements IReferenceHandler {
 		assertThat(images.size(), equalTo(7));
 
 		int index = 0;
-		assertImage("template-logo.png", images, index++);
-		assertImage("compo-logo.png", images, index++);
+		assertImage("res-template-logo.png", images, index++);
+		assertImage("res-compo-logo.png", images, index++);
 		assertImage(null, images, index++);
 		assertImage("https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif", images, index++);
-		assertImage("widget-prev-page.png", images, index++);
-		assertImage("widget-next-page.png", images, index++);
-		assertImage("compo-logo.png", images, index++);
+		assertImage("res-widget-prev-page.png", images, index++);
+		assertImage("res-widget-next-page.png", images, index++);
+		assertImage("lib-compo-logo.png", images, index++);
 	}
 
 	@Test

@@ -1,7 +1,8 @@
 package js.wood;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -84,7 +85,7 @@ public class BuilderTest {
 	@Test
 	public void build() throws IOException {
 		BuilderProject project = project("project");
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<>();
@@ -124,7 +125,7 @@ public class BuilderTest {
 	@Test
 	public void build_RootContext() throws IOException {
 		BuilderProject project = project("root-project");
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		// initialize probes
 		final List<Locale> locales = new ArrayList<>();
@@ -165,7 +166,7 @@ public class BuilderTest {
 	@Test
 	public void buildPage() throws Exception {
 		BuilderProject project = project("project");
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
@@ -186,7 +187,7 @@ public class BuilderTest {
 	@Test
 	public void buildPage_RootContext() throws Exception {
 		BuilderProject project = project("project");
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
@@ -228,20 +229,20 @@ public class BuilderTest {
 		assertStyle("media/favicon.ico", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Roboto", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", styles, index++);
-		assertStyle("style/theme-reset.css", styles, index++);
-		assertStyle("style/theme-fx.css", styles, index++);
+		assertStyle("style/res-theme_reset.css", styles, index++);
+		assertStyle("style/res-theme_fx.css", styles, index++);
 
 		// site styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='style/theme-form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='style/theme-style.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='style/res-theme_form.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='style/res-theme_style.css']"));
 
 		index += 2; // skip form.css and fx.css
-		assertStyle("style/template-dialog.css", styles, index++);
-		assertStyle("style/lib-paging.css", styles, index++);
-		assertStyle("style/lib-list-view.css", styles, index++);
-		assertStyle("style/template-page.css", styles, index++);
-		assertStyle("style/template-sidebar-page.css", styles, index++);
-		assertStyle("style/page-index.css", styles, index++);
+		assertStyle("style/res-template_dialog.css", styles, index++);
+		assertStyle("style/lib_paging.css", styles, index++);
+		assertStyle("style/lib_list-view.css", styles, index++);
+		assertStyle("style/res-template_page.css", styles, index++);
+		assertStyle("style/res-template_sidebar-page.css", styles, index++);
+		assertStyle("style/res-page_index.css", styles, index++);
 
 		EList elist = doc.findByTag("script");
 		List<String> scripts = new ArrayList<>();
@@ -250,23 +251,23 @@ public class BuilderTest {
 		}
 		assertThat(scripts, hasSize(10));
 
-		assertTrue(scripts.indexOf("script/hc.page.Index.js") > scripts.indexOf("script/js-lib.js"));
-		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/js-lib.js"));
-		assertTrue(scripts.indexOf("script/hc.view.DiscographyView.js") > scripts.indexOf("script/hc.view.VideoPlayer.js"));
-		assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js-lib.js"));
+		assertTrue(scripts.indexOf("script/script.hc.page.Index.js") > scripts.indexOf("script/lib.js-lib.js"));
+		assertTrue(scripts.indexOf("script/script.hc.view.DiscographyView.js") > scripts.indexOf("script/lib.js-lib.js"));
+		assertTrue(scripts.indexOf("script/script.hc.view.DiscographyView.js") > scripts.indexOf("script/script.hc.view.VideoPlayer.js"));
+		assertTrue(scripts.indexOf("script/script.hc.view.VideoPlayer.js") > scripts.indexOf("script/lib.js-lib.js"));
 		// assertTrue(scripts.indexOf("script/hc.view.VideoPlayer.js") > scripts.indexOf("script/js.compo.Dialog.js"));
 		// assertTrue(scripts.indexOf("script/js.compo.Dialog.js") > scripts.indexOf("script/js-lib.js"));
 
-		assertTrue(scripts.contains("script/js-lib.js"));
-		assertTrue(scripts.contains("script/js.compo.Dialog.js"));
-		assertTrue(scripts.contains("script/hc.view.VideoPlayer.js"));
-		assertTrue(scripts.contains("script/js.hood.MainMenu.js"));
-		assertTrue(scripts.contains("script/hc.page.Index.js"));
-		assertTrue(scripts.contains("script/hc.view.DiscographyView.js"));
+		assertTrue(scripts.contains("script/lib.js-lib.js"));
+		assertTrue(scripts.contains("script/script.js.compo.Dialog.js"));
+		assertTrue(scripts.contains("script/script.hc.view.VideoPlayer.js"));
+		assertTrue(scripts.contains("script/script.js.hood.MainMenu.js"));
+		assertTrue(scripts.contains("script/script.hc.page.Index.js"));
+		assertTrue(scripts.contains("script/script.hc.view.DiscographyView.js"));
 		assertTrue(scripts.contains("script/gen.js.controller.MainController.js"));
-		assertTrue(scripts.contains("script/list-view.js"));
-		assertTrue(scripts.contains("script/paging.js"));
-		assertTrue(scripts.contains("script/js.hood.TopMenu.js"));
+		assertTrue(scripts.contains("script/lib.list-view.js"));
+		assertTrue(scripts.contains("script/lib.paging.js"));
+		assertTrue(scripts.contains("script/script.js.hood.TopMenu.js"));
 
 		EList anchors = doc.findByTag("a");
 		assertThat(anchors.size(), equalTo(8));
@@ -285,10 +286,10 @@ public class BuilderTest {
 		assertThat(images.size(), equalTo(8));
 
 		index = 0;
-		assertImage("media/template-page_logo.jpg", images, index++);
-		assertImage("media/template-page-icon_logo.png", images, index++);
-		assertImage("media/template-page_page.jpg", images, index++);
-		assertImage("media/template-page_icon-logo.png", images, index++);
+		assertImage("media/res-template-page_logo.jpg", images, index++);
+		assertImage("media/res-template-page-icon_logo.png", images, index++);
+		assertImage("media/res-template-page_page.jpg", images, index++);
+		assertImage("media/res-template-page_icon-logo.png", images, index++);
 		assertImage("media/lib-paging_prev-page.png", images, index++);
 		assertImage("media/lib-paging_next-page.png", images, index++);
 		assertImage("media/lib-paging_prev-page.png", images, index++);
@@ -319,16 +320,16 @@ public class BuilderTest {
 		reference = new Reference(source, ResourceType.IMAGE, "logo");
 
 		source = new FilePath(project, "res/template/page/page.htm");
-		assertValue("media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("media/res-template-page_logo.jpg", builder, "de", reference, source);
 
 		source = new FilePath(project, "res/template/page/page.css");
-		assertValue("../media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("../media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("../media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("../media/res-template-page_logo.jpg", builder, "de", reference, source);
 
 		source = new FilePath(project, "res/template/page/page.js");
-		assertValue("/project/en/media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("/project/de/media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("/project/en/media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("/project/de/media/res-template-page_logo.jpg", builder, "de", reference, source);
 	}
 
 	@Test
@@ -355,16 +356,16 @@ public class BuilderTest {
 		reference = new Reference(source, ResourceType.IMAGE, "logo");
 
 		source = new FilePath(project, "res/template/page/page.htm");
-		assertValue("media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("media/res-template-page_logo.jpg", builder, "de", reference, source);
 
 		source = new FilePath(project, "res/template/page/page.css");
-		assertValue("../media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("../media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("../media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("../media/res-template-page_logo.jpg", builder, "de", reference, source);
 
 		source = new FilePath(project, "res/template/page/page.js");
-		assertValue("/root-project/en/media/template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("/root-project/de/media/template-page_logo.jpg", builder, "de", reference, source);
+		assertValue("/root-project/en/media/res-template-page_logo.jpg", builder, "en", reference, source);
+		assertValue("/root-project/de/media/res-template-page_logo.jpg", builder, "de", reference, source);
 	}
 
 	private static void assertValue(String expected, Builder builder, String languageTag, IReference reference, FilePath source) throws IOException {
@@ -380,7 +381,7 @@ public class BuilderTest {
 	public void strings() throws IOException {
 		Builder builder = builder("strings");
 		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
@@ -433,17 +434,17 @@ public class BuilderTest {
 		assertText("Acesta este <EM>descrierea</EM> <STRONG>widget</STRONG>.", doc, "//SECTION/SECTION/P");
 		assertText("Acesta este <EM>descrierea</EM> <STRONG>componentului din librărie</STRONG>.", doc, "//SECTION/SECTION/SECTION/P");
 
-		String script = Strings.load(new File(buildDir, "de/script/js.wood.Compo.js"));
+		String script = Strings.load(new File(buildDir, "de/script/script.js.wood.Compo.js"));
 		assertTrue(script.contains("this.setCaption('Hello');"));
 		assertTrue(script.contains("this.setName('Komponentennamen');"));
 		assertTrue(script.contains("this.setDescription('Dies ist <strong>Skript</strong> <em>Beschreibung</em>.');"));
 
-		script = Strings.load(new File(buildDir, "en/script/js.wood.Compo.js"));
+		script = Strings.load(new File(buildDir, "en/script/script.js.wood.Compo.js"));
 		assertTrue(script.contains("this.setCaption('Hello');"));
 		assertTrue(script.contains("this.setName('Component Name');"));
 		assertTrue(script.contains("this.setDescription('This is <strong>script</strong> <em>description</em>.');"));
 
-		script = Strings.load(new File(buildDir, "ro/script/js.wood.Compo.js"));
+		script = Strings.load(new File(buildDir, "ro/script/script.js.wood.Compo.js"));
 		assertTrue(script.contains("this.setCaption('Hello');"));
 		assertTrue(script.contains("this.setName('Nume component');"));
 		assertTrue(script.contains("this.setDescription('Acesta este <em>descrierea</em> <strong>scriptului</strong>.');"));
@@ -465,20 +466,20 @@ public class BuilderTest {
 	public void styles() throws Exception {
 		Builder builder = builder("styles");
 		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
 		File pageFile = new File(buildDir, "index.htm");
 		assertTrue(pageFile.exists());
 
-		assertTrue(new File(buildDir, "style/theme-reset.css").exists());
-		assertTrue(new File(buildDir, "style/theme-fx.css").exists());
-		assertTrue(new File(buildDir, "style/compo.css").exists());
-		assertTrue(new File(buildDir, "style/page.css").exists());
-		assertTrue(new File(buildDir, "style/index.css").exists());
-		assertTrue(new File(buildDir, "style/theme-form.css").exists());
-		assertTrue(new File(buildDir, "style/theme-styles.css").exists());
+		assertTrue(new File(buildDir, "style/res-theme_reset.css").exists());
+		assertTrue(new File(buildDir, "style/res-theme_fx.css").exists());
+		assertTrue(new File(buildDir, "style/res_compo.css").exists());
+		assertTrue(new File(buildDir, "style/res_page.css").exists());
+		assertTrue(new File(buildDir, "style/res_index.css").exists());
+		assertTrue(new File(buildDir, "style/res-theme_form.css").exists());
+		assertTrue(new File(buildDir, "style/res-theme_styles.css").exists());
 
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
@@ -486,52 +487,34 @@ public class BuilderTest {
 		assertThat(styles.size(), equalTo(7));
 
 		int index = 0;
-		assertStyle("style/theme-reset.css", styles, index++);
-		assertStyle("style/theme-fx.css", styles, index++);
+		assertStyle("style/res-theme_reset.css", styles, index++);
+		assertStyle("style/res-theme_fx.css", styles, index++);
 
 		// site styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='style/theme-form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='style/theme-styles.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='style/res-theme_form.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='style/res-theme_styles.css']"));
 
 		index += 2; // skip form.css and fx.css
-		assertStyle("style/compo.css", styles, index++);
-		assertStyle("style/page.css", styles, index++);
-		assertStyle("style/index.css", styles, index++);
-	}
-
-	@Test
-	public void styleMixin() throws IOException {
-		Builder builder = builder("styles");
-		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
-
-		builder.build();
-
-		File styleFile = new File(buildDir, "style/page.css");
-		assertTrue(styleFile.exists());
-
-		String style = Strings.load(styleFile);
-		assertTrue(style.contains("background-color: #001122;"));
-		assertTrue(style.contains("color: white;"));
-		assertTrue(style.contains("width: 50%;"));
-		assertTrue(style.contains("height: 80px;"));
+		assertStyle("style/res_compo.css", styles, index++);
+		assertStyle("style/res_page.css", styles, index++);
+		assertStyle("style/res_index.css", styles, index++);
 	}
 
 	@Test
 	public void scripts() throws IOException {
 		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
 		File pageFile = new File(buildDir, "index.htm");
 		assertTrue(pageFile.exists());
-		assertTrue(new File(buildDir, "style/theme-reset.css").exists());
-		assertTrue(new File(buildDir, "script/js-lib.js").exists());
-		assertTrue(new File(buildDir, "script/js.format.RichText.js").exists());
-		assertTrue(new File(buildDir, "script/js.widget.Description.js").exists());
-		assertTrue(new File(buildDir, "script/js.wood.IndexPage.js").exists());
+		assertTrue(new File(buildDir, "style/res-theme_reset.css").exists());
+		assertTrue(new File(buildDir, "script/lib.js-lib.js").exists());
+		assertTrue(new File(buildDir, "script/script.js.format.RichText.js").exists());
+		assertTrue(new File(buildDir, "script/script.js.widget.Description.js").exists());
+		assertTrue(new File(buildDir, "script/script.js.wood.IndexPage.js").exists());
 
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
@@ -539,13 +522,13 @@ public class BuilderTest {
 		assertThat(scripts.size(), equalTo(5));
 
 		int index = 0;
-		assertScript("script/js-lib.js", scripts, index++);
-		assertScript("script/gen.js.controller.MainController.js", scripts, index++);
-		assertScript("script/js.wood.IndexPage.js", scripts, index++);
-		assertScript("script/js.format.RichText.js", scripts, index++);
-		assertScript("script/js.widget.Description.js", scripts, index++);
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/lib.js-lib.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/gen.js.controller.MainController.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/script.js.wood.IndexPage.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/script.js.format.RichText.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/script.js.widget.Description.js"));
 
-		String script = Strings.load(new File(buildDir, "script/js.widget.Description.js"));
+		String script = Strings.load(new File(buildDir, "script/script.js.widget.Description.js"));
 		assertTrue(script.contains("this.setCaption(\"caption\");"));
 		assertTrue(script.contains("this.setText(\"Description.\");"));
 	}
@@ -554,16 +537,16 @@ public class BuilderTest {
 	public void thirdPartyScripts() throws Exception {
 		Builder builder = builder("scripts");
 		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
 		File pageFile = new File(buildDir, "geo-map.htm");
 		assertTrue(pageFile.exists());
-		assertTrue(new File(buildDir, "style/theme-reset.css").exists());
-		assertTrue(new File(buildDir, "script/js-lib.js").exists());
-		assertTrue(new File(buildDir, "script/js.wood.GeoMap.js").exists());
-		assertTrue(new File(buildDir, "script/google-maps-api.js").exists());
+		assertTrue(new File(buildDir, "style/res-theme_reset.css").exists());
+		assertTrue(new File(buildDir, "script/lib.js-lib.js").exists());
+		assertTrue(new File(buildDir, "script/script.js.wood.GeoMap.js").exists());
+		assertTrue(new File(buildDir, "script/lib.google-maps-api.js").exists());
 
 		DocumentBuilder documentBuilder = new DocumentBuilderImpl();
 		Document doc = documentBuilder.loadHTML(pageFile);
@@ -572,30 +555,30 @@ public class BuilderTest {
 		assertThat(scripts.size(), equalTo(4));
 
 		int index = 0;
-		assertScript("http://maps.google.com/maps/api/js?sensor=false", scripts, index++);
-		assertScript("script/js-lib.js", scripts, index++);
-		assertScript("script/js.wood.GeoMap.js", scripts, index++);
-		assertScript("script/google-maps-api.js", scripts, index++);
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("http://maps.google.com/maps/api/js?sensor=false"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/lib.js-lib.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/script.js.wood.GeoMap.js"));
+		assertThat(scripts.item(index++).getAttr("src"), equalTo("script/lib.google-maps-api.js"));
 	}
 
 	@Test
 	public void images() throws IOException {
 		Builder builder = builder("images");
 		BuilderProject project = builder.getProject();
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 
 		builder.build();
 
-		String[] layoutImages = new String[] { "asset_logo.png", //
-				"compo_logo.png", //
+		String[] layoutImages = new String[] { "res-asset_logo.png", //
+				"res-compo_logo.png", //
 				"lib-compo_logo.jpg", //
-				"widget_next-page.png", //
-				"widget_prev-page.png" };
-		String[] styleImages = new String[] { "compo_background.jpg", //
+				"res-widget_next-page.png", //
+				"res-widget_prev-page.png" };
+		String[] styleImages = new String[] { "res-compo_background.jpg", //
 				"lib-compo_background.jpg", //
-				"template_background.jpg", //
-				"asset_background.jpg", //
-				"widget_background.jpg" };
+				"res-template_background.jpg", //
+				"res-asset_background.jpg", //
+				"res-widget_background.jpg" };
 
 		for (String image : layoutImages) {
 			assertTrue("Media file not found: " + image, new File(buildDir, "media/" + image).exists());
@@ -608,16 +591,12 @@ public class BuilderTest {
 		for (String image : layoutImages) {
 			assertTrue(layout.contains(image));
 		}
-
-		assertStyleImage("../media/compo_background.jpg", buildDir, "compo.css");
-		assertStyleImage("../media/lib-compo_background.jpg", buildDir, "lib-compo.css");
-		assertStyleImage("../media/template_background.jpg", buildDir, "template.css");
-		assertStyleImage("../media/asset_background.jpg", buildDir, "theme-style.css");
-		assertStyleImage("../media/widget_background.jpg", buildDir, "widget.css");
-	}
-
-	private static void assertStyleImage(String expected, File buildDir, String styleFile) throws IOException {
-		assertTrue(Strings.load(new File(buildDir, "style/" + styleFile)).contains(expected));
+		
+		assertThat(Strings.load(new File(buildDir, "style/res_compo.css")), containsString("../media/res-compo_background.jpg"));
+		assertThat(Strings.load(new File(buildDir, "style/lib_compo.css")), containsString("../media/lib-compo_background.jpg"));
+		assertThat(Strings.load(new File(buildDir, "style/res_template.css")), containsString("../media/res-template_background.jpg"));
+		assertThat(Strings.load(new File(buildDir, "style/res-theme_style.css")), containsString("../media/res-asset_background.jpg"));
+		assertThat(Strings.load(new File(buildDir, "style/res_widget.css")), containsString("../media/res-widget_background.jpg"));
 	}
 
 	@Test
@@ -627,8 +606,8 @@ public class BuilderTest {
 		resetProjectLocales(project);
 		builder.build();
 
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
-		File style = new File(buildDir, "style/template-page.css");
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
+		File style = new File(buildDir, "style/res-template_page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
@@ -640,8 +619,8 @@ public class BuilderTest {
 		resetProjectLocales(project);
 		builder.build();
 
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
-		File style = new File(buildDir, "style/template-page.css");
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
+		File style = new File(buildDir, "style/res-template_page.css");
 		assertTrue(style.exists());
 		assertTrue(Strings.load(style).contains("min-height: 82.0px;"));
 	}
@@ -654,20 +633,20 @@ public class BuilderTest {
 
 		builder.buildPage(new CompoPath(project, "res/page/index"));
 
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");
-		assertFile(buildDir, "media/template-page_logo-001.jpg");
-		assertFile(buildDir, "script/js-lib-001.js");
-		assertFile(buildDir, "script/hc.page.Index-001.js");
-		assertFile(buildDir, "style/theme-reset-001.css");
-		assertFile(buildDir, "style/page-index-001.css");
+		assertFile(buildDir, "media/res-template-page_logo-001.jpg");
+		assertFile(buildDir, "script/lib.js-lib-001.js");
+		assertFile(buildDir, "script/script.hc.page.Index-001.js");
+		assertFile(buildDir, "style/res-theme_reset-001.css");
+		assertFile(buildDir, "style/res-page_index-001.css");
 
 		String page = Strings.load(new File(buildDir, "index-001.htm"));
-		assertTrue(page.contains("media/template-page_logo-001.jpg"));
-		assertTrue(page.contains("script/js-lib-001.js"));
-		assertTrue(page.contains("script/hc.page.Index-001.js"));
-		assertTrue(page.contains("style/theme-reset-001.css"));
-		assertTrue(page.contains("style/page-index-001.css"));
+		assertTrue(page.contains("media/res-template-page_logo-001.jpg"));
+		assertTrue(page.contains("script/lib.js-lib-001.js"));
+		assertTrue(page.contains("script/script.hc.page.Index-001.js"));
+		assertTrue(page.contains("style/res-theme_reset-001.css"));
+		assertTrue(page.contains("style/res-page_index-001.css"));
 	}
 
 	@Test
@@ -678,20 +657,20 @@ public class BuilderTest {
 
 		builder.buildPage(new CompoPath(project, "res/page/index"));
 
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		assertFile(buildDir, "index-001.htm");
-		assertFile(buildDir, "media/template-page_logo-001.jpg");
-		assertFile(buildDir, "script/js-lib-001.js");
-		assertFile(buildDir, "script/hc.page.Index-001.js");
-		assertFile(buildDir, "style/theme-reset-001.css");
-		assertFile(buildDir, "style/page-index-001.css");
+		assertFile(buildDir, "media/res-template-page_logo-001.jpg");
+		assertFile(buildDir, "script/lib.js-lib-001.js");
+		assertFile(buildDir, "script/script.hc.page.Index-001.js");
+		assertFile(buildDir, "style/res-theme_reset-001.css");
+		assertFile(buildDir, "style/res-page_index-001.css");
 
 		String page = Strings.load(new File(buildDir, "index-001.htm"));
-		assertTrue(page.contains("media/template-page_logo-001.jpg"));
-		assertTrue(page.contains("script/js-lib-001.js"));
-		assertTrue(page.contains("script/hc.page.Index-001.js"));
-		assertTrue(page.contains("style/theme-reset-001.css"));
-		assertTrue(page.contains("style/page-index-001.css"));
+		assertTrue(page.contains("media/res-template-page_logo-001.jpg"));
+		assertTrue(page.contains("script/lib.js-lib-001.js"));
+		assertTrue(page.contains("script/script.hc.page.Index-001.js"));
+		assertTrue(page.contains("style/res-theme_reset-001.css"));
+		assertTrue(page.contains("style/res-page_index-001.css"));
 	}
 
 	private static void assertFile(File buildDir, String path) {
@@ -710,20 +689,17 @@ public class BuilderTest {
 		assertThat(images.item(index).getAttr("src"), equalTo(expected));
 	}
 
-	private static void assertScript(String expected, EList scripts, int index) {
-		assertThat(scripts.item(index).getAttr("src"), equalTo(expected));
-	}
-
 	private static void resetProjectLocales(Project project) {
 		List<Locale> locales = new ArrayList<Locale>();
 		locales.add(new Locale("en"));
 		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
 	}
 
-	private static BuilderProject project(String projectDir) {
+	private static BuilderProject project(String projectName) {
 		try {
-			BuilderProject project = new BuilderProject(new File("src/test/resources/" + projectDir));
-			File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+			File projectRoot = new File("src/test/resources/" + projectName);
+			File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+			BuilderProject project = new BuilderProject(projectRoot, buildDir);
 			if (buildDir.exists()) {
 				Files.removeFilesHierarchy(buildDir);
 			}

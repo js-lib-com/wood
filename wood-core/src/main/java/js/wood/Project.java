@@ -71,14 +71,16 @@ public class Project {
 	 */
 	private final String description;
 
-	/** Project directory. All project file are included here, no external references allowed. */
-	protected final File projectDir;
+	/** Project root directory. All project file are included here, no external references allowed. */
+	protected final File projectRoot;
 
 	/**
 	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
 	 * project directory root.
 	 */
 	protected final ProjectDescriptor descriptor;
+
+	protected final DirPath projectDir;
 
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
@@ -93,7 +95,7 @@ public class Project {
 	protected final DirPath themeDir;
 
 	/** List of paths excluded from build process. Configurable per project, see {@link ProjectDescriptor#getExcludes()}. */
-	private final List<Path> excludes;
+	protected final List<Path> excludes;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
@@ -107,16 +109,17 @@ public class Project {
 	 * @param projectDir path to existing project root directory.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
-	public Project(File projectDir) throws IllegalArgumentException {
-		Params.isDirectory(projectDir, "Project directory");
-		this.projectDir = projectDir;
-		this.descriptor = new ProjectDescriptor(new File(this.projectDir, CT.PROJECT_CONFIG));
+	public Project(File projectRoot) throws IllegalArgumentException {
+		Params.isDirectory(projectRoot, "Project directory");
+		this.projectRoot = projectRoot;
+		this.projectDir = new DirPath(this);
+		this.descriptor = new ProjectDescriptor(new File(this.projectRoot, CT.PROJECT_CONFIG));
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> Path.create(this, exclude.trim())).collect(Collectors.toList());
 
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
 
-		this.name = descriptor.getName(this.projectDir.getName());
+		this.name = descriptor.getName(this.projectRoot.getName());
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.name));
 		this.description = descriptor.getDescription(this.display);
 
@@ -175,9 +178,13 @@ public class Project {
 	 * server side code base, e.g. Java files. Files that are not recognized by WOOD tools are silently ignored.
 	 * 
 	 * @return project root directory.
-	 * @see #projectDir
+	 * @see #projectRoot
 	 */
-	public File getProjectDir() {
+	public File getProjectRoot() {
+		return projectRoot;
+	}
+
+	public DirPath getProjectDir() {
 		return projectDir;
 	}
 

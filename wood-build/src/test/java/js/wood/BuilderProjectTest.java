@@ -2,14 +2,12 @@ package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,9 +15,6 @@ import org.junit.Test;
 import js.util.Classes;
 import js.util.Files;
 import js.wood.impl.ComponentDescriptor;
-import js.wood.impl.FilesHandler;
-import js.wood.impl.Reference;
-import js.wood.impl.ResourceType;
 import js.wood.impl.Variables;
 
 public class BuilderProjectTest implements IReferenceHandler {
@@ -27,70 +22,19 @@ public class BuilderProjectTest implements IReferenceHandler {
 
 	@Before
 	public void beforeTest() throws IOException {
-		project = new BuilderProject(new File("src/test/resources/project"));
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File projectRoot = new File("src/test/resources/project");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
 	}
 
 	@Test
-	public void variablesScanner() throws Exception {
-		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$VariablesScanner", project);
-
-		for (String file : new String[] { "res/page/index/strings.xml", //
-				"res/page/index/strings_de.xml", //
-				"res/page/index/index.css", //
-				"res/asset/colors.xml", //
-				"res/asset/favicon.ico" }) {
-			FilePath filePath = filePath(file);
-			handler.onDirectory(filePath.getParentDirPath());
-			handler.onFile(filePath);
-		}
-
-		Map<DirPath, Variables> projectVariables = project.getVariables();
-		assertFalse(projectVariables.isEmpty());
-
-		assertThat(projectVariables.get(dirPath("res/asset")), notNullValue());
-		assertThat(projectVariables.get(dirPath("res/theme")), notNullValue());
-
-		Variables dirVariables = projectVariables.get(dirPath("res/page/index"));
-		assertThat(dirVariables, notNullValue());
-
-		FilePath source = filePath("res/page/index/index.htm");
-		assertThat(variable(dirVariables, source, "en", ResourceType.STRING, "title"), equalTo("Index Page"));
-		assertThat(variable(dirVariables, source, "de", ResourceType.STRING, "title"), equalTo("Indexseite"));
-		// if a locale has not a variable uses default locale, in this case 'en'
-		assertThat(variable(dirVariables, source, "jp", ResourceType.STRING, "title"), equalTo("Index Page"));
-		assertThat(variable(dirVariables, source, "en", ResourceType.COLOR, "page-header-bg"), equalTo("#000000"));
-	}
-
-	private String variable(Variables variables, FilePath source, String language, ResourceType type, String name) {
-		return variables.get(new Locale(language), new Reference(source, type, name), source, this);
-	}
-
-	@Test
-	public void emptyVariablesScanner() throws Exception {
-		FilesHandler handler = Classes.newInstance("js.wood.BuilderProject$VariablesScanner", project);
-
-		DirPath dir = dirPath("res/template/sidebar");
-		handler.onDirectory(dir);
-
-		Map<DirPath, Variables> projectVariables = project.getVariables();
-		assertFalse(projectVariables.isEmpty());
-
-		Variables dirVariables = projectVariables.get(dir);
-		assertThat(dirVariables, notNullValue());
-	}
-
-	@Test
-	public void pagesDiscovery() throws IOException {
-	}
-
-	@Test
-	public void descriptorValues() {
-		project = new BuilderProject(new File("src/test/resources/scripts"));
-		project.scan();
+	public void descriptorValues() throws IOException {
+		File projectRoot = new File("src/test/resources/scripts");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		CompoPath compoPath = new CompoPath(project, "res/index");
 
 		final Variables variables = project.getVariables().get(compoPath);
@@ -106,8 +50,10 @@ public class BuilderProjectTest implements IReferenceHandler {
 	}
 
 	@Test
-	public void isExcluded() {
-		project = new BuilderProject(new File("src/test/resources/project"));
+	public void isExcluded() throws IOException {
+		File projectRoot = new File("src/test/resources/project");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		assertTrue(project.isExcluded(new CompoPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
@@ -115,8 +61,10 @@ public class BuilderProjectTest implements IReferenceHandler {
 	}
 
 	@Test
-	public void isExcluded_RootContext() {
-		project = new BuilderProject(new File("src/test/resources/root-project"));
+	public void isExcluded_RootContext() throws IOException {
+		File projectRoot = new File("src/test/resources/root-project");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		assertTrue(project.isExcluded(new CompoPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new DirPath(project, "res/page/about")));
 		assertTrue(project.isExcluded(new FilePath(project, "res/page/about/about.htm")));
@@ -134,13 +82,5 @@ public class BuilderProjectTest implements IReferenceHandler {
 			}
 		}
 		return variables.get(null, reference, sourcePath, this);
-	}
-
-	private DirPath dirPath(String path) {
-		return new DirPath(project, path);
-	}
-
-	private FilePath filePath(String path) {
-		return new FilePath(project, path);
 	}
 }

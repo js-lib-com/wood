@@ -27,7 +27,6 @@ import js.rmi.BusinessException;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
-import js.wood.impl.Variables;
 
 /**
  * Preview servlet allows access from browser to project components and related files. This allows to use browser for components
@@ -84,17 +83,17 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	/** Servlet context init parameter for project directory. */
 	private static final String PROJECT_DIR_PARAM = "PROJECT_DIR";
 
-	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
-	private PreviewProject project;
-
 	/**
 	 * Preview layout is a special layout used for component unit test. It is returned instead of component; preview layout uses
 	 * component layout as widget.
 	 */
 	private static final String LAYOUT_PREVIEW = "preview.htm";
 
+	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
+	private PreviewProject project;
+
 	/** Variables cache initialized before every component preview processing. */
-	private static VariablesCache variablesCache = new VariablesCache();
+	private VariablesCache variables;
 
 	/**
 	 * Servlet instance initialization. This hook is invoked by Servlet container when first create preview Servlet instance.
@@ -109,6 +108,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		super.init(config);
 		ServletContext context = config.getServletContext();
 		project = new PreviewProject(new File(context.getInitParameter(PROJECT_DIR_PARAM)));
+		variables = new VariablesCache(project);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			}
 
 			// update variables cache every time a component is requested
-			variablesCache.update(project);
+			variables.update();
 
 			// create component with support for preview script
 			Component component = new Component(layoutPath, this);
@@ -229,11 +229,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	public String onResourceReference(IReference reference, FilePath source) {
 		Locale previewLocale = new Locale("en");
 		if (reference.isVariable()) {
-			String value = variablesCache.getVariables(project, source).get(previewLocale, reference, source, this);
-			if (value == null) {
-				value = reference.toString();
-			}
-			return value;
+			String value = variables.get(previewLocale, reference, source, this);
+			return value != null ? value : reference.toString();
 		}
 
 		// discover media file and returns its absolute URL path
@@ -271,46 +268,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		httpResponse.setContentLength(bytes.length);
 		httpResponse.getOutputStream().write(bytes);
 		httpResponse.getOutputStream().flush();
-	}
-
-	/**
-	 * Variable caches used to speed up preview process. Cache life span last for a component preview session.
-	 * 
-	 * @author Iulian Rotaru
-	 */
-	private static class VariablesCache {
-		/** Components variables. */
-		private Map<Path, Variables> compoVariables = new HashMap<>();
-
-		/** Project asset variables. */
-		private Variables assetVariables;
-
-		/**
-		 * Initialize variables cache by cleaning component variables hash and rescanning assets and site styles directories.
-		 * 
-		 * @param project parent project.
-		 */
-		public synchronized void update(PreviewProject project) {
-			compoVariables.clear();
-			assetVariables = project.getVariables(project.getAssetsDir());
-		}
-
-		/**
-		 * Return cached component variables. If variables are not already on hash create new instance and store before return
-		 * it. Component to return variables for is identified by given source file.
-		 * 
-		 * @param sourcePath component source file.
-		 * @return component variables.
-		 */
-		public synchronized Variables getVariables(PreviewProject project, FilePath sourcePath) {
-			Variables variables = compoVariables.get(sourcePath.getParentDirPath());
-			if (variables == null) {
-				variables = project.getVariables(sourcePath.getParentDirPath());
-				variables.setAssetVariables(assetVariables);
-				compoVariables.put(sourcePath.getParentDirPath(), variables);
-			}
-			return variables;
-		}
 	}
 
 	private static boolean needForward(String requestPath) {
@@ -381,7 +338,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		// [ compos, dialogs, sixqs, site, controller, MainController, getCategoriesSelect.rmi]
 
 		// remove path parts that are directories into project resources
-		File resourcesPath = project.getProjectDir();
+		File resourcesPath = project.getProjectRoot();
 		for (;;) {
 			resourcesPath = new File(resourcesPath, pathParts.get(0));
 			if (!resourcesPath.isDirectory()) {

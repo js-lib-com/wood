@@ -1,7 +1,9 @@
 package js.wood.unit;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -44,7 +46,6 @@ public class VariablesTest implements IReferenceHandler {
 		assertThat(variable(variables, ResourceType.TEXT, "alert"), equalTo("This is <em>alert</em> message."));
 		assertThat(variable(variables, ResourceType.COLOR, "compo-header-bg"), equalTo("#000000"));
 		assertThat(variable(variables, ResourceType.DIMEN, "compo-height"), equalTo("80px"));
-		assertTrue(variable(variables, ResourceType.STYLE, "compo").contains("background-color: #80A0A0;"));
 	}
 
 	@Test
@@ -55,41 +56,6 @@ public class VariablesTest implements IReferenceHandler {
 		assertThat(variable(variables, ResourceType.TEXT, "alert"), equalTo("This is <em>alert</em> message."));
 		assertThat(variable(variables, ResourceType.COLOR, "page-header-link"), equalTo("#80A0A0"));
 		assertThat(variable(variables, ResourceType.DIMEN, "page-header-height"), equalTo("80px"));
-		assertTrue(variable(variables, ResourceType.STYLE, "dialog").contains("background-color: #000000;"));
-	}
-
-	@Test
-	public void incompleteConstructor() throws Throwable {
-		Variables variables = new Variables(dirPath("res/incomplete"));
-		variables.setAssetVariables(new Variables(dirPath("res/asset")));
-
-		assertThat(variable(variables, ResourceType.STRING, "logo-type"), equalTo("kids (a)cademy"));
-		assertThat(variable(variables, ResourceType.COLOR, "page-header-link"), equalTo("#80A0A0"));
-		assertThat(variable(variables, ResourceType.DIMEN, "page-header-height"), equalTo("80px"));
-		assertTrue(variable(variables, ResourceType.STYLE, "dialog").contains("background-color: #000000;"));
-	}
-
-	@Test
-	public void loadStyle() {
-		Variables variables = new Variables(dirPath("res/compo"));
-		variables.setAssetVariables(new Variables(dirPath("res/asset")));
-
-		String value = variable(variables, ResourceType.STYLE, "window");
-		assertTrue(value.contains("display: block;"));
-
-		value = variable(variables, ResourceType.STYLE, "dialog");
-		assertTrue(value.contains("display: block;"));
-		assertTrue(value.contains("background-color: #000000;"));
-		assertTrue(value.contains("color: #FFFFFF;"));
-
-		value = variable(variables, ResourceType.STYLE, "compo");
-
-		assertTrue(value.contains("display: block;"));
-		assertTrue(value.contains("background-color: #80A0A0;"));
-		assertTrue(value.contains("color: #FFFFFF;"));
-		assertTrue(value.contains("background-color: #000000;"));
-		assertTrue(value.contains("width: 50%;"));
-		assertTrue(value.contains("height: 80px;"));
 	}
 
 	@Test
@@ -111,10 +77,11 @@ public class VariablesTest implements IReferenceHandler {
 		assertThat(variable(variables, "ro", ResourceType.TEXT, "alert"), equalTo("Acesta este o <em>alertă</em>."));
 	}
 
-	@Test(expected = WoodException.class)
+	@Test
 	public void missingValue() {
 		Variables variables = new Variables(dirPath("res/compo"));
-		variable(variables, ResourceType.STRING, "fake-variable");
+		FilePath source = new FilePath(project, "res/compo/compo.htm");
+		assertThat(variables.get(new Locale("en"), new Reference(source, ResourceType.STRING, "fake-variable"), source, this), nullValue());
 	}
 
 	@Test(expected = WoodException.class)

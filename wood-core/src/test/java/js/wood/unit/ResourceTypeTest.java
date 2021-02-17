@@ -25,7 +25,6 @@ public class ResourceTypeTest {
 		assertTrue(ResourceType.TIP.isVariable());
 		assertTrue(ResourceType.COLOR.isVariable());
 		assertTrue(ResourceType.DIMEN.isVariable());
-		assertTrue(ResourceType.STYLE.isVariable());
 
 		assertFalse(ResourceType.IMAGE.isVariable());
 		assertFalse(ResourceType.AUDIO.isVariable());
@@ -40,7 +39,6 @@ public class ResourceTypeTest {
 		assertFalse(ResourceType.TEXT.isMedia());
 		assertFalse(ResourceType.COLOR.isMedia());
 		assertFalse(ResourceType.DIMEN.isMedia());
-		assertFalse(ResourceType.STYLE.isMedia());
 		assertFalse(ResourceType.UNKNOWN.isMedia());
 	}
 }

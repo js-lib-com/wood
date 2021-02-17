@@ -18,7 +18,6 @@ public class ReferenceTest {
 		assertThat(new Reference(ResourceType.TEXT, "text-value").toString(), equalTo("@text/text-value"));
 		assertThat(new Reference(ResourceType.COLOR, "color-value").toString(), equalTo("@color/color-value"));
 		assertThat(new Reference(ResourceType.DIMEN, "dimen-value").toString(), equalTo("@dimen/dimen-value"));
-		assertThat(new Reference(ResourceType.STYLE, "style-value").toString(), equalTo("@style/style-value"));
 		assertThat(new Reference(ResourceType.AUDIO, "audio-value").toString(), equalTo("@audio/audio-value"));
 		assertThat(new Reference(ResourceType.IMAGE, "image-value").toString(), equalTo("@image/image-value"));
 		assertThat(new Reference(ResourceType.IMAGE, "ext/java").toString(), equalTo("@image/ext/java"));
@@ -32,7 +31,7 @@ public class ReferenceTest {
 		assertThat(new Reference("@text/text-value").toString(), equalTo("@text/text-value"));
 		assertThat(new Reference("@color/color-value").toString(), equalTo("@color/color-value"));
 		assertThat(new Reference("@dimen/dimen-value").toString(), equalTo("@dimen/dimen-value"));
-		assertThat(new Reference("@style/style-value").toString(), equalTo("@style/style-value"));
+		assertThat(new Reference("@style/style-value").toString(), equalTo("@unknown/style-value"));
 		assertThat(new Reference("@audio/audio-value").toString(), equalTo("@audio/audio-value"));
 		assertThat(new Reference("@image/image-value").toString(), equalTo("@image/image-value"));
 		assertThat(new Reference("@video/video-value").toString(), equalTo("@video/video-value"));

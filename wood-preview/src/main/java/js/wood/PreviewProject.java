@@ -2,8 +2,6 @@ package js.wood;
 
 import java.io.File;
 
-import js.wood.impl.Variables;
-
 public class PreviewProject extends Project {
 	private final String previewName;
 
@@ -21,10 +19,6 @@ public class PreviewProject extends Project {
 	 */
 	public String getPreviewName() {
 		return previewName;
-	}
-
-	public Variables getVariables(DirPath dir) {
-		return new Variables(dir);
 	}
 
 	/**

@@ -228,9 +228,9 @@ public class FilePathTest {
 		assertTrue(FilePath.accept("lib/js-lib.js"));
 		assertTrue(FilePath.accept("res/compo/video-player/video-player.xml"));
 		assertTrue(FilePath.accept("lib/js-lib.1.2.3.js"));
-		assertFalse(FilePath.accept("template/page/page.htm"));
+		assertTrue(FilePath.accept("template/page/page.htm"));
 		assertFalse(FilePath.accept("res/template/page/page.htm#body"));
-		assertFalse(FilePath.accept("dir/template/page/page.htm"));
+		assertTrue(FilePath.accept("dir/template/page/page.htm"));
 		assertFalse(FilePath.accept("dir/template/page#body"));
 	}
 }

@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -105,8 +106,9 @@ class DefaultBuildFS extends BuildFS {
 	}
 
 	/**
-	 * Return qualified style file name separated by dash. Resources directory is not included. Also do not include last
-	 * directory if has the same name as style file.
+	 * Return qualified style file guaranteed to be unique in order to avoid name collision. Returned file name contains both
+	 * path directories and file name separated by underscore (_). Directory names are separated by dash (-). Do not include
+	 * last directory if has the same name as script file basename.
 	 * <p>
 	 * For your convenience here are couple examples.
 	 * <table border="1" style="border-collapse:collapse;">
@@ -115,13 +117,13 @@ class DefaultBuildFS extends BuildFS {
 	 * <td><b>Formatted Style Name
 	 * <tr>
 	 * <td>res/page/index/index.css
-	 * <td>page-index.css
+	 * <td>res-page_index.css
 	 * <tr>
 	 * <td>res/theme/style.css
-	 * <td>theme-style.css
+	 * <td>res-theme_style.css
 	 * <tr>
 	 * <td>lib/video-player/style.css
-	 * <td>lib-video-player-style.css
+	 * <td>lib-video-player_style.css
 	 * </table>
 	 * 
 	 * @param styleFile style file.
@@ -130,19 +132,16 @@ class DefaultBuildFS extends BuildFS {
 	@Override
 	protected String formatStyleName(FilePath styleFile) {
 		DirPath dir = styleFile.getParentDirPath();
-		List<String> segments = dir.getPathSegments();
-		if (dir.isLibrary()) {
-			segments.add(0, CT.LIBRARY_DIR);
+		List<String> segments = new ArrayList<String>(dir.getPathSegments());
+		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(styleFile.getBaseName())) {
+			segments.remove(segments.size() - 1);
 		}
-		if (segments.isEmpty() || !segments.get(segments.size() - 1).equals(styleFile.getBaseName())) {
-			segments.add(styleFile.getBaseName());
-		}
-		return Strings.join(segments, '-') + CT.DOT_STYLE_EXT;
+		// see #formatMediaName(FilePath) comment
+		return Strings.concat(Strings.join(segments, '-'), '_', styleFile.getName());
 	}
 
 	/**
-	 * Return qualified file name separated by dot. Source directory is not included, except for generated scripts. For library
-	 * scripts do not include last directory if has the same name as script file.
+	 * Return qualified file name separated by dot. Do not include last directory if has the same name as script file basename.
 	 * <p>
 	 * For your convenience here are couple examples.
 	 * <table border="1" style="border-collapse:collapse;">
@@ -151,19 +150,19 @@ class DefaultBuildFS extends BuildFS {
 	 * <td><b>Formatted Script Name
 	 * <tr>
 	 * <td>script/hc/page/Index.js
-	 * <td>hc.page.Index.js
+	 * <td>script.hc.page.Index.js
 	 * <tr>
 	 * <td>gen/js/wood/Controller.js
 	 * <td>gen.js.wood.Controller.js
 	 * <tr>
 	 * <td>lib/video-player/media.js
-	 * <td>video-player.media.js
+	 * <td>lib.video-player.media.js
 	 * <tr>
 	 * <td>lib/paging.js
-	 * <td>paging.js
+	 * <td>lib.paging.js
 	 * <tr>
 	 * <td>lib/js-lib/js-lib.js
-	 * <td>js-lib.js
+	 * <td>lib.js-lib.js
 	 * </table>
 	 * 
 	 * @param scriptFile script file.
@@ -172,22 +171,9 @@ class DefaultBuildFS extends BuildFS {
 	@Override
 	protected String formatScriptName(FilePath scriptFile) {
 		DirPath dir = scriptFile.getParentDirPath();
-
-		if (dir.isLibrary()) {
-			List<String> segments = dir.getPathSegments();
-			if (segments.isEmpty()) {
-				return scriptFile.getName();
-			}
-			if (dir.getName().equals(segments.get(segments.size() - 1))) {
-				segments.remove(segments.size() - 1);
-			}
-			segments.add(scriptFile.getName());
-			return Strings.join(segments, '.');
-		}
-
-		List<String> segments = dir.getPathSegments();
-		if (dir.isGenerated()) {
-			segments.add(0, "gen");
+		List<String> segments = new ArrayList<String>(dir.getPathSegments());
+		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(scriptFile.getBaseName())) {
+			segments.remove(segments.size() - 1);
 		}
 		segments.add(scriptFile.getName());
 		return Strings.join(segments, '.');
@@ -195,8 +181,7 @@ class DefaultBuildFS extends BuildFS {
 
 	/**
 	 * Return qualified media file guaranteed to be unique in order to avoid name collision. Returned file name contains both
-	 * path directories and file name separated by underscore (_). Directory names are separated by dash (-). Source directory
-	 * is not included, except for project library.
+	 * path directories and file name separated by underscore (_). Directory names are separated by dash (-).
 	 * <p>
 	 * For your convenience here are couple examples.
 	 * <table border="1" style="border-collapse:collapse;">
@@ -205,16 +190,16 @@ class DefaultBuildFS extends BuildFS {
 	 * <td><b>Formatted Media Name
 	 * <tr>
 	 * <td>res/page/index/background.png
-	 * <td>page-index_background.png
+	 * <td>res-page-index_background.png
 	 * <tr>
 	 * <td>res/theme/background.png
-	 * <td>theme_background.png
+	 * <td>res-theme_background.png
 	 * <tr>
 	 * <td>res/asset/background.png
-	 * <td>asset_background.png
+	 * <td>res-asset_background.png
 	 * <tr>
 	 * <td>script/js/wood/player/background.png
-	 * <td>js-wood-player_background.png
+	 * <td>script-js-wood-player_background.png
 	 * <tr>
 	 * <td>lib/paging/next-page.png
 	 * <td>lib-paging_next-page.png
@@ -227,12 +212,9 @@ class DefaultBuildFS extends BuildFS {
 	protected String formatMediaName(FilePath mediaFile) {
 		DirPath dir = mediaFile.getParentDirPath();
 		List<String> segments = dir.getPathSegments();
-		if (dir.isLibrary()) {
-			segments.add(0, CT.LIBRARY_DIR);
-		}
 		// uses underscore to separated directories path from file name in order to avoid name collision on sub-directories:
-		// template/page/icon-logo.png -> template-page_icon-logo.png
-		// template/page/icon/logo.png -> template-page-icon_logo.png
+		// res/template/page/icon-logo.png -> res/template-page_icon-logo.png
+		// res/template/page/icon/logo.png -> res/template-page-icon_logo.png
 		return Strings.concat(Strings.join(segments, '-'), '_', mediaFile.getName());
 	}
 }

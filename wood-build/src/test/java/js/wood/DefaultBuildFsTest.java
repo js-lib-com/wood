@@ -22,8 +22,9 @@ public class DefaultBuildFsTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new BuilderProject(new File("src/test/resources/project"));
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File projectRoot = new File("src/test/resources/project");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
@@ -66,49 +67,49 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void pageName() {
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 		assertThat(buildFS.formatPageName("index.htm"), equalTo("index.htm"));
 	}
 
 	@Test
 	public void styleName() {
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
-		assertThat(buildFS.formatStyleName(path("res/page/index/index.css")), equalTo("page-index.css"));
-		assertThat(buildFS.formatStyleName(path("res/theme/style.css")), equalTo("theme-style.css"));
-		assertThat(buildFS.formatStyleName(path("lib/video-player/style.css")), equalTo("lib-video-player-style.css"));
+		assertThat(buildFS.formatStyleName(path("res/page/index/index.css")), equalTo("res-page_index.css"));
+		assertThat(buildFS.formatStyleName(path("res/theme/style.css")), equalTo("res-theme_style.css"));
+		assertThat(buildFS.formatStyleName(path("lib/video-player/style.css")), equalTo("lib-video-player_style.css"));
 
 		// this condition is not really licit since style file cannot reside into source directory root
 		// but is allowed by file path syntax and need to ensure styleName cope with it
-		assertThat(buildFS.formatStyleName(path("res/style.css")), equalTo("style.css"));
-		assertThat(buildFS.formatStyleName(path("lib/style.css")), equalTo("lib-style.css"));
+		assertThat(buildFS.formatStyleName(path("res/style.css")), equalTo("res_style.css"));
+		assertThat(buildFS.formatStyleName(path("lib/style.css")), equalTo("lib_style.css"));
 	}
 
 	@Test
 	public void scriptName() {
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
-		assertThat(buildFS.formatScriptName(path("script/hc/page/Index.js")), equalTo("hc.page.Index.js"));
-		assertThat(buildFS.formatScriptName(path("lib/paging.js")), equalTo("paging.js"));
-		assertThat(buildFS.formatScriptName(path("lib/js-lib/js-lib.js")), equalTo("js-lib.js"));
+		assertThat(buildFS.formatScriptName(path("script/hc/page/Index.js")), equalTo("script.hc.page.Index.js"));
+		assertThat(buildFS.formatScriptName(path("lib/paging.js")), equalTo("lib.paging.js"));
+		assertThat(buildFS.formatScriptName(path("lib/js-lib/js-lib.js")), equalTo("lib.js-lib.js"));
 		assertThat(buildFS.formatScriptName(path("gen/js/wood/Controller.js")), equalTo("gen.js.wood.Controller.js"));
 	}
 
 	@Test
 	public void mediaName() {
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
-		assertThat(buildFS.formatMediaName(path("res/page/index/background.png")), equalTo("page-index_background.png"));
-		assertThat(buildFS.formatMediaName(path("res/page/index/index.png")), equalTo("page-index_index.png"));
-		assertThat(buildFS.formatMediaName(path("res/page/index/icon/logo.png")), equalTo("page-index-icon_logo.png"));
-		assertThat(buildFS.formatMediaName(path("res/page/index/icon-logo.png")), equalTo("page-index_icon-logo.png"));
-		assertThat(buildFS.formatMediaName(path("res/theme/background.png")), equalTo("theme_background.png"));
-		assertThat(buildFS.formatMediaName(path("res/asset/background.png")), equalTo("asset_background.png"));
-		assertThat(buildFS.formatMediaName(path("script/js/wood/player/background.png")), equalTo("js-wood-player_background.png"));
+		assertThat(buildFS.formatMediaName(path("res/page/index/background.png")), equalTo("res-page-index_background.png"));
+		assertThat(buildFS.formatMediaName(path("res/page/index/index.png")), equalTo("res-page-index_index.png"));
+		assertThat(buildFS.formatMediaName(path("res/page/index/icon/logo.png")), equalTo("res-page-index-icon_logo.png"));
+		assertThat(buildFS.formatMediaName(path("res/page/index/icon-logo.png")), equalTo("res-page-index_icon-logo.png"));
+		assertThat(buildFS.formatMediaName(path("res/theme/background.png")), equalTo("res-theme_background.png"));
+		assertThat(buildFS.formatMediaName(path("res/asset/background.png")), equalTo("res-asset_background.png"));
+		assertThat(buildFS.formatMediaName(path("script/js/wood/player/background.png")), equalTo("script-js-wood-player_background.png"));
 		assertThat(buildFS.formatMediaName(path("lib/paging/background.png")), equalTo("lib-paging_background.png"));
 	}
 

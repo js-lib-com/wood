@@ -46,6 +46,12 @@ public abstract class Path {
 	/** Wrapped Java file include project root. */
 	protected final File file;
 
+	protected Path(Project project) {
+		this.project = project;
+		this.value = null;
+		this.file = project.getProjectRoot();
+	}
+
 	/**
 	 * Create path instance, initialize value and wrapped file and compute instance hash code. Uses {@link #value} to compute
 	 * hash code.
@@ -59,7 +65,7 @@ public abstract class Path {
 		Params.notNullOrEmpty(value, "Path value");
 		this.project = project;
 		this.value = value;
-		this.file = new File(project.getProjectDir(), value);
+		this.file = new File(project.getProjectRoot(), value);
 	}
 
 	/**

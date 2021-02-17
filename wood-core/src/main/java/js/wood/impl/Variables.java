@@ -43,9 +43,6 @@ import js.wood.WoodException;
 public class Variables {
 	private Project project;
 
-	/** Optional asset variables used when this variables miss a value. */
-	private Variables assetVariables;
-
 	/**
 	 * Variable values mapped to languages. Resources without language variant are identified by null language. Null language
 	 * values are used when project is not multi-language. Also used when a value for a given language is missing.
@@ -93,14 +90,9 @@ public class Variables {
 		load(dirPath);
 	}
 
-	/**
-	 * Set asset variables used when this variables miss a value. It is caller responsibility to ensure given asset variables
-	 * are loaded from project asset directory.
-	 * 
-	 * @param assetVariables asset variables already initialized.
-	 */
-	public void setAssetVariables(Variables assetVariables) {
-		this.assetVariables = assetVariables;
+	public void reload(DirPath dirPath) {
+		localeValues.clear();
+		load(dirPath);
 	}
 
 	/**
@@ -157,22 +149,6 @@ public class Variables {
 	 * @throws WoodException if variable value not found.
 	 */
 	public String get(Locale locale, IReference reference, FilePath source, IReferenceHandler handler) throws WoodException {
-		String value = getValue(locale, reference, source, handler);
-
-		// 3. if still not found try to retrieve value form project global assets and theme variables, in this order
-		// anyway, do not execute this step if source file is from assets or site styles
-		if (value == null && assetVariables != null) {
-			value = assetVariables.getValue(locale, reference, source, handler);
-		}
-
-		// 4. if value not found throws exception with formatted message
-		if (value == null) {
-			throw new WoodException("Missing variables |%s| referenced from |%s|.", reference, source);
-		}
-		return value;
-	}
-
-	private String getValue(Locale locale, IReference reference, FilePath source, IReferenceHandler handler) {
 		String value = null;
 
 		// 1. attempt to get value from this variables instance, for specified language
@@ -370,9 +346,6 @@ public class Variables {
 			case TEXT:
 				return new TextValueBuilder();
 
-			case STYLE:
-				return new StyleValueBuilder();
-
 			default:
 				return new ValueBuilder();
 			}
@@ -409,111 +382,6 @@ public class Variables {
 			value.append("</");
 			value.append(name);
 			value.append('>');
-		}
-	}
-
-	/**
-	 * Value builder for {@link ResourceType#STYLE} variables. This builder convert style XML description into standard syntax
-	 * for CSS rules, see sample code below.
-	 * <p>
-	 * Here is a sample of CSS style properties description as present into <code>style</code> variables definition files. Style
-	 * property name is encoded as element tag name whereas style property value as element text. The name <code>compo</code> is
-	 * used by style reference, see <code>@style/comp</code> from next sample code.
-	 * 
-	 * <pre>
-	 * &lt;compo&gt;
-	 *    &lt;background-color&gt;black&lt;/background-color&gt;
-	 *    &lt;width&gt;50%&lt;/width&gt;
-	 * &lt;/compo&gt;
-	 * </pre>
-	 * 
-	 * <pre>
-	 * body {
-	 *    {@literal @}style/compo
-	 *    . . .
-	 * }
-	 * </pre>
-	 * <p>
-	 * This value builder convert above XML styles into CSS style properties that can text replace style reference. Note that,
-	 * though not depicted references are supported for style property values.
-	 * 
-	 * <pre>
-	 * background-color: black;
-	 * width: 50%;
-	 * </pre>
-	 * 
-	 * @author Iulian Rotaru
-	 *
-	 */
-	private static class StyleValueBuilder extends ValueBuilder {
-		/**
-		 * Enable CSS style property value processing. This flag is controlled by start and end of a new element into XML
-		 * stream. If not set to true {@link #addValue(char[], int, int)} is actually ignoring given buffer value.
-		 */
-		private boolean expectValue;
-
-		/**
-		 * Style value support <code>parent</code> parameter from which inherits properties. Parent is encoded in resulting CSS
-		 * style properties as reference to style, that is, <code>@style/parent</code>.
-		 * 
-		 * @param name parameter name, always <code>parent</code>,
-		 * @param value parameter value is in fact the parent name to be encoded into style reference.
-		 */
-		@Override
-		public void addParameter(String name, String value) {
-			if ("parent".equals(name)) {
-				this.value.append("@style/");
-				this.value.append(value);
-			}
-		}
-
-		/**
-		 * When new element is discovered into XML stream create a new CSS style property with element name. This method also
-		 * takes care to include colon separator.
-		 * <p>
-		 * After writing CSS style proper name this method enable property value processing setting {@link #expectValue} flag to
-		 * true.
-		 * 
-		 * @param name element name translated into CSS style property name.
-		 */
-		@Override
-		public void startTag(String name) {
-			if (value.length() > 0) {
-				// every new rule -less the first, starts on new line with tab
-				// first rule is expected to inherit new line and tab from insertion point on style file
-				value.append("\n\t");
-			}
-			value.append(name);
-			value.append(": ");
-			expectValue = true;
-		}
-
-		/**
-		 * Add CSS style property value is guaranteed to be called after {@link #startTag(String)}. It contains chunks of
-		 * element text content that is translated into CSS style property value. For a given CSS property value this method can
-		 * be called multiple times.
-		 * 
-		 * @param buffer XML stream characters buffer,
-		 * @param offset buffer offset,
-		 * @param length the number of characters to process.
-		 */
-		@Override
-		public void addValue(char[] buffer, int offset, int length) {
-			if (expectValue) {
-				super.addValue(buffer, offset, length);
-			}
-		}
-
-		/**
-		 * Uses XML stream element end to end CSS style property with semicolon. After concluding CSS style property this method
-		 * disable CSS style value processing by setting {@link #expectValue} flag to false.
-		 * 
-		 * @param name element name, ignored but requested by interface.
-		 */
-		@Override
-		public void endTag(String name) {
-			value.append(";");
-			expectValue = false;
 		}
 	}
 
@@ -622,8 +490,8 @@ public class Variables {
 				break;
 
 			default:
-				if (resourceType != ResourceType.TEXT && resourceType != ResourceType.STYLE) {
-					throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text and style variables support nested elements.", qName, sourceFile);
+				if (resourceType != ResourceType.TEXT) {
+					throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text variables support nested elements.", qName, sourceFile);
 				}
 				builder.startTag(qName);
 			}

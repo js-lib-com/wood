@@ -22,8 +22,9 @@ public class BuildFsTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new BuilderProject(new File("src/test/resources/project"));
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File projectRoot = new File("src/test/resources/project");
+		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
@@ -51,7 +52,7 @@ public class BuildFsTest {
 
 		buildFS.writePage(compo, page.getDocument());
 		assertTrue(exists("htm/index.htm"));
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		new File(buildDir, "htm/index.htm").delete();
 
 		// second attempt to write page in the same build FS instance is ignored
@@ -262,13 +263,13 @@ public class BuildFsTest {
 	}
 
 	private boolean exists(String fileName) {
-		File buildDir = new File(project.getProjectDir(), CT.DEF_BUILD_DIR);
+		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
 		return new File(buildDir, fileName).exists();
 	}
 
 	private static class TestBuildFS extends BuildFS {
 		public TestBuildFS(BuilderProject project, int buildNumber) {
-			super(new File(project.getProjectDir(), CT.DEF_BUILD_DIR), buildNumber);
+			super(new File(project.getProjectRoot(), CT.DEF_BUILD_DIR), buildNumber);
 		}
 
 		@Override
