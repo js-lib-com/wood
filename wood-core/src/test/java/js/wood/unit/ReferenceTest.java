@@ -13,7 +13,7 @@ import js.wood.impl.ResourceType;
 
 public class ReferenceTest {
 	@Test
-	public void valuesConstructor() {
+	public void constructor() {
 		assertThat(new Reference(ResourceType.STRING, "string-value").toString(), equalTo("@string/string-value"));
 		assertThat(new Reference(ResourceType.TEXT, "text-value").toString(), equalTo("@text/text-value"));
 		assertThat(new Reference(ResourceType.COLOR, "color-value").toString(), equalTo("@color/color-value"));
@@ -26,34 +26,43 @@ public class ReferenceTest {
 	}
 
 	@Test
-	public void referenceParserConstructor() {
-		assertThat(new Reference("@string/string-value").toString(), equalTo("@string/string-value"));
-		assertThat(new Reference("@text/text-value").toString(), equalTo("@text/text-value"));
-		assertThat(new Reference("@color/color-value").toString(), equalTo("@color/color-value"));
-		assertThat(new Reference("@dimen/dimen-value").toString(), equalTo("@dimen/dimen-value"));
-		assertThat(new Reference("@style/style-value").toString(), equalTo("@unknown/style-value"));
-		assertThat(new Reference("@audio/audio-value").toString(), equalTo("@audio/audio-value"));
-		assertThat(new Reference("@image/image-value").toString(), equalTo("@image/image-value"));
-		assertThat(new Reference("@video/video-value").toString(), equalTo("@video/video-value"));
-		assertThat(new Reference("@game/game-value").toString(), equalTo("@unknown/game-value"));
+	public void path() {
+		Reference reference = new Reference(ResourceType.IMAGE, "action/close-icon");
+		assertThat(reference.getPath(), equalTo("action"));
+		assertThat(reference.getName(), equalTo("close-icon"));
+	}
+
+	@Test(expected = WoodException.class)
+	public void path_OnVariable() {
+		new Reference(ResourceType.STRING, "action/description");
 	}
 
 	@Test
 	public void isValid() {
-		assertTrue(new Reference("@string/string-value").isValid());
-		assertFalse(new Reference("@game/game-value").isValid());
+		assertTrue(new Reference(ResourceType.STRING, "string-value").isValid());
+		assertFalse(new Reference(ResourceType.UNKNOWN, "game-value").isValid());
 	}
 
 	@Test
 	public void equals() {
-		Reference r1 = new Reference("@string/string-value");
-		Reference r2 = new Reference("@string/string-value");
+		Reference r1 = new Reference(ResourceType.STRING, "string-value");
+		Reference r2 = new Reference(ResourceType.STRING, "string-value");
 		assertFalse(r1 == r2);
 		assertThat(r1, equalTo(r2));
 	}
 
-	@Test(expected = WoodException.class)
-	public void badFormat() {
-		new Reference("res/exception/bad-type");
+	@Test(expected = IllegalArgumentException.class)
+	public void nullResourceType() {
+		new Reference(null, "value");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void nullResourceName() {
+		new Reference(ResourceType.STRING, null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void emptyResourceName() {
+		new Reference(ResourceType.STRING, "");
 	}
 }
