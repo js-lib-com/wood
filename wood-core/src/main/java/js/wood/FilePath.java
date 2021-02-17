@@ -260,7 +260,7 @@ public class FilePath extends Path {
 	 * @return style file.
 	 */
 	public FilePath cloneToStyle() {
-		return (FilePath) project.getFile(Files.replaceExtension(value(), CT.STYLE_EXT));
+		return new FilePath(project, Files.replaceExtension(value(), CT.STYLE_EXT));
 	}
 
 	/**

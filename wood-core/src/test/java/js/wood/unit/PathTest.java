@@ -2,9 +2,7 @@ package js.wood.unit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -15,8 +13,6 @@ import org.junit.Test;
 
 import js.util.Classes;
 import js.wood.CompoPath;
-import js.wood.DirPath;
-import js.wood.FilePath;
 import js.wood.Path;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -46,18 +42,12 @@ public class PathTest {
 		Path path = new TestPath(project, "http://server/path");
 		assertThat(path.value(), equalTo("http://server/path"));
 	}
-	
+
 	@Test
 	public void notExisting() {
 		// uses TestPath to create Path instance that is abstract
 		Path path = new TestPath(project, "res/compo/fake/fake.htm");
 		assertFalse(path.exists());
-	}
-	
-	@Test
-	public void excluded() {
-		assertTrue(new TestPath(project, "res/page/about/").isExcluded());
-		assertFalse(new TestPath(project, "res/compo/fake/fake.htm").isExcluded());
 	}
 
 	@Test
@@ -81,18 +71,6 @@ public class PathTest {
 	}
 
 	@Test
-	public void create() {
-		assertThat(Path.create(project, "res/template/page"), instanceOf(CompoPath.class));
-		assertThat(Path.create(project, "res/template/page/page.htm"), instanceOf(FilePath.class));
-		assertThat(Path.create(project, "res/template/page"), instanceOf(DirPath.class));
-	}
-
-	@Test
-	public void create_InvalidPath() {
-		assertThat(Path.create(project, "http://server/path"), nullValue());
-	}
-	
-	@Test
 	public void equals() {
 		Path path1 = new TestPath(project, "res/path1.htm");
 		Path path1bis = new TestPath(project, "res/path1.htm");
@@ -102,7 +80,7 @@ public class PathTest {
 		assertThat(path1.equals(path2), equalTo(false));
 		assertThat(path1.equals(null), equalTo(false));
 	}
-	
+
 	private static class TestPath extends Path {
 		public TestPath(Project project, String value) {
 			super(project, value);

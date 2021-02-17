@@ -112,15 +112,6 @@ public abstract class Path {
 	}
 
 	/**
-	 * Test if project entity designated by this path is excluded from build process.
-	 * 
-	 * @return true if this path is excluded from build.
-	 */
-	public boolean isExcluded() {
-		return project.isExcluded(this);
-	}
-
-	/**
 	 * Instance string representation returns the same value as {@link #value()}.
 	 * 
 	 * @return path string representation.
@@ -151,23 +142,5 @@ public abstract class Path {
 		} else if (!value.equals(other.value))
 			return false;
 		return true;
-	}
-
-	/**
-	 * Create path instance suitable to represent given path value. This factory method match path value against
-	 * {@link CompoPath} and {@link FilePath}, in this order. If none match returns null.
-	 * 
-	 * @param project project reference,
-	 * @param path path value.
-	 * @return instance for path value or null.
-	 */
-	public static Path create(Project project, String path) {
-		if (CompoPath.accept(path)) {
-			return new CompoPath(project, path);
-		}
-		if (FilePath.accept(path)) {
-			return project.getFile(path);
-		}
-		return null;
 	}
 }

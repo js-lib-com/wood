@@ -109,7 +109,7 @@ public class DirPath extends Path {
 	 * @return path of child file.
 	 */
 	public FilePath getFilePath(String fileName) {
-		return project.getFile(value + fileName);
+		return new FilePath(project, value + fileName);
 	}
 
 	/**
@@ -223,8 +223,8 @@ public class DirPath extends Path {
 					// if this directory path is the project root do not process files
 					continue;
 				}
-				
-				FilePath filePath = project.getFile(Files.getRelativePath(project.getProjectRoot(), file, true));
+
+				FilePath filePath = new FilePath(project, Files.getRelativePath(project.getProjectRoot(), file, true));
 				if (!handler.accept(filePath)) {
 					continue;
 				}
@@ -237,42 +237,32 @@ public class DirPath extends Path {
 		}
 	}
 
+	/**
+	 * Test if project entity designated by this path is excluded from build process.
+	 * 
+	 * @return true if this path is excluded from build.
+	 */
+	public boolean isExcluded() {
+		return project.getExcludes().contains(this);
+	}
+
+	/**
+	 * Test if this directory path is a HTML component.
+	 * 
+	 * @return true if this directory path is a HTML component.
+	 */
 	public boolean isComponent() {
 		File layoutFile = new File(file, getName() + CT.DOT_LAYOUT_EXT);
 		return layoutFile.exists();
 	}
 
+	/**
+	 * Test if this directory path is the project root.
+	 * 
+	 * @return true if this directory path is the project root.
+	 */
 	public boolean isRoot() {
 		return value == null;
-	}
-
-	/**
-	 * Test if this directory is the project assets directory. Project assets are global variables and media files.
-	 * 
-	 * @return true if this directory is project assets.
-	 */
-	public boolean isAssets() {
-		return CT.ASSETS_DIR.endsWith(getName());
-	}
-
-	/**
-	 * Test if this directory is UI resources theme directory. Theme directory stores style files for UI primitive elements and
-	 * theme variables.
-	 * 
-	 * @return true if this directory is theme directory.
-	 */
-	public boolean isTheme() {
-		return value.startsWith(CT.THEME_DIR);
-	}
-
-	/**
-	 * Directory string representation.
-	 * 
-	 * @return directory string representation.
-	 */
-	@Override
-	public String toString() {
-		return value;
 	}
 
 	/**
@@ -384,7 +374,7 @@ public class DirPath extends Path {
 		 */
 		@Override
 		public FilePath next() {
-			return project.getFile(Files.getRelativePath(project.getProjectRoot(), files[index], true));
+			return new FilePath(project, Files.getRelativePath(project.getProjectRoot(), files[index], true));
 		}
 
 		/**

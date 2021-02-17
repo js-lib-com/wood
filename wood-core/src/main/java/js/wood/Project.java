@@ -80,6 +80,8 @@ public class Project {
 	 */
 	protected final ProjectDescriptor descriptor;
 
+	protected final List<DirPath> excludes;
+
 	protected final DirPath projectDir;
 
 	/**
@@ -93,9 +95,6 @@ public class Project {
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
 	protected final DirPath themeDir;
-
-	/** List of paths excluded from build process. Configurable per project, see {@link ProjectDescriptor#getExcludes()}. */
-	protected final List<Path> excludes;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
@@ -114,7 +113,7 @@ public class Project {
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
 		this.descriptor = new ProjectDescriptor(new File(this.projectRoot, CT.PROJECT_CONFIG));
-		this.excludes = descriptor.getExcludes().stream().map(exclude -> Path.create(this, exclude.trim())).collect(Collectors.toList());
+		this.excludes = this.descriptor.getExcludes().stream().map(dirPath->new DirPath(this, dirPath)).collect(Collectors.toList());
 
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
@@ -233,29 +232,8 @@ public class Project {
 		return descriptor.getDefaultLocale();
 	}
 
-	/**
-	 * Test if path is excluded from building process. If <code>path</code> is a file test also if its parent is excluded.
-	 * 
-	 * @param path path, file or directory.
-	 * @return true if path is excluded from building process.
-	 * @see #excludes
-	 */
-	public boolean isExcluded(Path path) {
-		if (path instanceof FilePath) {
-			FilePath filePath = (FilePath) path;
-			return excludes.contains(filePath) || excludes.contains(filePath.getParentDirPath());
-		}
-		return excludes.contains(path);
-	}
-
-	/**
-	 * Create file path instance for a project file.
-	 * 
-	 * @param path path value.
-	 * @return file path instance.
-	 */
-	public FilePath getFile(String path) {
-		return new FilePath(this, path);
+	public List<DirPath> getExcludes() {
+		return excludes;
 	}
 
 	public String getAuthor() {

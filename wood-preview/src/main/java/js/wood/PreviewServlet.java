@@ -195,7 +195,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			return;
 		}
 
-		FilePath filePath = project.getFile(requestPath);
+		FilePath filePath = new FilePath(project, requestPath);
 		if (filePath.isStyle()) {
 			if (!filePath.hasVariants()) {
 				httpResponse.setContentType(TEXT_CSS);

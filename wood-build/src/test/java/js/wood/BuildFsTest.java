@@ -209,7 +209,7 @@ public class BuildFsTest {
 	@Test
 	public void writeScript() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
-		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
+		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
 		assertTrue(exists("js/Index.js"));
@@ -219,7 +219,7 @@ public class BuildFsTest {
 	public void writeScript_Locale() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 		buildFS.setLocale(new Locale("ro"));
-		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
+		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
 		assertTrue(exists("ro/js/Index.js"));
@@ -228,7 +228,7 @@ public class BuildFsTest {
 	@Test
 	public void writeScript_BuildNumber() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 4);
-		FilePath scriptFile = project.getFile("script/hc/page/Index.js");
+		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index-004.js"));
 		assertTrue(exists("js/Index-004.js"));

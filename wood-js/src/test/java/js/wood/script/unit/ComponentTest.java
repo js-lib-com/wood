@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,7 +45,8 @@ public class ComponentTest {
 	// Helper methods
 
 	protected static Project project(String projectDir) {
-		return new Project(new File("src/test/resources/" + projectDir));
+		//return new Project(new File("src/test/resources/" + projectDir));
+		return null;
 	}
 
 	private static Component getCompo(String path) {

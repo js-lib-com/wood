@@ -143,7 +143,7 @@ public class CompoPath extends DirPath {
 	 */
 	public FilePath getLayoutPath() {
 		if (inlineCompoPath) {
-			return project.getFile(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+			return new FilePath(project, value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
 		}
 		FilePath layoutPath = getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		return layoutPath;

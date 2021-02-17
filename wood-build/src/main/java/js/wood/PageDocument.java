@@ -246,7 +246,7 @@ class PageDocument {
 		Element scriptElement = doc.createElement("script");
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = handler.handle(project.getFile(src));
+				src = handler.handle(new FilePath(project, src));
 			}
 			scriptElement.setAttr("src", src);
 		}

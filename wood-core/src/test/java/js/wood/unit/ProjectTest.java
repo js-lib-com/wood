@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,7 +17,6 @@ import org.junit.Test;
 
 import js.util.Classes;
 import js.wood.CT;
-import js.wood.DirPath;
 import js.wood.FilePath;
 import js.wood.IReference;
 import js.wood.IReferenceHandler;
@@ -37,10 +35,6 @@ public class ProjectTest implements IReferenceHandler {
 
 	private FilePath filePath(String path) {
 		return new FilePath(project, path);
-	}
-
-	private DirPath dirPath(String path) {
-		return new DirPath(project, path);
 	}
 
 	@Test
@@ -106,13 +100,6 @@ public class ProjectTest implements IReferenceHandler {
 
 	private void assertMedia(String expected, String language, Reference reference, FilePath source) {
 		assertThat(project.getMediaFile(language != null ? new Locale(language) : null, reference, source).value(), equalTo(expected));
-	}
-
-	@Test
-	public void isExcluded() {
-		project = new Project(new File("src/test/resources/project"));
-		assertTrue(project.isExcluded(dirPath("res/page/about")));
-		assertFalse(project.isExcluded(dirPath("res/page/index")));
 	}
 
 	// ------------------------------------------------------

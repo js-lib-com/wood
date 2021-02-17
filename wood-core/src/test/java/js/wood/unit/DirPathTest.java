@@ -249,16 +249,6 @@ public class DirPathTest {
 	}
 
 	@Test
-	public void predicates() {
-		assertTrue(new DirPath(project, "res/asset").isAssets());
-		assertTrue(new DirPath(project, "res/theme").isTheme());
-
-		assertFalse(new DirPath(project, "res/asset").isTheme());
-		assertFalse(new DirPath(project, "res/theme").isAssets());
-		assertFalse(new DirPath(project, "res/compo/discography").isAssets());
-	}
-
-	@Test
 	public void accept() {
 		assertTrue(DirPath.accept("lib/video-player/"));
 		assertTrue(DirPath.accept("lib/video-player"));
@@ -270,4 +260,10 @@ public class DirPathTest {
 		assertFalse(DirPath.accept("lib/video-player#body"));
 	}
 
+	@Test
+	public void excluded() {
+		assertTrue(new DirPath(project, "res/page/about/").isExcluded());
+		assertTrue(new DirPath(project, "res/page/about").isExcluded());
+		assertFalse(new DirPath(project, "res/compo/fake/").isExcluded());
+	}
 }

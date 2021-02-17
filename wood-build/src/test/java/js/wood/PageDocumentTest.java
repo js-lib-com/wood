@@ -47,9 +47,6 @@ public class PageDocumentTest {
 
 		IScriptReference script = Mockito.mock(IScriptReference.class);
 		when(script.getSource()).thenReturn("script/index.js");
-		FilePath scriptFile = Mockito.mock(FilePath.class);
-		when(scriptFile.value()).thenReturn("script/index.js");
-		when(project.getFile("script/index.js")).thenReturn(scriptFile);
 
 		page.setLanguage("ro-RO");
 		page.setContentType("text/html; charset=UTF-8");
@@ -130,9 +127,6 @@ public class PageDocumentTest {
 		IScriptReference script = Mockito.mock(IScriptReference.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		when(script.getDefer()).thenReturn("true");
-		FilePath scriptFile = Mockito.mock(FilePath.class);
-		when(scriptFile.value()).thenReturn("script/index.js");
-		when(project.getFile("script/index.js")).thenReturn(scriptFile);
 
 		page.addScript(script, filePath -> filePath.value());
 		String doc = stringify(page.getDocument());
@@ -166,9 +160,6 @@ public class PageDocumentTest {
 	public void addScript_UrlAbsolutePath() throws IOException {
 		IScriptReference script = Mockito.mock(IScriptReference.class);
 		when(script.getSource()).thenReturn("script/index.js");
-		FilePath scriptFile = Mockito.mock(FilePath.class);
-		when(scriptFile.value()).thenReturn("script/index.js");
-		when(project.getFile("script/index.js")).thenReturn(scriptFile);
 
 		page.addScript(script, filePath -> "/context/" + filePath.value());
 		String doc = stringify(page.getDocument());

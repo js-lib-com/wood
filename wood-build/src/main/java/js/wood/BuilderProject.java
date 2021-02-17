@@ -82,13 +82,11 @@ class BuilderProject extends Project {
 	}
 
 	public String loadFile(String path) throws IOException {
-		return Strings.load(getFile(path).toFile());
+		return Strings.load(new FilePath(this, path).toFile());
 	}
 
 	private void scan(DirPath dir) {
-		System.out.println(dir);
 		if (dir.isExcluded()) {
-			System.out.println("-----------------");
 			return;
 		}
 

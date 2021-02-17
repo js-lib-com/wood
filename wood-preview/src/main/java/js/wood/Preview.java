@@ -218,7 +218,7 @@ public final class Preview {
 		}
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = absoluteUrlPath(project.getFile(src));
+				src = absoluteUrlPath(new FilePath(project, src));
 			}
 			scriptElement.setAttr("src", src);
 		}
@@ -233,7 +233,7 @@ public final class Preview {
 		setAttr(scriptElement, "integrity", script.getIntegrity());
 
 		if (script.isEmbedded()) {
-			scriptElement.setText(Strings.load(project.getFile(script.getSource()).toFile()));
+			scriptElement.setText(Strings.load(new FilePath(project, script.getSource()).toFile()));
 		}
 
 		head.addChild(scriptElement);
