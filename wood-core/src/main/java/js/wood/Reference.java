@@ -5,8 +5,8 @@ import js.wood.impl.ResourceType;
 
 /**
  * Immutable resource reference. Simply put, a reference is a pointer from a source file to a resource, be it variable or media
- * file. It has a type and a name, uniquely identifying the resource in its scope. Resource reference scope is the component to
- * which source file defining reference belongs plus global assets scope.
+ * file. It has a resource type and a name - uniquely identifying the resource in its scope. Resource reference scope is the
+ * source file defining the reference plus global assets scope.
  * <p>
  * Regarding media files, resource reference is a sort of abstract addressing. It does not identify precisely the file;
  * extension and variants are not included into media reference name. Also media file can be stored private into component
@@ -15,7 +15,7 @@ import js.wood.impl.ResourceType;
  * {@link #getPath()}.
  * <p>
  * Reference syntax is described below. This syntax is the same, no mater the source file type where reference is used: layout,
- * style or script.
+ * style, script or descriptors.
  * 
  * <pre>
  * reference = MARK resource-type SEP ?(path SEP) name
@@ -31,8 +31,8 @@ import js.wood.impl.ResourceType;
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * <p>
- * As stated variables and media files can be referenced from any source file: layout, style or script. Here are sample usage
- * for all three cases. Note that references are text replaced and where source file syntax requires quotes (") they should be
+ * As stated variables and media files can be referenced from any source file: layout, style, script or descriptors. Here are
+ * sample usage cases. Note that references are text replaced and where source file syntax requires quotes (") they should be
  * explicitly used.
  * 
  * <pre>
@@ -44,7 +44,6 @@ import js.wood.impl.ResourceType;
  *  &lt;/body&gt;
  *  
  *  body {
- *      {@literal @}style/page
  *      width: {@literal @}dimen/page-width;
  *      background-image: url("@image/page-bg");
  *      background-color: {@literal @}color/page-color;

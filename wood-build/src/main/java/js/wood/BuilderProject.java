@@ -12,7 +12,6 @@ import js.util.Strings;
 import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
-import js.wood.impl.Variables;
 import js.wood.util.Files;
 
 /**

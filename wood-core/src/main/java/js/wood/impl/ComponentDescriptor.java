@@ -109,7 +109,7 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 * Resolver parses element values and invoke {@link #referenceHandler} for discovered references, if any. It is necessary
 	 * because is legal for element value to contain resource references.
 	 */
-	private final ReferencesResolver resolver;
+	private final ReferencesResolver referenceResolver;
 
 	/**
 	 * Create component descriptor instance and initialize it from given file. Values defined by descriptor may contain resource
@@ -122,7 +122,7 @@ public class ComponentDescriptor extends BaseDescriptor {
 		super(document(filePath));
 		this.filePath = filePath;
 		this.referenceHandler = referenceHandler;
-		this.resolver = new ReferencesResolver();
+		this.referenceResolver = new ReferencesResolver();
 	}
 
 	/** Empty XML document used when component descriptor file is missing. */
@@ -178,6 +178,6 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 */
 	protected String text(String tagName, String defaultValue) {
 		String value = super.text(tagName, null);
-		return value != null ? resolver.parse(value, filePath, referenceHandler) : defaultValue;
+		return value != null ? referenceResolver.parse(value, filePath, referenceHandler) : defaultValue;
 	}
 }

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import js.log.Log;
 import js.log.LogFactory;
-import js.wood.impl.Variables;
 
 /**
  * Project builder for user interface resources. Builder acts as a bridge between {@link Project} and {@link BuildFS}. It reads

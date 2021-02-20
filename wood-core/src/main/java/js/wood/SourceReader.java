@@ -8,7 +8,6 @@ import js.wood.eval.Interpreter;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.ReferencesResolver;
 import js.wood.impl.ResourceType;
-import js.wood.impl.Variables;
 
 /**
  * Source file reader with {@literal @}meta processing, also known as at-meta. This class is a decorator for a

@@ -21,8 +21,8 @@ import js.wood.FilePath;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
 import js.wood.Reference;
+import js.wood.Variables;
 import js.wood.impl.ResourceType;
-import js.wood.impl.Variables;
 
 public class ProjectTest implements IReferenceHandler {
 	private Project project;

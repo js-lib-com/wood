@@ -9,6 +9,7 @@ import js.util.Files;
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
 import js.wood.SourceReader;
+import js.wood.Variables;
 import js.wood.WoodException;
 
 /**

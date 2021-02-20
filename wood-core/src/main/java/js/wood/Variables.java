@@ -1,4 +1,4 @@
-package js.wood.impl;
+package js.wood;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,13 +14,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import js.util.Strings;
-import js.wood.DirPath;
-import js.wood.FilePath;
-import js.wood.IReferenceHandler;
-import js.wood.Project;
-import js.wood.Reference;
-import js.wood.SourceReader;
-import js.wood.WoodException;
+import js.wood.impl.FilesHandler;
+import js.wood.impl.ReferencesResolver;
+import js.wood.impl.ResourceType;
 
 /**
  * Variables store name/value pairs that can be referenced from source files. In addition to having a name, variable belongs to
@@ -41,22 +37,22 @@ import js.wood.WoodException;
  * @since 1.0
  */
 public class Variables {
-	private Project project;
+	private final Project project;
+
+	/** Resource references resolver for this variable values. */
+	private final ReferencesResolver referenceResolver;
 
 	/**
-	 * Variable values mapped to languages. Resources without language variant are identified by null language. Null language
-	 * values are used when project is not multi-language. Also used when a value for a given language is missing.
+	 * Variable values mapped to locale. Resources without locale variant are identified by null locale. Null locale values are
+	 * used when project is not multi-locale. Also used when a value for a given locale is missing.
 	 */
-	private Map<Locale, Map<Reference, String>> localeValues = new HashMap<>();
+	private final Map<Locale, Map<Reference, String>> localeValues = new HashMap<>();
 
-	/** XML synchronous parser. */
-	private SAXParser parser;
+	/** XML stream parser. */
+	private SAXParser saxParser;
 
 	/** Handler for SAX parser in charge with variables files loading. */
-	private Scanner scanner;
-
-	/** References resolver for this variable values. */
-	ReferencesResolver resolver;
+	private SAXHandler saxHandler;
 
 	/**
 	 * Stack for references nesting level trace, global per execution thread. Nesting level trace logic assume references tree
@@ -71,8 +67,8 @@ public class Variables {
 		this.project = project;
 		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
-			this.parser = factory.newSAXParser();
-			this.resolver = new ReferencesResolver();
+			this.saxParser = factory.newSAXParser();
+			this.referenceResolver = new ReferencesResolver();
 		} catch (Exception e) {
 			throw new WoodException(e);
 		}
@@ -179,7 +175,7 @@ public class Variables {
 		levelTrace.push(trace);
 
 		// resolve nested references; see resolver API
-		value = resolver.parse(value, source, handler);
+		value = referenceResolver.parse(value, source, handler);
 		levelTrace.pop();
 		return value;
 	}
@@ -216,7 +212,7 @@ public class Variables {
 	/**
 	 * Load variable values from given directory files. Traverses directory files in no particular order searching for names
 	 * matching variables file pattern. If a resource file is found store its values mapped to language variant; if no language
-	 * variant is detected uses null. Note that scanning process workhorse is the {@link Scanner} class.
+	 * variant is detected uses null. Note that scanning process workhorse is the {@link SAXHandler} class.
 	 * 
 	 * @param dir directory path, should point to an existing directory.
 	 */
@@ -249,30 +245,181 @@ public class Variables {
 			values = new HashMap<Reference, String>();
 			localeValues.put(locale, values);
 		}
-		scanner = new Scanner(file, values);
-		parser.parse(file.toFile(), scanner);
+		saxHandler = new SAXHandler(file, values);
+		saxParser.parse(file.toFile(), saxHandler);
 	}
 
-	// ------------------------------------------------------
-	// Internal classes.
+	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * Base class for variable value builders. Value builders are used in conjunction with XML SAX handler, see {@link Scanner}.
-	 * A value builder instance is created on root element from variables definition file, considering {@link ResourceType}
-	 * encoded by root - see {@link #instance(ResourceType)}. Builder instance is reused for all variable elements from file;
-	 * there is {@link #reset()} method that prepare instance for new value. Once variable element discovered, value builder
-	 * helps collecting variable value from XML stream via {@link #addValue(char[], int, int)} method.
+	 * Scanner for variable values definition file. Variables values are stored into XML files processed by a SAX parser. This
+	 * scanner actually implement SAX parser handler.
 	 * <p>
-	 * This class deals with plain string only. There are specialized value builders for formatted text and styles, see
-	 * {@link TextValueBuilder} and {@link StyleValueBuilder}. Also, this base class defines hooks methods for subclasses
-	 * benefit: {@link #addParameter(String, String)}, {@link #startTag(String)} and {@link #endTag(String)}.
+	 * See below sample file for expected format. {@link ResourceType} is the root of the XML document. A resources file can
+	 * contain only one resource type; this is by design to promote clear types separation. Direct child on root is the
+	 * reference name, that is, the name used by source file to refer the variable - see {@link Reference} for syntax.
+	 * Everything inside reference element is considered value and is copied as plain text. If reference element has nested
+	 * children - e.g. {@link ResourceType#TEXT}, they are processed like a XML fragment and copied with element start/end tags
+	 * included. Anyway, the actual value reading from SAX stream is delegated to {@link ValueBuilder}.
+	 * 
+	 * <pre>
+	 *  &lt;type&gt;
+	 *      . . .   
+	 *      &lt;reference&gt;value&lt;/reference&gt;
+	 *      . . .
+	 *  &lt;/type&gt;
+	 *  
+	 *  &lt;body&gt;
+	 *      &lt;h1&gt;@type/reference&lt;/h1&gt;
+	 *      . . .
+	 *  &lt;/body&gt;
+	 * </pre>
+	 * 
+	 * In above example there is a variables definition file and a sample reference from a layout file. After reference
+	 * processing <code>value</code> from XML file will be inserted into layout file as text for <code>h1</code> element.
+	 * 
+	 * @author Iulian Rotaru
+	 */
+	private static class SAXHandler extends DefaultHandler {
+		/** Keep values definition file for error tracking. */
+		private final FilePath sourceFile;
+
+		/** Variable values storage mapped to related reference. This storage instance is created externally. */
+		private final Map<Reference, String> values;
+
+		/**
+		 * Variable values definition file has a resource type used to create reference instances. Note that by design all
+		 * variables from a file should have the same type.
+		 */
+		private ResourceType resourceType;
+
+		/**
+		 * Value builder used to actually collect variable value. There are specialized value builders for different resource
+		 * types. Builder instance is reused for entire variables definition file.
+		 */
+		private ValueBuilder builder;
+
+		/**
+		 * Current element nesting level acts as state for finite state automaton controlling this scanner behavior. Level value
+		 * start with 0, is incremented on every element start and decremented on element end. This way it keeps track of
+		 * nesting level.
+		 */
+		private int level;
+
+		/**
+		 * Create scanner instance that store discovered variable into given variables storage.
+		 * 
+		 * @param file the path for variables definition file, for error tracking,
+		 * @param values external storage for variable values.
+		 */
+		public SAXHandler(FilePath file, Map<Reference, String> values) {
+			super();
+			this.sourceFile = file;
+			this.values = values;
+		}
+
+		/**
+		 * Takes care to reset nesting level for every new document.
+		 */
+		@Override
+		public void startDocument() throws SAXException {
+			level = 0;
+		}
+
+		/**
+		 * Handle new element discovered into SAX stream. When detect root element this method initialized {@link #resourceType}
+		 * and create value builder instance, see {@link #builder}. For every element direct child to root, that is, nesting
+		 * level 1, reset the builder and add parameters from element attributes, if any. For the other deeper descendants just
+		 * invoke {@link ValueBuilder#startTag(String)} with element name.
+		 * 
+		 * @param uri unused namespace URI,
+		 * @param localName local name unused because namespace is not used,
+		 * @param qName element qualified name,
+		 * @param attributes attributes attached to element, possible empty.
+		 */
+		@Override
+		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+			switch (level) {
+			case 0:
+				resourceType = ResourceType.getValueOf(qName);
+				if (resourceType == ResourceType.UNKNOWN) {
+					throw new WoodException("Bad resource type |%s| in file |%s|", qName, sourceFile);
+				}
+				builder = ValueBuilder.instance(resourceType);
+				break;
+
+			case 1:
+				builder.reset();
+				for (int i = 0; i < attributes.getLength(); ++i) {
+					builder.addParameter(attributes.getQName(i), attributes.getValue(i));
+				}
+				break;
+
+			default:
+				if (resourceType != ResourceType.TEXT) {
+					throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text variables support nested elements.", qName, sourceFile);
+				}
+				builder.startTag(qName);
+			}
+			++level;
+		}
+
+		/**
+		 * Handle element closing tag. For root direct child elements stores value from {@link #builder} to {@link #values
+		 * values storage}. For deeper descendants just invoke {@link ValueBuilder#endTag(String)}.
+		 * 
+		 * @param uri unused namespace URI,
+		 * @param localName local name unused because namespace is not used,
+		 * @param qName element qualified name.
+		 */
+		@Override
+		public void endElement(String uri, String localName, String qName) throws SAXException {
+			--level;
+			switch (level) {
+			case 0:
+				break;
+
+			case 1:
+				values.put(new Reference(sourceFile, resourceType, qName), builder.toString());
+				break;
+
+			default:
+				builder.endTag(qName);
+			}
+		}
+
+		/**
+		 * Send text stream to value builder.
+		 * 
+		 * @param ch buffer of characters from SAX stream,
+		 * @param start buffer offset,
+		 * @param length buffer capacity.
+		 */
+		@Override
+		public void characters(char[] ch, int start, int length) throws SAXException {
+			if (level > 1) {
+				builder.addValue(ch, start, length);
+			}
+		}
+	}
+
+	/**
+	 * Base class for variable value builders. Value builders are used in conjunction with XML SAX handler, see
+	 * {@link SAXHandler}. A value builder instance is created on root element from variables definition file, considering
+	 * {@link ResourceType} encoded by root - see {@link #instance(ResourceType)}. Builder instance is reused for all variable
+	 * elements from file; there is {@link #reset()} method that prepare instance for new value. Once variable element
+	 * discovered, value builder helps collecting variable value from XML stream via {@link #addValue(char[], int, int)} method.
+	 * <p>
+	 * This class deals with plain string only. There is specialized value builder for formatted text, see
+	 * {@link TextValueBuilder}. Also, this base class defines hooks methods for subclasses benefit:
+	 * {@link #addParameter(String, String)}, {@link #startTag(String)} and {@link #endTag(String)}.
 	 * 
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
 	private static class ValueBuilder {
 		/** Value builder storage. */
-		protected StringBuilder value = new StringBuilder();
+		protected final StringBuilder value = new StringBuilder();
 
 		/**
 		 * Prepare builder instance for new value assembling.
@@ -382,158 +529,6 @@ public class Variables {
 			value.append("</");
 			value.append(name);
 			value.append('>');
-		}
-	}
-
-	/**
-	 * Scanner for variable values definition file. Variables values are stored into XML files processed by a SAX parser. This
-	 * scanner actually implement SAX parser handler.
-	 * <p>
-	 * See below sample file for expected format. {@link ResourceType} is the root of the XML document. A resources file can
-	 * contain only one resource type; this is by design to promote clear types separation. Direct child on root is the
-	 * reference name, that is, the name used by source file to refer the variable - see {@link Reference} for syntax.
-	 * Everything inside reference element is considered value and is copied as plain text. If reference element has nested
-	 * children - e.g. {@link ResourceType#TEXT}, they are processed like a XML fragment and copied with element start/end tags
-	 * included. Anyway, the actual value reading from SAX stream is delegated to {@link ValueBuilder}.
-	 * 
-	 * <pre>
-	 *  &lt;type&gt;
-	 *      . . .   
-	 *      &lt;reference&gt;value&lt;/reference&gt;
-	 *      . . .
-	 *  &lt;/type&gt;
-	 *  
-	 *  &lt;body&gt;
-	 *      &lt;h1&gt;@type/reference&lt;/h1&gt;
-	 *      . . .
-	 *  &lt;/body&gt;
-	 * </pre>
-	 * 
-	 * In above example there is a variables definition file and a sample reference from a layout file. After reference
-	 * processing <code>value</code> from XML file will be inserted into layout file as text for <code>h1</code> element.
-	 * 
-	 * @author Iulian Rotaru
-	 */
-	private static class Scanner extends DefaultHandler {
-		/** Keep values definition file for error tracking. */
-		private FilePath sourceFile;
-
-		/** Variable values storage mapped to related reference. This storage instance is created externally. */
-		private Map<Reference, String> values;
-
-		/**
-		 * Variable values definition file has a resource type used to create reference instances. Note that by design all
-		 * variables from a file should have the same type.
-		 */
-		private ResourceType resourceType;
-
-		/**
-		 * Value builder used to actually collect variable value. There are specialized value builders for different resource
-		 * types. Builder instance is reused for entire variables definition file.
-		 */
-		private ValueBuilder builder;
-
-		/**
-		 * Current element nesting level acts as state for finite state automaton controlling this scanner behavior. Level value
-		 * start with 0, is incremented on every element start and decremented on element end. This way it keeps track of
-		 * nesting level.
-		 */
-		private int level;
-
-		/**
-		 * Create scanner instance that store discovered variable into given variables storage.
-		 * 
-		 * @param file the path for variables definition file, for error tracking,
-		 * @param values external storage for variable values.
-		 */
-		public Scanner(FilePath file, Map<Reference, String> values) {
-			super();
-			this.sourceFile = file;
-			this.values = values;
-		}
-
-		/**
-		 * Takes care to reset nesting level for every new document.
-		 */
-		@Override
-		public void startDocument() throws SAXException {
-			level = 0;
-		}
-
-		/**
-		 * Handle new element discovered into SAX stream. When detect root element this method initialized {@link #resourceType}
-		 * and create value builder instance, see {@link #builder}. For every element direct child to root, that is, nesting
-		 * level 1, reset the builder and add parameters from element attributes, if any. For the other deeper descendants just
-		 * invoke {@link ValueBuilder#startTag(String)} with element name.
-		 * 
-		 * @param uri unused namespace URI,
-		 * @param localName local name unused because namespace is not used,
-		 * @param qName element qualified name,
-		 * @param attributes attributes attached to element, possible empty.
-		 */
-		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			switch (level) {
-			case 0:
-				resourceType = ResourceType.getValueOf(qName);
-				if (resourceType == ResourceType.UNKNOWN) {
-					throw new WoodException("Bad resource type |%s| in file |%s|", qName, sourceFile);
-				}
-				builder = ValueBuilder.instance(resourceType);
-				break;
-
-			case 1:
-				builder.reset();
-				for (int i = 0; i < attributes.getLength(); ++i) {
-					builder.addParameter(attributes.getQName(i), attributes.getValue(i));
-				}
-				break;
-
-			default:
-				if (resourceType != ResourceType.TEXT) {
-					throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text variables support nested elements.", qName, sourceFile);
-				}
-				builder.startTag(qName);
-			}
-			++level;
-		}
-
-		/**
-		 * Handle element closing tag. For root direct child elements stores value from {@link #builder} to {@link #values
-		 * values storage}. For deeper descendants just invoke {@link ValueBuilder#endTag(String)}.
-		 * 
-		 * @param uri unused namespace URI,
-		 * @param localName local name unused because namespace is not used,
-		 * @param qName element qualified name.
-		 */
-		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException {
-			--level;
-			switch (level) {
-			case 0:
-				break;
-
-			case 1:
-				values.put(new Reference(sourceFile, resourceType, qName), builder.toString());
-				break;
-
-			default:
-				builder.endTag(qName);
-			}
-		}
-
-		/**
-		 * Send text stream to value builder.
-		 * 
-		 * @param ch buffer of characters from SAX stream,
-		 * @param start buffer offset,
-		 * @param length buffer capacity.
-		 */
-		@Override
-		public void characters(char[] ch, int start, int length) throws SAXException {
-			if (level > 1) {
-				builder.addValue(ch, start, length);
-			}
 		}
 	}
 }

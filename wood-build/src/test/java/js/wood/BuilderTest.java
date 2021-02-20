@@ -28,7 +28,6 @@ import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
 import js.wood.impl.ResourceType;
-import js.wood.impl.Variables;
 
 public class BuilderTest {
 	@Test

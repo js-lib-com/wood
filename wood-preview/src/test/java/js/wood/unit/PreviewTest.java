@@ -31,7 +31,7 @@ import js.wood.IReferenceHandler;
 import js.wood.Preview;
 import js.wood.PreviewProject;
 import js.wood.Reference;
-import js.wood.impl.Variables;
+import js.wood.Variables;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewTest implements IReferenceHandler {

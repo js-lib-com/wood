@@ -25,10 +25,10 @@ import js.wood.IReferenceHandler;
 import js.wood.Project;
 import js.wood.Reference;
 import js.wood.SourceReader;
+import js.wood.Variables;
 import js.wood.WoodException;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.ResourceType;
-import js.wood.impl.Variables;
 
 public class SourceReaderTest implements IReferenceHandler {
 	private Project project;

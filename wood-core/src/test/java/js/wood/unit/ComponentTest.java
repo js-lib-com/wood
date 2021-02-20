@@ -25,9 +25,9 @@ import js.wood.FilePath;
 import js.wood.IReferenceHandler;
 import js.wood.Project;
 import js.wood.Reference;
+import js.wood.Variables;
 import js.wood.WOOD;
 import js.wood.WoodException;
-import js.wood.impl.Variables;
 
 public class ComponentTest {
 	@Test

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import js.wood.impl.Variables;
-
 /**
  * Variable caches used to speed up preview process. Cache life span last for a component preview session.
  * 

@@ -52,7 +52,7 @@ public class Component {
 	private final Project project;
 
 	/** Optional component descriptor, default to null. */
-	private ComponentDescriptor descriptor;
+	private final ComponentDescriptor descriptor;
 
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
