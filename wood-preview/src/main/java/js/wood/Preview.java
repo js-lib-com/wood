@@ -65,10 +65,10 @@ public final class Preview {
 		head.addChild(doc.createElement("meta", "name", "Description", "content", compo.getDescription()));
 		head.addText("\r\n");
 
-		for (IMetaReference meta : project.getMetaReferences()) {
+		for (IMetaDescriptor meta : project.getMetaDescriptors()) {
 			addMeta(doc, meta);
 		}
-		for (IMetaReference meta : compo.getMetaReferences()) {
+		for (IMetaDescriptor meta : compo.getMetaDescriptors()) {
 			addMeta(doc, meta);
 		}
 
@@ -87,10 +87,10 @@ public final class Preview {
 		// 5. theme styles - theme styles are in no particular order since they are independent of each other
 		// 6. component styles - first use template and child component styles then parent component
 
-		for (ILinkReference link : project.getLinkReferences()) {
+		for (ILinkDescriptor link : project.getLinkDescriptors()) {
 			addLink(doc, link);
 		}
-		for (ILinkReference link : compo.getLinkReferences()) {
+		for (ILinkDescriptor link : compo.getLinkDescriptors()) {
 			addLink(doc, link);
 		}
 
@@ -109,14 +109,14 @@ public final class Preview {
 			addStyle(doc, absoluteUrlPath(style));
 		}
 
-		for (IScriptReference script : project.getScriptReferences()) {
+		for (IScriptDescriptor script : project.getScriptDescriptors()) {
 			addScript(doc, script);
 		}
-		for (IScriptReference script : compo.getScriptReferences()) {
+		for (IScriptDescriptor script : compo.getScriptDescriptors()) {
 			addScript(doc, script);
 		}
 
-		IScriptReference previewScript = compo.getPreviewScript();
+		IScriptDescriptor previewScript = compo.getPreviewScript();
 		if (previewScript != null) {
 			addScript(doc, previewScript);
 		}
@@ -124,7 +124,7 @@ public final class Preview {
 		doc.serialize(writer, true);
 	}
 
-	private static void addMeta(Document doc, IMetaReference meta) {
+	private static void addMeta(Document doc, IMetaDescriptor meta) {
 		Element head = doc.getByTag("head");
 
 		final String name = meta.getName();
@@ -156,7 +156,7 @@ public final class Preview {
 
 	}
 
-	private static void addLink(Document doc, ILinkReference link) {
+	private static void addLink(Document doc, ILinkDescriptor link) {
 		Element head = doc.getByTag("head");
 
 		Element linkElement = doc.createElement("link");
@@ -208,7 +208,7 @@ public final class Preview {
 	 * @param src the source of script.
 	 * @throws IOException
 	 */
-	private void addScript(Document doc, IScriptReference script) throws IOException {
+	private void addScript(Document doc, IScriptDescriptor script) throws IOException {
 		String src = script.getSource();
 		assert src != null;
 		Element head = doc.getByTag("head");

@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -112,7 +113,7 @@ public class Project {
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
 		this.descriptor = new ProjectDescriptor(new File(this.projectRoot, CT.PROJECT_CONFIG));
-		this.excludes = this.descriptor.getExcludes().stream().map(dirPath->new DirPath(this, dirPath)).collect(Collectors.toList());
+		this.excludes = this.descriptor.getExcludes().stream().map(dirPath -> new DirPath(this, dirPath)).collect(Collectors.toList());
 
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
@@ -251,28 +252,43 @@ public class Project {
 		return null;
 	}
 
-	public List<IMetaReference> getMetaReferences() {
-		return descriptor.getMetas();
+	/**
+	 * Get descriptors for page meta elements, declared on project descriptor. Meta descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no meta descriptors declared on project descriptor. Returned list is not modifiable.
+	 * 
+	 * @return Immutable list of meta descriptors, possible empty.
+	 */
+	public List<IMetaDescriptor> getMetaDescriptors() {
+		return Collections.unmodifiableList(descriptor.getMetaDescriptors());
 	}
 
 	/**
-	 * Get link elements declared at project scope, therefore included in all pages head.
+	 * Get descriptors for page link elements, declared on project descriptor. Link descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no link descriptors declared on project descriptor. Returned list is not modifiable.
 	 * 
-	 * @return ordered set of link references.
+	 * @return Immutable list of link descriptors, possible empty.
 	 */
-	public List<ILinkReference> getLinkReferences() {
-		return descriptor.getLinks();
+	public List<ILinkDescriptor> getLinkDescriptors() {
+		return Collections.unmodifiableList(descriptor.getLinkDescriptors());
 	}
 
-	public List<IScriptReference> getScriptReferences() {
-		return descriptor.getScripts();
+	/**
+	 * Get descriptors for page script elements, declared on project descriptor. Script descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no script descriptors declared on project descriptor. Returned list is not modifiable.
+	 * 
+	 * @return Immutable list of script descriptors, possible empty.
+	 */
+	public List<IScriptDescriptor> getScriptDescriptors() {
+		return Collections.unmodifiableList(descriptor.getScriptDescriptors());
 	}
 
 	/**
 	 * Get style files declared into project theme directory. Returned set is not changeable.
 	 * 
 	 * @return site styles.
-	 * @see #themeStyles
 	 */
 	public ThemeStyles getThemeStyles() {
 		throw new BugError("Abstract method invoked.");
@@ -317,14 +333,13 @@ public class Project {
 	}
 
 	/**
-	 * Scan directory for media files matching base name and language variant. This helper method is used by
-	 * {@link #getMediaFile(String, Reference, FilePath)}. Try to locate file matching both base name and language; extension is
-	 * not considered. If not found try to return base variant, that is, file that match only base name and has no language. If
-	 * still not found returns null.
+	 * Scan directory for media files matching base name and locale variant. This helper method tries to locate file matching
+	 * both base name and locale; extension is not considered. If not found try to return base variant, that is, file that match
+	 * only base name and has no locale. If still not found returns null.
 	 * 
 	 * @param dir directory to scan for media files,
 	 * @param basename media file base name,
-	 * @param language language variant, possible null.
+	 * @param locale locale variant, possible null.
 	 * @return media file or null.
 	 */
 	public static FilePath mediaFile(DirPath dir, String basename, Locale locale) {

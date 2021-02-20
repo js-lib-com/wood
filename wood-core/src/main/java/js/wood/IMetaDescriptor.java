@@ -1,6 +1,6 @@
 package js.wood;
 
-public interface IMetaReference {
+public interface IMetaDescriptor {
 	String getName();
 
 	String getHttpEquiv();

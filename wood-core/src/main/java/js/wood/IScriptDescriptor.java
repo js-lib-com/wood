@@ -1,6 +1,6 @@
 package js.wood;
 
-public interface IScriptReference {
+public interface IScriptDescriptor {
 	String getSource();
 
 	String getType();

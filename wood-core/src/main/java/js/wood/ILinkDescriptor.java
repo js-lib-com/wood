@@ -1,6 +1,6 @@
 package js.wood;
 
-public interface ILinkReference {
+public interface ILinkDescriptor {
 	String getHref();
 
 	String getHreflang();

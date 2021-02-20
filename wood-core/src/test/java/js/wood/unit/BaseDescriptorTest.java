@@ -17,9 +17,9 @@ import org.junit.Test;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.util.Classes;
-import js.wood.ILinkReference;
-import js.wood.IMetaReference;
-import js.wood.IScriptReference;
+import js.wood.ILinkDescriptor;
+import js.wood.IMetaDescriptor;
+import js.wood.IScriptDescriptor;
 import js.wood.impl.BaseDescriptor;
 
 public class BaseDescriptorTest {
@@ -38,7 +38,7 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void metas() {
-		List<IMetaReference> metas = descriptor.getMetas();
+		List<IMetaDescriptor> metas = descriptor.getMetaDescriptors();
 		assertThat(metas, notNullValue());
 		assertThat(metas, hasSize(2));
 		assertThat(metas.get(0).getHttpEquiv(), equalTo("X-UA-Compatible"));
@@ -49,7 +49,7 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void links() {
-		List<ILinkReference> links = descriptor.getLinks();
+		List<ILinkDescriptor> links = descriptor.getLinkDescriptors();
 		assertThat(links, notNullValue());
 		assertThat(links, hasSize(2));
 
@@ -65,7 +65,7 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void scripts() {
-		List<IScriptReference> scripts = descriptor.getScripts();
+		List<IScriptDescriptor> scripts = descriptor.getScriptDescriptors();
 		assertThat(scripts, notNullValue());
 		assertThat(scripts, hasSize(1));
 		assertThat(scripts.get(0).getSource(), equalTo("lib/js-lib/js-lib.js"));
@@ -77,9 +77,9 @@ public class BaseDescriptorTest {
 		descriptor = new TestDescriptor(new File("src/test/resources/empty-descriptor.xml"));
 		assertThat(descriptor.getDisplay(null), nullValue());
 		assertThat(descriptor.getDescription(null), nullValue());
-		assertThat(descriptor.getMetas(), emptyIterable());
-		assertThat(descriptor.getLinks(), emptyIterable());
-		assertThat(descriptor.getScripts(), emptyIterable());
+		assertThat(descriptor.getMetaDescriptors(), emptyIterable());
+		assertThat(descriptor.getLinkDescriptors(), emptyIterable());
+		assertThat(descriptor.getScriptDescriptors(), emptyIterable());
 	}
 
 	private static class TestDescriptor extends BaseDescriptor {

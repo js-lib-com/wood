@@ -155,7 +155,7 @@ class PageDocument {
 	 * @param meta non null meta reference.
 	 * @throws IllegalArgumentException if meta reference parameter is null or empty.
 	 */
-	public void addMeta(IMetaReference meta) {
+	public void addMeta(IMetaDescriptor meta) {
 		Params.notNull(meta, "Meta reference");
 
 		Element metaElement = doc.createElement("meta");
@@ -174,12 +174,12 @@ class PageDocument {
 	 * parameter. There is no validation on link reference; attributes are set exactly as provided.
 	 * <p>
 	 * This setter is not used only for external style sheets; all standard links attributes are supported. See
-	 * {@link ILinkReference} for a list of supported attributes.
+	 * {@link ILinkDescriptor} for a list of supported attributes.
 	 * 
 	 * @param link non null link reference.
 	 * @throws IllegalArgumentException if link reference parameter is null or <code>href</code> attribute is null or empty.
 	 */
-	public void addLink(ILinkReference link) {
+	public void addLink(ILinkDescriptor link) {
 		Params.notNull(link, "Link reference");
 		final String href = link.getHref();
 		Params.notNullOrEmpty(href, "Link HREF");
@@ -220,15 +220,15 @@ class PageDocument {
 
 	/**
 	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script reference
-	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See {@link IScriptReference}
+	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See {@link IScriptDescriptor}
 	 * for a list of supported attributes.
 	 * <p>
-	 * If {@link IScriptReference#getSource()} is a file path relative this project, as accepted by
+	 * If {@link IScriptDescriptor#getSource()} is a file path relative this project, as accepted by
 	 * {@link FilePath#accept(String)}, invoke {@link Handler#handle(Object)} with {@link FilePath} created from script source
 	 * attribute. Handler returned value is used to replace current script source.
 	 * <p>
-	 * If script is embedded, see {@link IScriptReference#isEmbedded()}, load script as text content to created script element,
-	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptReference#getSource()} is project relative path
+	 * If script is embedded, see {@link IScriptDescriptor#isEmbedded()}, load script as text content to created script element,
+	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptDescriptor#getSource()} is project relative path
 	 * of the script file from where text content is loaded.
 	 * 
 	 * @param script script reference,
@@ -236,7 +236,7 @@ class PageDocument {
 	 * @throws IllegalArgumentException if script or handler parameter is null or script source is missing.
 	 * @throws IOException if script is embedded and script content loading fails.
 	 */
-	public void addScript(IScriptReference script, Handler<String, FilePath> handler) throws IOException {
+	public void addScript(IScriptDescriptor script, Handler<String, FilePath> handler) throws IOException {
 		Params.notNull(script, "Script reference");
 		Params.notNull(script.getSource(), "The source of script");
 		Params.notNull(handler, "File handler");

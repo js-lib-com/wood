@@ -2,6 +2,7 @@ package js.wood;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,7 @@ import js.wood.impl.EditablePath;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.LayoutReader;
 import js.wood.impl.Operator;
-import js.wood.impl.ScriptReference;
+import js.wood.impl.ScriptDescriptor;
 
 /**
  * Meta-data about component consolidated instance. Component is a piece of user interface designed to interconnect with another
@@ -77,15 +78,27 @@ public class Component {
 	 */
 	private final List<FilePath> styleFiles = new ArrayList<>();
 
-	private final List<IMetaReference> metaReferences = new ArrayList<>();
+	/**
+	 * Descriptors for page meta elements, declared on this component descriptor. Meta descriptors order is preserved.
+	 * <p>
+	 * This field is optional with default to empty list.
+	 */
+	private final List<IMetaDescriptor> metaDescriptors = new ArrayList<>();
 
 	/**
-	 * Link references declared on this component and all included components descriptors. Link references order from
-	 * descriptors is preserved. Link references are not limited to styles.
+	 * Descriptors for page link elements, declared on this component descriptor. Link descriptors order is preserved. Link
+	 * descriptors are not limited to styles.
+	 * <p>
+	 * This field is optional with default to empty list.
 	 */
-	private final List<ILinkReference> linkReferences = new ArrayList<>();
+	private final List<ILinkDescriptor> linkDescriptors = new ArrayList<>();
 
-	private final List<IScriptReference> scriptReferences = new ArrayList<>();
+	/**
+	 * Descriptors for page script elements, declared on this component descriptor. Script descriptors order is preserved.
+	 * <p>
+	 * This field is optional with default to empty list.
+	 */
+	private final List<IScriptDescriptor> scriptDescriptors = new ArrayList<>();
 
 	/**
 	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also
@@ -153,9 +166,9 @@ public class Component {
 			}
 		}
 
-		addAll(metaReferences, descriptor.getMetas());
-		addAll(linkReferences, descriptor.getLinks());
-		addAll(scriptReferences, descriptor.getScripts());
+		addAll(metaDescriptors, descriptor.getMetaDescriptors());
+		addAll(linkDescriptors, descriptor.getLinkDescriptors());
+		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 	}
 
 	/**
@@ -201,9 +214,9 @@ public class Component {
 
 			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-			addAll(metaReferences, descriptor.getMetas());
-			addAll(linkReferences, descriptor.getLinks());
-			addAll(scriptReferences, descriptor.getScripts());
+			addAll(metaDescriptors, descriptor.getMetaDescriptors());
+			addAll(linkDescriptors, descriptor.getLinkDescriptors());
+			addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
@@ -381,26 +394,50 @@ public class Component {
 		return baseLayoutPath.getName();
 	}
 
-	public List<IMetaReference> getMetaReferences() {
-		return metaReferences;
+	/**
+	 * Get descriptors for page meta elements, declared on this component descriptor. Meta descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no meta descriptors declared on component descriptor. Returned list is not modifiable.
+	 * 
+	 * @return Immutable list of meta descriptors, possible empty.
+	 * @see #metaDescriptors
+	 */
+	public List<IMetaDescriptor> getMetaDescriptors() {
+		return Collections.unmodifiableList(metaDescriptors);
 	}
 
-	public List<ILinkReference> getLinkReferences() {
-		return linkReferences;
+	/**
+	 * Get descriptors for page link elements, declared on this component descriptor. Link descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no link descriptors declared on component descriptor. Returned list is not modifiable.
+	 * 
+	 * @return Immutable list of link descriptors, possible empty.
+	 * @see #linkDescriptors
+	 */
+	public List<ILinkDescriptor> getLinkDescriptors() {
+		return Collections.unmodifiableList(linkDescriptors);
 	}
 
 	/**
 	 * Get component style files in the proper order for page document inclusion.
 	 * 
 	 * @return component style files.
-	 * @see #styleReferences
+	 * @see #styleFiles
 	 */
 	public List<FilePath> getStyleFiles() {
 		return styleFiles;
 	}
 
-	public List<IScriptReference> getScriptReferences() {
-		return scriptReferences;
+	/**
+	 * Get descriptors for page script elements, declared on this component descriptor. script descriptors order is preserved.
+	 * <p>
+	 * Return empty list if there are no script descriptors declared on component descriptor. Returned list is not modifiable.
+	 * 
+	 * @return Immutable list of script descriptors, possible empty.
+	 * @see #scriptDescriptors
+	 */
+	public List<IScriptDescriptor> getScriptDescriptors() {
+		return Collections.unmodifiableList(scriptDescriptors);
 	}
 
 	/**
@@ -425,9 +462,9 @@ public class Component {
 	 * 
 	 * @return component script preview file or null if not defined.
 	 */
-	public IScriptReference getPreviewScript() {
+	public IScriptDescriptor getPreviewScript() {
 		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(CT.PREVIEW_SCRIPT);
-		return file.exists() ? new ScriptReference(file.value()) : null;
+		return file.exists() ? new ScriptDescriptor(file.value()) : null;
 	}
 
 	/**

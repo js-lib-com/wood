@@ -1,8 +1,17 @@
 package js.wood.impl;
 
-import js.wood.IMetaReference;
+import js.dom.Element;
+import js.wood.IMetaDescriptor;
+import js.wood.WoodException;
 
-public class MetaReference implements IMetaReference {
+/**
+ * Descriptor for page meta element. This class is loaded from <code>meta</code> element of project or page descriptor. All
+ * standard attributes are supported.
+ * 
+ * @author Iulian Rotaru
+ * @since 1.0
+ */
+public class MetaDescriptor implements IMetaDescriptor {
 	private String name;
 	private String httpEquiv;
 	private String property;
@@ -30,7 +39,7 @@ public class MetaReference implements IMetaReference {
 	public void setProperty(String property) {
 		this.property = property;
 	}
-	
+
 	@Override
 	public String getProperty() {
 		return property;
@@ -72,7 +81,7 @@ public class MetaReference implements IMetaReference {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MetaReference other = (MetaReference) obj;
+		MetaDescriptor other = (MetaDescriptor) obj;
 		if (charset == null) {
 			if (other.charset != null)
 				return false;
@@ -94,5 +103,23 @@ public class MetaReference implements IMetaReference {
 	@Override
 	public String toString() {
 		return name != null ? name : httpEquiv;
+	}
+
+	public static MetaDescriptor create(Element metaElement) {
+		final String name = metaElement.getAttr("name");
+		final String httpEquiv = metaElement.getAttr("http-equiv");
+		final String property = metaElement.getAttr("property");
+		if (name == null && httpEquiv == null && property == null) {
+			throw new WoodException("Invalid meta descriptor. Missing 'name', 'http-equiv' or 'property' attribute from <meta> element.");
+		}
+
+		MetaDescriptor meta = new MetaDescriptor();
+		meta.setName(name);
+		meta.setHttpEquiv(httpEquiv);
+		meta.setProperty(property);
+		meta.setContent(metaElement.getAttr("content"));
+		meta.setCharset(metaElement.getAttr("charset"));
+
+		return meta;
 	}
 }

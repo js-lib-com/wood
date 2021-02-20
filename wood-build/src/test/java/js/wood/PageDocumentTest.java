@@ -38,14 +38,14 @@ public class PageDocumentTest {
 
 	@Test
 	public void setters() throws IOException {
-		IMetaReference meta = Mockito.mock(IMetaReference.class);
+		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
 		when(meta.getHttpEquiv()).thenReturn("X-UA-Compatible");
 		when(meta.getContent()).thenReturn("IE=9; IE=8; IE=7; IE=EDGE");
 
-		ILinkReference link = Mockito.mock(ILinkReference.class);
+		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn("styles/reset.css");
 
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 
 		page.setLanguage("ro-RO");
@@ -81,7 +81,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addMeta_Property() throws IOException {
-		IMetaReference meta = Mockito.mock(IMetaReference.class);
+		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
 		when(meta.getProperty()).thenReturn("og:title");
 		when(meta.getContent()).thenReturn("kids (a)cademy");
 
@@ -97,7 +97,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addLink_ThirdParty() throws IOException {
-		ILinkReference link = Mockito.mock(ILinkReference.class);
+		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn("http://js-lib.com/styles/reset.css");
 
 		page.addLink(link);
@@ -112,7 +112,7 @@ public class PageDocumentTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addLink_MissingHref() throws IOException {
-		ILinkReference link = Mockito.mock(ILinkReference.class);
+		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn(null);
 		page.addLink(link);
 	}
@@ -124,7 +124,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addScript_Defer() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		when(script.getDefer()).thenReturn("true");
 
@@ -135,7 +135,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addScript_Embedded() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.isEmbedded()).thenReturn(true).thenReturn(true);
 		when(script.getSource()).thenReturn("lib/sdk/analytics.js");
 
@@ -148,7 +148,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addScript_External() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("http://js-lib.com/sdk/analytics.js");
 
 		page.addScript(script, filePath -> null);
@@ -158,7 +158,7 @@ public class PageDocumentTest {
 
 	@Test
 	public void addScript_UrlAbsolutePath() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 
 		page.addScript(script, filePath -> "/context/" + filePath.value());
@@ -173,13 +173,13 @@ public class PageDocumentTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addScript_MissingSource() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		page.addScript(script, filePath -> null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addScript_NullHandler() throws IOException {
-		IScriptReference script = Mockito.mock(IScriptReference.class);
+		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		page.addScript(script, null);
 	}

@@ -5,17 +5,17 @@ import java.util.List;
 
 import js.dom.Document;
 import js.dom.Element;
-import js.wood.ILinkReference;
-import js.wood.IMetaReference;
-import js.wood.IScriptReference;
+import js.wood.ILinkDescriptor;
+import js.wood.IMetaDescriptor;
+import js.wood.IScriptDescriptor;
 import js.wood.WoodException;
 
 public abstract class BaseDescriptor {
 	/** XML DOM document. */
 	protected final Document doc;
 
-	private ILinkReference linkDefaults;
-	private IScriptReference scriptDefaults;
+	private ILinkDescriptor linkDefaults;
+	private IScriptDescriptor scriptDefaults;
 
 	protected BaseDescriptor(Document doc) {
 		this.doc = doc;
@@ -51,28 +51,28 @@ public abstract class BaseDescriptor {
 	 * 
 	 * @return meta elements list, possible empty.
 	 */
-	public List<IMetaReference> getMetas() {
-		List<IMetaReference> metas = new ArrayList<>();
-		for (Element metaElement : doc.findByTag("meta")) {
-			MetaReference meta = MetaReferenceFactory.create(metaElement);
-			if (metas.contains(meta)) {
-				throw new WoodException("Duplicate meta |%s| in project descriptor.", meta);
+	public List<IMetaDescriptor> getMetaDescriptors() {
+		List<IMetaDescriptor> descriptors = new ArrayList<>();
+		for (Element element : doc.findByTag("meta")) {
+			MetaDescriptor descriptor = MetaDescriptor.create(element);
+			if (descriptors.contains(descriptor)) {
+				throw new WoodException("Duplicate meta |%s| in project descriptor.", descriptor);
 			}
-			metas.add(meta);
+			descriptors.add(descriptor);
 		}
-		return metas;
+		return descriptors;
 	}
 
-	public List<ILinkReference> getLinks() {
-		List<ILinkReference> links = new ArrayList<>();
-		for (Element linkElement : doc.findByTag("link")) {
-			LinkReference link = LinkReferenceFactory.create(linkElement, linkDefaults);
-			if (links.contains(link)) {
-				throw new WoodException("Duplicate link |%s| in project descriptor.", link);
+	public List<ILinkDescriptor> getLinkDescriptors() {
+		List<ILinkDescriptor> descriptors = new ArrayList<>();
+		for (Element element : doc.findByTag("link")) {
+			LinkDescriptor descriptor = LinkDescriptor.create(element, linkDefaults);
+			if (descriptors.contains(descriptor)) {
+				throw new WoodException("Duplicate link |%s| in project descriptor.", descriptor);
 			}
-			links.add(link);
+			descriptors.add(descriptor);
 		}
-		return links;
+		return descriptors;
 	}
 
 	/**
@@ -95,20 +95,20 @@ public abstract class BaseDescriptor {
 	 * </pre>
 	 * <p>
 	 * If optional attribute <code>append-to-head</code> is present into <code>script</code> element enable
-	 * {@link ScriptReference#appendToHead}.
+	 * {@link ScriptDescriptor#appendToHead}.
 	 * 
 	 * @return scripts declared by this component descriptor.
 	 */
-	public List<IScriptReference> getScripts() {
-		List<IScriptReference> scripts = new ArrayList<>();
-		for (Element scriptElement : doc.findByTag("script")) {
-			ScriptReference script = ScriptReferenceFactory.create(scriptElement, scriptDefaults);
-			if (scripts.contains(script)) {
-				throw new WoodException("Duplicate script |%s| in project descriptor.", script);
+	public List<IScriptDescriptor> getScriptDescriptors() {
+		List<IScriptDescriptor> descriptors = new ArrayList<>();
+		for (Element element : doc.findByTag("script")) {
+			ScriptDescriptor descriptor = ScriptDescriptor.create(element, scriptDefaults);
+			if (descriptors.contains(descriptor)) {
+				throw new WoodException("Duplicate script |%s| in project descriptor.", descriptor);
 			}
-			scripts.add(script);
+			descriptors.add(descriptor);
 		}
-		return scripts;
+		return descriptors;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public abstract class BaseDescriptor {
 		return !value.isEmpty() ? value : defaultValue;
 	}
 
-	private static class LinkDefaults implements ILinkReference {
+	private static class LinkDefaults implements ILinkDescriptor {
 		private final Document doc;
 
 		public LinkDefaults(Document doc) {
@@ -215,7 +215,7 @@ public abstract class BaseDescriptor {
 		}
 	}
 
-	private static class ScriptDefaults implements IScriptReference {
+	private static class ScriptDefaults implements IScriptDescriptor {
 		private final Document doc;
 
 		public ScriptDefaults(Document doc) {

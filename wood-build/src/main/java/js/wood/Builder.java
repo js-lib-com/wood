@@ -137,10 +137,10 @@ public class Builder implements IReferenceHandler {
 		pageDocument.setAuthor(project.getAuthor());
 		pageDocument.setDescription(pageComponent.getDescription());
 
-		for (IMetaReference meta : project.getMetaReferences()) {
+		for (IMetaDescriptor meta : project.getMetaDescriptors()) {
 			pageDocument.addMeta(meta);
 		}
-		for (IMetaReference meta : pageComponent.getMetaReferences()) {
+		for (IMetaDescriptor meta : pageComponent.getMetaDescriptors()) {
 			pageDocument.addMeta(meta);
 		}
 
@@ -156,10 +156,10 @@ public class Builder implements IReferenceHandler {
 		// 5. theme styles - theme styles are in no particular order since they are independent of each other
 		// 6. component styles - first use template and child component styles then parent component
 
-		for (ILinkReference link : project.getLinkReferences()) {
+		for (ILinkDescriptor link : project.getLinkDescriptors()) {
 			pageDocument.addLink(link);
 		}
-		for (ILinkReference link : pageComponent.getLinkReferences()) {
+		for (ILinkDescriptor link : pageComponent.getLinkDescriptors()) {
 			pageDocument.addLink(link);
 		}
 
@@ -178,10 +178,10 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
 		}
 
-		for (IScriptReference script : project.getScriptReferences()) {
+		for (IScriptDescriptor script : project.getScriptDescriptors()) {
 			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
 		}
-		for (IScriptReference script : pageComponent.getScriptReferences()) {
+		for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
 			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
 		}
 

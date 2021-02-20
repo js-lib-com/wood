@@ -1,22 +1,17 @@
 package js.wood.impl;
 
-import js.wood.IScriptReference;
+import js.dom.Element;
+import js.wood.IScriptDescriptor;
+import js.wood.WoodException;
 
 /**
- * Third party script descriptor contains script source and flag to append to document head. This class is loaded from
- * <code>scripts</code> section of the component descriptor, see snippet below. It is used to declare third party scripts.
- * <p>
- * 
- * <pre>
- * &lt;scripts&gt;
- *    &lt;script&gt;http://code.jquery.com/jquery-1.7.min.js&lt;/script&gt;
- *    &lt;script&gt;http://sixqs.com/site/js/lib/qtip.js&lt;/script&gt;
- * &lt;/scripts&gt;
- * </pre>
+ * Descriptor for page script element. This class is loaded from <code>script</code> element of project or page descriptor. All
+ * standard attributes are supported.
  * 
  * @author Iulian Rotaru
+ * @since 1.0
  */
-public class ScriptReference implements IScriptReference {
+public class ScriptDescriptor implements IScriptDescriptor {
 	/** Script source is the URL from where third script is to be loaded. */
 	private final String source;
 
@@ -30,7 +25,7 @@ public class ScriptReference implements IScriptReference {
 	private String crossOrigin;
 	private boolean embedded;
 
-	public ScriptReference(String source) {
+	public ScriptDescriptor(String source) {
 		this.source = source;
 	}
 
@@ -136,7 +131,7 @@ public class ScriptReference implements IScriptReference {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ScriptReference other = (ScriptReference) obj;
+		ScriptDescriptor other = (ScriptDescriptor) obj;
 		if (source == null) {
 			if (other.source != null)
 				return false;
@@ -148,5 +143,29 @@ public class ScriptReference implements IScriptReference {
 	@Override
 	public String toString() {
 		return source;
+	}
+
+	public static ScriptDescriptor create(Element scriptElement, IScriptDescriptor defaults) {
+		final String src = scriptElement.getAttr("src");
+		if (src == null) {
+			throw new WoodException("Invalid descriptor file. Missing 'src' attribute from <script> element.");
+		}
+		ScriptDescriptor script = new ScriptDescriptor(src);
+
+		script.setType(value(scriptElement.getAttr("type"), defaults.getType()));
+		script.setAsync(value(scriptElement.getAttr("async"), defaults.getAsync()));
+		script.setDefer(value(scriptElement.getAttr("defer"), defaults.getDefer()));
+		script.setNoModule(value(scriptElement.getAttr("nomodule"), defaults.getNoModule()));
+		script.setNonce(value(scriptElement.getAttr("nonce"), defaults.getNonce()));
+		script.setReferrerPolicy(value(scriptElement.getAttr("referrerpolicy"), defaults.getReferrerPolicy()));
+		script.setIntegrity(value(scriptElement.getAttr("integrity"), defaults.getIntegrity()));
+		script.setCrossOrigin(value(scriptElement.getAttr("crossorigin"), defaults.getCrossOrigin()));
+		script.setEmbedded(Boolean.parseBoolean(scriptElement.getAttr("embedded")));
+
+		return script;
+	}
+
+	private static String value(String base, String defaults) {
+		return base != null ? base : defaults;
 	}
 }
