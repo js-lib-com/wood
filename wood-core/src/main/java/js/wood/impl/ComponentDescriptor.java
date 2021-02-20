@@ -1,13 +1,7 @@
 package js.wood.impl;
 
-import java.io.FileNotFoundException;
-
-import js.dom.Document;
-import js.dom.DocumentBuilder;
-import js.util.Classes;
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
-import js.wood.WoodException;
 
 /**
  * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor}
@@ -119,32 +113,10 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 * @param referenceHandler resource references handler.
 	 */
 	public ComponentDescriptor(FilePath filePath, IReferenceHandler referenceHandler) {
-		super(document(filePath));
+		super(filePath);
 		this.filePath = filePath;
 		this.referenceHandler = referenceHandler;
 		this.referenceResolver = new ReferencesResolver();
-	}
-
-	/** Empty XML document used when component descriptor file is missing. */
-	private static final Document EMPTY_DOC;
-	static {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		EMPTY_DOC = builder.createXML("component");
-	}
-
-	/**
-	 * Create optional component descriptor document. Return empty document if descriptor file is missing.
-	 * 
-	 * @param descriptorFile component descriptor file, absolute path.
-	 * @return component descriptor document, possible empty.
-	 */
-	private static Document document(FilePath descriptorFile) {
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			return descriptorFile.exists() ? builder.loadXML(descriptorFile.toFile()) : EMPTY_DOC;
-		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing component descriptor file |%s| although it exists.", descriptorFile);
-		}
 	}
 
 	/**

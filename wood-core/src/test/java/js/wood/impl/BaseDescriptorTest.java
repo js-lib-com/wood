@@ -6,38 +6,57 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.dom.Document;
-import js.dom.DocumentBuilder;
-import js.util.Classes;
+import js.wood.FilePath;
 import js.wood.ILinkDescriptor;
 import js.wood.IMetaDescriptor;
 import js.wood.IScriptDescriptor;
-import js.wood.impl.BaseDescriptor;
 
+@RunWith(MockitoJUnitRunner.class)
 public class BaseDescriptorTest {
-	private BaseDescriptor descriptor;
+	@Mock
+	private FilePath filePath;
 
 	@Before
 	public void beforeTest() throws FileNotFoundException {
-		descriptor = new TestDescriptor(new File("src/test/resources/project-descriptor.xml"));
+		when(filePath.exists()).thenReturn(true);
 	}
 
 	@Test
 	public void properties() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<display>Test Project</display>" + //
+				"	<description>Test project description.</description>" + //
+				"</component>";
+		BaseDescriptor descriptor = descriptor(xml);
+
 		assertThat(descriptor.getDisplay(null), equalTo("Test Project"));
 		assertThat(descriptor.getDescription(null), equalTo("Test project description."));
 	}
 
 	@Test
 	public void metas() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<metas>" + //
+				"		<meta http-equiv='X-UA-Compatible' content='IE=9; IE=8; IE=7; IE=EDGE' />" + //
+				"		<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0' />" + //
+				"	</metas>" + //
+				"</component>";
+		BaseDescriptor descriptor = descriptor(xml);
+
 		List<IMetaDescriptor> metas = descriptor.getMetaDescriptors();
 		assertThat(metas, notNullValue());
 		assertThat(metas, hasSize(2));
@@ -49,6 +68,15 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void links() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<links>" + //
+				"		<link href='http://fonts.googleapis.com/css?family=Great+Vibes' rel='stylesheet' type='text/css' />" + //
+				"		<link href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css' integrity='sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T' crossorigin='anonymous' rel='stylesheet' />" + //
+				"	</links>" + //
+				"</component>";
+		BaseDescriptor descriptor = descriptor(xml);
+
 		List<ILinkDescriptor> links = descriptor.getLinkDescriptors();
 		assertThat(links, notNullValue());
 		assertThat(links, hasSize(2));
@@ -65,6 +93,14 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void scripts() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<scripts>" + //
+				"		<script src='lib/js-lib/js-lib.js' type='text/javascript'></script>" + //
+				"	</scripts>" + //
+				"</component>";
+		BaseDescriptor descriptor = descriptor(xml);
+
 		List<IScriptDescriptor> scripts = descriptor.getScriptDescriptors();
 		assertThat(scripts, notNullValue());
 		assertThat(scripts, hasSize(1));
@@ -74,7 +110,11 @@ public class BaseDescriptorTest {
 
 	@Test
 	public void defaults() throws FileNotFoundException {
-		descriptor = new TestDescriptor(new File("src/test/resources/empty-descriptor.xml"));
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"</component>";
+		BaseDescriptor descriptor = descriptor(xml);
+
 		assertThat(descriptor.getDisplay(null), nullValue());
 		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getMetaDescriptors(), emptyIterable());
@@ -82,14 +122,14 @@ public class BaseDescriptorTest {
 		assertThat(descriptor.getScriptDescriptors(), emptyIterable());
 	}
 
-	private static class TestDescriptor extends BaseDescriptor {
-		public TestDescriptor(File descriptorFile) throws FileNotFoundException {
-			super(document(descriptorFile));
-		}
+	private BaseDescriptor descriptor(String xml) {
+		when(filePath.getReader()).thenReturn(new StringReader(xml));
+		return new TestDescriptor(filePath);
+	}
 
-		private static Document document(File descriptorFile) throws FileNotFoundException {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			return builder.loadXML(descriptorFile);
+	private static class TestDescriptor extends BaseDescriptor {
+		public TestDescriptor(FilePath descriptorFile) {
+			super(descriptorFile);
 		}
 	}
 }

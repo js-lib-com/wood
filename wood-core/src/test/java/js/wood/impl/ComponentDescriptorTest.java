@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
+import java.io.StringReader;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
-import js.wood.impl.ComponentDescriptor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentDescriptorTest {
@@ -29,24 +28,47 @@ public class ComponentDescriptorTest {
 	@Before
 	public void beforeTest() {
 		when(filePath.exists()).thenReturn(true);
-		descriptor = descriptor("component-descriptor.xml");
 	}
 
 	@Test
 	public void properties() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<version>1.0</version>" + //
+				"	<security-role>admin</security-role>" + //
+				"</component>";
+		descriptor = descriptor(xml);
+
 		assertThat(descriptor.getVersion(), equalTo("1.0"));
 		assertThat(descriptor.getSecurityRole(), equalTo("admin"));
 	}
 
 	@Test
-	public void defaults() {
-		descriptor = descriptor("empty-project-descriptor.xml");
+	public void properties_Missing() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"</component>";
+		descriptor = descriptor(xml);
+
 		assertThat(descriptor.getVersion(), nullValue());
 		assertThat(descriptor.getSecurityRole(), nullValue());
 	}
 
-	private ComponentDescriptor descriptor(String descriptorFile) {
-		when(filePath.toFile()).thenReturn(new File("src/test/resources/" + descriptorFile));
+	@Test
+	public void properties_Empty() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<version></version>" + //
+				"	<security-role></security-role>" + //
+				"</component>";
+		descriptor = descriptor(xml);
+
+		assertThat(descriptor.getVersion(), nullValue());
+		assertThat(descriptor.getSecurityRole(), nullValue());
+	}
+
+	private ComponentDescriptor descriptor(String xml) {
+		when(filePath.getReader()).thenReturn(new StringReader(xml));
 		return new ComponentDescriptor(filePath, referenceHandler);
 	}
 }

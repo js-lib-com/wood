@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -102,12 +103,13 @@ public class Project {
 	 * 
 	 * @param projectDir path to existing project root directory.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
+	 * @throws FileNotFoundException 
 	 */
 	public Project(File projectRoot) throws IllegalArgumentException {
 		Params.isDirectory(projectRoot, "Project directory");
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
-		this.descriptor = new ProjectDescriptor(new File(this.projectRoot, CT.PROJECT_CONFIG));
+		this.descriptor = new ProjectDescriptor(new FilePath(this, CT.PROJECT_CONFIG));
 		this.excludes = this.descriptor.getExcludes().stream().map(dirPath -> new DirPath(this, dirPath)).collect(Collectors.toList());
 
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);

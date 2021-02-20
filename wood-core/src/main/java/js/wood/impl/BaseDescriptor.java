@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import js.dom.Document;
+import js.dom.DocumentBuilder;
 import js.dom.Element;
+import js.util.Classes;
+import js.wood.FilePath;
 import js.wood.ILinkDescriptor;
 import js.wood.IMetaDescriptor;
 import js.wood.IScriptDescriptor;
@@ -17,14 +20,23 @@ import js.wood.WoodException;
  * @since 1.0
  */
 abstract class BaseDescriptor {
+	/** Empty XML document used when component descriptor file is missing. */
+	private static final Document EMPTY_DOC;
+	static {
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+		EMPTY_DOC = builder.createXML("component");
+	}
+
 	/** XML DOM document. */
 	protected final Document doc;
 
 	private final ILinkDescriptor linkDefaults;
 	private final IScriptDescriptor scriptDefaults;
 
-	protected BaseDescriptor(Document doc) {
-		this.doc = doc;
+	protected BaseDescriptor(FilePath descriptorFile) {
+		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+		this.doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
+
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
 	}

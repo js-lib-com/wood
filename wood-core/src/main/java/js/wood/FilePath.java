@@ -63,7 +63,7 @@ public class FilePath extends Path {
 
 	/** Pattern for file path accordingly syntax described by class description. */
 	private static final Pattern PATTERN = Pattern.compile("^" + //
-			"((?:[a-z]+)/(?:[a-z0-9-]+/)*)" + // directory path
+			"((?:[a-z]+)/(?:[a-z0-9-]+/)*)?" + // directory path
 			"([a-z0-9-\\.]+)" + // base name is file name without variants or extension
 			"(?:_([a-z0-9][a-z0-9-_]*))?" + // variants
 			"\\.([a-z0-9]{2,3})" + // file extension
@@ -99,7 +99,7 @@ public class FilePath extends Path {
 			throw new WoodException("Invalid file path |%s|.", filePath);
 		}
 
-		this.parentDirPath = new DirPath(project, matcher.group(1));
+		this.parentDirPath = matcher.group(1) != null ? new DirPath(project, matcher.group(1)) : null;
 		this.basename = matcher.group(2);
 		String extension = matcher.group(4);
 		this.name = Strings.concat(this.basename, '.', extension);

@@ -1,7 +1,5 @@
 package js.wood.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,11 +9,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import js.dom.Document;
-import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.util.Classes;
 import js.util.Strings;
+import js.wood.FilePath;
 import js.wood.WoodException;
 
 /**
@@ -130,10 +126,9 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * declared.
 	 *
 	 * @param descriptorFile descriptor file, absolute path.
-	 * @throws WoodException if descriptor file not found or locale property is missing.
 	 */
-	public ProjectDescriptor(File descriptorFile) throws WoodException {
-		super(document(descriptorFile));
+	public ProjectDescriptor(FilePath descriptorFile) {
+		super(descriptorFile);
 
 		Element localeElement = this.doc.getByTag("locale");
 		if (localeElement == null) {
@@ -163,22 +158,6 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Create project descriptor document.
-	 * 
-	 * @param descriptorFile project descriptor file, absolute path.
-	 * @return project descriptor document.
-	 * @throws WoodException if project descriptor file is missing.
-	 */
-	private static Document document(File descriptorFile) {
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			return builder.loadXML(descriptorFile);
-		} catch (FileNotFoundException unused) {
-			throw new WoodException("Missing project descriptor |%s|.", descriptorFile);
-		}
-	}
-
-	/**
 	 * Create locale instance for given language tag.
 	 * 
 	 * @param languageTag language tag.
@@ -203,25 +182,6 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 */
 	public String getAuthor() {
 		return text("author", null);
-	}
-
-	/**
-	 * Get project name or default value if <code>name</code> element is missing.
-	 * 
-	 * @param defaultValue default value.
-	 * @return project name or default value.
-	 */
-	public String getName(String defaultValue) {
-		return text("name", defaultValue);
-	}
-
-	/**
-	 * Get project theme or null if none declared on project descriptor.
-	 * 
-	 * @return project theme, possible null.
-	 */
-	public String getTheme() {
-		return text("theme", null);
 	}
 
 	/**

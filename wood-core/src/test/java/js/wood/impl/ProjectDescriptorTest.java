@@ -7,35 +7,55 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
-import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.impl.NamingStrategy;
-import js.wood.impl.ProjectDescriptor;
+import js.wood.FilePath;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectDescriptorTest {
+	@Mock
+	private FilePath filePath;
+
 	private ProjectDescriptor descriptor;
 
 	@Before
-	public void beforeTest() {
-		descriptor = new ProjectDescriptor(new File("src/test/resources/project-descriptor.xml"));
+	public void beforeTest() throws FileNotFoundException {
+		when(filePath.exists()).thenReturn(true);
 	}
 
 	@Test
 	public void properties() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"	<locale>en</locale>" + //
+				"	<author>j(s)-lib</author>" + //
+				"	<naming-strategy>XMLNS</naming-strategy>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
 		assertThat(descriptor.getAuthor(), equalTo("j(s)-lib"));
-		assertThat(descriptor.getName(null), equalTo("project"));
-		assertThat(descriptor.getTheme(), equalTo("material"));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 	}
 
 	@Test
 	public void locales() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"	<locale>en, de, fr, ro</locale>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
 		List<Locale> locales = descriptor.getLocales();
 		assertThat(locales, notNullValue());
 		assertThat(locales, hasSize(4));
@@ -44,6 +64,13 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void excludes() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"	<locale>en</locale>" + //
+				"	<excludes>page/about</excludes>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
 		List<String> excludes = descriptor.getExcludes();
 		assertThat(excludes, notNullValue());
 		assertThat(excludes, hasSize(1));
@@ -51,12 +78,20 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void defaults() {
-		descriptor = new ProjectDescriptor(new File("src/test/resources/empty-project-descriptor.xml"));
+	public void defaults() throws FileNotFoundException {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"	<locale>en</locale>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
 		assertThat(descriptor.getAuthor(), nullValue());
-		assertThat(descriptor.getName(null), nullValue());
-		assertThat(descriptor.getTheme(), nullValue());
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getExcludes(), emptyIterable());
+	}
+
+	private ProjectDescriptor descriptor(String xml) {
+		when(filePath.getReader()).thenReturn(new StringReader(xml));
+		return new ProjectDescriptor(filePath);
 	}
 }
