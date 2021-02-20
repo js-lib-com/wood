@@ -7,29 +7,11 @@ package js.wood;
  * @since 1.0
  */
 public final class CT {
-	// ------------------------------------------------------
-	// Global constants
-
-	/** Default author string used when not configured on project descriptor. */
-	public static final String DEF_AUTHOR = "WOOD";
-
 	/** Project configuration file. */
 	public static final String PROJECT_CONFIG = "project.xml";
 
 	/** Favicon file name stored into project assets directory. */
 	public static final String FAVICON = "favicon.ico";
-
-	/** End of file mark. */
-	public static final int EOF = -1;
-
-	/** System dependent line separator. */
-	public static final String LN = System.getProperty("line.separator");
-
-	/** Name convention for current directory. */
-	public static final String CURRENT_DIR = ".";
-
-	/** Seed for hash code computation. */
-	public static final int PRIME = 31;
 
 	// ------------------------------------------------------
 	// Files types recognized by this build tool
@@ -56,15 +38,6 @@ public final class CT {
 
 	// ------------------------------------------------------
 	// Project directories relative to project root
-
-	/** Project library for third party components and script libraries. */
-	public static final String LIBRARY_DIR = "lib";
-
-	/** Script code base. */
-	public static final String SCRIPT_DIR = "script";
-
-	/** Generated files, mainly scripts for HTTP-RMI stubs. */
-	public static final String GENERATED_DIR = "gen";
 
 	/** Project assets directory stores global variables and media files. */
 	public static final String ASSETS_DIR = "res/asset";

@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import js.util.Classes;
-import js.wood.CT;
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
 import js.wood.Project;

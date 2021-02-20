@@ -21,12 +21,12 @@ public final class LayoutReader extends Reader {
 
 	/** XML stream header contains XML declaration and root opening tag. */
 	private static final String HEADER = Strings.concat(//
-			"<?xml version='1.0' encoding='UTF-8'?>", CT.LN, //
-			"<!DOCTYPE ", ROOT, " PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>", CT.LN, //
-			"<", ROOT, ">", CT.LN);
+			"<?xml version='1.0' encoding='UTF-8'?>", System.getProperty("line.separator"), //
+			"<!DOCTYPE ", ROOT, " PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>", System.getProperty("line.separator"), //
+			"<", ROOT, ">", System.getProperty("line.separator"));
 
 	/** XML stream footer contains root closing tag. */
-	private static final String FOOTER = Strings.concat(CT.LN, "</", ROOT, ">");
+	private static final String FOOTER = Strings.concat(System.getProperty("line.separator"), "</", ROOT, ">");
 
 	/** External defined reader, decorated by this layout reader instance. */
 	private Reader reader;
@@ -73,12 +73,12 @@ public final class LayoutReader extends Reader {
 	 */
 	@Override
 	public int read(char[] buffer, int offset, int length) throws IOException {
-		int readCount = CT.EOF;
+		int readCount = -1;
 
 		switch (this.state) {
 		case HEADER:
 			readCount = copy(HEADER, buffer, offset, length);
-			if (readCount != CT.EOF) {
+			if (readCount != -1) {
 				// keep the state till header end
 				break;
 			}
@@ -87,7 +87,7 @@ public final class LayoutReader extends Reader {
 
 		case BODY:
 			readCount = reader.read(buffer, offset, length);
-			if (readCount != CT.EOF) {
+			if (readCount != -1) {
 				// keep the state till decorated reader end
 				break;
 			}
@@ -117,7 +117,7 @@ public final class LayoutReader extends Reader {
 	 */
 	private int copy(String source, char[] buffer, int offset, int length) {
 		if (sourceIndex == source.length()) {
-			return CT.EOF;
+			return -1;
 		}
 		int readCount = 0;
 		for (int i = offset; sourceIndex < source.length() && i < length; sourceIndex++, i++) {

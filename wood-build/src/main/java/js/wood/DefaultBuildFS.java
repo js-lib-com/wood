@@ -67,7 +67,7 @@ class DefaultBuildFS extends BuildFS {
 				return createDirectory(directory);
 			}
 		}
-		return createDirectory(CT.CURRENT_DIR);
+		return createDirectory(".");
 	}
 
 	/**

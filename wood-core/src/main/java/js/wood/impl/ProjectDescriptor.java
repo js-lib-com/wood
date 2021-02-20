@@ -16,7 +16,6 @@ import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
-import js.wood.CT;
 import js.wood.WoodException;
 
 /**
@@ -203,7 +202,7 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 * @return project author or null.
 	 */
 	public String getAuthor() {
-		return text("author", CT.DEF_AUTHOR);
+		return text("author", null);
 	}
 
 	/**

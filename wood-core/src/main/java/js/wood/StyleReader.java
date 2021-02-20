@@ -53,10 +53,10 @@ import js.wood.impl.FilesHandler;
  */
 public class StyleReader extends Reader {
 	/** Media section header. */
-	private static final String HEADER = Strings.concat(CT.LN, "@media screen and %s {", CT.LN, CT.LN);
+	private static final String HEADER = Strings.concat(System.getProperty("line.separator"), "@media screen and %s {", System.getProperty("line.separator"), System.getProperty("line.separator"));
 
 	/** Media section footer. */
-	private static final String FOOTER = Strings.concat(CT.LN, "}", CT.LN);
+	private static final String FOOTER = Strings.concat(System.getProperty("line.separator"), "}", System.getProperty("line.separator"));
 
 	/** Media expressions list mapped to style files, possible empty. */
 	private final List<FilePath> variants = new ArrayList<>();
@@ -125,13 +125,13 @@ public class StyleReader extends Reader {
 	public int read(char[] buffer, int offset, int length) throws IOException {
 		if (state == State.BASE_CONTENT) {
 			int readCount = reader.read(buffer, offset, length);
-			if (readCount != CT.EOF) {
+			if (readCount != -1) {
 				return readCount;
 			}
 			state = State.NEXT_VARIANT;
 		}
 
-		int readCount = CT.EOF;
+		int readCount = -1;
 		VARIANTS_LOOP: for (;;) {
 			switch (state) {
 			case NEXT_VARIANT:
@@ -154,7 +154,7 @@ public class StyleReader extends Reader {
 
 			case VARIANT_HEADER:
 				readCount = copy(buffer, offset, length);
-				if (readCount != CT.EOF) {
+				if (readCount != -1) {
 					// keep the state till header end
 					break VARIANTS_LOOP;
 				}
@@ -163,7 +163,7 @@ public class StyleReader extends Reader {
 
 			case VARIANT_CONTENT:
 				readCount = reader.read(buffer, offset, length);
-				if (readCount != CT.EOF) {
+				if (readCount != -1) {
 					// keep the state till current style file reader end
 					break VARIANTS_LOOP;
 				}
@@ -175,7 +175,7 @@ public class StyleReader extends Reader {
 
 			case VARIANT_FOOTER:
 				readCount = copy(buffer, offset, length);
-				if (readCount != CT.EOF) {
+				if (readCount != -1) {
 					// keep copying footer till its end
 					break VARIANTS_LOOP;
 				}
@@ -205,7 +205,7 @@ public class StyleReader extends Reader {
 	 */
 	private int copy(char[] buffer, int offset, int length) {
 		if (sourceIndex == source.length()) {
-			return CT.EOF;
+			return -1;
 		}
 		int readCount = 0;
 		for (int i = offset; sourceIndex < source.length() && i < length; sourceIndex++, i++) {

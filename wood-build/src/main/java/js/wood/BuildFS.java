@@ -326,7 +326,7 @@ public abstract class BuildFS {
 			dir = new File(dir, locale.toLanguageTag());
 		}
 
-		if (!CT.CURRENT_DIR.equals(dirName)) {
+		if (!".".equals(dirName)) {
 			dir = new File(dir, dirName);
 		}
 		if (!dir.exists()) {

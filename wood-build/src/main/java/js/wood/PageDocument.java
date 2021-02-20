@@ -100,13 +100,13 @@ class PageDocument {
 	/**
 	 * Set page author. Add meta element to page head, with name <code>Author</code> and provided author value as content.
 	 * 
-	 * @param author page author, null not accepted.
-	 * @throws IllegalArgumentException if author parameter is null or empty.
+	 * @param author page author, null ignored.
 	 */
 	public void setAuthor(String author) {
-		Params.notNullOrEmpty(author, "Author");
-		head.addChild(doc.createElement("meta", "name", "Author", "content", author));
-		head.addText("\r\n");
+		if (author != null) {
+			head.addChild(doc.createElement("meta", "name", "Author", "content", author));
+			head.addText("\r\n");
+		}
 	}
 
 	/**
@@ -220,16 +220,16 @@ class PageDocument {
 
 	/**
 	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script reference
-	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See {@link IScriptDescriptor}
-	 * for a list of supported attributes.
+	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See
+	 * {@link IScriptDescriptor} for a list of supported attributes.
 	 * <p>
 	 * If {@link IScriptDescriptor#getSource()} is a file path relative this project, as accepted by
 	 * {@link FilePath#accept(String)}, invoke {@link Handler#handle(Object)} with {@link FilePath} created from script source
 	 * attribute. Handler returned value is used to replace current script source.
 	 * <p>
 	 * If script is embedded, see {@link IScriptDescriptor#isEmbedded()}, load script as text content to created script element,
-	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptDescriptor#getSource()} is project relative path
-	 * of the script file from where text content is loaded.
+	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptDescriptor#getSource()} is project relative
+	 * path of the script file from where text content is loaded.
 	 * 
 	 * @param script script reference,
 	 * @param handler file handler.

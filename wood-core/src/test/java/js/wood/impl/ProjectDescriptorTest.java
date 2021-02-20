@@ -53,7 +53,7 @@ public class ProjectDescriptorTest {
 	@Test
 	public void defaults() {
 		descriptor = new ProjectDescriptor(new File("src/test/resources/empty-project-descriptor.xml"));
-		assertThat(descriptor.getAuthor(), equalTo("WOOD"));
+		assertThat(descriptor.getAuthor(), nullValue());
 		assertThat(descriptor.getName(null), nullValue());
 		assertThat(descriptor.getTheme(), nullValue());
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));

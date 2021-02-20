@@ -63,8 +63,10 @@ public final class Preview {
 		head.addText("\r\n");
 		head.addChild(doc.createElement("title").setText(compo.getDisplay()));
 		head.addText("\r\n");
-		head.addChild(doc.createElement("meta", "name", "Author", "content", project.getAuthor()));
-		head.addText("\r\n");
+		if (project.getAuthor() != null) {
+			head.addChild(doc.createElement("meta", "name", "Author", "content", project.getAuthor()));
+			head.addText("\r\n");
+		}
 		head.addChild(doc.createElement("meta", "name", "Description", "content", compo.getDescription()));
 		head.addText("\r\n");
 
