@@ -2,14 +2,10 @@ package js.wood.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
 import org.junit.Test;
-
-import js.wood.impl.FileType;
 
 public class FileTypeTest {
 	@Test
@@ -26,24 +22,29 @@ public class FileTypeTest {
 
 	/** Not recognized extensions are considered media file. Also if extension is null or empty. */
 	@Test
-	public void nullOrBadExtension() {
+	public void forExtension_BadExtension() {
 		assertThat(FileType.forExtension("fake"), equalTo(FileType.MEDIA));
-		assertThat(FileType.forExtension(null), equalTo(FileType.MEDIA));
 		assertThat(FileType.forExtension(""), equalTo(FileType.MEDIA));
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void forExtension_NullExtension() {
+		FileType.forExtension(null);
+	}
+
 	@Test
-	public void equals() {
-		assertTrue(FileType.LAYOUT.equals(new File("path/file.htm")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.css")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.js")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file.xml")));
-		assertFalse(FileType.LAYOUT.equals(new File("path/file")));
-		assertTrue(FileType.STYLE.equals(new File("path/file.css")));
-		assertTrue(FileType.SCRIPT.equals(new File("path/file.js")));
-		assertTrue(FileType.XML.equals(new File("path/file.xml")));
-		assertTrue(FileType.MEDIA.equals(new File("path/file")));
-		assertTrue(FileType.MEDIA.equals(new File("path/file.png")));
-		assertTrue(FileType.MEDIA.equals(new File("path/file.avi")));
+	public void forFile() {
+		assertThat(FileType.forFile(new File("path/file.htm")), equalTo(FileType.LAYOUT));
+		assertThat(FileType.forFile(new File("path/file.css")), equalTo(FileType.STYLE));
+		assertThat(FileType.forFile(new File("path/file.js")), equalTo(FileType.SCRIPT));
+		assertThat(FileType.forFile(new File("path/file.xml")), equalTo(FileType.XML));
+		assertThat(FileType.forFile(new File("path/file")), equalTo(FileType.MEDIA));
+		assertThat(FileType.forFile(new File("path/file.png")), equalTo(FileType.MEDIA));
+		assertThat(FileType.forFile(new File("path/file.avi")), equalTo(FileType.MEDIA));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void forFile_NullFile() {
+		FileType.forFile(null);
 	}
 }

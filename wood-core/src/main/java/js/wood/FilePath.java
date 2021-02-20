@@ -104,7 +104,7 @@ public class FilePath extends Path {
 		String extension = matcher.group(4);
 		this.name = Strings.concat(this.basename, '.', extension);
 		this.variants = new Variants(this, matcher.group(3));
-		this.fileType = FileType.forExtension(extension);
+		this.fileType = FileType.forExtension(extension.toLowerCase());
 	}
 
 	/**

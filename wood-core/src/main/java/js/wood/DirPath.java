@@ -228,7 +228,8 @@ public class DirPath extends Path {
 				if (!handler.accept(filePath)) {
 					continue;
 				}
-				if (fileType == null || fileType.equals(file)) {
+				// if file type is null accept all files
+				if (fileType == null || FileType.forFile(file) == fileType) {
 					handler.onFile(filePath);
 				}
 			}
