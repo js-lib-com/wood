@@ -66,9 +66,6 @@ public final class CT {
 	/** Generated files, mainly scripts for HTTP-RMI stubs. */
 	public static final String GENERATED_DIR = "gen";
 
-	/** Default site build directory used when project configuration file does not include it. */
-	public static final String DEF_BUILD_DIR = "build/site";
-
 	/** Project assets directory stores global variables and media files. */
 	public static final String ASSETS_DIR = "res/asset";
 

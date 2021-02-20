@@ -5,7 +5,6 @@ import js.dom.EList;
 import js.dom.Element;
 import js.dom.NamespaceContext;
 import js.util.Params;
-import js.wood.IOperatorsHandler;
 import js.wood.WOOD;
 
 /**

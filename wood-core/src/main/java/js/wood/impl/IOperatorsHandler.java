@@ -1,9 +1,8 @@
-package js.wood;
+package js.wood.impl;
 
 import js.dom.Document;
 import js.dom.EList;
 import js.dom.Element;
-import js.wood.impl.Operator;
 
 /**
  * WOOD operators handler. This interface supplies methods for WOOD operators handling. An operator is a standard

@@ -14,7 +14,7 @@ public class BuilderProjectTest implements IReferenceHandler {
 	@Before
 	public void beforeTest() throws IOException {
 		File projectRoot = new File("src/test/resources/project");
-		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		File buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
 		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);

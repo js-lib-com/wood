@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

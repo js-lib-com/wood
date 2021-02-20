@@ -18,6 +18,7 @@ import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.EditablePath;
+import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.LayoutReader;
 import js.wood.impl.Operator;

@@ -23,7 +23,7 @@ public class DefaultBuildFsTest {
 	@Before
 	public void beforeTest() throws Exception {
 		File projectRoot = new File("src/test/resources/project");
-		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		File buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
 		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
@@ -67,15 +67,13 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void pageName() {
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
 		assertThat(buildFS.formatPageName("index.htm"), equalTo("index.htm"));
 	}
 
 	@Test
 	public void styleName() {
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
 
 		assertThat(buildFS.formatStyleName(path("res/page/index/index.css")), equalTo("res-page_index.css"));
 		assertThat(buildFS.formatStyleName(path("res/theme/style.css")), equalTo("res-theme_style.css"));
@@ -89,8 +87,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void scriptName() {
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
 
 		assertThat(buildFS.formatScriptName(path("script/hc/page/Index.js")), equalTo("script.hc.page.Index.js"));
 		assertThat(buildFS.formatScriptName(path("lib/paging.js")), equalTo("lib.paging.js"));
@@ -100,8 +97,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void mediaName() {
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
 
 		assertThat(buildFS.formatMediaName(path("res/page/index/background.png")), equalTo("res-page-index_background.png"));
 		assertThat(buildFS.formatMediaName(path("res/page/index/index.png")), equalTo("res-page-index_index.png"));

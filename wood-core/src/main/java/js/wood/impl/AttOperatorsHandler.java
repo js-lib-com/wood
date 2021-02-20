@@ -4,7 +4,6 @@ import js.dom.Document;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Params;
-import js.wood.IOperatorsHandler;
 
 /**
  * Operators handler implementation for operators with simple attribute name.

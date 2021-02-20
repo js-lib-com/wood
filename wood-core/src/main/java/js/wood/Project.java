@@ -11,6 +11,7 @@ import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
+import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
@@ -72,7 +73,7 @@ public class Project {
 	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
 	 * project directory root.
 	 */
-	protected final ProjectDescriptor descriptor;
+	private final ProjectDescriptor descriptor;
 
 	protected final List<DirPath> excludes;
 

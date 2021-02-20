@@ -66,7 +66,7 @@ public class Builder implements IReferenceHandler {
 	 * @throws IOException
 	 */
 	public Builder(BuilderProject project) throws IOException {
-		this(project, new DefaultBuildFS(new File(project.getProjectRoot(), CT.DEF_BUILD_DIR), 0));
+		this(project, new DefaultBuildFS(new File(project.getProjectRoot(), BuildFS.DEF_BUILD_DIR), 0));
 	}
 
 	/**

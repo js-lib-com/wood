@@ -21,9 +21,11 @@ import js.wood.util.Files;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	private final ThemeStyles themeStyles;
+	private final File buildDir;
 
 	private final Variables assetVariables;
+
+	private final ThemeStyles themeStyles;
 
 	/** Cache for resource variables. */
 	private final Map<DirPath, Variables> variables;
@@ -39,6 +41,7 @@ class BuilderProject extends Project {
 	 */
 	public BuilderProject(File projectDir, File buildDir) throws IOException {
 		super(projectDir);
+		this.buildDir = buildDir;
 		this.excludes.add(new DirPath(this, Files.getRelativePath(projectDir, buildDir, true)));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
@@ -53,7 +56,7 @@ class BuilderProject extends Project {
 	 * @return true if project is multi-locale.
 	 */
 	public boolean isMultiLocale() {
-		return descriptor.getLocales().size() > 1;
+		return getLocales().size() > 1;
 	}
 
 	@Override
@@ -119,5 +122,16 @@ class BuilderProject extends Project {
 				}
 			}
 		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	File getBuildDir() {
+		return buildDir;
+	}
+
+	File getBuildFile(String path) {
+		return new File(buildDir, path);
 	}
 }

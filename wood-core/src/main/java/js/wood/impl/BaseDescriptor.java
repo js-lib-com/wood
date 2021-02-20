@@ -16,7 +16,7 @@ import js.wood.WoodException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public abstract class BaseDescriptor {
+abstract class BaseDescriptor {
 	/** XML DOM document. */
 	protected final Document doc;
 

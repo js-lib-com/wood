@@ -23,7 +23,7 @@ public class BuildFsTest {
 	@Before
 	public void beforeTest() throws Exception {
 		File projectRoot = new File("src/test/resources/project");
-		File buildDir = new File(projectRoot, CT.DEF_BUILD_DIR);
+		File buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
 		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
@@ -39,7 +39,7 @@ public class BuildFsTest {
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());
-		assertTrue(exists("htm/index.htm"));
+		assertTrue(project.getBuildFile("htm/index.htm").exists());
 	}
 
 	@Test
@@ -51,13 +51,12 @@ public class BuildFsTest {
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());
-		assertTrue(exists("htm/index.htm"));
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		new File(buildDir, "htm/index.htm").delete();
+		assertTrue(project.getBuildFile("htm/index.htm").exists());
+		project.getBuildFile("htm/index.htm").delete();
 
 		// second attempt to write page in the same build FS instance is ignored
 		buildFS.writePage(compo, page.getDocument());
-		assertFalse(exists("htm/index.htm"));
+		assertFalse(project.getBuildFile("htm/index.htm").exists());
 	}
 
 	@Test
@@ -70,7 +69,7 @@ public class BuildFsTest {
 
 		buildFS.setLocale(new Locale("ro"));
 		buildFS.writePage(compo, page.getDocument());
-		assertTrue(exists("ro/htm/index.htm"));
+		assertTrue(project.getBuildFile("ro/htm/index.htm").exists());
 	}
 
 	@Test
@@ -82,16 +81,16 @@ public class BuildFsTest {
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());
-		assertTrue(exists("htm/index-004.htm"));
+		assertTrue(project.getBuildFile("htm/index-004.htm").exists());
 	}
 
 	@Test
 	public void writeFavicon() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
-		assertFalse(exists("favicon.ico"));
+		assertFalse(project.getBuildFile("favicon.ico").exists());
 		assertThat(buildFS.writeFavicon(null, new FilePath(project, "res/asset/favicon.ico")), equalTo("../img/favicon.ico"));
-		assertTrue(exists("img/favicon.ico"));
+		assertTrue(project.getBuildFile("img/favicon.ico").exists());
 	}
 
 	@Test
@@ -100,7 +99,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(exists("img/background.jpg"));
+		assertTrue(project.getBuildFile("img/background.jpg").exists());
 	}
 
 	@Test
@@ -110,7 +109,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(exists("ro/img/background.jpg"));
+		assertTrue(project.getBuildFile("ro/img/background.jpg").exists());
 	}
 
 	@Test
@@ -119,7 +118,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background-004.jpg"));
-		assertTrue(exists("img/background-004.jpg"));
+		assertTrue(project.getBuildFile("img/background-004.jpg").exists());
 	}
 
 	@Test
@@ -128,7 +127,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(exists("img/background.jpg"));
+		assertTrue(project.getBuildFile("img/background.jpg").exists());
 	}
 
 	@Test
@@ -138,7 +137,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(exists("ro/img/background.jpg"));
+		assertTrue(project.getBuildFile("ro/img/background.jpg").exists());
 	}
 
 	@Test
@@ -147,7 +146,7 @@ public class BuildFsTest {
 		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
 
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background-004.jpg"));
-		assertTrue(exists("img/background-004.jpg"));
+		assertTrue(project.getBuildFile("img/background-004.jpg").exists());
 	}
 
 	@Test
@@ -156,7 +155,7 @@ public class BuildFsTest {
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style.css"));
-		assertTrue(exists("css/style.css"));
+		assertTrue(project.getBuildFile("css/style.css").exists());
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class BuildFsTest {
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style.css"));
-		assertTrue(exists("ro/css/style.css"));
+		assertTrue(project.getBuildFile("ro/css/style.css").exists());
 	}
 
 	@Test
@@ -175,7 +174,7 @@ public class BuildFsTest {
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");
 
 		assertThat(buildFS.writeStyle(null, styleFile, nullReferenceHandler()), equalTo("../css/style-004.css"));
-		assertTrue(exists("css/style-004.css"));
+		assertTrue(project.getBuildFile("css/style-004.css").exists());
 	}
 
 	@Test
@@ -184,7 +183,7 @@ public class BuildFsTest {
 		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
-		assertTrue(exists("js/Index.js"));
+		assertTrue(project.getBuildFile("js/Index.js").exists());
 	}
 
 	@Test
@@ -194,7 +193,7 @@ public class BuildFsTest {
 		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index.js"));
-		assertTrue(exists("ro/js/Index.js"));
+		assertTrue(project.getBuildFile("ro/js/Index.js").exists());
 	}
 
 	@Test
@@ -203,7 +202,7 @@ public class BuildFsTest {
 		FilePath scriptFile = new FilePath(project, "script/hc/page/Index.js");
 
 		assertThat(buildFS.writeScript(null, scriptFile, nullReferenceHandler()), equalTo("../js/Index-004.js"));
-		assertTrue(exists("js/Index-004.js"));
+		assertTrue(project.getBuildFile("js/Index-004.js").exists());
 	}
 
 	@Test
@@ -234,14 +233,9 @@ public class BuildFsTest {
 		buildFS.setLocale(null);
 	}
 
-	private boolean exists(String fileName) {
-		File buildDir = new File(project.getProjectRoot(), CT.DEF_BUILD_DIR);
-		return new File(buildDir, fileName).exists();
-	}
-
 	private static class TestBuildFS extends BuildFS {
 		public TestBuildFS(BuilderProject project, int buildNumber) {
-			super(new File(project.getProjectRoot(), CT.DEF_BUILD_DIR), buildNumber);
+			super(project.getBuildDir(), buildNumber);
 		}
 
 		@Override

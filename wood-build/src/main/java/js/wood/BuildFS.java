@@ -30,6 +30,9 @@ import js.util.Params;
  * @since 1.0
  */
 public abstract class BuildFS {
+	/** Default site build directory used when project configuration file does not include it. */
+	public static final String DEF_BUILD_DIR = "build/site";
+
 	/** Project reference. */
 	private final File buildDir;
 
