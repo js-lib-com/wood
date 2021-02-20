@@ -10,12 +10,18 @@ import js.wood.IMetaDescriptor;
 import js.wood.IScriptDescriptor;
 import js.wood.WoodException;
 
+/**
+ * Common logic for both component and project descriptors.
+ * 
+ * @author Iulian Rotaru
+ * @since 1.0
+ */
 public abstract class BaseDescriptor {
 	/** XML DOM document. */
 	protected final Document doc;
 
-	private ILinkDescriptor linkDefaults;
-	private IScriptDescriptor scriptDefaults;
+	private final ILinkDescriptor linkDefaults;
+	private final IScriptDescriptor scriptDefaults;
 
 	protected BaseDescriptor(Document doc) {
 		this.doc = doc;

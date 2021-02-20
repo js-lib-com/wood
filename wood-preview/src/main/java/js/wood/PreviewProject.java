@@ -3,22 +3,8 @@ package js.wood;
 import java.io.File;
 
 public class PreviewProject extends Project {
-	private final String previewName;
-
 	public PreviewProject(File projectDir) throws IllegalArgumentException {
 		super(projectDir);
-		String name = this.getName();
-		this.previewName = name.isEmpty() ? "preview" : name + "-preview";
-	}
-
-	/**
-	 * Get project name for preview servlet.
-	 * 
-	 * @return project name used for preview.
-	 * @see #previewName
-	 */
-	public String getPreviewName() {
-		return previewName;
 	}
 
 	/**

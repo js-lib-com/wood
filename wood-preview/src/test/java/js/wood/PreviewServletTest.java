@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -81,16 +81,16 @@ public class PreviewServletTest {
 		assertThat(styles.size(), equalTo(6));
 
 		int index = 0;
-		assertStyle("/styles-preview/res/theme/reset.css", styles, index++);
-		assertStyle("/styles-preview/res/theme/fx.css", styles, index++);
+		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/theme/reset.css"));
+		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/theme/fx.css"));
 
 		// site theme styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='/styles-preview/res/theme/form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='/styles-preview/res/theme/styles.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/form.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/styles.css']"));
 		index += 2; // skip form.css and styles.css
 
-		assertStyle("/styles-preview/res/compo/compo.css", styles, index++);
-		assertStyle("/styles-preview/res/compo/preview.css", styles, index++);
+		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/compo/compo.css"));
+		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/compo/preview.css"));
 	}
 
 	@Test
@@ -170,7 +170,7 @@ public class PreviewServletTest {
 
 		reference = new Reference(source, ResourceType.IMAGE, "logo");
 		source = new FilePath(project, "res/template/page/page.htm");
-		assertThat(servlet.onResourceReference(reference, source), equalTo("/project-preview/res/template/page/logo.jpg"));
+		assertThat(servlet.onResourceReference(reference, source), equalTo("/test/res/template/page/logo.jpg"));
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class PreviewServletTest {
 		PreviewServlet servlet = new PreviewServlet();
 		servlet.init(config);
 
-		project = Classes.getFieldValue(servlet, "project");
+		project = servlet.getProject();
 
 		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
 		when(httpRequest.getContextPath()).thenReturn("/test");
@@ -236,7 +236,7 @@ public class PreviewServletTest {
 			}
 		});
 
-		Classes.invoke(Classes.getFieldValue(servlet, "variables"), "update");
+		servlet.getVariables().update();
 		servlet.service(httpRequest, httpResponse);
 		return httpResponse;
 	}
@@ -248,22 +248,22 @@ public class PreviewServletTest {
 		assertThat(links.size(), equalTo(12));
 
 		int index = 0;
-		assertStyle("http://fonts.googleapis.com/css?family=Roboto", links, index++);
-		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", links, index++);
-		assertStyle("/project-preview/res/theme/reset.css", links, index++);
-		assertStyle("/project-preview/res/theme/fx.css", links, index++);
+		assertThat(links.item(index++).getAttr("href"), equalTo("http://fonts.googleapis.com/css?family=Roboto"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("http://fonts.googleapis.com/css?family=Great+Vibes"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/theme/reset.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/theme/fx.css"));
 
 		// site styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='/project-preview/res/theme/form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='/project-preview/res/theme/style.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/form.css']"));
+		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/style.css']"));
 
 		index += 2; // skip form.css and styles.css
-		assertStyle("/project-preview/res/template/dialog/dialog.css", links, index++);
-		assertStyle("/project-preview/lib/paging/paging.css", links, index++);
-		assertStyle("/project-preview/lib/list-view/list-view.css", links, index++);
-		assertStyle("/project-preview/res/template/page/page.css", links, index++);
-		assertStyle("/project-preview/res/template/sidebar-page/sidebar-page.css", links, index++);
-		assertStyle("/project-preview/res/page/index/index.css", links, index++);
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/dialog/dialog.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/lib/paging/paging.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/lib/list-view/list-view.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/page/page.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/sidebar-page/sidebar-page.css"));
+		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/page/index/index.css"));
 
 		EList elist = doc.findByTag("script");
 		List<String> scripts = new ArrayList<>();
@@ -273,26 +273,22 @@ public class PreviewServletTest {
 		}
 		assertThat(scripts, hasSize(10));
 
-		assertTrue(scripts.indexOf("/project-preview/script/hc/page/Index.js") > scripts.indexOf("/project/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/project-preview/script/hc/view/DiscographyView.js") > scripts.indexOf("/project/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/project-preview/script/hc/view/DiscographyView.js") > scripts.indexOf("/project/script/hc/view/VideoPlayer.js"));
-		assertTrue(scripts.indexOf("/project-preview/script/hc/view/VideoPlayer.js") > scripts.indexOf("/project/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/project-preview/script/hc/view/VideoPlayer.js") > scripts.indexOf("/project/script/js.compo.Dialog.js"));
-		assertTrue(scripts.indexOf("/project-preview/script/js/compo/Dialog.js") > scripts.indexOf("/project/lib/js-lib/js-lib.js"));
+		assertTrue(scripts.indexOf("/test/script/hc/page/Index.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
+		assertTrue(scripts.indexOf("/test/script/hc/view/DiscographyView.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
+		assertTrue(scripts.indexOf("/test/script/hc/view/DiscographyView.js") > scripts.indexOf("/test/script/hc/view/VideoPlayer.js"));
+		assertTrue(scripts.indexOf("/test/script/hc/view/VideoPlayer.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
+		assertTrue(scripts.indexOf("/test/script/hc/view/VideoPlayer.js") > scripts.indexOf("/test/script/js.compo.Dialog.js"));
+		assertTrue(scripts.indexOf("/test/script/js/compo/Dialog.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
 
-		assertTrue(scripts.contains("/project-preview/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.contains("/project-preview/script/hc/page/Index.js"));
-		assertTrue(scripts.contains("/project-preview/gen/js/controller/MainController.js"));
-		assertTrue(scripts.contains("/project-preview/script/js/hood/MainMenu.js"));
-		assertTrue(scripts.contains("/project-preview/script/hc/view/VideoPlayer.js"));
-		assertTrue(scripts.contains("/project-preview/lib/list-view/list-view.js"));
-		assertTrue(scripts.contains("/project-preview/lib/paging/paging.js"));
-		assertTrue(scripts.contains("/project-preview/script/js/compo/Dialog.js"));
-		assertTrue(scripts.contains("/project-preview/script/js/hood/TopMenu.js"));
-		assertTrue(scripts.contains("/project-preview/script/hc/view/DiscographyView.js"));
-	}
-
-	private static void assertStyle(String expected, EList styles, int index) {
-		assertThat(styles.item(index).getAttr("href"), equalTo(expected));
+		assertTrue(scripts.contains("/test/lib/js-lib/js-lib.js"));
+		assertTrue(scripts.contains("/test/script/hc/page/Index.js"));
+		assertTrue(scripts.contains("/test/gen/js/controller/MainController.js"));
+		assertTrue(scripts.contains("/test/script/js/hood/MainMenu.js"));
+		assertTrue(scripts.contains("/test/script/hc/view/VideoPlayer.js"));
+		assertTrue(scripts.contains("/test/lib/list-view/list-view.js"));
+		assertTrue(scripts.contains("/test/lib/paging/paging.js"));
+		assertTrue(scripts.contains("/test/script/js/compo/Dialog.js"));
+		assertTrue(scripts.contains("/test/script/js/hood/TopMenu.js"));
+		assertTrue(scripts.contains("/test/script/hc/view/DiscographyView.js"));
 	}
 }

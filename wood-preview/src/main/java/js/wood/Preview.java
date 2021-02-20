@@ -21,6 +21,8 @@ import js.util.Strings;
  * @author Iulian Rotaru
  */
 public final class Preview {
+	private final String contextPath;
+
 	/** Project reference. */
 	private final PreviewProject project;
 
@@ -32,7 +34,8 @@ public final class Preview {
 	 * 
 	 * @param compo component.
 	 */
-	public Preview(PreviewProject project, Component compo) {
+	public Preview(String contextPath, PreviewProject project, Component compo) {
+		this.contextPath = contextPath;
 		this.project = project;
 		this.compo = compo;
 	}
@@ -258,8 +261,7 @@ public final class Preview {
 	 */
 	private String absoluteUrlPath(String filePath) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(Path.SEPARATOR);
-		builder.append(project.getPreviewName());
+		builder.append(contextPath);
 		builder.append(Path.SEPARATOR);
 		builder.append(filePath);
 		return builder.toString();

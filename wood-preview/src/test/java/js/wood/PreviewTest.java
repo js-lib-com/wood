@@ -1,4 +1,4 @@
-package js.wood.unit;
+package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -219,7 +219,7 @@ public class PreviewTest implements IReferenceHandler {
 		Component component = new Component(path.getLayoutPath(), this);
 		component.scan();
 
-		Preview preview = new Preview(project, component);
+		Preview preview = new Preview(Strings.concat('/', projectDirName, "-preview"), project, component);
 		StringWriter writer = new StringWriter();
 		preview.serialize(writer);
 

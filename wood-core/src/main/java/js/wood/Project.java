@@ -54,12 +54,6 @@ import js.wood.impl.XmlnsOperatorsHandler;
  */
 public class Project {
 	/**
-	 * Project name is used for internal representation. This value may be supplied by {@link ProjectDescriptor#getName(String)}
-	 * with default to project directory name.
-	 */
-	private final String name;
-
-	/**
 	 * Project display is for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
 	 * project name converted to title case.
 	 */
@@ -118,8 +112,7 @@ public class Project {
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
 
-		this.name = descriptor.getName(this.projectRoot.getName());
-		this.display = descriptor.getDisplay(Strings.toTitleCase(this.name));
+		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
 
 		switch (this.descriptor.getNamingStrategy()) {
@@ -138,16 +131,6 @@ public class Project {
 		default:
 			operatorsHandler = null;
 		}
-	}
-
-	/**
-	 * Get project name for internal use.
-	 * 
-	 * @return project name.
-	 * @see #name
-	 */
-	public String getName() {
-		return name;
 	}
 
 	/**

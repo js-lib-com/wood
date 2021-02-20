@@ -110,9 +110,6 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Media files
-
 	/**
 	 * Write media file referenced from site page. Target file name is the media file name formated by
 	 * {@link #formatMediaName(FilePath)}. Stores target file into {@link #processedFiles} in order to avoid multiple
@@ -156,52 +153,6 @@ public abstract class BuildFS {
 	}
 
 	/**
-	 * Write media file referenced from script. Target file name is the media file name formated by
-	 * {@link #formatMediaName(FilePath)}. Stores target file into {@link #processedFiles} in order to avoid multiple
-	 * processing. Also takes care to append {@link #buildNumber}, if set.
-	 * <p>
-	 * Returns context absolute URL path for written media file. Returned URL path is ready to be inserted into page document.
-	 * Context absolute path starts with path separator but does not include protocol, host and port. Anyway, it includes
-	 * context name, that is, application name. It is an absolute path relative to server document root.
-	 * 
-	 * @param contextName web context name included in returned URL absolute path,
-	 * @param mediaFile media file path.
-	 * @return media file URL absolute path.
-	 * @throws IllegalArgumentException if context name or media file parameter is null.
-	 * @throws IOException if media file write fails.
-	 */
-	public String writeScriptMedia(String contextName, FilePath mediaFile) throws IOException {
-		Params.notNull(contextName, "Context name");
-		Params.notNull(mediaFile, "Media file path");
-
-		String mediaName = insertBuildNumber(formatMediaName(mediaFile));
-		File targetFile = new File(getMediaDir(), mediaName);
-		if (!processedFiles.contains(targetFile)) {
-			Files.copy(mediaFile.toFile(), targetFile);
-			processedFiles.add(targetFile);
-		}
-
-		StringBuilder builder = new StringBuilder();
-		// context name can be empty for root context
-		if (!contextName.isEmpty()) {
-			builder.append(Path.SEPARATOR);
-			builder.append(contextName);
-		}
-		builder.append(Path.SEPARATOR);
-		if (locale != null) {
-			builder.append(locale.toLanguageTag());
-			builder.append(Path.SEPARATOR);
-		}
-		builder.append(getMediaDir().getName());
-		builder.append(Path.SEPARATOR);
-		builder.append(mediaName);
-		return builder.toString();
-	}
-
-	// ------------------------------------------------------
-	// Style files
-
-	/**
 	 * Write style file using external references handler. References handler is used for resources processing. Returns URL path
 	 * of the written style file, relative to page location, ready to be inserted into page document.
 	 * <p>
@@ -226,9 +177,6 @@ public abstract class BuildFS {
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
-
-	// ------------------------------------------------------
-	// Script files
 
 	/**
 	 * Write script file using external references handler. References handler is used for resources processing. Returns URL

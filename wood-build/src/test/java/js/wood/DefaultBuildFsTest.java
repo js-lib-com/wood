@@ -61,7 +61,7 @@ public class DefaultBuildFsTest {
 	}
 
 	private File dir(String... segments) {
-		File projectDir = new File("src/test/resources/" + project.getName());
+		File projectDir = new File("src/test/resources/project");
 		return new File(projectDir, Strings.join(segments, '/'));
 	}
 

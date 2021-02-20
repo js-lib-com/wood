@@ -231,7 +231,7 @@ public class Builder implements IReferenceHandler {
 			return buildFS.writeStyleMedia(mediaFile);
 
 		case SCRIPT:
-			return buildFS.writeScriptMedia(project.getName(), mediaFile);
+			throw new WoodException("Media files not supported on scripts for reference |%s:%s|.", source, reference);
 
 		default:
 		}

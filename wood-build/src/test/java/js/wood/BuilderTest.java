@@ -324,10 +324,6 @@ public class BuilderTest {
 		source = new FilePath(project, "res/template/page/page.css");
 		assertValue("../media/res-template-page_logo.jpg", builder, "en", reference, source);
 		assertValue("../media/res-template-page_logo.jpg", builder, "de", reference, source);
-
-		source = new FilePath(project, "res/template/page/page.js");
-		assertValue("/project/en/media/res-template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("/project/de/media/res-template-page_logo.jpg", builder, "de", reference, source);
 	}
 
 	@Test
@@ -360,10 +356,6 @@ public class BuilderTest {
 		source = new FilePath(project, "res/template/page/page.css");
 		assertValue("../media/res-template-page_logo.jpg", builder, "en", reference, source);
 		assertValue("../media/res-template-page_logo.jpg", builder, "de", reference, source);
-
-		source = new FilePath(project, "res/template/page/page.js");
-		assertValue("/root-project/en/media/res-template-page_logo.jpg", builder, "en", reference, source);
-		assertValue("/root-project/de/media/res-template-page_logo.jpg", builder, "de", reference, source);
 	}
 
 	private static void assertValue(String expected, Builder builder, String languageTag, Reference reference, FilePath source) throws IOException {

@@ -89,11 +89,21 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	private static final String LAYOUT_PREVIEW = "preview.htm";
 
+	private static final ThreadLocal<String> CONTEXT_PATH = new ThreadLocal<>();
+	
 	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
 	private PreviewProject project;
 
 	/** Variables cache initialized before every component preview processing. */
 	private VariablesCache variables;
+
+	PreviewProject getProject() {
+		return project;
+	}
+
+	VariablesCache getVariables() {
+		return variables;
+	}
 
 	/**
 	 * Servlet instance initialization. This hook is invoked by Servlet container when first create preview Servlet instance.
@@ -154,6 +164,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		httpResponse.setCharacterEncoding("UTF-8");
 
 		final String contextPath = httpRequest.getContextPath();
+		CONTEXT_PATH.set(contextPath);
+		
 		// request path is request URI without context; it does not starts with a path separator
 		String requestPath = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length() + 1);
 		log.debug("Request |%s| on context |%s|.", requestPath, contextPath);
@@ -190,7 +202,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			// create component with support for preview script
 			Component component = new Component(layoutPath, this);
 			component.scan();
-			Preview preview = new Preview(project, component);
+			Preview preview = new Preview(contextPath, project, component);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}
@@ -240,8 +252,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(Path.SEPARATOR);
-		builder.append(project.getPreviewName());
+		builder.append(CONTEXT_PATH.get());
 		builder.append(Path.SEPARATOR);
 		builder.append(mediaFile.getParentDirPath().value());
 		builder.append(mediaFile.getName());

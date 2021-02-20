@@ -151,34 +151,6 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writeScriptMedia() throws IOException {
-		BuildFS buildFS = new TestBuildFS(project, 0);
-		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
-
-		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/img/background.jpg"));
-		assertTrue(exists("img/background.jpg"));
-	}
-
-	@Test
-	public void writeScriptMedia_Locale() throws IOException {
-		BuildFS buildFS = new TestBuildFS(project, 0);
-		buildFS.setLocale(new Locale("ro"));
-		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
-
-		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/ro/img/background.jpg"));
-		assertTrue(exists("ro/img/background.jpg"));
-	}
-
-	@Test
-	public void writeScriptMedia_BuildNumber() throws IOException {
-		BuildFS buildFS = new TestBuildFS(project, 4);
-		FilePath mediaFile = new FilePath(project, "res/asset/background.jpg");
-
-		assertThat(buildFS.writeScriptMedia(project.getName(), mediaFile), equalTo("/project/img/background-004.jpg"));
-		assertTrue(exists("img/background-004.jpg"));
-	}
-
-	@Test
 	public void writeStyle() throws IOException {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 		FilePath styleFile = new FilePath(project, "res/theme/style.css");

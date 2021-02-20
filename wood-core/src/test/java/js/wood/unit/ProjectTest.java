@@ -46,7 +46,6 @@ public class ProjectTest implements IReferenceHandler {
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR + "/"));
 		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
 
-		assertThat(project.getName(), equalTo("project"));
 		assertThat(project.getDisplay(), equalTo("Test Project"));
 		assertThat(project.getDescription(), equalTo("Project used as fixture for unit testing."));
 
