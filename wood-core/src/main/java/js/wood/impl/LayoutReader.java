@@ -29,7 +29,7 @@ public final class LayoutReader extends Reader {
 	private static final String FOOTER = Strings.concat(System.getProperty("line.separator"), "</", ROOT, ">");
 
 	/** External defined reader, decorated by this layout reader instance. */
-	private Reader reader;
+	private final Reader reader;
 
 	/** Current state determine stream source: header, decorated reader or footer. */
 	private State state;

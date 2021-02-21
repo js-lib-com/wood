@@ -18,7 +18,24 @@ import js.wood.impl.LayoutReader;
 
 public class LayoutReaderTest {
 	@Test
-	public void layoutReader() throws IOException {
+	public void content() throws IOException {
+		Reader reader = new StringReader("<h1>header 1</h1><h2>header 2</h2>");
+		Reader layoutReader = new LayoutReader(reader);
+
+		StringWriter stringWriter = new StringWriter();
+		Files.copy(layoutReader, stringWriter);
+
+		String expected = "<?xml version='1.0' encoding='UTF-8'?>\r\n" + //
+				"<!DOCTYPE layout PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\r\n" + //
+				"<layout>\r\n" + //
+				"<h1>header 1</h1><h2>header 2</h2>\r\n" + //
+				"</layout>";
+
+		assertThat(stringWriter.toString(), equalTo(expected));
+	}
+
+	@Test
+	public void document() throws IOException {
 		Reader reader = new StringReader("<h1>header 1</h1><h2>header 2</h2>");
 		Reader layoutReader = new LayoutReader(reader);
 

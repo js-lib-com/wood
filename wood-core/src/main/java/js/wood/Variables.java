@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -13,33 +14,39 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import js.io.ReaderInputStream;
 import js.util.Strings;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.ReferencesResolver;
 import js.wood.impl.ResourceType;
 
 /**
- * Variables store name/value pairs that can be referenced from source files. In addition to having a name, variable belongs to
- * a type; so to fully refer a variable one need to know both type and name. See {@link ResourceType} for recognized types and
- * {@link Reference} for syntax and sample usage.
+ * Variables store holds name/value pairs that can be referenced from source files. In addition to having a name, variable
+ * belongs to a type; so to fully refer a variable one need to know both type and name. See {@link ResourceType} for recognized
+ * types and {@link Reference} for syntax and sample usage.
  * <p>
  * Variables are resources and are processed the same way as media files: by {@link IReferenceHandler}. When source file is
  * read, {@link SourceReader} discovers references and delegates reference handler. There are distinct reference handler
  * instances for build and preview processes but basically variables references are text replaces by their values; this class
- * provides getters just for that.
+ * provides getters just for that - see {@link #get(Reference, FilePath, IReferenceHandler)} and
+ * {@link #get(Locale, Reference, FilePath, IReferenceHandler)}.
  * <p>
  * A variables has a scope; its name is private to a component. Is legal for variables from different component to have the same
- * name. Anyway, asset variables are global. Value retrieving logic attempts first to get value from component variables and
- * only if value miss tries asset variables. Also, when language is requested, attempt first to retrieve that language and if
- * not found uses default.
+ * name. Anyway, asset variables are global. Value retrieving logic from reference handler attempts first to get value from
+ * component variables and only if value miss tries asset variables. Also, when locale is requested, attempt first to retrieve
+ * that locale and if not found uses default.
  * 
  * @author Iulian Rotaru
  * @since 1.0
  */
 public class Variables {
+	/** WOOD project context. */
 	private final Project project;
 
-	/** Resource references resolver for this variable values. */
+	/**
+	 * Resource references resolver for this variable values. A variable value may contain references to nested variables,
+	 * creating a references tree.
+	 */
 	private final ReferencesResolver referenceResolver;
 
 	/**
@@ -48,20 +55,20 @@ public class Variables {
 	 */
 	private final Map<Locale, Map<Reference, String>> localeValues = new HashMap<>();
 
-	/** XML stream parser. */
-	private SAXParser saxParser;
-
-	/** Handler for SAX parser in charge with variables files loading. */
-	private SAXHandler saxHandler;
+	/** XML stream parser for files containing variables definition. */
+	private final SAXParser saxParser;
 
 	/**
-	 * Stack for references nesting level trace, global per execution thread. Nesting level trace logic assume references tree
-	 * iteration occurs in a single thread.
+	 * Stack for references nesting level trace, used for circular dependencies detection. It is global per execution thread.
+	 * Nesting level trace logic assume references tree iteration occurs in a single thread.
 	 */
-	private static ThreadLocal<Stack<String>> levelTraceTLS = new ThreadLocal<>();
+	private static final ThreadLocal<Stack<String>> levelTraceTLS = new ThreadLocal<>();
 
 	/**
 	 * Create empty variables instance.
+	 * 
+	 * @param project WOOD project.
+	 * @throws WoodException if SAXA parser initialization fails.
 	 */
 	public Variables(Project project) {
 		this.project = project;
@@ -75,25 +82,59 @@ public class Variables {
 	}
 
 	/**
-	 * Create variables instance and load its values from provided directory files. Directory should designate a component or
-	 * project assets. If given <code>dir</code> parameter is not an existing directory this constructor does not load values
-	 * and resulting variables instance is empty.
+	 * Create variables instance and load its values from provided directory files. All XML files from directory are scanned,
+	 * except component descriptor; by convention descriptor has the same basename as directory.
+	 * <p>
+	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this
+	 * constructor does not load values and resulting variables instance is empty.
 	 * 
-	 * @param dirPath directory to scan for variable files.
+	 * @param dirPath directory to scan for variables definition files.
+	 * @throws WoodException if SAXA parser initialization fails.
+	 * @see #load(DirPath)
 	 */
 	public Variables(DirPath dirPath) {
 		this(dirPath.getProject());
 		load(dirPath);
 	}
 
+	/**
+	 * Reload variables definition from provided directory files. All XML files from directory are scanned, except component
+	 * descriptor; by convention descriptor has the same basename as directory.
+	 * <p>
+	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this method
+	 * just clean-up this variables instance values.
+	 * 
+	 * @param dirPath directory to scan for variables definition files.
+	 * @see #load(DirPath)
+	 */
 	public void reload(DirPath dirPath) {
 		localeValues.clear();
 		load(dirPath);
 	}
 
 	/**
-	 * Load variable values form file. This method just delegates {@link #_load(FilePath)} re-throwing exceptions as library
-	 * runtime exception.
+	 * Load variable values from given directory files. Traverses directory files, in no particular order, parsing variables
+	 * definition. It is legal for directory to contains XML files that are not variables definition. For that files SAX parsing
+	 * is aborted eagerly - see {@link #_load(FilePath)}.
+	 * <p>
+	 * Note that only direct child files are parsed. Also, if given directory does not exist this method does nothing.
+	 * 
+	 * @param dirPath directory path.
+	 */
+	private void load(DirPath dirPath) {
+		dirPath.files(new FilesHandler() {
+			@Override
+			public void onFile(FilePath file) throws Exception {
+				if (file.isVariables()) {
+					_load(file);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Load variable values form variables definition file. This method just delegates {@link #_load(FilePath)} re-throwing
+	 * exceptions as library runtime exception.
 	 * 
 	 * @param file file to load values.
 	 * @throws WoodException if file reading or parsing fails.
@@ -107,13 +148,52 @@ public class Variables {
 	}
 
 	/**
-	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when language variants are not used.
+	 * Load variable values from a variables definition file. Values are stored in a dictionary using locale as key - see
+	 * {@link #localeValues}. Key locale are retrieved from given file variants; if file is not localized uses project default
+	 * locale.
+	 * <p>
+	 * Variables definition files are XML files and this worker method uses {@link #saxParser} with a new {@link SAXHandler}
+	 * instance to perform the actual parsing.
+	 * <p>
+	 * Variables definition file is a standard XML with root element one of the {@link ResourceType#variables()} values. It is
+	 * legal that provided <code>file</code> parameter to not point to a variables definition file. If this is the case SAX
+	 * parsing is aborted eagerly by {@ SAXHandler}; this way SAX parsing is also used to detect if file is valid variables
+	 * definition.
+	 * 
+	 * @param file existing variables definition file.
+	 * @throws IOException if file reading fails.
+	 * @throws SAXException if XML parsing fails.
+	 */
+	private void _load(FilePath file) throws IOException, SAXException {
+		Locale locale = file.getVariants().getLocale();
+		if (locale == null) {
+			locale = project.getDefaultLocale();
+		}
+		Map<Reference, String> values = localeValues.get(locale);
+		if (values == null) {
+			values = new HashMap<Reference, String>();
+		}
+
+		SAXHandler saxHandler = new SAXHandler(file, values);
+		try (InputStream stream = new ReaderInputStream(file.getReader())) {
+			saxParser.parse(stream, saxHandler);
+			localeValues.put(locale, values);
+		} catch (NoVariablesDefinitionException unused) {
+			// is a legal condition to have XML files that are not variables definition
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Variable value retrieving with circular dependencies detection on references resolver
+
+	/**
+	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when locale variant is not used.
 	 * Returns null if value not found.
 	 * 
 	 * @param reference variable reference,
 	 * @param source source file where reference is declared,
 	 * @param listener resource references handler.
-	 * @return variable value.
+	 * @return variable value for requested reference or null if not found.
 	 * @throws WoodException if variable value not found.
 	 */
 	public String get(Reference reference, FilePath source, IReferenceHandler listener) throws WoodException {
@@ -121,33 +201,39 @@ public class Variables {
 	}
 
 	/**
-	 * Get variable value for requested language and resolve nested references. If <code>language</code> is null uses default
-	 * language; default language values are those loaded from files without language variant.
+	 * Get variable value for requested locale, taking care to resolve nested references. A nested reference is one used by a
+	 * variable definition, e.g.
+	 * 
+	 * <pre>
+	 * <description>This {@literal}string/app description.</description>
+	 * </pre>
+	 * 
+	 * If <code>locale</code> parameter is null uses project default one; default locale is that loaded from files without
+	 * explicit locale variant.
 	 * <p>
 	 * This method attempts to retrieve variable value using next heuristic:
 	 * <ol>
-	 * <li>attempt to get value from this variables instance, for specified language,
-	 * <li>if not found try to get value for default language,
-	 * <li>if still not found try to retrieve value form project global assets and theme variables, in this order - see
-	 * {@link #assetVariables}, {@link #themeVariables}; execute this step only if source file is not asset or theme,
-	 * <li>throw exception if not found
+	 * <li>attempt to get value from this variables instance, for requested locale,
+	 * <li>if not found try to get value for default locale,
+	 * <li>if still value not found or if value is empty return null,
+	 * <li>if value found attempt to resolve nested references; guard resolver invocation against circular dependencies
 	 * </ol>
 	 * <p>
 	 * Is legal for a variable value to contain nested references. This method takes care to normalize returned value, that is,
 	 * it invokes {@link ReferencesResolver} with found value. There is a recursive chain of methods invoked till references
 	 * tree is completely resolved. See {@link SourceReader} for a discussion on references tree iteration.
 	 * 
-	 * @param language language, null for default language,
+	 * @param locale optional locale, null for default,
 	 * @param reference variable reference,
 	 * @param source source file where reference is declared,
 	 * @param handler resource references handler.
-	 * @return variable value.
-	 * @throws WoodException if variable value not found.
+	 * @return variable value or null if variable not defined or if is empty.
+	 * @throws WoodException if circular dependency is detected on references resolver.
 	 */
 	public String get(Locale locale, Reference reference, FilePath source, IReferenceHandler handler) throws WoodException {
 		String value = null;
 
-		// 1. attempt to get value from this variables instance, for specified language
+		// 1. attempt to get value from this variables instance, for requested locale
 		Map<Reference, String> values = localeValues.get(locale);
 		if (values != null) {
 			value = values.get(reference);
@@ -161,16 +247,20 @@ public class Variables {
 			}
 		}
 
-		// 4. if value not found or is empty throws exception with formatted message
+		// 3. if still value not found or if value is empty return null
 		if (value == null || value.isEmpty()) {
 			return null;
 		}
 
-		// trace contains source file and reference and avoid circular referencing
+		// 4. if value found attempt to resolve nested references; guard resolver invocation against circular dependencies
 		Stack<String> levelTrace = levelTrace();
 		String trace = String.format("%s:%s", source, reference);
 		if (levelTrace.contains(trace)) {
-			throw new WoodException(exceptionMessage(levelTrace, "Circular variable references."));
+			StringBuilder builder = new StringBuilder("Circular variable references. Trace stack follows:\n");
+			for (int i = 0; i < levelTrace.size(); ++i) {
+				builder.append(Strings.concat("\t- ", levelTrace.get(i), "\n"));
+			}
+			throw new WoodException(builder.toString());
 		}
 		levelTrace.push(trace);
 
@@ -181,9 +271,10 @@ public class Variables {
 	}
 
 	/**
-	 * Retrieve level trace stack for current thread. Create instance on the fly, if missing.
+	 * Retrieve nesting level trace stack for references resolver, in current thread. Create stack instance on the fly, if
+	 * missing.
 	 * 
-	 * @return level trace stack.
+	 * @return nesting level trace stack.
 	 */
 	private static Stack<String> levelTrace() {
 		Stack<String> levelTrace = levelTraceTLS.get();
@@ -194,62 +285,8 @@ public class Variables {
 		return levelTrace;
 	}
 
-	/**
-	 * Create exception message with level trace dump.
-	 * 
-	 * @param levelTrace level trace stack,
-	 * @param message exception message.
-	 * @return formatted exception message.
-	 */
-	private static String exceptionMessage(Stack<String> levelTrace, String message) {
-		StringBuilder builder = new StringBuilder(message + " Level trace stack follows:\n");
-		for (int i = 0; i < levelTrace.size(); ++i) {
-			builder.append(Strings.concat("\t- ", levelTrace.get(i), "\n"));
-		}
-		return builder.toString();
-	}
-
-	/**
-	 * Load variable values from given directory files. Traverses directory files in no particular order searching for names
-	 * matching variables file pattern. If a resource file is found store its values mapped to language variant; if no language
-	 * variant is detected uses null. Note that scanning process workhorse is the {@link SAXHandler} class.
-	 * 
-	 * @param dir directory path, should point to an existing directory.
-	 */
-	private void load(DirPath dir) {
-		dir.files(new FilesHandler() {
-			@Override
-			public void onFile(FilePath file) throws Exception {
-				if (file.isVariables()) {
-					_load(file);
-				}
-			}
-		});
-	}
-
-	/**
-	 * Load variable values from file. This workhorse is designed for {@link #load(FilePath)} and {@link #load(DirPath)} values
-	 * loaders.
-	 * 
-	 * @param file file to load values.
-	 * @throws IOException if file reading fails.
-	 * @throws SAXException if XML parsing fails.
-	 */
-	private void _load(FilePath file) throws SAXException, IOException {
-		Locale locale = file.getVariants().getLocale();
-		if (locale == null) {
-			locale = project.getDefaultLocale();
-		}
-		Map<Reference, String> values = localeValues.get(locale);
-		if (values == null) {
-			values = new HashMap<Reference, String>();
-			localeValues.put(locale, values);
-		}
-		saxHandler = new SAXHandler(file, values);
-		saxParser.parse(file.toFile(), saxHandler);
-	}
-
 	// --------------------------------------------------------------------------------------------
+	// Internal types
 
 	/**
 	 * Scanner for variable values definition file. Variables values are stored into XML files processed by a SAX parser. This
@@ -277,6 +314,8 @@ public class Variables {
 	 * 
 	 * In above example there is a variables definition file and a sample reference from a layout file. After reference
 	 * processing <code>value</code> from XML file will be inserted into layout file as text for <code>h1</code> element.
+	 * <p>
+	 * This SAX handler has mutable internal state and is not thread safe.
 	 * 
 	 * @author Iulian Rotaru
 	 */
@@ -294,8 +333,8 @@ public class Variables {
 		private ResourceType resourceType;
 
 		/**
-		 * Value builder used to actually collect variable value. There are specialized value builders for different resource
-		 * types. Builder instance is reused for entire variables definition file.
+		 * Value builder used to actually collect currently processed variable value. There are specialized value builders for
+		 * different resource types. Builder instance is reused for entire variables definition file.
 		 */
 		private ValueBuilder builder;
 
@@ -343,16 +382,13 @@ public class Variables {
 			case 0:
 				resourceType = ResourceType.getValueOf(qName);
 				if (resourceType == ResourceType.UNKNOWN) {
-					throw new WoodException("Bad resource type |%s| in file |%s|", qName, sourceFile);
+					throw new NoVariablesDefinitionException();
 				}
 				builder = ValueBuilder.instance(resourceType);
 				break;
 
 			case 1:
 				builder.reset();
-				for (int i = 0; i < attributes.getLength(); ++i) {
-					builder.addParameter(attributes.getQName(i), attributes.getValue(i));
-				}
 				break;
 
 			default:
@@ -404,6 +440,17 @@ public class Variables {
 	}
 
 	/**
+	 * Exception thrown by {@link SAXHandler} if detects that XML file root is not valid for a variables definition file. A
+	 * variable definition file is a XML file with root element one of {@link ResourceType#variables()} values.
+	 * 
+	 * @author Iulian Rotaru
+	 * @since 1.0
+	 */
+	private static class NoVariablesDefinitionException extends SAXException {
+		private static final long serialVersionUID = 6320065817993955976L;
+	}
+
+	/**
 	 * Base class for variable value builders. Value builders are used in conjunction with XML SAX handler, see
 	 * {@link SAXHandler}. A value builder instance is created on root element from variables definition file, considering
 	 * {@link ResourceType} encoded by root - see {@link #instance(ResourceType)}. Builder instance is reused for all variable
@@ -437,18 +484,6 @@ public class Variables {
 		 */
 		public void addValue(char[] buffer, int offset, int length) {
 			value.append(buffer, offset, length);
-		}
-
-		/**
-		 * A value parameter is extra data related to particular value. It is defined as and attribute of the value element. See
-		 * every subclass implementation for value parameters usage. For base case this method is not supported.
-		 * 
-		 * @param name parameter name,
-		 * @param value parameter value.
-		 * @throws UnsupportedOperationException base class does not support value parameters.
-		 */
-		public void addParameter(String name, String value) throws UnsupportedOperationException {
-			throw new UnsupportedOperationException();
 		}
 
 		/**
@@ -531,4 +566,12 @@ public class Variables {
 			value.append('>');
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	Map<Locale, Map<Reference, String>> getLocaleValues() {
+		return localeValues;
+	}
+
 }

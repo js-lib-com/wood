@@ -2,33 +2,37 @@ package js.wood.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
-import js.wood.Project;
 import js.wood.Reference;
-import js.wood.impl.ReferencesResolver;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ReferencesResolverTest {
-	private Project project;
+	@Mock
+	private FilePath sourceFile;
+
+	private ReferencesResolver resolver;
 
 	@Before
 	public void beforeTest() {
-		project = new Project(new File("src/test/resources/resources"));
+		when(sourceFile.exists()).thenReturn(true);
+		resolver = new ReferencesResolver();
 	}
 
 	@Test
-	public void valueReferencesResolverParse() {
+	public void parse() {
 		String value = "<h1>@string/title</h1>";
-		FilePath sourceFile = new FilePath(project, "res/compo/compo.htm");
 
-		ReferencesResolver resolver = new ReferencesResolver();
 		value = resolver.parse(value, sourceFile, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
@@ -37,5 +41,10 @@ public class ReferencesResolverTest {
 		});
 
 		assertThat(value, equalTo("<h1>resource value</h1>"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void nullValue() {
+		resolver.parse(null, sourceFile, null);
 	}
 }
