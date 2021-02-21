@@ -8,11 +8,6 @@ import js.util.Params;
  * Path designates project entities like component directories, source and resource files. It is immutable and is always
  * relative to project root directory. Anyway, the Java {@link File} returned by {@link #toFile()} does contain project root.
  * <p>
- * Paths are designed to address entities from {@link Project}. This tool library project can be part of a larger project,
- * perhaps an Eclipse one. Although paths are relative to project root they can access files only in source directories. Master
- * project files, if any, are not in this path class scope. See {@link Project} class description for recognized source
- * directories.
- * <p>
  * Path syntax depends on concrete implementation but resemble Java file: it has a sequence of parts, separated by slash (/).
  * Note that Path always uses slash (/) for separator, no matter JVM platform. Also names from path uses US-ASCII alphanumeric
  * characters and dash (-). Note that underscore (_) is not allowed since it is used as variants separator.
@@ -46,15 +41,21 @@ public abstract class Path {
 	/** Wrapped Java file include project root. */
 	protected final File file;
 
+	/**
+	 * Root path.
+	 * 
+	 * @param project parent project.
+	 * @throws IllegalArgumentException if project is null.
+	 */
 	protected Path(Project project) {
+		Params.notNull(project, "Project");
 		this.project = project;
 		this.value = null;
 		this.file = project.getProjectRoot();
 	}
 
 	/**
-	 * Create path instance, initialize value and wrapped file and compute instance hash code. Uses {@link #value} to compute
-	 * hash code.
+	 * Create path instance and initialize value and wrapped Java file.
 	 * 
 	 * @param project parent project,
 	 * @param value path value relative to project.
@@ -66,6 +67,18 @@ public abstract class Path {
 		this.project = project;
 		this.value = value;
 		this.file = new File(project.getProjectRoot(), value);
+	}
+
+	/**
+	 * Test constructor.
+	 * 
+	 * @param project parent project,
+	 * @param file Java file relative to project root.
+	 */
+	protected Path(Project project, File file) {
+		this.project = project;
+		this.value = file.getPath().replace('\\', '/');
+		this.file = file;
 	}
 
 	/**
@@ -89,7 +102,7 @@ public abstract class Path {
 	}
 
 	/**
-	 * Test if this path denotes an existing entity. This predicate simply check that wrapped {@link #file} exists.
+	 * Test if this path denotes an existing entity. This predicate simply check that wrapped Java {@link #file} exists.
 	 * 
 	 * @return true if entity exists.
 	 */
@@ -118,7 +131,7 @@ public abstract class Path {
 	 */
 	@Override
 	public String toString() {
-		return value;
+		return value != null ? value : ".";
 	}
 
 	@Override

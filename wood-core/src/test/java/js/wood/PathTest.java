@@ -3,38 +3,68 @@ package js.wood;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.util.Classes;
-import js.wood.CompoPath;
-import js.wood.Path;
-import js.wood.Project;
-import js.wood.WoodException;
-
+@RunWith(MockitoJUnitRunner.class)
 public class PathTest {
+	@Mock
 	private Project project;
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project(new File("src/test/resources/project"));
+		when(project.getProjectRoot()).thenReturn(new File("."));
 	}
 
 	@Test
-	public void constructor() {
-		// uses TestPath to create Path instance that is abstract
-		Path path = new TestPath(project, "res/compo/discography/discography.htm");
-		assertThat(path.value(), equalTo("res/compo/discography/discography.htm"));
-		assertTrue(path.exists());
-		assertThat(path.toFile().getPath().replace('\\', '/'), equalTo("src/test/resources/project/res/compo/discography/discography.htm"));
+	public void constructor_FilePath() {
+		Path path = new TestPath(project, "res/compo/compo.htm");
+		assertThat(path.value(), equalTo("res/compo/compo.htm"));
+		assertFalse(path.exists());
 		assertTrue(path.getProject() == project);
 		assertThat(path.hashCode(), not(equalTo(0)));
-		assertThat(path.toString(), equalTo("res/compo/discography/discography.htm"));
+		assertThat(path.toString(), equalTo("res/compo/compo.htm"));
+	}
+
+	@Test
+	public void constructor_DirectoryPath() {
+		Path path = new TestPath(project, "res/compo/");
+		assertThat(path.value(), equalTo("res/compo/"));
+		assertFalse(path.exists());
+		assertTrue(path.getProject() == project);
+		assertThat(path.hashCode(), not(equalTo(0)));
+		assertThat(path.toString(), equalTo("res/compo/"));
+	}
+
+	@Test
+	public void constructor_RootPath() {
+		Path path = new TestPath(project);
+		assertThat(path.value(), nullValue());
+		assertTrue(path.exists());
+		assertTrue(path.getProject() == project);
+		assertThat(path.toFile(), equalTo(new File(".")));
+		assertThat(path.hashCode(), not(equalTo(0)));
+		assertThat(path.toString(), equalTo("."));
+	}
+
+	@Test
+	public void constructor_File() {
+		Path path = new TestPath(project, new File("res/compo/"));
+		assertThat(path.value(), equalTo("res/compo"));
+		assertFalse(path.exists());
+		assertTrue(path.getProject() == project);
+		assertThat(path.hashCode(), not(equalTo(0)));
+		assertThat(path.toString(), equalTo("res/compo"));
 	}
 
 	@Test
@@ -44,29 +74,14 @@ public class PathTest {
 	}
 
 	@Test
-	public void notExisting() {
-		// uses TestPath to create Path instance that is abstract
-		Path path = new TestPath(project, "res/compo/fake/fake.htm");
-		assertFalse(path.exists());
-	}
-
-	@Test
 	public void toFile() throws Throwable {
-		assertPath("src/test/resources/project/res/compo/discography", "res/compo/discography", CompoPath.class);
-		assertPath("src/test/resources/project/lib/js-lib/js-lib.js", "lib/js-lib/js-lib.js", TestPath.class);
-		assertPath("src/test/resources/project/script/hc/view/DiscographyView.js", "script/hc/view/DiscographyView.js", TestPath.class);
-		assertPath("src/test/resources/project/gen/js/controller/MainController.js", "gen/js/controller/MainController.js", TestPath.class);
-	}
-
-	private void assertPath(String expectedFile, String pathValue, Class<?> pathClass) throws Throwable {
-		Path path = (Path) Classes.newInstance(pathClass, project, pathValue);
-		assertThat(path.toFile(), equalTo(new File(expectedFile)));
+		Path path = new TestPath(project);
+		assertThat(path.toFile(), equalTo(new File(".")));
 	}
 
 	@Test(expected = WoodException.class)
-	public void toFile_Exception() {
-		// uses TestPath to create Path instance that is abstract
-		Path path = new TestPath(project, "res/compo/fake/fake.htm");
+	public void toFile_NotExisting() throws Throwable {
+		Path path = new TestPath(project, "not-existing-file");
 		path.toFile();
 	}
 
@@ -81,9 +96,24 @@ public class PathTest {
 		assertThat(path1.equals(null), equalTo(false));
 	}
 
+	@Test
+	public void equals_NullValue() {
+		Path path1 = new TestPath(project);
+		Path path2 = new TestPath(project, "res/path.htm");
+		assertFalse(path1.equals(path2));
+	}
+
 	private static class TestPath extends Path {
+		public TestPath(Project project) {
+			super(project);
+		}
+
 		public TestPath(Project project, String value) {
 			super(project, value);
+		}
+
+		public TestPath(Project project, File file) {
+			super(project, file);
 		}
 	}
 }
