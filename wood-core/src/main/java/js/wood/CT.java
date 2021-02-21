@@ -40,10 +40,10 @@ public final class CT {
 	// Project directories relative to project root
 
 	/** Project assets directory stores global variables and media files. */
-	public static final String ASSETS_DIR = "res/asset";
+	public static final String ASSETS_DIR = "res/asset/";
 
 	/** Site theme directory for styles related to UI primitive elements design and theme variables. */
-	public static final String THEME_DIR = "res/theme";
+	public static final String THEME_DIR = "res/theme/";
 
 	// ------------------------------------------------------
 	// Dynamic generated files

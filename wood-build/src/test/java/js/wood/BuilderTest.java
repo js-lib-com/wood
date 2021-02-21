@@ -51,7 +51,7 @@ public class BuilderTest {
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
-		DirPath themeDir = new DirPath(project, "res/theme");
+		DirPath themeDir = new DirPath(project, "res/theme/");
 		assertNotNull(variables.get(themeDir));
 	}
 
@@ -76,7 +76,7 @@ public class BuilderTest {
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
-		DirPath themeDir = new DirPath(project, "res/theme");
+		DirPath themeDir = new DirPath(project, "res/theme/");
 		assertNotNull(variables.get(themeDir));
 	}
 

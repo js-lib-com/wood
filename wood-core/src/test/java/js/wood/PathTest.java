@@ -3,7 +3,6 @@ package js.wood;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -49,7 +48,7 @@ public class PathTest {
 	@Test
 	public void constructor_RootPath() {
 		Path path = new TestPath(project);
-		assertThat(path.value(), nullValue());
+		assertThat(path.value(), equalTo("."));
 		assertTrue(path.exists());
 		assertTrue(path.getProject() == project);
 		assertThat(path.toFile(), equalTo(new File(".")));

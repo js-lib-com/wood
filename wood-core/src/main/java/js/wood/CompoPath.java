@@ -124,7 +124,7 @@ public class CompoPath extends DirPath {
 		if (!matcher.find()) {
 			throw new WoodException("Invalid component path |%s|.", compoPath);
 		}
-		return matcher.group(1);
+		return matcher.group(1) + Path.SEPARATOR;
 	}
 
 	/**

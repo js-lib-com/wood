@@ -42,7 +42,7 @@ public class ProjectTest implements IReferenceHandler {
 		assertThat(project.getProjectRoot(), equalTo(new File("src/test/resources/project")));
 		assertThat(Classes.getFieldValue(project, "descriptor"), notNullValue());
 
-		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR + "/"));
+		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
 		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
 
 		assertThat(project.getDisplay(), equalTo("Test Project"));

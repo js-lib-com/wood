@@ -42,7 +42,7 @@ class BuilderProject extends Project {
 	public BuilderProject(File projectDir, File buildDir) throws IOException {
 		super(projectDir);
 		this.buildDir = buildDir;
-		this.excludes.add(new DirPath(this, Files.getRelativePath(projectDir, buildDir, true)));
+		this.excludes.add(new DirPath(this, Files.getRelativePath(projectDir, buildDir, true) + Path.SEPARATOR));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
 		this.variables = new HashMap<>();
@@ -101,7 +101,10 @@ class BuilderProject extends Project {
 			@Override
 			public void onFile(FilePath file) throws Exception {
 				DirPath parentDir = file.getParentDirPath();
-
+				if(parentDir == null) {
+					return;
+				}
+				
 				if (Files.isXML(file.toFile(), ResourceType.variables())) {
 					Variables parentDirVariables = variables.get(parentDir);
 					if (parentDirVariables == null) {

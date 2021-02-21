@@ -76,7 +76,7 @@ public class CompoPathTest {
 
 	@Test
 	public void equals() {
-		final String path = "res/compo/video-player";
+		final String path = "res/compo/video-player/";
 		Path dirPath = new DirPath(project, path);
 		Path compoPath = new CompoPath(project, path);
 		assertTrue(dirPath.equals(compoPath));

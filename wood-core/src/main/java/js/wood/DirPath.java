@@ -15,26 +15,22 @@ import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 
 /**
- * Directory path relative to project root. Directory path is always relative to project root and provides methods to retrieve
- * and iterate child files.
+ * Directory path relative to project root. Directory path is always relative to project root and this class provides methods to
+ * retrieve and iterate child files.
  * <p>
- * A directory path has a source directory and optional path segments. File separator is always slash (/). If trailing file
- * separator is missing takes care to add it. Since directory path is relative to project root leading file separator is not
- * accepted. Characters for name and path segment are those used by this tool: US-ASCII alphanumeric and dash (-). Note that
- * underscore (_) is not supported since is used for variants separator.
+ * A directory path is a sequence of path segments separated by file separator. First segment is known as
+ * <code>source directory</code>. File separator is always slash (/) and trailing file separator is mandatory. Since directory
+ * path is relative to project root leading file separator is not accepted. Characters for name and path segment are those
+ * accepted by {@link Path} class: US-ASCII alphanumeric and dash (-). Note that underscore (_) is not supported since is used
+ * for variants separator.
  * 
  * <pre>
- * dir-path     = source-dir *path-segment [SEP] 
- * source-dir   = RES / LIB / SCRIPT / GEN
- * path-segment = SEP 1*CH
+ * dir-path     = 1*(path-segment SEP) 
+ * path-segment = 1*CH
  * 
  * ; terminal symbols definition
- * RES    = "res"               ; UI resources
- * LIB    = "lib"               ; third-party Java archives and UI components
- * SCRIPT = "script"            ; scripts source directory
- * GEN    = "gen"               ; generated scripts, mostly HTTP-RMI stubs
- * SEP    = "/"                 ; file separator
- * CH     = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
+ * SEP = "/"                 ; file separator is always forward slash
+ * CH  = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
  * 
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
@@ -46,45 +42,53 @@ import js.wood.impl.FilesHandler;
  */
 public class DirPath extends Path {
 	/** Pattern for directory path. */
-	private static final Pattern PATTERN = Pattern.compile("^[a-z]+(?:/\\.?[a-z0-9-]+)*/?$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PATTERN = Pattern.compile("^(?:[a-z0-9-]+/)+?$", Pattern.CASE_INSENSITIVE);
 
-	/** Directory path segments does not include source directory. */
+	/** Directory path segments. */
 	private final List<String> pathSegments;
 
+	/**
+	 * Create root directory.
+	 * 
+	 * @param project WOOD project context.
+	 * @throws IllegalArgumentException if project is null.
+	 */
 	public DirPath(Project project) {
 		super(project);
 		pathSegments = Collections.emptyList();
 	}
 
 	/**
-	 * Create an immutable directory path instance. It is not legal to use absolute paths, that is, path to start with file
-	 * separator. See {@link DirPath} class description for directory path syntax.
+	 * Create an immutable directory path instance. Directory path value should be relative to project root. See {@link DirPath}
+	 * class description for directory path syntax.
 	 * 
-	 * @param project project reference,
-	 * @param dirPath directory path, relative to project root.
-	 * @throws WoodException if <code>path</code> parameter is absolute or uses not valid characters.
+	 * @param project WOOD project context,
+	 * @param value directory path value, relative to project root.
+	 * @throws WoodException if <code>path</code> syntax is not valid.
+	 * @throws IllegalArgumentException if project is null or path value is null or empty.
 	 */
-	public DirPath(Project project, String dirPath) throws WoodException {
-		super(project, dir(dirPath));
-		Matcher matcher = PATTERN.matcher(dirPath);
+	public DirPath(Project project, String value) throws WoodException {
+		super(project, value);
+		Matcher matcher = PATTERN.matcher(value);
 		if (!matcher.find()) {
-			throw new WoodException("Directory path parameter |%s| is invalid.", dirPath);
+			throw new WoodException("Directory path parameter |%s| is invalid.", value);
 		}
-		pathSegments = new ArrayList<>(Strings.split(dirPath, Path.SEPARATOR));
+		pathSegments = new ArrayList<>(Strings.split(value, Path.SEPARATOR));
 	}
 
 	/**
-	 * Add trailing file separator, if missing.
+	 * Test constructor. Initialize directory path instance from Java directory.
 	 * 
-	 * @param dirPath directory path.
-	 * @return directory path with trailing file separator.
+	 * @param project WOOD project context.
+	 * @param dir Java directory.
 	 */
-	private static String dir(String dirPath) {
-		return dirPath.endsWith(Path.SEPARATOR) ? dirPath : dirPath + Path.SEPARATOR;
+	public DirPath(Project project, File dir) {
+		super(project, dir);
+		pathSegments = new ArrayList<>(Strings.split(dir.getPath(), Path.SEPARATOR));
 	}
 
 	/**
-	 * Get this directory path segments, that do not include source directory. Returned list is safe to modify.
+	 * Get this directory path segments. Returned list is unmodifiable.
 	 * 
 	 * @return directory path segments.
 	 * @see #pathSegments
@@ -119,11 +123,16 @@ public class DirPath extends Path {
 	 * @return path of child directory.
 	 */
 	public DirPath getSubdirPath(String path) {
-		return new DirPath(project, value + path);
+		String dir = value + path;
+		if (!dir.endsWith(Path.SEPARATOR)) {
+			dir += Path.SEPARATOR;
+		}
+		return new DirPath(project, dir);
 	}
 
 	/**
-	 * Get a new iterable instance on this directory child files. Note that child sub-directories are not included.
+	 * Get a new iterable instance on this directory child files. Note that child sub-directories are not included. Also hidden
+	 * files are excluded; a hidden file is one that starts with dot, e.g. <code>.gitignore</code>.
 	 * <p>
 	 * This method is designed to work with for-each Java loop as in snippet below.
 	 * 
@@ -143,7 +152,8 @@ public class DirPath extends Path {
 	}
 
 	/**
-	 * Iterate over all this directory files and sub-directories. Please note that iteration order is not guaranteed.
+	 * Iterate over all this directory direct children, both files and sub-directories. Please note that iteration order is not
+	 * guaranteed. Hidden directories and files are excluded; a hidden directory or file has a name that starts with a dot.
 	 * <p>
 	 * Files handler instance does not need to override all handler methods as in sample below. In fact is common case to
 	 * override only {@link FilesHandler#onFile(FilePath)}.
@@ -174,9 +184,12 @@ public class DirPath extends Path {
 	}
 
 	/**
-	 * Iterate over sub-directories and files of specified type. This method behaves the same as {@link #files(FilesHandler)}
-	 * but list only files of specified type. If {@link FilesHandler#accept(FilePath)} is implemented its results uses AND logic
-	 * with file type filtering. Note that iteration order is not guaranteed.
+	 * Iterate over direct children, both sub-directories and files, but only files of specified type. This method behaves the
+	 * same as {@link #files(FilesHandler)} but list only files of specified type. If {@link FilesHandler#accept(FilePath)} is
+	 * implemented its results uses AND logic with file type filtering. Also hidden directories and files are ignored. Iteration
+	 * order is not guaranteed.
+	 * <p>
+	 * If attempt to invoke it on a not existing directory, this method does nothing.
 	 * <p>
 	 * Files handler anonymous instance does not need to override all handler methods as in sample below. For child files
 	 * processing only, one can override just {@link FilesHandler#onFile(FilePath)}.
@@ -216,11 +229,11 @@ public class DirPath extends Path {
 				}
 				if (file.isDirectory()) {
 					// takes care to create DirPath relative to project
-					handler.onDirectory(new DirPath(project, Files.getRelativePath(project.getProjectRoot(), file, true)));
-					continue;
-				}
-				if (isRoot()) {
-					// if this directory path is the project root do not process files
+					String dir = Files.getRelativePath(project.getProjectRoot(), file, true);
+					if (!dir.endsWith(Path.SEPARATOR)) {
+						dir += Path.SEPARATOR;
+					}
+					handler.onDirectory(new DirPath(project, dir));
 					continue;
 				}
 
@@ -239,9 +252,9 @@ public class DirPath extends Path {
 	}
 
 	/**
-	 * Test if project entity designated by this path is excluded from build process.
+	 * Test if this directory path is excluded from build process.
 	 * 
-	 * @return true if this path is excluded from build.
+	 * @return true if this directory path is excluded from build.
 	 */
 	public boolean isExcluded() {
 		return project.getExcludes().contains(this);
@@ -263,7 +276,7 @@ public class DirPath extends Path {
 	 * @return true if this directory path is the project root.
 	 */
 	public boolean isRoot() {
-		return value == null;
+		return value.equals(".");
 	}
 
 	/**

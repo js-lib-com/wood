@@ -18,5 +18,5 @@
 		<script src="gen/js/controller/MainController.js"></script>
 	</head>
 
-	<excludes>res/page/about</excludes>
+	<excludes>res/page/about/</excludes>
 </project>
