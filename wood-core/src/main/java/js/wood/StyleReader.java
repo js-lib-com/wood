@@ -2,34 +2,30 @@ package js.wood;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import js.util.Params;
 import js.util.Strings;
-import js.wood.impl.FileType;
-import js.wood.impl.FilesHandler;
 
 /**
  * Style file reader adds style variants, as media queries sections, to given base style file. This class is used in conjunction
- * with {@link SourceReader}, see sample code below. Style reader append media sections to style file and source reader resolve
- * resources from aggregated stream. Both tasks are processed on the fly, while style file content is reading.
+ * with {@link SourceReader}, see sample code below. Style reader appends media sections to style file and source reader
+ * resolves at-meta references. Both tasks are processed on the fly, while style file content is reading.
  * <p>
- * Be it a component <code>page</code> with a base style file <code>page.css</code>. Also, component has two style file
- * variants, namely <code>page_w1200.css</code> and <code>page_w800.css</code>.
+ * Be it a component <code>res/page</code> with a base style file <code>res/page/page.css</code>. Also, component has two style
+ * file variants, namely <code>res/page/page_w1200.css</code> and <code>res/page/page_w800.css</code>.
  * 
  * <pre>
- * FilePath styleFile = project.getFile("page.css");
+ * FilePath styleFile = project.getFile("res/page/page.css");
  * Files.copy(new SourceReader(new StyleReader(styleFile)), ...
  * </pre>
  * <p>
  * Resulting style file would be something like snippet below. First <code>body</code> rule set is from base style file
- * <code>page.css</code> whereas the other two are from style variants, <code>page_w1200.css</code> respective
- * <code>page_w800.css</code>. Please notice relation between file path variant and <code>max-width</code> expression from media
- * query.
+ * <code>res/page/page.css</code> whereas the other two are from style variants, <code>res/page/page_w1200.css</code> respective
+ * <code>res/page/page_w800.css</code>. Please notice relation between file path variant and <code>max-width</code> expression
+ * from media query.
  * 
  * <pre>
  * body {
@@ -59,8 +55,8 @@ public class StyleReader extends Reader {
 	private static final String FOOTER = Strings.concat(System.getProperty("line.separator"), "}", System.getProperty("line.separator"));
 
 	/** Media expressions list mapped to style files, possible empty. */
-	private final List<FilePath> variants = new ArrayList<>();
-	
+	private final List<FilePath> variants;
+
 	private final Iterator<FilePath> variantsIterator;
 
 	/** Currently processed style file reader, base style file or style variants. */
@@ -86,28 +82,15 @@ public class StyleReader extends Reader {
 		this.reader = styleFile.getReader();
 		this.state = State.BASE_CONTENT;
 
-		final String styleFileBasename = styleFile.getBaseName();
-		styleFile.getParentDirPath().files(FileType.STYLE, new FilesHandler() {
-			@Override
-			public boolean accept(FilePath file) {
-				return file.getBaseName().equals(styleFileBasename);
-			}
-
-			@Override
-			public void onFile(FilePath file) throws Exception {
-				if (file.getVariants().hasMediaQueries()) {
-					variants.add(file);
-				}
-			}
+		final String basename = styleFile.getBaseName();
+		this.variants = styleFile.getParentDirPath().filter(filePath -> {
+			return filePath.getBaseName().equals(basename) && filePath.getVariants().hasMediaQueries();
 		});
 
-		Collections.sort(variants, new Comparator<FilePath>() {
-			@Override
-			public int compare(FilePath o1, FilePath o2) {
-				return o1.getVariants().getMediaQueries().compareTo(o2.getVariants().getMediaQueries());
-			}
+		Collections.sort(variants, (filePath1, filePath2) -> {
+			return filePath1.getVariants().getMediaQueries().compareTo(filePath2.getVariants().getMediaQueries());
 		});
-		
+
 		variantsIterator = variants.iterator();
 	}
 
@@ -121,6 +104,7 @@ public class StyleReader extends Reader {
 	 * @param length target buffer length.
 	 * @throws IOException if read operation fails.
 	 */
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public int read(char[] buffer, int offset, int length) throws IOException {
 		if (state == State.BASE_CONTENT) {
@@ -182,9 +166,6 @@ public class StyleReader extends Reader {
 				state = State.NEXT_VARIANT;
 				// goto NEXT_VARIANT state via for loop continue
 				continue;
-
-			default:
-				throw new IllegalStateException();
 			}
 		}
 
@@ -244,5 +225,20 @@ public class StyleReader extends Reader {
 
 		/** Copy footer for current variant. On completion go back to {@link #NEXT_VARIANT}. */
 		VARIANT_FOOTER;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	Reader getReader() {
+		return reader;
+	}
+
+	String getState() {
+		return state.toString();
+	}
+
+	List<FilePath> getVariants() {
+		return variants;
 	}
 }

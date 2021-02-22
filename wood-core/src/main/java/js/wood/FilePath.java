@@ -1,5 +1,6 @@
 package js.wood;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
@@ -95,6 +96,10 @@ public class FilePath extends Path {
 		this.name = Strings.concat(this.basename, '.', extension);
 		this.variants = new Variants(this, matcher.group(3));
 		this.fileType = FileType.forExtension(extension.toLowerCase());
+	}
+
+	public FilePath(Project project, File file) {
+		this(project, Files.getRelativePath(project.getProjectRoot(), file, true));
 	}
 
 	/**

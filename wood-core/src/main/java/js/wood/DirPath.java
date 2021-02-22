@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -128,6 +129,24 @@ public class DirPath extends Path {
 			dir += Path.SEPARATOR;
 		}
 		return new DirPath(project, dir);
+	}
+
+	public List<FilePath> filter(Predicate<FilePath> predicate) {
+		List<FilePath> files = new ArrayList<>();
+		for (File file : toFile().listFiles()) {
+			if (file.getName().charAt(0) == '.') {
+				continue;
+			}
+			if (file.isDirectory()) {
+				continue;
+			}
+			
+			FilePath filePath = new FilePath(project, file);
+			if(predicate.test(filePath)) {
+				files.add(filePath);
+			}
+		}
+		return files;
 	}
 
 	/**
