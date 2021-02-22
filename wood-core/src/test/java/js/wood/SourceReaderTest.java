@@ -5,61 +5,63 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import js.util.Classes;
 import js.util.Files;
-import js.util.Strings;
-import js.wood.FilePath;
-import js.wood.IReferenceHandler;
-import js.wood.Project;
-import js.wood.Reference;
-import js.wood.SourceReader;
-import js.wood.Variables;
-import js.wood.WoodException;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.ResourceType;
 
-public class SourceReaderTest implements IReferenceHandler {
-	private Project project;
+@RunWith(MockitoJUnitRunner.class)
+public class SourceReaderTest {
+	@Mock
+	private FilePath sourceFile;
+	@Mock
+	private IReferenceHandler handler;
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project(new File("src/test/resources/resources"));
-	}
-
-	private FilePath filePath(String path) {
-		return new FilePath(project, path);
+		when(sourceFile.exists()).thenReturn(true);
 	}
 
 	@Test
 	public void fileConstructor() {
-		FilePath sourceFile = filePath("res/compo/compo.htm");
-		SourceReader reader = new SourceReader(sourceFile, this);
+		String source = "" + //
+				"<body>" + //
+				"	<h1>Title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.toString()).thenReturn("res/compo/compo.htm");
+
+		SourceReader reader = new SourceReader(sourceFile, handler);
 		assertReader(reader);
 	}
 
 	@Test
 	public void readerConstructor() throws FileNotFoundException {
-		FilePath sourceFile = filePath("res/compo/compo.htm");
-		FileReader fileReader = new FileReader(sourceFile.toFile());
-		SourceReader reader = new SourceReader(fileReader, sourceFile, this);
+		when(sourceFile.toString()).thenReturn("res/compo/compo.htm");
+
+		Reader fileReader = new StringReader("");
+		SourceReader reader = new SourceReader(fileReader, sourceFile, handler);
 		assertReader(reader);
 	}
 
 	private void assertReader(SourceReader reader) {
 		assertThat(field(reader, "sourceFile").toString(), equalTo("res/compo/compo.htm"));
-		assertThat(field(reader, "referenceHandler"), equalTo(this));
+		assertThat(field(reader, "referenceHandler"), equalTo(handler));
 		assertThat(field(reader, "reader"), notNullValue());
 		assertThat(field(reader, "metaBuilder"), notNullValue());
 		assertThat(field(reader, "state").toString(), equalTo("TEXT"));
@@ -70,27 +72,37 @@ public class SourceReaderTest implements IReferenceHandler {
 
 	@Test
 	public void referenceHandlerParameter() throws IOException {
-		FilePath sourceFile = filePath("res/compo/compo.htm");
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@string/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.value()).thenReturn("res/compo/compo.htm");
 
-		SourceReader reader = new SourceReader(sourceFile, new IReferenceHandler() {
-			@Override
-			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
-				assertThat(((Reference) reference).getResourceType(), equalTo(ResourceType.STRING));
-				assertThat(reference.getName(), equalTo("title"));
-				assertThat(sourceFile.value(), equalTo("res/compo/compo.htm"));
-				return reference.toString();
-			}
-		});
+		ArgumentCaptor<Reference> referenceCaptor = ArgumentCaptor.forClass(Reference.class);
+		ArgumentCaptor<FilePath> sourceFileCaptor = ArgumentCaptor.forClass(FilePath.class);
+		when(handler.onResourceReference(referenceCaptor.capture(), sourceFileCaptor.capture())).thenReturn("Component Title");
 
+		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		assertThat(referenceCaptor.getValue().getResourceType(), equalTo(ResourceType.STRING));
+		assertThat(referenceCaptor.getValue().getName(), equalTo("title"));
+		assertThat(sourceFileCaptor.getValue().value(), equalTo("res/compo/compo.htm"));
 	}
 
 	@Test
 	public void copy_StringResolve() throws IOException {
-		FilePath sourceFile = filePath("res/compo/compo.htm");
-		SourceReader reader = new SourceReader(sourceFile, this);
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@string/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
+		when(handler.onResourceReference(new Reference(ResourceType.STRING, "title"), sourceFile)).thenReturn("Component Title");
+
+		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 		assertTrue(writer.toString().contains("<h1>Component Title</h1>"));
@@ -98,8 +110,13 @@ public class SourceReaderTest implements IReferenceHandler {
 
 	@Test
 	public void copy_ExpressionEval() throws IOException {
-		FilePath sourceFile = filePath("res/compo/compo.css");
-		SourceReader reader = new SourceReader(sourceFile, this);
+		String source = "" + //
+				"body {" + //
+				"	width: @eval(add 2px (add 3px 4px));" + //
+				"}";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+
+		SourceReader reader = new SourceReader(sourceFile, handler);
 
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
@@ -107,13 +124,34 @@ public class SourceReaderTest implements IReferenceHandler {
 	}
 
 	@Test
+	public void copy_StyleMedia() throws IOException {
+		String source = "" + //
+				"@media all" + //
+				"body {" + //
+				"	width: 800px" + //
+				"}";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+
+		SourceReader reader = new SourceReader(sourceFile, handler);
+
+		StringWriter writer = new StringWriter();
+		Files.copy(reader, writer);
+		assertTrue(writer.toString().contains("@media all"));
+	}
+
+	@Test
 	public void copy_ParamResolve() throws IOException {
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@param/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.isLayout()).thenReturn(true);
+
 		LayoutParameters parameters = new LayoutParameters();
 		parameters.load("title:Component Parameter;");
 
-		FilePath sourceFile = filePath("res/generic-compo/generic-compo.htm");
-		SourceReader reader = new SourceReader(sourceFile, parameters, this);
-
+		SourceReader reader = new SourceReader(sourceFile, parameters, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 		assertTrue(writer.toString().contains("<h1>Component Parameter</h1>"));
@@ -121,50 +159,51 @@ public class SourceReaderTest implements IReferenceHandler {
 
 	@Test(expected = WoodException.class)
 	public void copy_ParamResolve_MissingParameter() throws IOException {
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@param/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.isLayout()).thenReturn(true);
+
 		LayoutParameters parameters = new LayoutParameters();
 
-		FilePath sourceFile = filePath("res/generic-compo/generic-compo.htm");
-		SourceReader reader = new SourceReader(sourceFile, parameters, this);
+		SourceReader reader = new SourceReader(sourceFile, parameters, handler);
+		StringWriter writer = new StringWriter();
+		Files.copy(reader, writer);
+	}
 
+	@Test(expected = WoodException.class)
+	public void copy_ParamResolve_NullLayoutParameters() throws IOException {
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@param/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.isLayout()).thenReturn(true);
+
+		SourceReader reader = new SourceReader(sourceFile, null, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 	}
 
 	@Test(expected = WoodException.class)
 	public void unknownType() throws IOException {
-		FilePath sourceFile = filePath("res/exception/unknown-type/unknown-type.htm");
-		SourceReader reader = new SourceReader(sourceFile, this);
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@strings/value</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+
+		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 	}
 
-	// ------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
 	// Internal helpers
-
-	@Override
-	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException {
-		if (reference.isVariable()) {
-			Variables variables = new Variables(sourcePath.getParentDirPath());
-			if (project.getAssetsDir().exists()) {
-				invoke(variables, "load", project.getAssetsDir());
-			}
-			return variables.get(new Locale("en"), reference, sourcePath, this);
-		} else {
-			return Strings.concat("media/", reference.getName(), ".png");
-		}
-	}
 
 	private static <T> T field(Object object, String field) {
 		return Classes.getFieldValue(object, field);
-	}
-
-	private static <T> T invoke(Object object, String method, Object... args) {
-		try {
-			return Classes.invoke(object, method, args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-		throw new IllegalStateException();
 	}
 }
