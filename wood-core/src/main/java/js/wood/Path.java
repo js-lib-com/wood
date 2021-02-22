@@ -75,9 +75,13 @@ public abstract class Path {
 	 * @param project parent project,
 	 * @param file Java file relative to project root.
 	 */
-	protected Path(Project project, File file) {
+	Path(Project project, File file) {
 		this.project = project;
-		this.value = file.getPath().replace('\\', '/');
+		String value = file.getPath().replace('\\', SEPARATOR.charAt(0));
+		if (file.isDirectory()) {
+			value += SEPARATOR;
+		}
+		this.value = value;
 		this.file = file;
 	}
 

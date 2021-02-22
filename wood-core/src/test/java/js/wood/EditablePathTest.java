@@ -41,7 +41,7 @@ public class EditablePathTest {
 	public void constructor_BadPath() {
 		FilePath layoutPath = new FilePath(project, "res/page/index/index.htm");
 
-		for (String path : new String[] { "", "template/page", "dir/template/page#body", "template/page/page.htm#body" }) {
+		for (String path : new String[] { "", "/template/page", "/dir/template/page#body", "template/page/page.htm#body" }) {
 			try {
 				new EditablePath(layoutPath, path);
 				fail("Editable path constructor with bad path value should rise exception.");

@@ -4,15 +4,14 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import js.wood.impl.EditablePath;
-
 /**
- * Component path is used by layout files to declare editable elements and compos bounds. It is the mean to implement
- * inheritance and composition. Component path identifies a component under UI resources or library source directories. Project
- * directory segments are mapped to component path elements.
+ * Component path is the {@link DirPath} to the project directory where component files reside. Being a directory path is
+ * relative to the project root; it is also a sequence of path segments but it has no trailing separator. Last path segment is
+ * usually known as component name.
  * <p>
- * Here is a sample usage for component path. Template attribute declare a reference to and editable element from a template
- * whereas widget attribute is a reference to an widget. For full template reference description see {@link EditablePath}.
+ * Component paths are used on layout files to declare inheritance and composition. Here is a sample usage for component paths.
+ * <code>wood:template</code> operator declare a reference to and editable element from a template whereas
+ * <code>wood:compo</code> operator is a reference to a reusable component.
  * 
  * <pre>
  * &lt;div wood:template="template/page#body"&gt;
@@ -21,50 +20,57 @@ import js.wood.impl.EditablePath;
  * &lt;/div&gt;
  * </pre>
  * <p>
- * Below is component path syntax. Component path starts with an optional source directory followed by a file separator then an
- * optional number of path segments and mandatory component name. If trailing path separator is missing takes care to add it.
- * Both path segment and component names uses US-ASCII alphanumeric characters and dash (-). If source directory is missing uses
- * UI resources.
+ * Below is the component path syntax. Component path is a sequence of path segments, the last segment being called component
+ * name. Both path segment and component names uses US-ASCII alphanumeric characters and dash (-). Note that underscore (_) is
+ * not supported since is used for variants separator.
  * 
  * <pre>
- * compo-path   = [source-dir SEP] *path-segment compo-name [SEP]
- * source-dir   = RES / LIB ; RES is default value
+ * compo-path   = 1*path-segment compo-name [SEP]
  * path-segment = name SEP
  * compo-name   = name
  * name         = 1*CH
  * 
  * ; terminal symbols definition
- * RES = "res"               ; UI resources
- * LIB = "lib"               ; third-party Java archives and UI components
- * SEP  = "/"                ; file separator 
+ * SEP = "/"                 ; file separator 
  * CH  = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
  * 
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * <p>
- * As stated, component directory segments are mapped on component path elements:
- * <ul>
- * <li>first director is source directory, optional,
- * <li>last director is component name,
- * <li>the rest are component path segments, optional.
- * </ul>
+ * A component always has a layout file. It is a HTML file with basename equal to parent directory name and this path instance
+ * points to component directory. In this case component directory contains, beside layout, couple related files: styles,
+ * scripts, media files, variables and descriptor.
+ * <p>
+ * Anyway, there are simplified components that have only layout. For example a select with options reused in multiple forms. In
+ * this case component directory can miss and this component path points to layout file itself; need only to add layout
+ * extension. This simplified component is named <code>inline component</code>.
  * <p>
  * In ASCII diagram we have a sample project file system with couple components and relation between project directories
- * structure and components path.
+ * structure and components path. Component path <code>res/template/page</code> points to directory
+ * <code>${project-root}/res/template/page</code> whereas component path <code>res/template/select</code> points to file
+ * <code>${project-root}/res/template/select.htm</code>.
  * 
  * <pre>
  * project /                              
  *         ~                              
  *         / lib /                        
- *         |     / paging /          --> lib/paging
+ *         |     / paging /              --> lib/paging
  *         ~ 
  *         / res /
  *         |     / template /
- *         |     |          / page / --> template/page
+ *         |     |          / page /     --> res/template/page
+ *         |     |          / select.htm --> res/template/select - inline component
  *         ~     ~
  *         |     / page /
- *         |     |      / index /    --> page/index
+ *         |     |      / index /        --> res/page/index
  * </pre>
+ * <p>
+ * This class provides convenient method to retrieve layout file path, see {@link #getLayoutPath()}. In above diagram it returns
+ * <code>res/template/page/page.htm</code> for component path <code>res/template/page</code>. For inline component
+ * <code>res/template/select</code> returned layout file path is <code>res/template/select.htm</code>.
+ * <p>
+ * Note that for a full component this component path points to an existing directory. By contrast, inline component path is
+ * abstract, with no direct node associated on project file system.
  * <p>
  * Component path has no mutable state and is thread safe.
  * 
@@ -74,46 +80,26 @@ import js.wood.impl.EditablePath;
 public class CompoPath extends DirPath {
 	/** Component path pattern. */
 	protected static final Pattern PATTERN = Pattern.compile("^(" + //
-			"(?:[\\w-]+/)+" + // path segments
-			"[\\w-]+" + // component name
+			"(?:[a-z0-9-]+/)+" + // path segments
+			"[a-z0-9-]+" + // component name
 			")/?$", //
 			Pattern.CASE_INSENSITIVE);
 
-	/** Simple component that has only layout file and no component directory. */
-	private final boolean inlineCompoPath;
-
 	/**
-	 * Create component path instance with safe path value. This constructor is designed to be called with verified path value
-	 * and does not attempt to test its validity or if directory actually exist. Attempting to use this constructor with invalid
-	 * path value will conclude in not predictable behavior.
+	 * Create component path instance with normalized path value. This constructor is designed to be called with verified path
+	 * value and does not attempt to test its validity or if directory actually exist. Attempting to use this constructor with
+	 * invalid path value will conclude in not predictable behavior.
 	 * 
-	 * @param project project reference,
-	 * @param compoPath component path value.
+	 * @param project WOOD project context,
+	 * @param value component path value.
 	 */
-	public CompoPath(Project project, String compoPath) {
-		super(project, value(compoPath));
-		if (!exists()) {
-			// by convention component path is the name of the directory where layout file is stored
-			// for example for path/to/compo there is 'compo' directory and 'compo/compo.htm' layout file
-			// in this case 'compo' directory should exist, condition tested by above exists() predicate
-
-			// in the case of inline components there may be no enclosing directory
-			// remember that inline component have only layout files and directory is optional
-			// in this is the case test for layout file existence
-
-			File inlineCompoFile = new File(file.getAbsoluteFile() + CT.DOT_LAYOUT_EXT);
-			if (!inlineCompoFile.exists()) {
-				throw new WoodException("Missing component path |%s|.", compoPath);
-			}
-			inlineCompoPath = true;
-		} else {
-			inlineCompoPath = false;
-		}
+	public CompoPath(Project project, String value) {
+		super(project, value(value));
 	}
 
 	/**
-	 * Check component path syntax and return normalized value. In this context normalization means removing trailing path
-	 * separator, if present. Syntax is matched against {@link #PATTERN component path pattern}.
+	 * Check component path syntax and return normalized value. In this context normalization means adding trailing path
+	 * separator. Syntax is matched against {@link #PATTERN component path pattern}.
 	 * 
 	 * @param compoPath component path value.
 	 * @return normalized path value.
@@ -128,24 +114,38 @@ public class CompoPath extends DirPath {
 	}
 
 	/**
-	 * Get this component name.
+	 * Test constructor.
 	 * 
-	 * @return component name.
+	 * @param project WOOD project context,
+	 * @param file component file.
 	 */
-	public String getName() {
-		return file.getName();
+	CompoPath(Project project, File file) {
+		super(project, file);
 	}
 
 	/**
-	 * Get file path for this component layout.
+	 * Get file path for this component layout. Usually layout is an HTML file with basename equal to parent directory name and
+	 * this path instance points to component directory. In this case component directory contains, beside layout, couple
+	 * related files: styles, scripts, media files, variables and descriptor.
+	 * <p>
+	 * Anyway, there are simplified component that have only layout. For example a select with options reused in multiple forms.
+	 * In this case component directory can miss and this path points to layout file itself; need only to add layout extension.
+	 * This simplified component is named <code>inline component</code>.
+	 * <p>
+	 * To detect if this component is inline check if this path is an existing directory. If so, we have a full component,
+	 * otherwise this component is inline.
 	 * 
 	 * @return component layout.
 	 */
 	public FilePath getLayoutPath() {
-		if (inlineCompoPath) {
-			return new FilePath(project, value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+		if (file.isDirectory()) {
+			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
-		FilePath layoutPath = getFilePath(getName() + CT.DOT_LAYOUT_EXT);
+
+		FilePath layoutPath = new FilePath(project, value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+		if (!layoutPath.exists()) {
+			throw new WoodException("Missing component |%s|.", file);
+		}
 		return layoutPath;
 	}
 

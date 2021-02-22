@@ -1,5 +1,7 @@
 package js.wood;
 
+import static org.mockito.Mockito.*;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -9,38 +11,28 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.CompoPath;
-import js.wood.DirPath;
-import js.wood.FilePath;
-import js.wood.Path;
-import js.wood.Project;
-import js.wood.WoodException;
-
+@RunWith(MockitoJUnitRunner.class)
 public class CompoPathTest {
+	@Mock
 	private Project project;
 
 	@Before
 	public void beforeTest() {
-		project = new Project(new File("src/test/resources/project"));
+		when(project.getProjectRoot()).thenReturn(new File("."));
 	}
 
 	@Test
 	public void constructor() {
-		assertCompoPath("res/compo/discography", "res/compo/discography/discography.htm", "res/compo/discography/", "discography");
-		assertCompoPath("res/compo/discography", "res/compo/discography/discography.htm", "res/compo/discography/", "discography");
-	}
+		File path = Mockito.mock(File.class);
+		when(path.getPath()).thenReturn("res/page");
 
-	private void assertCompoPath(String pathValue, String layout, String value, String name) {
-		CompoPath p = new CompoPath(project, pathValue);
-		assertThat(p.getLayoutPath().value(), equalTo(layout));
-		assertThat(p.value(), equalTo(value));
-		assertThat(p.getName(), equalTo(name));
-	}
-
-	@Test(expected = WoodException.class)
-	public void constructor_MissingInlineComponent() {
-		new CompoPath(project, "res/compo/missing-component");
+		CompoPath compoPath = new CompoPath(project, path);
+		assertThat(compoPath.value(), equalTo("res/page"));
 	}
 
 	@Test(expected = WoodException.class)
@@ -55,23 +47,36 @@ public class CompoPathTest {
 
 	@Test
 	public void getFilePath() {
-		CompoPath compo = new CompoPath(project, "res/compo/discography");
+		File path = Mockito.mock(File.class);
+		when(path.isDirectory()).thenReturn(true);
+		when(path.getPath()).thenReturn("res/page");
+
+		CompoPath compo = new CompoPath(project, path);
+
 		FilePath file = compo.getFilePath("picture.png");
-		assertThat(file.value(), equalTo("res/compo/discography/picture.png"));
-		assertThat(file.getParentDirPath().value(), equalTo("res/compo/discography/"));
+		assertThat(file.value(), equalTo("res/page/picture.png"));
+		assertThat(file.getParentDirPath().value(), equalTo("res/page/"));
 		assertThat(file.getName(), equalTo("picture.png"));
 	}
 
 	@Test
 	public void getLayoutPath() {
-		CompoPath compo = new CompoPath(project, "res/compo/discography");
-		assertThat(compo.getLayoutPath().value(), equalTo("res/compo/discography/discography.htm"));
+		File path = Mockito.mock(File.class);
+		when(path.isDirectory()).thenReturn(true);
+		when(path.getPath()).thenReturn("res/page");
+		when(path.getName()).thenReturn("page");
+
+		CompoPath compo = new CompoPath(project, path);
+		assertThat(compo.getLayoutPath().value(), equalTo("res/page/page.htm"));
 	}
 
-	@Test
-	public void getLayoutPath_InlineComponent() {
-		CompoPath compo = new CompoPath(project, "res/compo/select");
-		assertThat(compo.getLayoutPath().value(), equalTo("res/compo/select.htm"));
+	@Test(expected = WoodException.class)
+	public void getLayoutPath_MissingInlineComponent() {
+		File path = Mockito.mock(File.class);
+		when(path.getPath()).thenReturn("res/page");
+
+		CompoPath compo = new CompoPath(project, path);
+		compo.getLayoutPath();
 	}
 
 	@Test
@@ -84,20 +89,14 @@ public class CompoPathTest {
 
 	@Test
 	public void accept() {
-		assertFalse(CompoPath.accept("compo"));
 		assertTrue(CompoPath.accept("res/compo"));
 		assertTrue(CompoPath.accept("path/compo"));
+		assertTrue(CompoPath.accept("path/compo/"));
 		assertTrue(CompoPath.accept("res/path/compo"));
+
+		assertFalse(CompoPath.accept("compo"));
 		assertFalse(CompoPath.accept("res/path/compo/compo.htm"));
 		assertFalse(CompoPath.accept("res/path/compo/compo.htm#fragment-id"));
 		assertFalse(CompoPath.accept("res/path/compo/compo.css"));
-	}
-
-	@Test
-	public void accept_LogicFlaw() {
-		// here is a component path logic flaw
-		// because res directory is optional source directory cannot reliable be detected
-		// accordingly syntax description next path value should be rejected but is accepted
-		assertTrue(CompoPath.accept("dir/template/page"));
 	}
 }

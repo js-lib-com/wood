@@ -82,7 +82,7 @@ public class DirPath extends Path {
 	 * @param project WOOD project context.
 	 * @param dir Java directory.
 	 */
-	public DirPath(Project project, File dir) {
+	DirPath(Project project, File dir) {
 		super(project, dir);
 		pathSegments = new ArrayList<>(Strings.split(dir.getPath(), Path.SEPARATOR));
 	}
