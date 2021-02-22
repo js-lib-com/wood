@@ -52,9 +52,8 @@ public class EditablePath extends CompoPath {
 
 	/**
 	 * Construct editable path instance for value loaded from layout file. This constructor extracts editable name from given
-	 * path and store it; with what is left delegates {@link CompoPath#CompoPath(Project, FilePath, String) super constructor}.
-	 * Since editable path is loaded from layout files it is not reliable and uses component constructor that check component
-	 * path integrity.
+	 * path and store it; with what is left delegates {@link CompoPath#CompoPath(Project, FilePath)}. Since editable path is
+	 * loaded from layout files it is not reliable and uses component constructor that check component path integrity.
 	 * 
 	 * @param project project reference,
 	 * @param layoutPath layout file declaring editable path,
