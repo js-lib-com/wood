@@ -15,39 +15,29 @@ import js.wood.impl.FileType;
 import js.wood.impl.Variants;
 
 /**
- * File path identifies component files, both source files and resources. Recognized source files are layout (HTM), style (CSS)
- * and script (JS); they can contain references to resources that are variables (XML) and media files. File paths scope is
- * limited to source directories, see {@link Project} class description.
+ * File path identify project files, usually component files like layout, styles and scripts. A file path is a standard Java
+ * file with couple syntax constrains: it always uses slash (/) for file separator, directory path is optional and file name
+ * supports variants. Variants qualify file path so that one can create group of files with the same semantic content but
+ * differently presented, e.g. string variables for multi-locale support.
  * <p>
- * A file path is a standard Java file with couple syntax constrains: it always uses slash (/) for file separator, always starts
- * with a valid source directory and file name supports variants. Variants qualify file path so that one can create group of
- * files with the same semantic content but differently presented, e.g. string variables for multi-language support.
- * <p>
- * Currently supported variants are language, viewport maximum width and design. Language is two letter code standard - see ISO
- * 639-1 whereas viewport width is a numeric value in pixels. Language code is used for multi-language build and viewport width
- * for styles depending on display size for responsive design. Design variant is used by component import logic to match against
- * target project design.
+ * Currently supported variants are locale and media queries for style files. See {@link Variants} class.
  * <p>
  * Characters used by path segments and file base name are US-ASCII alphanumeric characters, dash and dot. Dot is allowed for
- * file names with version, for example <code>js-lib-.1.2.3.js</code>. Underscore is reserved for variants separator and is not
- * valid in names.
+ * file names with version, for example <code>js-lib-1.2.3.js</code>. Last dot is for extension. Underscore is reserved for
+ * variants separator and is not valid in names.
  * 
  * <pre>
- * file-path    = source-dir SEP *path-segment base-name *variant DOT extension 
- * source-dir   = RES / LIB / SCRIPT / GEN
+ * file-path    = *path-segment base-name *variant DOT extension 
  * path-segment = 1*CH F-SEP
  * base-name    = 1*CH
- * extension    = 2*4(ALPHA / DIGIT)
- * ; for variant non terminal definition see {@link Variants}
+ * variant      = V-SEP 1*(ALPHA / DIGIT / "-")
+ * extension    = 2*3(ALPHA / DIGIT)
  * 
  * ; terminal symbols definition
- * RES    = "res"                       ; UI resources
- * LIB    = "lib"                       ; third-party Java archives and UI components
- * SCRIPT = "script"                    ; scripts source directory
- * GEN    = "gen"                       ; generated scripts, mostly server services stub
- * SEP  = "/"                           ; file separator is always slash
- * DOT    = "."                         ; dot as file extension separator
- * CH     = ALPHA / DIGIT / "-" / "."   ; character is US-ASCII alphanumeric, dash and dot
+ * F-SEP = "/"                         ; file separator is always slash
+ * V-SEP = "_"                         ; variant separator is always underscore
+ * DOT   = "."                         ; dot as file extension separator
+ * CH    = ALPHA / DIGIT / "-" / "."   ; character is US-ASCII alphanumeric, dash and dot
  * 
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
@@ -59,7 +49,7 @@ import js.wood.impl.Variants;
  */
 public class FilePath extends Path {
 	// res/template/progress-bar/progress-bar_ro_desktop.htm
-	// ---------- path ----------|-- name --|-|variants|-|ext
+	// ---------- path --------|-|-- name --|-|variants|-|ext
 
 	/** Pattern for file path accordingly syntax described by class description. */
 	private static final Pattern PATTERN = Pattern.compile("^" + //
@@ -89,7 +79,7 @@ public class FilePath extends Path {
 	 * Create immutable path instance from a given path value.
 	 * 
 	 * @param project project reference,
-	 * @param filePath path value.
+	 * @param filePath file path value.
 	 */
 	public FilePath(Project project, String filePath) {
 		super(project, filePath);
@@ -272,6 +262,7 @@ public class FilePath extends Path {
 	 */
 	public Reader getReader() {
 		try {
+			// uses InputStreamReader with explicit encoding to avoid using system default encoding used by FileReader
 			return new InputStreamReader(new FileInputStream(file), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// fatal condition: JVM without UTF-8 support
