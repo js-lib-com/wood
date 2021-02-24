@@ -1,5 +1,7 @@
 package js.wood.impl;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,20 @@ abstract class BaseDescriptor {
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		this.doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
 
+		this.linkDefaults = new LinkDefaults(doc);
+		this.scriptDefaults = new ScriptDefaults(doc);
+	}
+
+	protected BaseDescriptor(File descriptorFile) {
+		Document doc;
+		try {
+			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+			doc = builder.loadXML(descriptorFile);
+		} catch (FileNotFoundException e) {
+			doc = EMPTY_DOC;
+		}
+
+		this.doc = doc;
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
 	}

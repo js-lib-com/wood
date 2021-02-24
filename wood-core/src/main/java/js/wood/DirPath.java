@@ -140,13 +140,30 @@ public class DirPath extends Path {
 			if (file.isDirectory()) {
 				continue;
 			}
-			
+
 			FilePath filePath = new FilePath(project, file);
-			if(predicate.test(filePath)) {
+			if (predicate.test(filePath)) {
 				files.add(filePath);
 			}
 		}
 		return files;
+	}
+
+	public FilePath findFirst(Predicate<FilePath> predicate) {
+		for (File file : toFile().listFiles()) {
+			if (file.getName().charAt(0) == '.') {
+				continue;
+			}
+			if (file.isDirectory()) {
+				continue;
+			}
+
+			FilePath filePath = new FilePath(project, file);
+			if (predicate.test(filePath)) {
+				return filePath;
+			}
+		}
+		return null;
 	}
 
 	/**

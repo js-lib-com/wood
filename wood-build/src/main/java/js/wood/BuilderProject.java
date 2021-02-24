@@ -117,7 +117,7 @@ class BuilderProject extends Project {
 
 				// component descriptor for pages has root 'page'
 				if (parentDir.getName().equals(file.getBaseName()) && Files.isXML(file.toFile(), "page")) {
-					CompoPath compoPath = new CompoPath(BuilderProject.this, Files.getRelativePath(projectRoot, parentDir.toFile(), true));
+					CompoPath compoPath = new CompoPath(BuilderProject.this, Files.getRelativePath(getProjectRoot(), parentDir.toFile(), true));
 					if (!compoPath.isExcluded()) {
 						pages.add(compoPath);
 					}

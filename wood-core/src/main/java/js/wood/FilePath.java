@@ -168,8 +168,8 @@ public class FilePath extends Path {
 	 * @return true if reference name equals this file base name.
 	 * @see #basename
 	 */
-	public boolean isBaseName(Reference reference) {
-		return isBaseName(reference.getName());
+	public boolean hasBaseName(Reference reference) {
+		return hasBaseName(reference.getName());
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class FilePath extends Path {
 	 * @return true if this file base name equals given name.
 	 * @see #basename
 	 */
-	public boolean isBaseName(String name) {
+	public boolean hasBaseName(String name) {
 		return basename.equals(name);
 	}
 

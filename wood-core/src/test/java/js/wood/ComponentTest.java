@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -198,7 +199,7 @@ public class ComponentTest {
 	}
 
 	@Test
-	public void referenceHandler() {
+	public void referenceHandler() throws IllegalArgumentException, FileNotFoundException {
 		Project project = new Project(new File("src/test/resources/components"));
 		CompoPath path = new CompoPath(project, "res/references");
 		final List<Reference> references = new ArrayList<>();
@@ -347,8 +348,13 @@ public class ComponentTest {
 	// Helper methods
 
 	private static Component getCompo(String path) {
-		Project project = new Project(new File("src/test/resources/components"));
-		return createCompo(project, new CompoPath(project, path));
+		Project project;
+		try {
+			project = new Project(new File("src/test/resources/components"));
+			return createCompo(project, new CompoPath(project, path));
+		} catch (Exception e) {
+			throw new WoodException(e);
+		}
 	}
 
 	private static Component createCompo(final Project project, final CompoPath path) {

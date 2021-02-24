@@ -1,7 +1,6 @@
 package js.wood;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -19,44 +18,38 @@ import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
- * Project global singleton. A project has a root directory; all {@link Path} instances are relative to this project root.
- * Regarding build process, project reads component files under project builder control. For this, project scans source
- * directories hierarchy, collects and caches meta data that is available for entire lifetime of the build process. Note that
- * Project does not consider all sub-directories from project root; only source directories. This allows Project to be part of a
- * larger project layout, like an Eclipse project.
+ * Project global context. A project has a root directory and all {@link Path} instances are relative to this project root. This
+ * class provides basic functionality but there are specialized project classes for build and preview. Project is initialized
+ * from {@link ProjectDescriptor}, that is optional. If project descriptor file is missing there are sensible defaults.
  * <p>
- * Current Project file system is depicted below. There are four source directories and one build target. There is also a
- * project configuration XML file, see {@link ProjectDescriptor}. It is acceptable to share directories with master project, if
- * any. For example <code>lib</code> can hold Java archives. Anyway, master project files must not use extensions expected by
- * this tool library and file name should obey syntax described by {@link FilePath}.
- * 
- * <pre>
- *  /                     ; project root
- *  /build/site           ; site build target directory
- *  /gen/                 ; optional generated scripts, mostly HTTP-RMI stubs
- *  /lib/                 ; third-party user interface components and script libraries
- *  /res/                 ; application user interface resources
- *  |   /asset            ; project assets directory stores global variables and media files
- *  |   /theme            ; site styles for UI primitive elements and theme variables
- *  ~                     ; application defined components
- *  /script/              ; application specific scripts structured in packages
- *  +-project.xml         ; project configuration file
- * </pre>
- * 
- * Note that default build target directory is a sub-directory of master project build. This is to allow storing all build files
- * in the same place. Anyway, site build directory is Project configurable, see <code>site-dir</code> from
- * {@link ProjectDescriptor}.
+ * Project is a not constrained tree of directories and files, source files - layouts, styles, scripts, medias and variables,
+ * and descriptors. Directories hierarchy is indeed not constrained but there are naming conventions for component files - see
+ * {@link Component} class description.
  * <p>
- * Project instance is used in two different modes: build and preview. When working for build, project scans and cache files
- * meta data; cache is valid for entire build process. On preview mode project does not use cache in order to display most
- * updated content.
+ * Is recommended as good practice to have separated modules for user interface and back-end logic. Anyway, there are no
+ * constraints that impose this separation of concerns. It is allowed to embed WOOD project directories in a master Java
+ * project, perhaps Eclipse. For example, is possible to have a <code>lib</code> directory for both WOOD components and Java
+ * archives. Anyway, master project files must not use extensions expected by this tool library and file name should obey syntax
+ * described by {@link Path} classes hierarchy.
  * 
  * @author Iulian Rotaru
- * @version draft
+ * @since 1.0
  */
 public class Project {
+	/** Project root directory. All project file are included here, no external references allowed. */
+	private final File projectRoot;
+
+	/** Directory path instance used as root. */
+	private final DirPath projectDir;
+
 	/**
-	 * Project display is for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
+	 * Project configuration loaded from <code>project.xml</code> file. It is allowed for project descriptor to be missing in
+	 * which case there are sensible default values.
+	 */
+	private final ProjectDescriptor descriptor;
+
+	/**
+	 * Project name for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
 	 * project name converted to title case.
 	 */
 	private final String display;
@@ -67,30 +60,17 @@ public class Project {
 	 */
 	private final String description;
 
-	/** Project root directory. All project file are included here, no external references allowed. */
-	protected final File projectRoot;
-
-	/**
-	 * Project configuration loaded from <code>project.xml</code> file. By convention, configuration file should be stored
-	 * project directory root.
-	 */
-	private final ProjectDescriptor descriptor;
-
-	protected final List<DirPath> excludes;
-
-	protected final DirPath projectDir;
-
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
 	 */
-	protected final DirPath assetsDir;
+	private final DirPath assetsDir;
 
 	/**
 	 * Contains site styles for UI primitive elements and theme variables. This directory content describe overall site design -
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
-	protected final DirPath themeDir;
+	private final DirPath themeDir;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
@@ -98,19 +78,32 @@ public class Project {
 	 */
 	private final IOperatorsHandler operatorsHandler;
 
+	/** Directories excluded from build processing. */
+	protected final List<DirPath> excludes;
+
 	/**
 	 * Construct and initialize project instance. Created instance is immutable.
 	 * 
-	 * @param projectDir path to existing project root directory.
+	 * @param projectRoot path to existing project root directory.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
-	 * @throws FileNotFoundException 
 	 */
 	public Project(File projectRoot) throws IllegalArgumentException {
+		this(projectRoot, new ProjectDescriptor(new File(projectRoot, CT.PROJECT_CONFIG)));
+	}
+
+	/**
+	 * Test constructor.
+	 * 
+	 * @param projectRoot path to existing project root directory,
+	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
+	 * @throws IllegalArgumentException if project root does not designate an existing directory.
+	 */
+	Project(File projectRoot, ProjectDescriptor descriptor) {
 		Params.isDirectory(projectRoot, "Project directory");
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
-		this.descriptor = new ProjectDescriptor(new FilePath(this, CT.PROJECT_CONFIG));
-		this.excludes = this.descriptor.getExcludes().stream().map(dirPath -> new DirPath(this, dirPath)).collect(Collectors.toList());
+		this.descriptor = descriptor;
+		this.excludes = descriptor.getExcludes().stream().map(exclude -> new DirPath(this, exclude)).collect(Collectors.toList());
 
 		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
 		this.themeDir = new DirPath(this, CT.THEME_DIR);
@@ -157,18 +150,21 @@ public class Project {
 	}
 
 	/**
-	 * Get absolute path to this project root. Project root directory contains all WOOD project files.
-	 * <p>
-	 * Although is good practice to not mix user interface with server logic it is allowed for project directory to contain
-	 * server side code base, e.g. Java files. Files that are not recognized by WOOD tools are silently ignored.
+	 * Get Java absolute path to this project root. Project root directory contains all WOOD project files.
 	 * 
-	 * @return project root directory.
+	 * @return project root Java directory.
 	 * @see #projectRoot
 	 */
 	public File getProjectRoot() {
 		return projectRoot;
 	}
 
+	/**
+	 * Get directory path instance used as project root.
+	 * 
+	 * @return project root directory path.
+	 * @see #projectDir
+	 */
 	public DirPath getProjectDir() {
 		return projectDir;
 	}
@@ -211,31 +207,26 @@ public class Project {
 	 * @see ProjectDescriptor#getLocales()
 	 */
 	public List<Locale> getLocales() {
-		return descriptor.getLocales();
+		return Collections.unmodifiableList(descriptor.getLocales());
 	}
 
+	/**
+	 * Get project configured default locale. By convention default path locale is the first from descriptor locale list.
+	 * 
+	 * @return default locale.
+	 */
 	public Locale getDefaultLocale() {
-		return descriptor.getDefaultLocale();
+		return descriptor.getLocales().get(0);
 	}
 
-	public List<DirPath> getExcludes() {
-		return excludes;
-	}
-
-	public String getAuthor() {
-		return descriptor.getAuthor();
-	}
-
+	/**
+	 * Get media query definition for given alias.
+	 * 
+	 * @param alias alias for media query definition.
+	 * @return media query definition or null if alias not defined.
+	 */
 	public MediaQueryDefinition getMediaQueryDefinition(String alias) {
-		// return descriptor.getMediaQueryDefinitions().stream().filter(query ->
-		// query.getAlias().equals(alias)).findAny().orElse(null);
-
-		for (MediaQueryDefinition query : descriptor.getMediaQueryDefinitions()) {
-			if (query.getAlias().equals(alias)) {
-				return query;
-			}
-		}
-		return null;
+		return descriptor.getMediaQueryDefinitions().stream().filter(query -> query.getAlias().equals(alias)).findAny().orElse(null);
 	}
 
 	/**
@@ -272,74 +263,71 @@ public class Project {
 	}
 
 	/**
-	 * Get style files declared into project theme directory. Returned set is not changeable.
-	 * 
-	 * @return site styles.
+	 * Get style files declared into project theme directory. Returned instance is immutable.
+	 * <p>
+	 * This method should be overridden by builder and preview project subclasses. 
+	 *  
+	 * @return theme styles.
 	 */
 	public ThemeStyles getThemeStyles() {
 		throw new BugError("Abstract method invoked.");
 	}
 
-	// ------------------------------------------------------
-	// Media files
-
 	/**
-	 * Get project media file referenced from given source file. This method tries to locate media file into source path parent
-	 * and assets directories, in this order. When search for media file only base name and language variant is considered, that
-	 * is, no extension.
-	 * <p>
-	 * There is no attempt to test reference type against actual file content or matching against file extension. It is
-	 * developer responsibility to ensure reference points to proper type.
+	 * Get project media file referenced from given source file. This method tries to locate media file into source parent and
+	 * assets directories, in this order. When search for media file only base name and language variant is considered, that is,
+	 * no extension.
 	 * <p>
 	 * Returns null if media file is not found.
 	 * 
-	 * @param language language variant, possible null,
+	 * @param locale locale variant,
 	 * @param reference media resource reference,
-	 * @param source source file using media resource.
+	 * @param sourceFile source file using media resource.
 	 * @return media file or null.
+	 * @throws IllegalArgumentException if any parameters is null.
 	 */
-	public FilePath getMediaFile(Locale locale, Reference reference, FilePath source) {
-		DirPath dir = source.getParentDirPath();
-		boolean isComponentSource = dir.isComponent();
-		if (reference.hasPath()) {
-			dir = dir.getSubdirPath(reference.getPath());
+	public FilePath getMediaFile(Locale locale, Reference reference, FilePath sourceFile) {
+		Params.notNull(locale, "Locale");
+		Params.notNull(reference, "Reference");
+		Params.notNull(sourceFile, "Source file");
+
+		if (getDefaultLocale().equals(locale)) {
+			locale = null;
 		}
+
+		DirPath sourceDir = sourceFile.getParentDirPath();
+		boolean isComponentSource = sourceDir.isComponent();
 		// search media in source directory only if directory is a component
-		FilePath file = isComponentSource ? mediaFile(dir, reference.getName(), locale) : null;
-
-		if (file == null) {
-			dir = assetsDir;
-			if (reference.hasPath()) {
-				dir = dir.getSubdirPath(reference.getPath());
-			}
-			file = mediaFile(dir, reference.getName(), locale);
+		FilePath mediaFile = isComponentSource ? findMediaFile(sourceDir, reference, locale) : null;
+		if (mediaFile != null) {
+			return mediaFile;
 		}
 
-		return file;
+		return findMediaFile(assetsDir, reference, locale);
 	}
 
 	/**
-	 * Scan directory for media files matching base name and locale variant. This helper method tries to locate file matching
+	 * Scan source directory for media files matching base name and locale variant. This helper method tries to locate file matching
 	 * both base name and locale; extension is not considered. If not found try to return base variant, that is, file that match
 	 * only base name and has no locale. If still not found returns null.
 	 * 
-	 * @param dir directory to scan for media files,
-	 * @param basename media file base name,
-	 * @param locale locale variant, possible null.
+	 * @param sourceDir directory to scan for media files,
+	 * @param reference media file reference,
+	 * @param locale locale variant, null for project default locale.
 	 * @return media file or null.
 	 */
-	public static FilePath mediaFile(DirPath dir, String basename, Locale locale) {
-		for (FilePath file : dir.files()) {
-			if (file.isMedia() && file.isBaseName(basename) && file.getVariants().hasLocale(locale)) {
-				return file;
-			}
+	static FilePath findMediaFile(DirPath sourceDir, Reference reference, Locale locale) {
+		if (reference.hasPath()) {
+			sourceDir = sourceDir.getSubdirPath(reference.getPath());
 		}
-		for (FilePath file : dir.files()) {
-			if (file.isMedia() && file.isBaseName(basename)) {
-				return file;
-			}
+		if (locale == null) {
+			return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 		}
-		return null;
+		FilePath mediaFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+		if (mediaFile != null) {
+			return mediaFile;
+		}
+		return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 	}
 
 	/**
@@ -358,5 +346,20 @@ public class Project {
 	 */
 	public boolean hasNamespace() {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	String getAuthor() {
+		return descriptor.getAuthor();
+	}
+
+	ProjectDescriptor getDescriptor() {
+		return descriptor;
+	}
+
+	List<DirPath> getExcludes() {
+		return excludes;
 	}
 }

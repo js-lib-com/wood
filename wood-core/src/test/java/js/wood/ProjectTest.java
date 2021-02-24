@@ -1,114 +1,263 @@
 package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import js.util.Classes;
-import js.wood.FilePath;
-import js.wood.IReferenceHandler;
-import js.wood.Project;
-import js.wood.Reference;
-import js.wood.Variables;
+import js.lang.BugError;
+import js.wood.impl.MediaQueryDefinition;
+import js.wood.impl.NamingStrategy;
+import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.ResourceType;
+import js.wood.impl.XmlnsOperatorsHandler;
 
-public class ProjectTest implements IReferenceHandler {
+@RunWith(MockitoJUnitRunner.class)
+public class ProjectTest {
+	@Mock
+	private ProjectDescriptor descriptor;
+
+	@Mock
+	private IReferenceHandler referenceHandler;
+
+	private Directory projectRoot;
+
 	private Project project;
 
 	@Before
 	public void beforeTest() throws Exception {
-		project = new Project(new File("src/test/resources/project"));
-	}
-
-	private FilePath filePath(String path) {
-		return new FilePath(project, path);
+		when(descriptor.getNamingStrategy()).thenReturn(NamingStrategy.XMLNS);
+		projectRoot = new Directory(".");
+		project = new Project(projectRoot, descriptor);
 	}
 
 	@Test
-	public void initialization() throws FileNotFoundException {
-		project = new Project(new File("src/test/resources/project"));
+	public void construtor_NoDescriptor() throws FileNotFoundException {
+		projectRoot = new Directory("root/path/project");
+		project = new Project(projectRoot);
 
-		assertThat(project.getProjectRoot(), equalTo(new File("src/test/resources/project")));
-		assertThat(Classes.getFieldValue(project, "descriptor"), notNullValue());
+		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
+		assertThat(project.getProjectDir().value(), equalTo("."));
+		assertThat(project.getDescriptor(), notNullValue());
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
+		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
 		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
 
-		assertThat(project.getDisplay(), equalTo("Test Project"));
-		assertThat(project.getDescription(), equalTo("Project used as fixture for unit testing."));
+		assertThat(project.getAuthor(), nullValue());
+		assertThat(project.getDisplay(), equalTo("Project"));
+		assertThat(project.getDescription(), equalTo("Project"));
 
-		assertThat(project.getLocales(), hasSize(4));
+		assertThat(project.getLocales(), hasSize(1));
+		assertThat(project.getLocales(), contains(Locale.ENGLISH));
+		assertThat(project.getDefaultLocale(), equalTo(Locale.ENGLISH));
+
+		assertThat(project.getExcludes(), empty());
+		assertThat(project.getOperatorsHandler(), instanceOf(XmlnsOperatorsHandler.class));
 	}
 
-	@Override
-	public String onResourceReference(Reference reference, FilePath sourcePath) throws IOException {
-		Variables variables = new Variables(sourcePath.getParentDirPath());
-		if (project.getAssetsDir().exists()) {
-			try {
-				Classes.invoke(variables, "load", sourcePath.getProject().getAssetsDir());
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		}
-		return variables.get(null, reference, sourcePath, this);
+	@Test
+	public void construtor_WithDescriptor() throws FileNotFoundException {
+		when(descriptor.getAuthor()).thenReturn("Iulian Rotaru");
+		when(descriptor.getDisplay(anyString())).thenReturn("Project Display");
+		when(descriptor.getDescription(anyString())).thenReturn("Project description.");
+		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
+		when(descriptor.getExcludes()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
+
+		projectRoot = new Directory("root/path/project");
+		project = new Project(projectRoot, descriptor);
+
+		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
+		assertThat(project.getProjectDir().value(), equalTo("."));
+		assertThat(project.getDescriptor(), equalTo(descriptor));
+
+		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
+		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
+		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
+
+		assertThat(project.getAuthor(), equalTo("Iulian Rotaru"));
+		assertThat(project.getDisplay(), equalTo("Project Display"));
+		assertThat(project.getDescription(), equalTo("Project description."));
+
+		assertThat(project.getLocales(), hasSize(2));
+		assertThat(project.getLocales(), contains(Locale.FRANCE, Locale.GERMAN));
+		assertThat(project.getDefaultLocale(), equalTo(Locale.FRANCE));
+
+		assertThat(project.getExcludes(), hasSize(2));
+		assertThat(project.getExcludes(), contains(new DirPath(project, "res/page/trivia/"), new DirPath(project, "res/page/experiment/")));
+		assertThat(project.getOperatorsHandler(), instanceOf(XmlnsOperatorsHandler.class));
+	}
+
+	@Test
+	public void getMediaQueryDefinition() {
+		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
+		project = new Project(projectRoot, descriptor);
+		
+		MediaQueryDefinition query = project.getMediaQueryDefinition("w800");
+		assertThat(query, notNullValue());
+		assertThat(query.getAlias(), equalTo("w800"));
+		assertThat(query.getExpression(), equalTo("min-width: 800px"));
+		assertThat(query.getWeight(), equalTo(1));
+	}
+
+	@Test
+	public void getMediaQueryDefinition_NotFound() {
+		assertThat(project.getMediaQueryDefinition("w800"), nullValue());
+	}
+
+	@Test
+	public void getMetaDescriptors() {
+		when(descriptor.getMetaDescriptors()).thenReturn(Arrays.asList(Mockito.mock(IMetaDescriptor.class)));
+		project = new Project(projectRoot, descriptor);
+		List<IMetaDescriptor> metas = project.getMetaDescriptors();
+		assertThat(metas, hasSize(1));
+	}
+
+	@Test
+	public void getMetaDescriptors_Empty() {
+		List<IMetaDescriptor> metas = project.getMetaDescriptors();
+		assertThat(metas, empty());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void getMetaDescriptors_AttemptToChange() {
+		project.getMetaDescriptors().add(Mockito.mock(IMetaDescriptor.class));
+	}
+
+	@Test
+	public void getLinkDescriptors() {
+		when(descriptor.getLinkDescriptors()).thenReturn(Arrays.asList(Mockito.mock(ILinkDescriptor.class)));
+		project = new Project(projectRoot, descriptor);
+		List<ILinkDescriptor> links = project.getLinkDescriptors();
+		assertThat(links, hasSize(1));
+	}
+
+	@Test
+	public void getLinkDescriptors_Empty() {
+		List<ILinkDescriptor> links = project.getLinkDescriptors();
+		assertThat(links, empty());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void getLinkDescriptors_AttemptToChange() {
+		project.getLinkDescriptors().add(Mockito.mock(ILinkDescriptor.class));
+	}
+
+	@Test
+	public void getScriptDescriptors() {
+		when(descriptor.getScriptDescriptors()).thenReturn(Arrays.asList(Mockito.mock(IScriptDescriptor.class)));
+		project = new Project(projectRoot, descriptor);
+		List<IScriptDescriptor> scripts = project.getScriptDescriptors();
+		assertThat(scripts, hasSize(1));
+	}
+
+	@Test
+	public void getScriptDescriptors_Empty() {
+		List<IScriptDescriptor> scripts = project.getScriptDescriptors();
+		assertThat(scripts, empty());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void getScriptDescriptors_AttemptToChange() {
+		project.getScriptDescriptors().add(Mockito.mock(IScriptDescriptor.class));
 	}
 
 	@Test
 	public void getMediaFile() throws FileNotFoundException {
-		project = new Project(new File("src/test/resources/project"));
+		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
+		project = new Project(projectRoot, descriptor);
 
-		FilePath source = filePath("res/template/page/page.htm");
-		Reference reference = new Reference(source, ResourceType.IMAGE, "logo");
+		FilePath mediaFile = Mockito.mock(FilePath.class);
 
-		assertMedia("res/template/page/logo.jpg", null, reference, source);
-		assertMedia("res/template/page/logo.jpg", "en", reference, source);
-		assertMedia("res/template/page/logo.jpg", "jp", reference, source);
-		assertMedia("res/template/page/logo_de.jpg", "de", reference, source);
-		assertMedia("res/template/page/logo_fr.jpg", "fr", reference, source);
-		assertMedia("res/template/page/logo_ro.jpg", "ro", reference, source);
+		DirPath sourceDir = Mockito.mock(DirPath.class);
+		when(sourceDir.isComponent()).thenReturn(true);
+		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
+
+		FilePath sourceFile = Mockito.mock(FilePath.class);
+		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+
+		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
+		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+	}
+
+	@Test(expected = WoodException.class)
+	public void getMediaFile_NoComponent() throws FileNotFoundException {
+		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
+		project = new Project(projectRoot, descriptor);
+
+		DirPath sourceDir = Mockito.mock(DirPath.class);
+		when(sourceDir.isComponent()).thenReturn(false);
+
+		FilePath sourceFile = Mockito.mock(FilePath.class);
+		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+
+		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
+		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
 	}
 
 	@Test
-	public void getMediaFileFromSubdirectory() throws FileNotFoundException {
-		project = new Project(new File("src/test/resources/project"));
-		FilePath source = filePath("res/template/page/page.htm");
-		Reference reference = new Reference(source, ResourceType.IMAGE, "icon/logo");
-		assertMedia("res/template/page/icon/logo.png", null, reference, source);
+	public void getMediaFile_DefaultLocale() throws FileNotFoundException {
+		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.GERMAN, Locale.FRANCE));
+		project = new Project(projectRoot, descriptor);
+
+		FilePath mediaFile = Mockito.mock(FilePath.class);
+
+		DirPath sourceDir = Mockito.mock(DirPath.class);
+		when(sourceDir.isComponent()).thenReturn(true);
+		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
+
+		FilePath sourceFile = Mockito.mock(FilePath.class);
+		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+
+		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
+		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
 	}
 
-	@Test
-	public void getMediaFileWithCompoName() {
-		project = new Project(new File("src/test/resources/project"));
-		FilePath source = filePath("res/template/page/page.htm");
-		Reference reference = new Reference(source, ResourceType.IMAGE, "page");
-		assertMedia("res/template/page/page.jpg", null, reference, source);
-	}
-
-	private void assertMedia(String expected, String language, Reference reference, FilePath source) {
-		assertThat(project.getMediaFile(language != null ? new Locale(language) : null, reference, source).value(), equalTo(expected));
-	}
-
-	// ------------------------------------------------------
-	// Exceptions
-
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void badConstructor() {
-		try {
-			new Project(new File("src/test/resources/fake-project"));
-			fail("Bad directory should rise illegal argument exception.");
-		} catch (Exception e) {
-			assertTrue(e instanceof IllegalArgumentException);
+		File projectRoot = Mockito.mock(File.class);
+		when(projectRoot.isDirectory()).thenReturn(false);
+		new Project(projectRoot, descriptor);
+	}
+
+	@Test(expected = BugError.class)
+	public void getThemeStyles() {
+		project = new Project(projectRoot);
+		project.getThemeStyles();
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	private static class Directory extends File {
+		private static final long serialVersionUID = -4499496665524589579L;
+
+		public Directory(String path) {
+			super(path);
+		}
+
+		@Override
+		public boolean isDirectory() {
+			return true;
 		}
 	}
 }

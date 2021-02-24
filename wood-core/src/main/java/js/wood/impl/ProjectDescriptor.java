@@ -1,5 +1,6 @@
 package js.wood.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -109,10 +110,10 @@ import js.wood.WoodException;
  * @since 1.0
  * @see ComponentDescriptor
  */
-public final class ProjectDescriptor extends BaseDescriptor {
+public class ProjectDescriptor extends BaseDescriptor {
 	/**
-	 * Mandatory project locale. This property should be present even if project has a single locale. This is because there is
-	 * no way to reliable detect locale from resource files.
+	 * Mandatory project locale list. Although this property is mandatory the underlying <code>locale</code> element is not - if
+	 * is missing uses <code>en</code> as default locale.
 	 * <p>
 	 * The first declared locale is always the default one; this holds true even if there is a single locale declared. Note that
 	 * default locale is used for resources without locale variant.
@@ -129,12 +130,16 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 */
 	public ProjectDescriptor(FilePath descriptorFile) {
 		super(descriptorFile);
+		init();
+	}
 
-		Element localeElement = this.doc.getByTag("locale");
-		if (localeElement == null) {
-			throw new WoodException("Invalid project descriptor. Missing <locale> element.");
-		}
-		Strings.split(localeElement.getText(), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
+	public ProjectDescriptor(File file) {
+		super(file);
+		init();
+	}
+
+	private void init() {
+		Strings.split(text("locale", "en"), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <locale> element.");
 		}
@@ -193,15 +198,6 @@ public final class ProjectDescriptor extends BaseDescriptor {
 	 */
 	public List<Locale> getLocales() {
 		return Collections.unmodifiableList(locales);
-	}
-
-	/**
-	 * Get project configured default locale.
-	 * 
-	 * @return default locale.
-	 */
-	public Locale getDefaultLocale() {
-		return locales.get(0);
 	}
 
 	/**

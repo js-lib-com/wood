@@ -187,7 +187,7 @@ public class Variants {
 	 * @see #language
 	 */
 	public boolean hasLocale(Locale locale) {
-		if (this.locale == null) {
+		if(this.locale == null) {
 			return locale == null;
 		}
 		return this.locale.equals(locale);

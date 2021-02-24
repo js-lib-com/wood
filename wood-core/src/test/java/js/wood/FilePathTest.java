@@ -94,12 +94,12 @@ public class FilePathTest {
 	public void baseName() {
 		FilePath path = new FilePath(project, "res/compo/compo.css");
 		assertThat(path.getBaseName(), equalTo("compo"));
-		assertThat(path.isBaseName("compo"), equalTo(true));
-		assertThat(path.isBaseName(new Reference(path, ResourceType.STRING, "compo")), equalTo(true));
+		assertThat(path.hasBaseName("compo"), equalTo(true));
+		assertThat(path.hasBaseName(new Reference(path, ResourceType.STRING, "compo")), equalTo(true));
 
 		path = new FilePath(project, "res/compo/strings_de.xml");
 		assertThat(path.getBaseName(), equalTo("strings"));
-		assertThat(path.isBaseName("strings"), equalTo(true));
+		assertThat(path.hasBaseName("strings"), equalTo(true));
 	}
 
 	@Test
