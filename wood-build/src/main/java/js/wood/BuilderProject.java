@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
 import js.wood.util.Files;
@@ -87,23 +86,20 @@ class BuilderProject extends Project {
 	}
 
 	private void scan(DirPath dir) {
-		if (dir.isExcluded()) {
-			return;
-		}
-
-		dir.files(FileType.XML, new FilesHandler() {
+		dir.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) throws Exception {
-				scan(dir);
+			public void onDirectory(DirPath dir) {
+				if (!dir.isExcluded()) {
+					scan(dir);
+				}
 			}
 
 			@Override
-			public void onFile(FilePath file) throws Exception {
-				DirPath parentDir = file.getParentDirPath();
-				if(parentDir == null) {
-					return;
-				}
-				
+			public void onFile(FilePath file) {
+				final DirPath parentDir = file.getParentDirPath();
+				assert parentDir != null;
+
+				// variables definition files are XML files with root element one of defined resource type variables
 				if (file.isXML(ResourceType.variables())) {
 					Variables parentDirVariables = variables.get(parentDir);
 					if (parentDirVariables == null) {
@@ -114,11 +110,9 @@ class BuilderProject extends Project {
 					return;
 				}
 
-				// component descriptor for pages has root 'page'
+				// XML component descriptor for pages has root 'page'
 				if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
-					if (!parentDir.isExcluded()) {
-						pages.add(new CompoPath(parentDir));
-					}
+					pages.add(new CompoPath(parentDir));
 					return;
 				}
 			}

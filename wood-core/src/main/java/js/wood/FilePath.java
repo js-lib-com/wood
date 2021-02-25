@@ -96,7 +96,7 @@ public class FilePath extends Path {
 			throw new WoodException("Invalid file path |%s|.", filePath);
 		}
 
-		this.parentDirPath = matcher.group(1) != null ? new DirPath(project, matcher.group(1)) : null;
+		this.parentDirPath = matcher.group(1) != null ? new DirPath(project, matcher.group(1)) : project.getProjectDir();
 		this.basename = matcher.group(2);
 		this.extension = matcher.group(4);
 		this.name = Strings.concat(this.basename, '.', this.extension);
@@ -248,7 +248,14 @@ public class FilePath extends Path {
 		return fileType == FileType.MEDIA;
 	}
 
-	public boolean isXML(String... roots) throws IOException {
+	public boolean isXML(String... roots) {
+		if (fileType != FileType.XML) {
+			return false;
+		}
+		if (roots.length == 0) {
+			// if there are no 'roots' arguments accept all XML files
+			return true;
+		}
 		try (BufferedReader reader = new BufferedReader(getReader())) {
 			String line = reader.readLine();
 			if (line.startsWith("<?")) {
@@ -259,8 +266,10 @@ public class FilePath extends Path {
 					return true;
 				}
 			}
+			return false;
+		} catch (IOException ignore) {
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -283,7 +292,7 @@ public class FilePath extends Path {
 	public void copyTo(OutputStream stream) throws IOException {
 		Files.copy(file, stream);
 	}
-	
+
 	public String load() throws IOException {
 		return Strings.load(getReader());
 	}

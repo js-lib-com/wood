@@ -51,9 +51,8 @@ public abstract class FilesHandler
    * Sub-directory handler. Invoked when a sub-directory is found.
    * 
    * @param dir sub-directory.
-   * @throws Exception exceptions from sub-directory processing are bubbled up.
    */
-  public void onDirectory(DirPath dir) throws Exception
+  public void onDirectory(DirPath dir)
   {
   }
 
@@ -73,9 +72,8 @@ public abstract class FilesHandler
    * Handler invoked for files from directory if {@link #accept(FilePath)} predicate grant it.
    * 
    * @param file file path.
-   * @throws Exception any exception from file processing is bubbled up.
    */
-  public void onFile(FilePath file) throws Exception
+  public void onFile(FilePath file)
   {
   }
 }

@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
-import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 
 /**
@@ -36,12 +35,20 @@ import js.wood.impl.FilesHandler;
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * <p>
- * Directory path has no mutable state and is thread safe.
+ * Directory path implements {@link Iterable<FilePath>} interface that allows to use it in for-each Java loop, see code snippet.
+ * 
+ * <pre>
+ * for (FilePath file : dir) {
+ * 	// handle file path
+ * }
+ * </pre>
+ * <p>
+ * Directory path instance has no mutable state and is thread safe.
  * 
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class DirPath extends Path {
+public class DirPath extends Path implements Iterable<FilePath> {
 	/** Pattern for directory path. */
 	private static final Pattern PATTERN = Pattern.compile("^(?:[a-z0-9-]+/)+?$", Pattern.CASE_INSENSITIVE);
 
@@ -131,67 +138,64 @@ public class DirPath extends Path {
 		return new DirPath(project, dir);
 	}
 
+	/**
+	 * Directory path implements {@link Iterable<FilePath>} interface that allows to use it in for-each Java loop, see code
+	 * snippet.
+	 * 
+	 * <pre>
+	 * for (FilePath file : dir) {
+	 * 	// handle file path
+	 * }
+	 * </pre>
+	 * 
+	 * Returned iterator instance handle only direct child files. Note that child sub-directories are not included. Also hidden
+	 * files are excluded; a hidden file is one that starts with dot, e.g. <code>.gitignore</code>.
+	 * <p>
+	 * There is no guarantees about a particular iteration order.
+	 * 
+	 * @return file iterator instance.
+	 * @see FilesIterator
+	 */
+	@Override
+	public Iterator<FilePath> iterator() {
+		if (!exists()) {
+			return Collections.emptyIterator();
+		}
+		File[] files = file.listFiles();
+		return files != null ? new FilesIterator(files) : Collections.emptyIterator();
+	}
+
+	/**
+	 * Collect child files that are accepted by given predicate. Returned files list can be empty if there is no match.
+	 * 
+	 * @param predicate predicate to test child files.
+	 * @return found child files list, possible empty.
+	 */
 	public List<FilePath> filter(Predicate<FilePath> predicate) {
 		List<FilePath> files = new ArrayList<>();
-		for (File file : listFiles()) {
-			if (file.getName().charAt(0) == '.') {
-				continue;
-			}
-			if (file.isDirectory()) {
-				continue;
-			}
-
-			FilePath filePath = new FilePath(project, file);
-			if (predicate.test(filePath)) {
-				files.add(filePath);
+		for (FilePath file : this) {
+			if (predicate.test(file)) {
+				files.add(file);
 			}
 		}
 		return files;
 	}
 
+	/**
+	 * Get first child file that satisfy given predicate or null if not found. Use this finder to locate files with unique
+	 * properties. Since files iteration is not guaranteed, if there are multiple files accepted by predicate, there is no
+	 * guarantee about which file is returned.
+	 * 
+	 * @param predicate predicate to test child file.
+	 * @return child file accepted by predicate or null.
+	 */
 	public FilePath findFirst(Predicate<FilePath> predicate) {
-		for (File file : listFiles()) {
-			if (file.getName().charAt(0) == '.') {
-				continue;
-			}
-			if (file.isDirectory()) {
-				continue;
-			}
-
-			FilePath filePath = new FilePath(project, file);
-			if (predicate.test(filePath)) {
-				return filePath;
+		for (FilePath file : this) {
+			if (predicate.test(file)) {
+				return file;
 			}
 		}
 		return null;
-	}
-
-	private File[] listFiles() {
-		if(!exists()) {
-			return new File[0];
-		}
-		return file.listFiles();
-	}
-	
-	/**
-	 * Get a new iterable instance on this directory child files. Note that child sub-directories are not included. Also hidden
-	 * files are excluded; a hidden file is one that starts with dot, e.g. <code>.gitignore</code>.
-	 * <p>
-	 * This method is designed to work with for-each Java loop as in snippet below.
-	 * 
-	 * <pre>
-	 * for (FilePath file : dir.files()) {
-	 * 	// handle file path
-	 * }
-	 * </pre>
-	 * 
-	 * @return file iteratble instance.
-	 */
-	public Iterable<FilePath> files() {
-		if (!exists()) {
-			return Collections.emptyList();
-		}
-		return new FilesIterable(file);
 	}
 
 	/**
@@ -223,74 +227,37 @@ public class DirPath extends Path {
 	 * @param handler files handler.
 	 */
 	public void files(FilesHandler handler) {
-		files(null, handler);
-	}
-
-	/**
-	 * Iterate over direct children, both sub-directories and files, but only files of specified type. This method behaves the
-	 * same as {@link #files(FilesHandler)} but list only files of specified type. If {@link FilesHandler#accept(FilePath)} is
-	 * implemented its results uses AND logic with file type filtering. Also hidden directories and files are ignored. Iteration
-	 * order is not guaranteed.
-	 * <p>
-	 * If attempt to invoke it on a not existing directory, this method does nothing.
-	 * <p>
-	 * Files handler anonymous instance does not need to override all handler methods as in sample below. For child files
-	 * processing only, one can override just {@link FilesHandler#onFile(FilePath)}.
-	 * 
-	 * <pre>
-	 * dir.files(FileType.LAYOUT, new FilesHandler() {
-	 * 	&#064;Override
-	 * 	public void onDirectory(DirPath dir) throws Exception {
-	 * 		// recursive scanning of sub-directories
-	 * 	}
-	 * 
-	 * 	&#064;Override
-	 * 	public boolean accept(FilePath file) {
-	 * 		// test file attributes and decide if acceptable
-	 * 	}
-	 * 
-	 * 	&#064;Override
-	 * 	public void onFile(FilePath file) throws Exception {
-	 * 		// handle file
-	 * 	}
-	 * });
-	 * </pre>
-	 * 
-	 * @param fileType files type filter,
-	 * @param handler files handler.
-	 */
-	public void files(FileType fileType, FilesHandler handler) {
 		if (!exists()) {
 			return;
 		}
 
-		try {
-			for (File file : file.listFiles()) {
-				// ignores hidden files and directories
-				if (file.getName().charAt(0) == '.') {
-					continue;
-				}
-				if (file.isDirectory()) {
-					// takes care to create DirPath relative to project
-					String dir = Files.getRelativePath(project.getProjectRoot(), file, true);
-					if (!dir.endsWith(Path.SEPARATOR)) {
-						dir += Path.SEPARATOR;
-					}
-					handler.onDirectory(new DirPath(project, dir));
-					continue;
-				}
-
-				FilePath filePath = new FilePath(project, Files.getRelativePath(project.getProjectRoot(), file, true));
-				if (!handler.accept(filePath)) {
-					continue;
-				}
-				// if file type is null accept all files
-				if (fileType == null || FileType.forFile(file) == fileType) {
-					handler.onFile(filePath);
-				}
+		File[] files = file.listFiles();
+		if (files == null) {
+			throw new WoodException("Cannot list files from directory |%s|.", file);
+		}
+		
+		for (File file : file.listFiles()) {
+			// ignores hidden files and directories
+			if (file.getName().charAt(0) == '.') {
+				continue;
 			}
-		} catch (Exception e) {
-			throw (e instanceof WoodException) ? (WoodException) e : new WoodException(e);
+
+			if (file.isDirectory()) {
+				// takes care to create DirPath relative to project
+				String dir = Files.getRelativePath(project.getProjectRoot(), file, true);
+				if (!dir.endsWith(Path.SEPARATOR)) {
+					dir += Path.SEPARATOR;
+				}
+				handler.onDirectory(new DirPath(project, dir));
+				continue;
+			}
+
+			FilePath filePath = new FilePath(project, Files.getRelativePath(project.getProjectRoot(), file, true));
+			if (!handler.accept(filePath)) {
+				continue;
+			}
+
+			handler.onFile(filePath);
 		}
 	}
 
@@ -333,47 +300,12 @@ public class DirPath extends Path {
 		return matcher.find();
 	}
 
-	// ------------------------------------------------------
-	// Internal utility classes.
-
-	/**
-	 * Iterable over files from a directory.
-	 * 
-	 * @author Iulian Rotaru
-	 * @since 1.0
-	 */
-	private class FilesIterable implements Iterable<FilePath> {
-		/** Files iterator. */
-		private final Iterator<FilePath> iterator;
-
-		/**
-		 * Construct file iterable instance for files from requested directory.
-		 * 
-		 * @param dir directory to iterate.
-		 */
-		public FilesIterable(File dir) {
-			File[] files = dir.listFiles();
-			if (files == null) {
-				iterator = Collections.emptyIterator();
-			} else {
-				iterator = new FilesIterator(files);
-			}
-		}
-
-		/**
-		 * Retrieve files iterator instance.
-		 * 
-		 * @return files iterator instance.
-		 */
-		@Override
-		public Iterator<FilePath> iterator() {
-			return iterator;
-		}
-	}
+	// --------------------------------------------------------------------------------------------
 
 	/**
 	 * Iterator over array of files in natural, incremental order. Please note that this iterator is flat, that is, it does not
-	 * enter sub-directories. In fact directories are ignored.
+	 * enter sub-directories. In fact directories are ignored. Hidden files are also ignored; a hidden file has a name that
+	 * starts with a dot, e.g. <code>.gitignore</code>.
 	 * <p>
 	 * Be aware that this implementation mandates standard iterator pattern, see sample code. Trying to call {@link #next()}
 	 * without {@link #hasNext()} will render not predictable behavior.
@@ -414,7 +346,7 @@ public class DirPath extends Path {
 		@Override
 		public boolean hasNext() {
 			for (++index; index < files.length; ++index) {
-				if (files[index].isFile()) {
+				if (files[index].isFile() && files[index].getName().charAt(0) != '.') {
 					return true;
 				}
 			}

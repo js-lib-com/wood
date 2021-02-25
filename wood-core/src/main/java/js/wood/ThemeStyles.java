@@ -12,7 +12,10 @@ public class ThemeStyles {
 		FilePath reset = null;
 		FilePath fx = null;
 		
-		for (FilePath file : themeDir.files()) {
+		for (FilePath file : themeDir) {
+			if(!file.isStyle()) {
+				continue;
+			}
 			switch (file.getName()) {
 			case CT.RESET_CSS:
 				reset = file;

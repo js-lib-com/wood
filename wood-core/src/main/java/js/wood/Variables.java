@@ -16,7 +16,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import js.io.ReaderInputStream;
 import js.util.Strings;
-import js.wood.impl.FilesHandler;
 import js.wood.impl.ReferencesResolver;
 import js.wood.impl.ResourceType;
 
@@ -120,16 +119,18 @@ public class Variables {
 	 * Note that only direct child files are parsed. Also, if given directory does not exist this method does nothing.
 	 * 
 	 * @param dirPath directory path.
+	 * @throws WoodException if file reading or parsing fails.
 	 */
 	private void load(DirPath dirPath) {
-		dirPath.files(new FilesHandler() {
-			@Override
-			public void onFile(FilePath file) throws Exception {
-				if (file.isVariables()) {
-					_load(file);
+		for (FilePath filePath : dirPath) {
+			if (filePath.isVariables()) {
+				try {
+					_load(filePath);
+				} catch (IOException | SAXException e) {
+					throw new WoodException(e);
 				}
 			}
-		});
+		}
 	}
 
 	/**

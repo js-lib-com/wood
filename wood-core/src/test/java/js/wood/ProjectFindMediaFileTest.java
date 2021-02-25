@@ -47,14 +47,14 @@ public class ProjectFindMediaFileTest {
 		when(sourceDir.getPath()).thenReturn("res/page/");
 		when(sourceDir.exists()).thenReturn(true);
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new File("page.htm"), //
-				new File("icon.png"), //
-				new File("logo.png"), //
-				new File("logo_w800.png"), //
-				new File("logo_ja.png") });
+				new XFile("page.htm"), //
+				new XFile("icon.png"), //
+				new XFile("logo.png"), //
+				new XFile("logo_w800.png"), //
+				new XFile("logo_ja.png") });
 
 		// findMediaFile is always used with verified reference and does not perform its own check
-		// therefore resource type can be anything, including null
+		// therefore resource type can be anything, including null; therefore next Mockito line is not necessary
 		// when(reference.getResourceType()).thenReturn(ResourceType.IMAGE);
 
 		when(reference.getName()).thenReturn("logo");
@@ -85,11 +85,11 @@ public class ProjectFindMediaFileTest {
 	@Test
 	public void nullLocale_FilesOrder() {
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new File("page.htm"), //
-				new File("icon.png"), //
-				new File("logo_w800.png"), //
-				new File("logo_ja.png"), //
-				new File("logo.png") });
+				new XFile("page.htm"), //
+				new XFile("icon.png"), //
+				new XFile("logo_w800.png"), //
+				new XFile("logo_ja.png"), //
+				new XFile("logo.png") });
 		sourceDirPath = new DirPath(project, sourceDir);
 
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
@@ -110,11 +110,11 @@ public class ProjectFindMediaFileTest {
 	@Test
 	public void missingLocale_FilesOrder() {
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new File("page.htm"), //
-				new File("icon.png"), //
-				new File("logo_w800.png"), //
-				new File("logo_ja.png"), //
-				new File("logo.png") });
+				new XFile("page.htm"), //
+				new XFile("icon.png"), //
+				new XFile("logo_w800.png"), //
+				new XFile("logo_ja.png"), //
+				new XFile("logo.png") });
 		sourceDirPath = new DirPath(project, sourceDir);
 
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, Locale.GERMANY);
@@ -155,6 +155,19 @@ public class ProjectFindMediaFileTest {
 
 		@Override
 		public boolean isDirectory() {
+			return true;
+		}
+	}
+
+	private static class XFile extends File {
+		private static final long serialVersionUID = -5975578621510948684L;
+
+		public XFile(String pathname) {
+			super(pathname);
+		}
+
+		@Override
+		public boolean isFile() {
 			return true;
 		}
 	}

@@ -7,12 +7,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
@@ -21,11 +20,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
-import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variants;
 
@@ -56,15 +52,8 @@ public class VariablesTest {
 
 		DirPath dir = Mockito.mock(DirPath.class);
 		when(dir.getProject()).thenReturn(project);
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				FilesHandler handler = invocation.getArgument(0);
-				handler.onFile(file);
-				return null;
-			}
-		}).when(dir).files(any());
-
+		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
+		
 		Variables variables = new Variables(dir);
 
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
@@ -202,14 +191,7 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		DirPath dir = Mockito.mock(DirPath.class);
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				FilesHandler handler = invocation.getArgument(0);
-				handler.onFile(file);
-				return null;
-			}
-		}).when(dir).files(any());
+		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
 
 		Variables variables = new Variables(project);
 		variables.reload(dir);
@@ -268,16 +250,7 @@ public class VariablesTest {
 
 		DirPath dir = Mockito.mock(DirPath.class);
 		when(dir.getProject()).thenReturn(project);
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				FilesHandler handler = invocation.getArgument(0);
-				for (FilePath file : files) {
-					handler.onFile(file);
-				}
-				return null;
-			}
-		}).when(dir).files(any());
+		when(dir.iterator()).thenReturn(Arrays.asList(files).iterator());
 
 		Variables variables = new Variables(dir);
 		IReferenceHandler handler = new IReferenceHandler() {
