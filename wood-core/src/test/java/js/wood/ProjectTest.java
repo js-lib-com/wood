@@ -197,10 +197,11 @@ public class ProjectTest {
 		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
-		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		assertThat(foundFile, equalTo(mediaFile));
 	}
 
-	@Test(expected = WoodException.class)
+	@Test
 	public void getMediaFile_NoComponent() throws FileNotFoundException {
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		project = new Project(projectRoot, descriptor);
@@ -212,7 +213,8 @@ public class ProjectTest {
 		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
-		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		assertThat(foundFile, nullValue());
 	}
 
 	@Test
@@ -230,7 +232,8 @@ public class ProjectTest {
 		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
-		project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		assertThat(foundFile, equalTo(mediaFile));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

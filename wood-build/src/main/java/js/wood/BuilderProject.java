@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import js.util.Strings;
 import js.wood.impl.FileType;
 import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
@@ -84,7 +83,7 @@ class BuilderProject extends Project {
 	}
 
 	public String loadFile(String path) throws IOException {
-		return Strings.load(new FilePath(this, path).toFile());
+		return new FilePath(this, path).load();
 	}
 
 	private void scan(DirPath dir) {
@@ -105,7 +104,7 @@ class BuilderProject extends Project {
 					return;
 				}
 				
-				if (Files.isXML(file.toFile(), ResourceType.variables())) {
+				if (file.isXML(ResourceType.variables())) {
 					Variables parentDirVariables = variables.get(parentDir);
 					if (parentDirVariables == null) {
 						parentDirVariables = new Variables(BuilderProject.this);
@@ -116,10 +115,9 @@ class BuilderProject extends Project {
 				}
 
 				// component descriptor for pages has root 'page'
-				if (parentDir.getName().equals(file.getBaseName()) && Files.isXML(file.toFile(), "page")) {
-					CompoPath compoPath = new CompoPath(BuilderProject.this, Files.getRelativePath(getProjectRoot(), parentDir.toFile(), true));
-					if (!compoPath.isExcluded()) {
-						pages.add(compoPath);
+				if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
+					if (!parentDir.isExcluded()) {
+						pages.add(new CompoPath(parentDir));
 					}
 					return;
 				}

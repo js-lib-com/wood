@@ -51,7 +51,6 @@ public class PathTest {
 		assertThat(path.value(), equalTo("."));
 		assertTrue(path.exists());
 		assertTrue(path.getProject() == project);
-		assertThat(path.toFile(), equalTo(new File(".")));
 		assertThat(path.hashCode(), not(equalTo(0)));
 		assertThat(path.toString(), equalTo("."));
 	}
@@ -70,18 +69,6 @@ public class PathTest {
 	public void constructor_InvalidPath() {
 		Path path = new TestPath(project, "http://server/path");
 		assertThat(path.value(), equalTo("http://server/path"));
-	}
-
-	@Test
-	public void toFile() throws Throwable {
-		Path path = new TestPath(project);
-		assertThat(path.toFile(), equalTo(new File(".")));
-	}
-
-	@Test(expected = WoodException.class)
-	public void toFile_NotExisting() throws Throwable {
-		Path path = new TestPath(project, "not-existing-file");
-		path.toFile();
 	}
 
 	@Test

@@ -133,7 +133,7 @@ public class DirPath extends Path {
 
 	public List<FilePath> filter(Predicate<FilePath> predicate) {
 		List<FilePath> files = new ArrayList<>();
-		for (File file : toFile().listFiles()) {
+		for (File file : listFiles()) {
 			if (file.getName().charAt(0) == '.') {
 				continue;
 			}
@@ -150,7 +150,7 @@ public class DirPath extends Path {
 	}
 
 	public FilePath findFirst(Predicate<FilePath> predicate) {
-		for (File file : toFile().listFiles()) {
+		for (File file : listFiles()) {
 			if (file.getName().charAt(0) == '.') {
 				continue;
 			}
@@ -166,6 +166,13 @@ public class DirPath extends Path {
 		return null;
 	}
 
+	private File[] listFiles() {
+		if(!exists()) {
+			return new File[0];
+		}
+		return file.listFiles();
+	}
+	
 	/**
 	 * Get a new iterable instance on this directory child files. Note that child sub-directories are not included. Also hidden
 	 * files are excluded; a hidden file is one that starts with dot, e.g. <code>.gitignore</code>.
@@ -184,7 +191,7 @@ public class DirPath extends Path {
 		if (!exists()) {
 			return Collections.emptyList();
 		}
-		return new FilesIterable(toFile());
+		return new FilesIterable(file);
 	}
 
 	/**
@@ -258,7 +265,7 @@ public class DirPath extends Path {
 		}
 
 		try {
-			for (File file : toFile().listFiles()) {
+			for (File file : file.listFiles()) {
 				// ignores hidden files and directories
 				if (file.getName().charAt(0) == '.') {
 					continue;

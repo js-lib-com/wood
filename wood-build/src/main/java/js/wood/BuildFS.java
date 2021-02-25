@@ -2,6 +2,7 @@ package js.wood;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -107,7 +108,7 @@ public abstract class BuildFS {
 	public String writeFavicon(Component page, FilePath favicon) throws IOException {
 		File targetFile = new File(getMediaDir(), favicon.getName());
 		if (favicon.exists() && !processedFiles.contains(targetFile)) {
-			Files.copy(favicon.toFile(), targetFile);
+			favicon.copyTo(new FileWriter(targetFile));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
@@ -128,7 +129,7 @@ public abstract class BuildFS {
 	public String writePageMedia(Component page, FilePath mediaFile) throws IOException {
 		File targetFile = new File(getMediaDir(), insertBuildNumber(formatMediaName(mediaFile)));
 		if (!processedFiles.contains(targetFile)) {
-			Files.copy(mediaFile.toFile(), targetFile);
+			mediaFile.copyTo(new FileWriter(targetFile));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
@@ -149,7 +150,7 @@ public abstract class BuildFS {
 	public String writeStyleMedia(FilePath mediaFile) throws IOException {
 		File targetFile = new File(getMediaDir(), insertBuildNumber(formatMediaName(mediaFile)));
 		if (!processedFiles.contains(targetFile)) {
-			Files.copy(mediaFile.toFile(), targetFile);
+			mediaFile.copyTo(new FileWriter(targetFile));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getStyleDir(), targetFile, true);

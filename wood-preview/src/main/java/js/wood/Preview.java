@@ -7,7 +7,6 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
-import js.util.Strings;
 
 /**
  * Component preview wraps component in standard HTML document and serialize it to given writer. This component preview class is
@@ -238,7 +237,7 @@ public final class Preview {
 		setAttr(scriptElement, "integrity", script.getIntegrity());
 
 		if (script.isEmbedded()) {
-			scriptElement.setText(Strings.load(new FilePath(project, script.getSource()).toFile()));
+			scriptElement.setText(new FilePath(project, script.getSource()).load());
 		}
 
 		head.addChild(scriptElement);

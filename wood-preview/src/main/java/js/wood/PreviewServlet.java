@@ -225,9 +225,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		// all other files are just sent back to browser
-		File file = filePath.toFile();
-		httpResponse.setContentType(forFile(file));
-		Files.copy(file, httpResponse.getOutputStream());
+		httpResponse.setContentType(forFile(filePath));
+		filePath.copyTo(httpResponse.getOutputStream());
 	}
 
 	/**
@@ -322,8 +321,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		FILE_TYPES.put("svg", IMAGE_SVG);
 	}
 
-	private static String forFile(File file) {
-		String contentType = FILE_TYPES.get(Files.getExtension(file));
+	private static String forFile(FilePath file) {
+		String contentType = FILE_TYPES.get(file.getExtension().toLowerCase());
 		if (contentType == null) {
 			log.debug("Unknown content type for |%s|. Replace with default |%s|.", file, TEXT_HTML);
 			contentType = TEXT_HTML;

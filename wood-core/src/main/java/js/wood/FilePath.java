@@ -1,11 +1,15 @@
 package js.wood;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,6 +74,8 @@ public class FilePath extends Path {
 	/** File name including extension but no trailing file separator nor variants. */
 	private final String name;
 
+	private final String extension;
+
 	/** Optional variants, empty if file path has none. */
 	private final Variants variants;
 
@@ -92,10 +98,10 @@ public class FilePath extends Path {
 
 		this.parentDirPath = matcher.group(1) != null ? new DirPath(project, matcher.group(1)) : null;
 		this.basename = matcher.group(2);
-		String extension = matcher.group(4);
-		this.name = Strings.concat(this.basename, '.', extension);
+		this.extension = matcher.group(4);
+		this.name = Strings.concat(this.basename, '.', this.extension);
 		this.variants = new Variants(this, matcher.group(3));
-		this.fileType = FileType.forExtension(extension.toLowerCase());
+		this.fileType = FileType.forExtension(this.extension.toLowerCase());
 	}
 
 	public FilePath(Project project, File file) {
@@ -120,6 +126,10 @@ public class FilePath extends Path {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	String getExtension() {
+		return extension;
 	}
 
 	/**
@@ -159,17 +169,6 @@ public class FilePath extends Path {
 	 */
 	public String getBaseName() {
 		return basename;
-	}
-
-	/**
-	 * Test if reference name equals this file path base name. Base name is file name without variants and extension.
-	 * 
-	 * @param reference reference.
-	 * @return true if reference name equals this file base name.
-	 * @see #basename
-	 */
-	public boolean hasBaseName(Reference reference) {
-		return hasBaseName(reference.getName());
 	}
 
 	/**
@@ -249,6 +248,21 @@ public class FilePath extends Path {
 		return fileType == FileType.MEDIA;
 	}
 
+	public boolean isXML(String... roots) throws IOException {
+		try (BufferedReader reader = new BufferedReader(getReader())) {
+			String line = reader.readLine();
+			if (line.startsWith("<?")) {
+				line = reader.readLine();
+			}
+			for (String root : roots) {
+				if (line.startsWith(Strings.concat('<', root, '>'))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Clone this file path but forces the type to style. Returned file differs only by its type.
 	 * 
@@ -256,6 +270,22 @@ public class FilePath extends Path {
 	 */
 	public FilePath cloneToStyle() {
 		return new FilePath(project, Files.replaceExtension(value(), CT.STYLE_EXT));
+	}
+
+	public void copyTo(FilePath target) throws IOException {
+		Files.copy(file, target.file);
+	}
+
+	public void copyTo(Writer writer) throws IOException {
+		Files.copy(getReader(), writer);
+	}
+
+	public void copyTo(OutputStream stream) throws IOException {
+		Files.copy(file, stream);
+	}
+	
+	public String load() throws IOException {
+		return Strings.load(getReader());
 	}
 
 	/**

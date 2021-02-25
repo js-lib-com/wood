@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.util.Classes;
 import js.wood.impl.FileType;
 import js.wood.impl.MediaQueryDefinition;
-import js.wood.impl.ResourceType;
 import js.wood.impl.Variants;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -95,7 +94,6 @@ public class FilePathTest {
 		FilePath path = new FilePath(project, "res/compo/compo.css");
 		assertThat(path.getBaseName(), equalTo("compo"));
 		assertThat(path.hasBaseName("compo"), equalTo(true));
-		assertThat(path.hasBaseName(new Reference(path, ResourceType.STRING, "compo")), equalTo(true));
 
 		path = new FilePath(project, "res/compo/strings_de.xml");
 		assertThat(path.getBaseName(), equalTo("strings"));

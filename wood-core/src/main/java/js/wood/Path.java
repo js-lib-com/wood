@@ -115,20 +115,6 @@ public abstract class Path {
 	}
 
 	/**
-	 * Convert this path instance to project Java file; returned file always contains project root. This method test that file
-	 * really exists and throw exception if not.
-	 * 
-	 * @return path file.
-	 * @throws WoodException if file to return does not exist.
-	 */
-	public File toFile() throws WoodException {
-		if (!exists()) {
-			throw new WoodException("Attempt to use not existing file path |%s|.", value);
-		}
-		return file;
-	}
-
-	/**
 	 * Instance string representation returns the same value as {@link #value()}.
 	 * 
 	 * @return path string representation.
