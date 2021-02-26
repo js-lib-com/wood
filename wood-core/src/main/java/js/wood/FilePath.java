@@ -104,7 +104,7 @@ public class FilePath extends Path {
 		this.fileType = FileType.forExtension(this.extension.toLowerCase());
 	}
 
-	public FilePath(Project project, File file) {
+	FilePath(Project project, File file) {
 		this(project, Files.getRelativePath(project.getProjectRoot(), file, true));
 	}
 

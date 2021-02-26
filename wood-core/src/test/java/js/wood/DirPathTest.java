@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
@@ -120,14 +121,9 @@ public class DirPathTest {
 
 	@Test
 	public void iterable() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
-
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
+		DirPath dirPath = new DirPath(project, directory(sources));
 
 		List<String> files = new ArrayList<String>();
 		for (FilePath file : dirPath) {
@@ -140,12 +136,8 @@ public class DirPathTest {
 
 	@Test
 	public void iterable_Subdirectories() {
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(new DFile[] { new DFile("res/compo") });
-
-		DirPath dirPath = new DirPath(project, dir);
+		File[] sources = new File[] { new SourceDirectory("res/compo") };
+		DirPath dirPath = new DirPath(project, directory(sources));
 
 		final List<String> files = new ArrayList<>();
 		for (FilePath file : dirPath) {
@@ -173,12 +165,7 @@ public class DirPathTest {
 
 	@Test
 	public void iterable_NullListFiles() {
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(null);
-
-		DirPath dirPath = new DirPath(project, dir);
+		DirPath dirPath = new DirPath(project, directory(null));
 
 		List<String> files = new ArrayList<String>();
 		for (FilePath file : dirPath) {
@@ -190,25 +177,15 @@ public class DirPathTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void iterable_Remove() {
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(new File[0]);
-
-		DirPath dirPath = new DirPath(project, dir);
+		DirPath dirPath = new DirPath(project, directory(new File[0]));
 		dirPath.iterator().remove();
 	}
 
 	@Test
 	public void filter() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
-
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
+		DirPath dirPath = new DirPath(project, directory(sources));
 		List<FilePath> files = dirPath.filter(filePath -> filePath.isStyle());
 
 		assertThat(files, hasSize(1));
@@ -217,92 +194,61 @@ public class DirPathTest {
 
 	@Test
 	public void findFirst() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
+		DirPath dirPath = new DirPath(project, directory(sources));
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
 		FilePath file = dirPath.findFirst(filePath -> filePath.isStyle());
-
 		assertThat(file, notNullValue());
 		assertThat(file.value(), equalTo("compo.css"));
 	}
 
 	@Test
 	public void findFirst_NotFound() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
-
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-		FilePath file = dirPath.findFirst(filePath -> filePath.isScript());
-
-		assertThat(file, nullValue());
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
+		DirPath dirPath = new DirPath(project, directory(sources));
+		assertThat(dirPath.findFirst(filePath -> filePath.isScript()), nullValue());
 	}
 
 	@Test
 	public void files() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		Path[] paths = initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-
-		final List<String> files = new ArrayList<String>();
+		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
+			private int index = 0;
+
 			@Override
-			public void onFile(FilePath file) {
-				files.add(file.value());
+			public void onFile(FilePath filePath) {
+				assertThat(filePath, equalTo(paths[index++]));
 			}
 		});
-
-		assertThat(files, hasSize(2));
-		assertThat(files, hasItems("compo.htm", "compo.css"));
 	}
 
 	@Test
 	public void files_RootDirectory() {
-		File[] xfiles = new XFile[] { new XFile("project.xml") };
+		File[] sources = new File[] { new SourceFile("project.xml") };
+		Path[] paths = initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn(".");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-
-		final List<String> files = new ArrayList<String>();
+		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
+			private int index = 0;
+
 			@Override
-			public void onFile(FilePath file) {
-				files.add(file.value());
+			public void onFile(FilePath filePath) {
+				assertThat(filePath, equalTo(paths[index++]));
 			}
 		});
-
-		assertThat(files, hasSize(1));
-		assertThat(files, hasItems("project.xml"));
 	}
 
 	@Test
 	public void files_Accept() {
-		File[] xfiles = new XFile[] { new XFile("compo.htm"), new XFile("compo.css") };
+		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-
+		DirPath dirPath = new DirPath(project, directory(sources));
 		final List<String> files = new ArrayList<String>();
 		dirPath.files(new FilesHandler() {
 			@Override
@@ -322,77 +268,59 @@ public class DirPathTest {
 
 	@Test
 	public void files_HiddenFile() {
-		File[] xfiles = new XFile[] { new XFile(".gitignore"), new XFile("compo.htm"), new XFile("compo.css") };
+		File[] sources = new File[] { new SourceFile(".gitignore"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		Path[] paths = initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-
-		final List<String> files = new ArrayList<String>();
+		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
+			private int index = 0;
+
 			@Override
-			public void onFile(FilePath file) {
-				files.add(file.value());
+			public void onFile(FilePath filePath) {
+				assertThat(index, lessThan(2));
+				assertThat(filePath, equalTo(paths[index++]));
 			}
 		});
-
-		assertThat(files, hasSize(2));
-		assertThat(files, hasItems("compo.htm", "compo.css"));
 	}
 
 	@Test
-	public void files_Subdirectory() {
-		File[] xfiles = new File[] { new DFile("media") };
+	public void files_Subdir() {
+		File[] sources = new File[] { new SourceDirectory("media") };
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
+		DirPath subdir = new DirPath(project, "media/");
+		when(project.createDirPath(sources[0])).thenReturn(subdir);
 
-		DirPath dirPath = new DirPath(project, dir);
-
+		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			@Override
 			public void onDirectory(DirPath dir) {
-				assertThat(dir.value(), equalTo("media/"));
+				assertThat(dir, equalTo(subdir));
 			}
 		});
 	}
 
 	@Test
-	public void files_Subdirectory_TrailingSeparator() {
-		File[] xfiles = new File[] { new DFile("media/") };
+	public void files_Subdir_TrailingSeparator() {
+		File[] sources = new File[] { new SourceDirectory("media/") };
+		Path[] paths = initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
-
-		DirPath dirPath = new DirPath(project, dir);
-
+		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			@Override
 			public void onDirectory(DirPath dir) {
-				assertThat(dir.value(), equalTo("media/"));
+				assertThat(dir, equalTo(paths[0]));
 			}
 		});
 	}
 
 	@Test
-	public void files_SubdirectoryAndFiles() {
-		File[] xfiles = new File[] { new DFile("media"), new XFile("compo.htm"), new XFile("compo.css") };
+	public void files_SubdirAndFiles() {
+		File[] sources = new File[] { new SourceDirectory("media"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		initSources(sources);
 
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(xfiles);
+		DirPath dirPath = new DirPath(project, directory(sources));
 
-		DirPath dirPath = new DirPath(project, dir);
-
-		final List<String> files = new ArrayList<String>();
+		final List<String> result = new ArrayList<String>();
 		dirPath.files(new FilesHandler() {
 			@Override
 			public void onDirectory(DirPath dir) {
@@ -401,12 +329,12 @@ public class DirPathTest {
 
 			@Override
 			public void onFile(FilePath file) {
-				files.add(file.value());
+				result.add(file.value());
 			}
 		});
 
-		assertThat(files, hasSize(2));
-		assertThat(files, hasItems("compo.htm", "compo.css"));
+		assertThat(result, hasSize(2));
+		assertThat(result, hasItems("compo.htm", "compo.css"));
 	}
 
 	@Test
@@ -416,19 +344,12 @@ public class DirPathTest {
 		when(dir.exists()).thenReturn(false);
 
 		DirPath dirPath = new DirPath(project, dir);
-
 		dirPath.files(null);
 	}
 
 	@Test(expected = WoodException.class)
 	public void files_NulllistFiles() {
-		File dir = Mockito.mock(File.class);
-		when(dir.getPath()).thenReturn("res/compo");
-		when(dir.exists()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(null);
-
-		DirPath dirPath = new DirPath(project, dir);
-
+		DirPath dirPath = new DirPath(project, directory(null));
 		dirPath.files(null);
 	}
 
@@ -455,10 +376,10 @@ public class DirPathTest {
 
 	// --------------------------------------------------------------------------------------------
 
-	private static class XFile extends File {
+	private static class SourceFile extends File {
 		private static final long serialVersionUID = -5975578621510948684L;
 
-		public XFile(String pathname) {
+		public SourceFile(String pathname) {
 			super(pathname);
 		}
 
@@ -468,10 +389,10 @@ public class DirPathTest {
 		}
 	}
 
-	private static class DFile extends File {
+	private static class SourceDirectory extends File {
 		private static final long serialVersionUID = 962174848140145344L;
 
-		public DFile(String pathname) {
+		public SourceDirectory(String pathname) {
 			super(pathname);
 		}
 
@@ -479,5 +400,32 @@ public class DirPathTest {
 		public boolean isDirectory() {
 			return true;
 		}
+	}
+
+	private File directory(File[] files) {
+		File dir = Mockito.mock(File.class);
+		when(dir.getPath()).thenReturn(".");
+		when(dir.exists()).thenReturn(true);
+		when(dir.listFiles()).thenReturn(files);
+		return dir;
+	}
+
+	private Path[] initSources(File[] files) {
+		List<Path> paths = new ArrayList<>();
+		for (int i = 0; i < files.length; ++i) {
+			if (files[i].getName().charAt(0) == '.') {
+				continue;
+			}
+			if (files[i] instanceof SourceDirectory) {
+				DirPath path = new DirPath(project, files[i]);
+				when(project.createDirPath(files[i])).thenReturn(path);
+				paths.add(path);
+			} else if (files[i] instanceof SourceFile) {
+				FilePath path = new FilePath(project, files[i]);
+				when(project.createFilePath(files[i])).thenReturn(path);
+				paths.add(path);
+			}
+		}
+		return paths.toArray(new Path[0]);
 	}
 }

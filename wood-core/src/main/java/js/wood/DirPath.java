@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.FilesHandler;
@@ -235,7 +234,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 		if (files == null) {
 			throw new WoodException("Cannot list files from directory |%s|.", file);
 		}
-		
+
 		for (File file : file.listFiles()) {
 			// ignores hidden files and directories
 			if (file.getName().charAt(0) == '.') {
@@ -243,16 +242,11 @@ public class DirPath extends Path implements Iterable<FilePath> {
 			}
 
 			if (file.isDirectory()) {
-				// takes care to create DirPath relative to project
-				String dir = Files.getRelativePath(project.getProjectRoot(), file, true);
-				if (!dir.endsWith(Path.SEPARATOR)) {
-					dir += Path.SEPARATOR;
-				}
-				handler.onDirectory(new DirPath(project, dir));
+				handler.onDirectory(project.createDirPath(file));
 				continue;
 			}
 
-			FilePath filePath = new FilePath(project, Files.getRelativePath(project.getProjectRoot(), file, true));
+			FilePath filePath = project.createFilePath(file);
 			if (!handler.accept(filePath)) {
 				continue;
 			}
@@ -363,7 +357,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 		 */
 		@Override
 		public FilePath next() {
-			return new FilePath(project, Files.getRelativePath(project.getProjectRoot(), files[index], true));
+			return project.createFilePath(files[index]);
 		}
 
 		/**

@@ -1,12 +1,11 @@
 package js.wood.impl;
 
-import static org.mockito.Mockito.*;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.WoodException;
 
@@ -32,8 +30,7 @@ public class EditablePathTest {
 
 	@Test
 	public void constructor() {
-		FilePath layoutPath = new FilePath(project, "res/page/index/index.htm");
-		EditablePath path = new EditablePath(layoutPath, "res/template/page#page-body");
+		EditablePath path = new EditablePath(project, "res/template/page#page-body");
 		
 		assertThat(path.value(), equalTo("res/template/page/"));
 		assertThat(path.getName(), equalTo("page"));
@@ -43,11 +40,9 @@ public class EditablePathTest {
 
 	@Test
 	public void constructor_BadPath() {
-		FilePath layoutPath = new FilePath(project, "res/page/index/index.htm");
-
 		for (String path : new String[] { "", "/template/page", "/dir/template/page#body", "template/page/page.htm#body" }) {
 			try {
-				new EditablePath(layoutPath, path);
+				new EditablePath(project, path);
 				fail("Editable path constructor with bad path value should rise exception.");
 			} catch (Exception e) {
 				assertTrue(e instanceof WoodException);

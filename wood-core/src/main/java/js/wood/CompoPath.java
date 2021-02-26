@@ -112,10 +112,6 @@ public class CompoPath extends DirPath {
 		}
 		return matcher.group(1) + Path.SEPARATOR;
 	}
-
-	public CompoPath(DirPath dirPath) {
-		super(dirPath.getProject(), dirPath.value());
-	}
 	
 	/**
 	 * Test constructor.

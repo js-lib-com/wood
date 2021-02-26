@@ -7,10 +7,12 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import js.lang.BugError;
+import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
+import js.wood.impl.EditablePath;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
@@ -105,8 +107,8 @@ public class Project {
 		this.descriptor = descriptor;
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> new DirPath(this, exclude)).collect(Collectors.toList());
 
-		this.assetsDir = new DirPath(this, CT.ASSETS_DIR);
-		this.themeDir = new DirPath(this, CT.THEME_DIR);
+		this.assetsDir = createDirPath(CT.ASSETS_DIR);
+		this.themeDir = createDirPath(CT.THEME_DIR);
 
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
@@ -265,8 +267,8 @@ public class Project {
 	/**
 	 * Get style files declared into project theme directory. Returned instance is immutable.
 	 * <p>
-	 * This method should be overridden by builder and preview project subclasses. 
-	 *  
+	 * This method should be overridden by builder and preview project subclasses.
+	 * 
 	 * @return theme styles.
 	 */
 	public ThemeStyles getThemeStyles() {
@@ -307,9 +309,9 @@ public class Project {
 	}
 
 	/**
-	 * Scan source directory for media files matching base name and locale variant. This helper method tries to locate file matching
-	 * both base name and locale; extension is not considered. If not found try to return base variant, that is, file that match
-	 * only base name and has no locale. If still not found returns null.
+	 * Scan source directory for media files matching base name and locale variant. This helper method tries to locate file
+	 * matching both base name and locale; extension is not considered. If not found try to return base variant, that is, file
+	 * that match only base name and has no locale. If still not found returns null.
 	 * 
 	 * @param sourceDir directory to scan for media files,
 	 * @param reference media file reference,
@@ -346,6 +348,29 @@ public class Project {
 	 */
 	public boolean hasNamespace() {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
+	}
+
+	public FilePath createFilePath(File file) {
+		return new FilePath(this, Files.getRelativePath(projectRoot, file, true));
+	}
+
+	public DirPath createDirPath(File file) {
+		return createDirPath(Files.getRelativePath(projectRoot, file, true));
+	}
+
+	public CompoPath createCompoPath(String path) {
+		return new CompoPath(this, path);
+	}
+
+	public EditablePath createEditablePath(String path) {
+		return new EditablePath(this, path);
+	}
+
+	public DirPath createDirPath(String path) {
+		if (!path.endsWith(Path.SEPARATOR)) {
+			path += Path.SEPARATOR;
+		}
+		return new DirPath(this, path);
 	}
 
 	// --------------------------------------------------------------------------------------------

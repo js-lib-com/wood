@@ -66,7 +66,7 @@ public class StyleReaderTest {
 		when(project.getMediaQueryDefinition("landscape")).thenReturn(new MediaQueryDefinition("landscape", "orientation: landscape", 0));
 		when(project.getMediaQueryDefinition("portrait")).thenReturn(new MediaQueryDefinition("portrait", "orientation: portrait", 0));
 
-		File[] stylesFiles = new XFile[] { //
+		File[] styleFiles = new File[] { //
 				new XFile("res/page/page_lgd.css"), //
 				new XFile("res/page/page_nod.css"), //
 				new XFile("res/page/page_mdd.css"), //
@@ -85,11 +85,15 @@ public class StyleReaderTest {
 				new XFile("res/page/preview.htm"), //
 				new XFile("res/page/page.htm") //
 		};
+		for(File styleFile:styleFiles) {
+			FilePath stylePath = new FilePath(project, styleFile);
+			when(project.createFilePath(styleFile)).thenReturn(stylePath);
+		}
 
 		File stylesDir = Mockito.mock(File.class);
 		when(stylesDir.exists()).thenReturn(true);
 		when(stylesDir.getPath()).thenReturn("res/page");
-		when(stylesDir.listFiles()).thenReturn(stylesFiles);
+		when(stylesDir.listFiles()).thenReturn(styleFiles);
 		DirPath parentDir = new DirPath(project, stylesDir);
 
 		when(styleFile.getBaseName()).thenReturn("page");

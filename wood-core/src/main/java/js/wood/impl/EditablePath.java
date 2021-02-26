@@ -55,13 +55,12 @@ public class EditablePath extends CompoPath {
 	 * path and store it; with what is left delegates {@link CompoPath#CompoPath(Project, FilePath)}. Since editable path is
 	 * loaded from layout files it is not reliable and uses component constructor that check component path integrity.
 	 * 
-	 * @param project project reference,
-	 * @param layoutPath layout file declaring editable path,
+	 * @param project WOOD project context,
 	 * @param editablePath editable path value.
 	 * @throws WoodException if <code>editablePath</code> parameter is invalid or its component path missing.
 	 */
-	public EditablePath(FilePath layoutPath, String editablePath) throws WoodException {
-		super(layoutPath.getProject(), compoPath(layoutPath, editablePath));
+	public EditablePath(Project project, String editablePath) throws WoodException {
+		super(project, compoPath(editablePath));
 		editableName = editablePath.substring(editablePath.lastIndexOf(EDITABLE_SEPARATOR) + 1);
 
 		StringBuilder builder = new StringBuilder(value.substring(0, value.length() - 1));
@@ -77,10 +76,10 @@ public class EditablePath extends CompoPath {
 	 * @return component path.
 	 * @throws WoodException if editable name is missing.
 	 */
-	private static String compoPath(FilePath layoutPath, String editablePath) throws WoodException {
+	private static String compoPath(String editablePath) throws WoodException {
 		int index = editablePath.lastIndexOf(EDITABLE_SEPARATOR);
 		if (index == -1) {
-			throw new WoodException("Missing editable name from editable path |%s| declared in layout file |%s|.", layoutPath, editablePath);
+			throw new WoodException("Missing editable name from editable path |%s|.", editablePath);
 		}
 		return editablePath.substring(0, index);
 	}

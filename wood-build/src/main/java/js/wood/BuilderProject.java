@@ -10,7 +10,6 @@ import java.util.Map;
 
 import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
-import js.wood.util.Files;
 
 /**
  * WOOD {@link Project} extension for build process.
@@ -40,7 +39,7 @@ class BuilderProject extends Project {
 	public BuilderProject(File projectDir, File buildDir) throws IOException {
 		super(projectDir);
 		this.buildDir = buildDir;
-		this.excludes.add(new DirPath(this, Files.getRelativePath(projectDir, buildDir, true) + Path.SEPARATOR));
+		this.excludes.add(createDirPath(buildDir));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
 		this.variables = new HashMap<>();
@@ -112,7 +111,7 @@ class BuilderProject extends Project {
 
 				// XML component descriptor for pages has root 'page'
 				if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
-					pages.add(new CompoPath(parentDir));
+					pages.add(createCompoPath(parentDir.value()));
 					return;
 				}
 			}
