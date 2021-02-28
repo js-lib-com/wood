@@ -317,7 +317,7 @@ public class ComponentInheritanceTest {
 		when(templateStyle.value()).thenReturn("template.css");
 		when(compoStyle.exists()).thenReturn(true);
 		when(compoStyle.value()).thenReturn("compo.css");
-		
+
 		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
@@ -326,7 +326,7 @@ public class ComponentInheritanceTest {
 
 		when(templateEditable.getEditableName()).thenReturn("h1");
 		when(project.createEditablePath("res/template#h1")).thenReturn(templateEditable);
-		
+
 		Component compo = new Component(compoPath, referenceHandler);
 
 		List<FilePath> styles = compo.getStyleFiles();
@@ -334,7 +334,7 @@ public class ComponentInheritanceTest {
 		assertThat(styles.get(0).value(), equalTo("template.css"));
 		assertThat(styles.get(1).value(), equalTo("compo.css"));
 	}
-	
+
 	@Test
 	public void scriptDescriptors() {
 		String templateDescriptorXML = "" + //
@@ -368,5 +368,64 @@ public class ComponentInheritanceTest {
 		assertThat(scripts.get(0).getSource(), equalTo("libs/js-lib.js"));
 		assertThat(scripts.get(1).getSource(), equalTo("scripts/Template.js"));
 		assertThat(scripts.get(2).getSource(), equalTo("scripts/Compo.js"));
+	}
+
+	@Test
+	public void clean() {
+		String templateHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"	<div w:editable='empty'></div>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section w:template='res/template#section' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		when(templateEditable.getEditableName()).thenReturn("section");
+		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		compo.clean();
+
+		Element layout = compo.getLayout();
+		assertFalse(layout.hasAttr("xmlns:w"));
+		assertThat(layout.getByTag("section"), notNullValue());
+		assertFalse(layout.getByTag("section").hasAttr("xmlns:w"));
+		assertThat(layout.getByTag("div"), nullValue());
+	}
+
+	/** Template editable element is named 'h1' but component fragment reference is named 'fake'. */
+	@Test(expected = WoodException.class)
+	public void missingEditable() {
+		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
+
+		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'></h1>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
+
+		when(templateEditable.getEditableName()).thenReturn("fake");
+		when(project.createEditablePath("res/template#fake")).thenReturn(templateEditable);
+
+		new Component(compoPath, referenceHandler);
+	}
+
+	/** Template editable element has children. */
+	@Test(expected = WoodException.class)
+	public void editableWithChildren() {
+		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'><b>Title</b></h1>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
+
+		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'></h1>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
+
+		when(templateEditable.getEditableName()).thenReturn("h1");
+		when(project.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+
+		new Component(compoPath, referenceHandler);
 	}
 }

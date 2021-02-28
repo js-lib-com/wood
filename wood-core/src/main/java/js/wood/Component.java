@@ -139,7 +139,6 @@ public class Component {
 		this.layoutParameters = new LayoutParameters();
 		this.referenceHandler = referenceHandler;
 
-		//FilePath descriptorFile = layoutPath.getParentDirPath().getFilePath(layoutPath.getParentDirPath().getName() + CT.DOT_XML_EXT);
 		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
 		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 
@@ -160,16 +159,15 @@ public class Component {
 
 	public void clean() {
 		// templates realization is optional; remove empty editable elements
-		for (Element editableEl : operators.findByOperator(layout, Operator.EDITABLE)) {
-			if (editableEl.isEmpty()) {
-				editableEl.remove();
-			}
+		for (Element editable : operators.findByOperator(layout, Operator.EDITABLE)) {
+			assert editable.isEmpty();
+			editable.remove();
 		}
-		
+
 		// remove wood namespace declarations
 		layout.getDocument().removeNamespaceDeclaration(WOOD.NS);
 	}
-	
+
 	/**
 	 * Scan project resources and library directories for requested component layout, resolving its dependencies. Scanning
 	 * process is recursively, in depth-first order, and actually solves two kinds of dependencies: templates hierarchy and
@@ -211,7 +209,6 @@ public class Component {
 			// descendants are guaranteed to be resolved
 			CompoPath compoPath = project.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
 
-			//FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
 			FilePath descriptorFile = compoPath.getLayoutPath().cloneTo(FileType.XML);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 			addAll(metaDescriptors, descriptor.getMetaDescriptors());
@@ -270,9 +267,6 @@ public class Component {
 
 		Reader reader = new LayoutReader(new SourceReader(layoutPath, layoutParameters, referenceHandler));
 		Document layout = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
-		if (!layout.getRoot().hasChildren()) {
-			throw new WoodException("Empty layout |%s|.", layoutPath);
-		}
 
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
@@ -313,7 +307,7 @@ public class Component {
 				// source reader takes care to inject parameter values into template layout
 				layoutParameters.load(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
-				
+
 				FilePath templateLayoutPath = editablePath.getLayoutPath();
 				template = loadLayoutDocument(templateLayoutPath, guardCount);
 				editables = new Editables(template);
@@ -604,6 +598,9 @@ public class Component {
 			Element editable = editables.get(editableName);
 			if (editable == null) {
 				editable = operators.getByOperator(template, Operator.EDITABLE, editableName);
+				if (editable == null) {
+					return null;
+				}
 				if (editable.hasChildren()) {
 					throw new WoodException("Template editable element |%s| is not allowed to have children.", editable);
 				}

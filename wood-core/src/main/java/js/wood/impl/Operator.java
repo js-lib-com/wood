@@ -15,7 +15,7 @@ public enum Operator
   TEMPLATE,
   /** Insert widget layout into calling scope. */
   COMPO,
-  /** Used in conjunction with {@link #WIDGET} and {@link #TEMPLATE} to define layout parameters list. */
+  /** Used in conjunction with {@link #COMPO} and {@link #TEMPLATE} to define layout parameters list. */
   PARAM;
 
   public String value()
