@@ -16,9 +16,7 @@ public enum Operator
   /** Insert widget layout into calling scope. */
   COMPO,
   /** Used in conjunction with {@link #WIDGET} and {@link #TEMPLATE} to define layout parameters list. */
-  PARAM,
-  /** Declare script class, especially page class, to include into generated page. */
-  SCRIPT;
+  PARAM;
 
   public String value()
   {
