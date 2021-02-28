@@ -35,7 +35,6 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		Component compo = new Component(new CompoPath(project, "res/page/index"), (Reference reference, FilePath sourceFile) -> sourceFile.value());
-		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());
@@ -47,7 +46,6 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		Component compo = new Component(new CompoPath(project, "res/page/index"), (Reference reference, FilePath sourceFile) -> sourceFile.value());
-		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());
@@ -64,7 +62,6 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 0);
 
 		Component compo = new Component(new CompoPath(project, "res/page/index"), (Reference reference, FilePath sourceFile) -> sourceFile.value());
-		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.setLocale(new Locale("ro"));
@@ -77,7 +74,6 @@ public class BuildFsTest {
 		BuildFS buildFS = new TestBuildFS(project, 4);
 
 		Component compo = new Component(new CompoPath(project, "res/page/index"), (Reference reference, FilePath sourceFile) -> sourceFile.value());
-		compo.scan();
 		PageDocument page = new PageDocument(compo);
 
 		buildFS.writePage(compo, page.getDocument());

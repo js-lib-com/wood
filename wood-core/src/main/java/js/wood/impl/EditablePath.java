@@ -8,8 +8,9 @@ import js.wood.Project;
 import js.wood.WoodException;
 
 /**
- * The path to an editable element has component path and editable name. An editable path is used by components to declare OOP
- * inheritance. It is the path to editable element from template, for which component define content.
+ * The path to an editable element from a component. It has component path and editable name, separated by hash (#). An editable
+ * path is used by components to declare OOP inheritance. It is the path to editable element from template, for which component
+ * define content.
  * <p>
  * In sample code, <code>wood:template</code> attribute declares a bound to an editable element named <code>body</code> from
  * <code>template/page</code> component.
@@ -28,7 +29,7 @@ import js.wood.WoodException;
  * editable-name = 1*CH
  * 
  * ; terminal symbols definition
- * SEP = "#"                 ; editable separator
+ * SEP = "#"                 ; editable separator is always hash
  * CH  = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
  * 
  * ; compo-path nonterminal symbol is described in {@link CompoPath component path}

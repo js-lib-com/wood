@@ -351,11 +351,22 @@ public class Project {
 	}
 
 	public FilePath createFilePath(File file) {
-		return new FilePath(this, Files.getRelativePath(projectRoot, file, true));
+		return createFilePath(Files.getRelativePath(projectRoot, file, true));
 	}
 
+	public FilePath createFilePath(String path) {
+		return new FilePath(this, path);
+	}
+	
 	public DirPath createDirPath(File file) {
 		return createDirPath(Files.getRelativePath(projectRoot, file, true));
+	}
+
+	public DirPath createDirPath(String path) {
+		if (!path.endsWith(Path.SEPARATOR)) {
+			path += Path.SEPARATOR_CHAR;
+		}
+		return new DirPath(this, path);
 	}
 
 	public CompoPath createCompoPath(String path) {
@@ -364,13 +375,6 @@ public class Project {
 
 	public EditablePath createEditablePath(String path) {
 		return new EditablePath(this, path);
-	}
-
-	public DirPath createDirPath(String path) {
-		if (!path.endsWith(Path.SEPARATOR)) {
-			path += Path.SEPARATOR;
-		}
-		return new DirPath(this, path);
 	}
 
 	// --------------------------------------------------------------------------------------------

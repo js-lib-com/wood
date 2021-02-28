@@ -80,7 +80,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 		if (!matcher.find()) {
 			throw new WoodException("Directory path parameter |%s| is invalid.", value);
 		}
-		pathSegments = new ArrayList<>(Strings.split(value, Path.SEPARATOR));
+		pathSegments = new ArrayList<>(Strings.split(value, Path.SEPARATOR_CHAR));
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 */
 	DirPath(Project project, File dir) {
 		super(project, dir);
-		pathSegments = new ArrayList<>(Strings.split(dir.getPath(), Path.SEPARATOR));
+		pathSegments = new ArrayList<>(Strings.split(dir.getPath(), Path.SEPARATOR_CHAR));
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return path of child file.
 	 */
 	public FilePath getFilePath(String fileName) {
-		return new FilePath(project, value + fileName);
+		return project.createFilePath(value + fileName);
 	}
 
 	/**
@@ -130,11 +130,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return path of child directory.
 	 */
 	public DirPath getSubdirPath(String path) {
-		String dir = value + path;
-		if (!dir.endsWith(Path.SEPARATOR)) {
-			dir += Path.SEPARATOR;
-		}
-		return new DirPath(project, dir);
+		return project.createDirPath(value + path);
 	}
 
 	/**

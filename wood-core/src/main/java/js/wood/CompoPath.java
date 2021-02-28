@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 
  * Component path is the {@link DirPath} to the project directory where component files reside. Being a directory path is
  * relative to the project root; it is also a sequence of path segments but it has no trailing separator. Last path segment is
  * usually known as component name.
@@ -110,7 +111,7 @@ public class CompoPath extends DirPath {
 		if (!matcher.find()) {
 			throw new WoodException("Invalid component path |%s|.", compoPath);
 		}
-		return matcher.group(1) + Path.SEPARATOR;
+		return matcher.group(1) + Path.SEPARATOR_CHAR;
 	}
 	
 	/**
@@ -142,7 +143,7 @@ public class CompoPath extends DirPath {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
 
-		FilePath layoutPath = new FilePath(project, value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+		FilePath layoutPath = project.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
 		if (!layoutPath.exists()) {
 			throw new WoodException("Missing component |%s|.", file);
 		}

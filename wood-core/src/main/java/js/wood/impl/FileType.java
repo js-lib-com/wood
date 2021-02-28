@@ -2,6 +2,7 @@ package js.wood.impl;
 
 import java.io.File;
 
+import js.lang.BugError;
 import js.util.Files;
 import js.util.Params;
 import js.wood.CT;
@@ -28,6 +29,25 @@ public enum FileType {
 
 	/** Media files, mostly support images. */
 	MEDIA;
+
+	public String extension() {
+		switch (this) {
+		case LAYOUT:
+			return CT.LAYOUT_EXT;
+
+		case SCRIPT:
+			return CT.SCRIPT_EXT;
+
+		case STYLE:
+			return CT.STYLE_EXT;
+
+		case XML:
+			return CT.XML_EXT;
+
+		default:
+			throw new BugError("Attempt to got extension for file type |%s|.", this);
+		}
+	}
 
 	/**
 	 * Get the type of requested file. Use file extension to detect file type; if file extension is missing or not recognized

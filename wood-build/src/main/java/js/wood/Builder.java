@@ -126,8 +126,9 @@ public class Builder implements IReferenceHandler {
 		log.debug("Build page |%s|.", compoPath);
 
 		Component pageComponent = new Component(compoPath, this);
+		pageComponent.clean();
+		pageComponent.getLayout().getDocument().dump();
 		currentCompo.set(pageComponent);
-		pageComponent.scan();
 
 		PageDocument pageDocument = new PageDocument(pageComponent);
 		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());

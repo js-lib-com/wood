@@ -5,8 +5,8 @@ import java.io.File;
 import js.util.Params;
 
 /**
- * Path designates project entities like component directories, source and resource files. It is immutable and is always
- * relative to project root directory. Anyway, the Java {@link File} returned by {@link #toFile()} does contain project root.
+ * Path designates project entities like components, source and resource files and directories, descriptors, etc. It is an
+ * immutable sequence of path segments and is always relative to {@link Project#getRootDir()}.
  * <p>
  * Path syntax depends on concrete implementation but resemble Java file: it has a sequence of parts, separated by slash (/).
  * Note that Path always uses slash (/) for separator, no matter JVM platform. Also names from path uses US-ASCII alphanumeric
@@ -31,6 +31,8 @@ import js.util.Params;
 public abstract class Path {
 	/** Path separator is always slash. Note that this path separator is also used by URL path related logic. */
 	public static final String SEPARATOR = "/";
+	/** Convenient path separator represented as a character. */
+	public static final char SEPARATOR_CHAR = '/';
 
 	/** Parent project reference. All paths are always relative to this parent project. */
 	protected final Project project;
@@ -77,9 +79,9 @@ public abstract class Path {
 	 */
 	Path(Project project, File file) {
 		this.project = project;
-		String value = file.getPath().replace('\\', SEPARATOR.charAt(0));
+		String value = file.getPath().replace('\\', SEPARATOR_CHAR);
 		if (file.isDirectory()) {
-			value += SEPARATOR;
+			value += SEPARATOR_CHAR;
 		}
 		this.value = value;
 		this.file = file;

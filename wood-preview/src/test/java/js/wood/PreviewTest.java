@@ -217,7 +217,6 @@ public class PreviewTest implements IReferenceHandler {
 
 		CompoPath path = new CompoPath(project, pathValue);
 		Component component = new Component(path.getLayoutPath(), this);
-		component.scan();
 
 		Preview preview = new Preview(Strings.concat('/', projectDirName, "-preview"), project, component);
 		StringWriter writer = new StringWriter();

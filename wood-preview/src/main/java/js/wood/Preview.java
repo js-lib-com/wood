@@ -120,7 +120,7 @@ public final class Preview {
 			addScript(doc, script);
 		}
 
-		IScriptDescriptor previewScript = compo.getPreviewScript();
+		IScriptDescriptor previewScript = compo.getScriptDescriptor(CT.PREVIEW_SCRIPT);
 		if (previewScript != null) {
 			addScript(doc, previewScript);
 		}
@@ -263,7 +263,7 @@ public final class Preview {
 	private String absoluteUrlPath(String filePath) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
-		builder.append(Path.SEPARATOR);
+		builder.append(Path.SEPARATOR_CHAR);
 		builder.append(filePath);
 		return builder.toString();
 	}

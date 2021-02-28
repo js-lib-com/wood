@@ -46,21 +46,11 @@ public class CompoPathTest {
 	}
 
 	@Test
-	public void getFilePath() {
-		File path = Mockito.mock(File.class);
-		when(path.isDirectory()).thenReturn(true);
-		when(path.getPath()).thenReturn("res/page");
-
-		CompoPath compo = new CompoPath(project, path);
-
-		FilePath file = compo.getFilePath("picture.png");
-		assertThat(file.value(), equalTo("res/page/picture.png"));
-		assertThat(file.getParentDirPath().value(), equalTo("res/page/"));
-		assertThat(file.getName(), equalTo("picture.png"));
-	}
-
-	@Test
 	public void getLayoutPath() {
+		FilePath layoutPath = Mockito.mock(FilePath.class);
+		when(layoutPath.value()).thenReturn("res/page/page.htm");
+		when(project.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
+
 		File path = Mockito.mock(File.class);
 		when(path.isDirectory()).thenReturn(true);
 		when(path.getPath()).thenReturn("res/page");
@@ -70,10 +60,17 @@ public class CompoPathTest {
 		assertThat(compo.getLayoutPath().value(), equalTo("res/page/page.htm"));
 	}
 
+	/**
+	 * Create CompoPath from Java file that is not directory meaning that its layout file is inline. This inline layout path
+	 * returns false on {@link FilePath#exists()} and we should have WoodException.
+	 */
 	@Test(expected = WoodException.class)
 	public void getLayoutPath_MissingInlineComponent() {
+		FilePath layoutPath = Mockito.mock(FilePath.class);
+		when(project.createFilePath("res/page.htm")).thenReturn(layoutPath);
+
 		File path = Mockito.mock(File.class);
-		when(path.getPath()).thenReturn("res/page");
+		when(path.getPath()).thenReturn("res/page/");
 
 		CompoPath compo = new CompoPath(project, path);
 		compo.getLayoutPath();

@@ -18,6 +18,7 @@ import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
 import js.wood.impl.EditablePath;
+import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.LayoutParameters;
 import js.wood.impl.LayoutReader;
@@ -52,9 +53,6 @@ public class Component {
 	/** Parent project reference. */
 	private final Project project;
 
-	/** Optional component descriptor, default to null. */
-	private final ComponentDescriptor descriptor;
-
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
 
@@ -63,6 +61,10 @@ public class Component {
 
 	/** Display is the component name formatted for user interface. */
 	private final String display;
+
+	private final String description;
+
+	private final String securityRole;
 
 	/** This component base layout file path. */
 	private final FilePath baseLayoutPath;
@@ -137,41 +139,37 @@ public class Component {
 		this.layoutParameters = new LayoutParameters();
 		this.referenceHandler = referenceHandler;
 
+		//FilePath descriptorFile = layoutPath.getParentDirPath().getFilePath(layoutPath.getParentDirPath().getName() + CT.DOT_XML_EXT);
+		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
+		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+
 		this.baseLayoutPath = layoutPath;
 		this.name = layoutPath.getBaseName();
-		this.display = Strings.toTitleCase(name);
+		this.display = descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", Strings.toTitleCase(name)));
+		this.description = descriptor.getDescription(this.display);
+		this.securityRole = descriptor.getSecurityRole();
 
-		FilePath descriptorFile = layoutPath.getParentDirPath().getFilePath(layoutPath.getParentDirPath().getName() + CT.DOT_XML_EXT);
-		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-	}
-
-	public void scan() {
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
-
-		// after layout consolidated scan it for included scripts and class and formatter declarations
-		// 'script' is used only to declare script dependencies and remove after processing
-		// 'class' and 'format' are j(s)-script library operators and need to be preserved
-
-		Element pageClassEl = operators.getByOperator(layout, Operator.SCRIPT);
-		if (pageClassEl != null) {
-			operators.removeOperator(pageClassEl, Operator.SCRIPT);
-		}
-
-		for (Element editableEl : operators.findByOperator(layout, Operator.EDITABLE)) {
-			if (editableEl.isEmpty()) {
-				editableEl.remove();
-			} else {
-				operators.removeOperator(editableEl, Operator.EDITABLE);
-			}
-		}
 
 		addAll(metaDescriptors, descriptor.getMetaDescriptors());
 		addAll(linkDescriptors, descriptor.getLinkDescriptors());
 		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 	}
 
+	public void clean() {
+		// templates realization is optional; remove empty editable elements
+		for (Element editableEl : operators.findByOperator(layout, Operator.EDITABLE)) {
+			if (editableEl.isEmpty()) {
+				editableEl.remove();
+			}
+		}
+		
+		// remove wood namespace declarations
+		layout.getDocument().removeNamespaceDeclaration(WOOD.NS);
+	}
+	
 	/**
 	 * Scan project resources and library directories for requested component layout, resolving its dependencies. Scanning
 	 * process is recursively, in depth-first order, and actually solves two kinds of dependencies: templates hierarchy and
@@ -213,7 +211,8 @@ public class Component {
 			// descendants are guaranteed to be resolved
 			CompoPath compoPath = project.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
 
-			FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
+			//FilePath descriptorFile = compoPath.getFilePath(compoPath.getName() + CT.DOT_XML_EXT);
+			FilePath descriptorFile = compoPath.getLayoutPath().cloneTo(FileType.XML);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 			addAll(metaDescriptors, descriptor.getMetaDescriptors());
 			addAll(linkDescriptors, descriptor.getLinkDescriptors());
@@ -314,9 +313,16 @@ public class Component {
 				// source reader takes care to inject parameter values into template layout
 				layoutParameters.load(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
-
-				template = loadLayoutDocument(editablePath.getLayoutPath(), guardCount);
+				
+				FilePath templateLayoutPath = editablePath.getLayoutPath();
+				template = loadLayoutDocument(templateLayoutPath, guardCount);
 				editables = new Editables(template);
+
+				FilePath descriptorFile = templateLayoutPath.cloneTo(FileType.XML);
+				ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+				addAll(metaDescriptors, descriptor.getMetaDescriptors());
+				addAll(linkDescriptors, descriptor.getLinkDescriptors());
+				addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 			}
 
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
@@ -354,8 +360,7 @@ public class Component {
 	 * @return page security role or null if not defined.
 	 */
 	public String getSecurityRole() {
-		// TODO: rename <path> element from descriptor to <security-role>
-		return descriptor.getSecurityRole();
+		return securityRole;
 	}
 
 	/**
@@ -369,11 +374,11 @@ public class Component {
 	}
 
 	public String getDisplay() {
-		return descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", display));
+		return display;
 	}
 
 	public String getDescription() {
-		return descriptor.getDescription(getDisplay());
+		return description;
 	}
 
 	/**
@@ -442,29 +447,13 @@ public class Component {
 	}
 
 	/**
-	 * Get the file path for optional preview style. Preview style is used only by preview process and provides styles for unit
-	 * testing context.
-	 * <p>
-	 * Returned file path is optional, that is, designed file is not mandatory to exist. Is caller responsibility to ensure file
-	 * exist before using it.
+	 * Get descriptor for requested script file or null if not found.
 	 * 
-	 * @return component style preview file.
+	 * @param fileName script file name.
+	 * @return script descriptor or null if not defined.
 	 */
-	public FilePath getPreviewStyle() {
-		return baseLayoutPath.getParentDirPath().getFilePath(CT.PREVIEW_STYLE);
-	}
-
-	/**
-	 * Get the file path for optional preview script. Preview script describe unit testing logic; it is used by preview process
-	 * to literally replace component script.
-	 * <p>
-	 * Returned file path is optional, that is, designed file is not mandatory to exist. Is caller responsibility to ensure file
-	 * exist before using it.
-	 * 
-	 * @return component script preview file or null if not defined.
-	 */
-	public IScriptDescriptor getPreviewScript() {
-		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(CT.PREVIEW_SCRIPT);
+	public IScriptDescriptor getScriptDescriptor(String fileName) {
+		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(fileName);
 		return file.exists() ? new ScriptDescriptor(file.value()) : null;
 	}
 
@@ -497,7 +486,7 @@ public class Component {
 		// for example, component res/path/compo has res/path/compo/compo.htm layout, res/path/compo/compo.js script and
 		// res/path/compo/compo.css style
 
-		FilePath styleFile = sourceFile.cloneToStyle();
+		FilePath styleFile = sourceFile.cloneTo(FileType.STYLE);
 		if (styleFile.exists() && !styleFiles.contains(styleFile)) {
 			// component style files are linked into build and preview document header
 			// in the order from this component styles list, first style file on top
@@ -513,9 +502,9 @@ public class Component {
 	private static final Element[] EMPTY_ARRAY = new Element[0];
 
 	/**
-	 * An compo path is a reference to an external component; this method returns defined compo paths. Returns a newly created
-	 * array with all compo path elements found in given layout document. This method creates a new array because {@link EList}
-	 * is live and we need to remove compo paths while iterating. Returns empty array if no compo found.
+	 * An compo path is a reference to a child component; this method returns defined compo paths. Returns a newly created array
+	 * with all compo path elements found in given layout document. This method creates a new array because {@link EList} is
+	 * live and we need to remove compo paths while iterating. Returns empty array if no compo found.
 	 * <p>
 	 * Compo path element is identified by attribute with name <code>wood:compo</code>.
 	 * 
@@ -543,19 +532,31 @@ public class Component {
 	 */
 	private static void mergeAttrs(Element element, Iterable<Attr> attrs) {
 		for (Attr attr : attrs) {
-			if (attr.getName().equals("class")) {
+			switch (attr.getName()) {
+			case "class":
 				// merge attributes and element CSS classes but do not overwrite element classes
-				Set<String> classes = new HashSet<String>();
+				Set<String> classes = new HashSet<>();
 				classes.addAll(Strings.split(attr.getValue(), ' '));
 				String elementClass = element.getAttr("class");
 				if (elementClass != null) {
 					classes.addAll(Strings.split(elementClass, ' '));
 				}
 				element.setAttr("class", Strings.join(classes, ' '));
-				continue;
-			}
-			if (!element.hasAttr(attr.getName())) {
-				element.setAttr(attr.getName(), attr.getValue());
+				break;
+
+			default:
+				if (element.hasAttr(attr.getName())) {
+					break;
+				}
+				String namespaceURI = attr.getNamespaceURI();
+				if (namespaceURI != null) {
+					if (!namespaceURI.equals(WOOD.NS)) {
+						element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
+					}
+				} else {
+					String[] names = attr.getName().split(":");
+					element.setAttr(names[0], attr.getValue());
+				}
 			}
 		}
 	}
@@ -579,10 +580,10 @@ public class Component {
 	 */
 	private class Editables {
 		/** Template document. */
-		private Document template;
+		private final Document template;
 
 		/** Template editables. */
-		private Map<String, Element> editables = new HashMap<String, Element>();
+		private final Map<String, Element> editables = new HashMap<>();
 
 		/**
 		 * Create editables instance for given template layout.
@@ -603,6 +604,9 @@ public class Component {
 			Element editable = editables.get(editableName);
 			if (editable == null) {
 				editable = operators.getByOperator(template, Operator.EDITABLE, editableName);
+				if (editable.hasChildren()) {
+					throw new WoodException("Template editable element |%s| is not allowed to have children.", editable);
+				}
 				editables.put(editableName, editable);
 			}
 			return editable;
@@ -617,4 +621,12 @@ public class Component {
 			}
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	FilePath getBaseLayoutPath() {
+		return baseLayoutPath;
+	}
+
 }

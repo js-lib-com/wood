@@ -201,7 +201,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 			// create component with support for preview script
 			Component component = new Component(layoutPath, this);
-			component.scan();
 			Preview preview = new Preview(contextPath, project, component);
 			preview.serialize(httpResponse.getWriter());
 			return;
@@ -252,7 +251,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(CONTEXT_PATH.get());
-		builder.append(Path.SEPARATOR);
+		builder.append(Path.SEPARATOR_CHAR);
 		builder.append(mediaFile.getParentDirPath().value());
 		builder.append(mediaFile.getName());
 		return builder.toString();

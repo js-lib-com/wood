@@ -105,7 +105,7 @@ public class FilePathTest {
 		when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "", 0));
 
 		FilePath layoutFile = new FilePath(project, "res/compo/compo_w800.htm");
-		FilePath styleFile = layoutFile.cloneToStyle();
+		FilePath styleFile = layoutFile.cloneTo(FileType.STYLE);
 		assertThat(layoutFile.isLayout(), equalTo(true));
 		assertThat(styleFile.isStyle(), equalTo(true));
 		assertThat(layoutFile.getBaseName(), equalTo(styleFile.getBaseName()));

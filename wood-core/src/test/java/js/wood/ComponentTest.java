@@ -14,22 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import js.dom.EList;
 import js.dom.Element;
 import js.dom.NamespaceContext;
 import js.util.Classes;
-import js.wood.CompoPath;
-import js.wood.Component;
-import js.wood.FilePath;
-import js.wood.IReferenceHandler;
-import js.wood.Project;
-import js.wood.Reference;
-import js.wood.Variables;
-import js.wood.WOOD;
-import js.wood.WoodException;
 
+@Ignore
 public class ComponentTest {
 	@Test
 	public void simpleLayout() {
@@ -204,14 +197,13 @@ public class ComponentTest {
 		CompoPath path = new CompoPath(project, "res/references");
 		final List<Reference> references = new ArrayList<>();
 
-		Component compo = new Component(path, new IReferenceHandler() {
+		new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				references.add(reference);
 				return reference.toString();
 			}
 		});
-		compo.scan();
 
 		assertThat(references.size(), equalTo(3));
 		assertThat(references.get(0).toString(), equalTo("@string/title"));
@@ -358,7 +350,7 @@ public class ComponentTest {
 	}
 
 	private static Component createCompo(final Project project, final CompoPath path) {
-		Component compo = new Component(path, new IReferenceHandler() {
+		return new Component(path, new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				Variables variables = new Variables(sourcePath.getParentDirPath());
@@ -372,9 +364,6 @@ public class ComponentTest {
 				return variables.get(new Locale("en"), reference, sourcePath, this);
 			}
 		});
-
-		compo.scan();
-		return compo;
 	}
 
 	private static <T> T field(Object object, String field) {

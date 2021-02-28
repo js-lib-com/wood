@@ -277,8 +277,8 @@ public class FilePath extends Path {
 	 * 
 	 * @return style file.
 	 */
-	public FilePath cloneToStyle() {
-		return new FilePath(project, Files.replaceExtension(value(), CT.STYLE_EXT));
+	public FilePath cloneTo(FileType type) {
+		return new FilePath(project, Files.replaceExtension(value(), type.extension()));
 	}
 
 	public void copyTo(FilePath target) throws IOException {

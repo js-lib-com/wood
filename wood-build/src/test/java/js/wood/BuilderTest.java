@@ -176,7 +176,7 @@ public class BuilderTest {
 		buildFS.setLocale(locale);
 
 		CompoPath indexPage = new CompoPath(project, "res/page/index");
-		Classes.invoke(builder, "buildPage", indexPage);
+		builder.buildPage(indexPage);
 	}
 
 	@Test

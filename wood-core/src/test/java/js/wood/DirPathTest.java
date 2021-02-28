@@ -81,24 +81,36 @@ public class DirPathTest {
 
 	@Test
 	public void getFilePath() {
+		FilePath filePath = Mockito.mock(FilePath.class);
+		when(filePath.value()).thenReturn("res/page/strings.xml");
+		when(project.createFilePath("res/page/strings.xml")).thenReturn(filePath);
+		
 		DirPath dirPath = new DirPath(project, "res/page/");
-		FilePath filePath = dirPath.getFilePath("strings.xml");
+		filePath = dirPath.getFilePath("strings.xml");
 		assertThat(filePath, notNullValue());
 		assertThat(filePath.value(), equalTo("res/page/strings.xml"));
 	}
 
 	@Test
 	public void getSubdirPath() {
+		DirPath subdirPath = Mockito.mock(DirPath.class);
+		when(subdirPath.value()).thenReturn("res/page/media/");
+		when(project.createDirPath("res/page/media")).thenReturn(subdirPath);
+		
 		DirPath dirPath = new DirPath(project, "res/page/");
-		DirPath subdirPath = dirPath.getSubdirPath("media");
+		subdirPath = dirPath.getSubdirPath("media");
 		assertThat(subdirPath, notNullValue());
 		assertThat(subdirPath.value(), equalTo("res/page/media/"));
 	}
 
 	@Test
 	public void getSubdirPath_WithTrailingSeparator() {
+		DirPath subdirPath = Mockito.mock(DirPath.class);
+		when(subdirPath.value()).thenReturn("res/page/media/");
+		when(project.createDirPath("res/page/media/")).thenReturn(subdirPath);
+		
 		DirPath dirPath = new DirPath(project, "res/page/");
-		DirPath subdirPath = dirPath.getSubdirPath("media/");
+		subdirPath = dirPath.getSubdirPath("media/");
 		assertThat(subdirPath, notNullValue());
 		assertThat(subdirPath.value(), equalTo("res/page/media/"));
 	}
