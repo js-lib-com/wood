@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page>
+	<display>Page Compo</display>
+	<description>Page description.</description>
+	<scripts>
+		<script src="lib/js-lib.js"></script>
+		<script src="script/js/wood/Compo.js"></script>
+	</scripts>
+</page>

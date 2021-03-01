@@ -1,9 +1,12 @@
 package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
@@ -17,13 +20,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.dom.EList;
 import js.dom.Element;
+import js.dom.NamespaceContext;
 import js.wood.impl.EditablePath;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
+import js.wood.impl.Operator;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
- * Components inheritance via templates.
+ * Components inheritance via templates. Fixture contains mocks for a component and a hierarchy of two templates:
+ * <code>page</code> and </code>template</code>.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -66,10 +72,17 @@ public class ComponentInheritanceTest {
 	private IReferenceHandler referenceHandler;
 
 	private IOperatorsHandler operatorsHandler;
+	private NamespaceContext namespace;
 
 	@Before
 	public void beforeTest() {
 		operatorsHandler = new XmlnsOperatorsHandler();
+		namespace = new NamespaceContext() {
+			@Override
+			public String getNamespaceURI(String prefix) {
+				return WOOD.NS;
+			}
+		};
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
@@ -124,9 +137,11 @@ public class ComponentInheritanceTest {
 		assertThat(headings.item(0).getText(), equalTo("Template"));
 		assertThat(headings.item(1).getText(), equalTo("Content"));
 
-		Element editable = layout.getByTag("section");
-		assertThat(editable, notNullValue());
-		assertFalse(editable.hasAttrNS(WOOD.NS, "editable"));
+		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
+		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
+		assertTrue(section.hasAttr("xmlns:w"));
 	}
 
 	/** Component with template and multiple implementations for the same editable element. */
@@ -370,6 +385,31 @@ public class ComponentInheritanceTest {
 		assertThat(scripts.get(2).getSource(), equalTo("scripts/Compo.js"));
 	}
 
+	/** {@link Operator#TEMPLATE} and {@link Operator#EDITABLE} should be erased from layout. */
+	@Test
+	public void operatorsErasure() {
+		String templateHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section w:template='res/template#section' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		when(templateEditable.getEditableName()).thenReturn("section");
+		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getByXPathNS(namespace, "//*[@w:template]"), nullValue());
+		assertThat(layout.getByXPathNS(namespace, "//*[@w:editable]"), nullValue());
+	}
+
 	@Test
 	public void clean() {
 		String templateHTML = "" + //
@@ -399,7 +439,7 @@ public class ComponentInheritanceTest {
 		assertThat(layout.getByTag("div"), nullValue());
 	}
 
-	/** Template editable element is named 'h1' but component fragment reference is named 'fake'. */
+	/** Template editable element is named 'h1' but component fragment references it as 'fake'. */
 	@Test(expected = WoodException.class)
 	public void missingEditable() {
 		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
