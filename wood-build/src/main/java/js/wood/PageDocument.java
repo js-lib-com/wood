@@ -19,6 +19,7 @@ import js.util.Params;
  * @since 1.0
  */
 class PageDocument {
+	/** Page component from which this page document loads its content. */
 	private final Component component;
 
 	/** X(HT)ML document. */
@@ -51,15 +52,6 @@ class PageDocument {
 
 		this.html.addChild(this.doc.importElement(component.getLayout()));
 		this.html.addText("\r\n");
-	}
-
-	/**
-	 * Get page component for which this page document is created.
-	 * 
-	 * @return parent page component.
-	 */
-	public Component getComponent() {
-		return component;
 	}
 
 	/**
@@ -246,7 +238,7 @@ class PageDocument {
 		Element scriptElement = doc.createElement("script");
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = handler.handle(new FilePath(project, src));
+				src = handler.handle(project.createFilePath(src));
 			}
 			scriptElement.setAttr("src", src);
 		}
