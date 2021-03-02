@@ -2,80 +2,73 @@ package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import js.util.Classes;
 import js.util.Files;
-import js.util.Strings;
 
 public class DefaultBuildFsTest {
 	private BuilderProject project;
 	private File buildDir;
+	private BuildFS buildFS;
 
 	@Before
 	public void beforeTest() throws Exception {
-		File projectRoot = new File("src/test/resources/project");
-		buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
-		project = new BuilderProject(projectRoot, buildDir);
+		File projectRoot = new File("src/test/resources/build-fs");
+		buildDir = new File(projectRoot, "site");
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
+
+		project = new BuilderProject(projectRoot, buildDir);
+		buildFS = new DefaultBuildFS(buildDir, 0);
 	}
 
 	@Test
-	public void layout() throws IOException {
-		// force project descriptor locale to single locale
-		List<Locale> locales = Arrays.asList(new Locale("en"));
-		Classes.setFieldValue(Classes.getFieldValue(project, Project.class, "descriptor"), "locales", locales);
-
-		Builder builder = new Builder(project);
-		builder.build();
-
-		assertTrue(dir("build/site").exists());
-		assertTrue(dir("build/site", "player").exists());
-		assertTrue(dir("build/site", "media").exists());
-		assertTrue(dir("build/site", "script").exists());
-		assertTrue(dir("build/site", "style").exists());
+	public void getPageDir() {
+		Component page = Mockito.mock(Component.class);
+		assertThat(buildFS.getPageDir(page), equalTo(buildDir));
 	}
 
 	@Test
-	public void layout_MultiLocale() throws IOException {
-		Builder builder = new Builder(project);
-		builder.build();
-
-		for (String language : new String[] { "de", "en", "fr", "ro" }) {
-			assertTrue(dir("build/site", language).exists());
-			assertTrue(dir("build/site", language, "player").exists());
-			assertTrue(dir("build/site", language, "media").exists());
-			assertTrue(dir("build/site", language, "script").exists());
-			assertTrue(dir("build/site", language, "style").exists());
-		}
-	}
-
-	private File dir(String... segments) {
-		File projectDir = new File("src/test/resources/project");
-		return new File(projectDir, Strings.join(segments, '/'));
+	public void getPageDir_SecurityRole() {
+		Component page = Mockito.mock(Component.class);
+		when(page.getSecurityRole()).thenReturn("admin");
+		assertThat(buildFS.getPageDir(page), equalTo(new File(buildDir, "admin")));
 	}
 
 	@Test
-	public void pageName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
+	public void getPageDir_NullPage() {
+		assertThat(buildFS.getPageDir(null), equalTo(buildDir));
+	}
+
+	@Test
+	public void getStyleDir() {
+		assertThat(buildFS.getStyleDir(), equalTo(new File(buildDir, "style")));
+	}
+
+	@Test
+	public void getScriptDir() {
+		assertThat(buildFS.getScriptDir(), equalTo(new File(buildDir, "script")));
+	}
+
+	@Test
+	public void getMediaDir() {
+		assertThat(buildFS.getMediaDir(), equalTo(new File(buildDir, "media")));
+	}
+
+	@Test
+	public void formatPageName() {
 		assertThat(buildFS.formatPageName("index.htm"), equalTo("index.htm"));
 	}
 
 	@Test
-	public void styleName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
-
+	public void formatStyleName() {
 		assertThat(buildFS.formatStyleName(path("res/page/index/index.css")), equalTo("res-page_index.css"));
 		assertThat(buildFS.formatStyleName(path("res/theme/style.css")), equalTo("res-theme_style.css"));
 		assertThat(buildFS.formatStyleName(path("lib/video-player/style.css")), equalTo("lib-video-player_style.css"));
@@ -87,9 +80,7 @@ public class DefaultBuildFsTest {
 	}
 
 	@Test
-	public void scriptName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
-
+	public void formatScriptName() {
 		assertThat(buildFS.formatScriptName(path("script/hc/page/Index.js")), equalTo("script.hc.page.Index.js"));
 		assertThat(buildFS.formatScriptName(path("lib/paging.js")), equalTo("lib.paging.js"));
 		assertThat(buildFS.formatScriptName(path("lib/js-lib/js-lib.js")), equalTo("lib.js-lib.js"));
@@ -97,9 +88,7 @@ public class DefaultBuildFsTest {
 	}
 
 	@Test
-	public void mediaName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
-
+	public void formatMediaName() {
 		assertThat(buildFS.formatMediaName(path("res/page/index/background.png")), equalTo("res-page-index_background.png"));
 		assertThat(buildFS.formatMediaName(path("res/page/index/index.png")), equalTo("res-page-index_index.png"));
 		assertThat(buildFS.formatMediaName(path("res/page/index/icon/logo.png")), equalTo("res-page-index-icon_logo.png"));
