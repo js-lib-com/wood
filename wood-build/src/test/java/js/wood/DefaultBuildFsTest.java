@@ -19,11 +19,12 @@ import js.util.Strings;
 
 public class DefaultBuildFsTest {
 	private BuilderProject project;
+	private File buildDir;
 
 	@Before
 	public void beforeTest() throws Exception {
 		File projectRoot = new File("src/test/resources/project");
-		File buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
+		buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
 		project = new BuilderProject(projectRoot, buildDir);
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
@@ -67,13 +68,13 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void pageName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 		assertThat(buildFS.formatPageName("index.htm"), equalTo("index.htm"));
 	}
 
 	@Test
 	public void styleName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
 		assertThat(buildFS.formatStyleName(path("res/page/index/index.css")), equalTo("res-page_index.css"));
 		assertThat(buildFS.formatStyleName(path("res/theme/style.css")), equalTo("res-theme_style.css"));
@@ -87,7 +88,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void scriptName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
 		assertThat(buildFS.formatScriptName(path("script/hc/page/Index.js")), equalTo("script.hc.page.Index.js"));
 		assertThat(buildFS.formatScriptName(path("lib/paging.js")), equalTo("lib.paging.js"));
@@ -97,7 +98,7 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void mediaName() {
-		DefaultBuildFS buildFS = new DefaultBuildFS(project.getBuildDir(), 0);
+		DefaultBuildFS buildFS = new DefaultBuildFS(buildDir, 0);
 
 		assertThat(buildFS.formatMediaName(path("res/page/index/background.png")), equalTo("res-page-index_background.png"));
 		assertThat(buildFS.formatMediaName(path("res/page/index/index.png")), equalTo("res-page-index_index.png"));
