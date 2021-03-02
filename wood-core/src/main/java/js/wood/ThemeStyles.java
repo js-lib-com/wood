@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThemeStyles {
-	public final FilePath reset;
-	public final FilePath fx;
-	public final List<FilePath> styles = new ArrayList<>();
+	private final FilePath reset;
+	private final FilePath fx;
+	private final List<FilePath> styles = new ArrayList<>();
 
 	public ThemeStyles(DirPath themeDir) {
 		FilePath reset = null;
@@ -34,5 +34,17 @@ public class ThemeStyles {
 		
 		this.reset = reset;
 		this.fx = fx;
+	}
+
+	FilePath getReset() {
+		return reset;
+	}
+
+	FilePath getFx() {
+		return fx;
+	}
+
+	List<FilePath> getStyles() {
+		return styles;
 	}
 }
