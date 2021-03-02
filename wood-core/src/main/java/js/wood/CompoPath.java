@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import js.util.Params;
+
 /**
  * 
  * Component path is the {@link DirPath} to the project directory where component files reside. Being a directory path is
@@ -107,13 +109,14 @@ public class CompoPath extends DirPath {
 	 * @throws WoodException if component path parameter has bad syntax.
 	 */
 	private static String value(String compoPath) throws WoodException {
+		Params.notNullOrEmpty(compoPath, "Component path");
 		Matcher matcher = PATTERN.matcher(compoPath);
 		if (!matcher.find()) {
 			throw new WoodException("Invalid component path |%s|.", compoPath);
 		}
 		return matcher.group(1) + Path.SEPARATOR_CHAR;
 	}
-	
+
 	/**
 	 * Test constructor.
 	 * 
