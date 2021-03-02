@@ -12,7 +12,7 @@ import js.wood.WoodException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class LinkDescriptor implements ILinkDescriptor {
+class LinkDescriptor implements ILinkDescriptor {
 	private String href;
 	private String hreflang;
 	private String relationship;

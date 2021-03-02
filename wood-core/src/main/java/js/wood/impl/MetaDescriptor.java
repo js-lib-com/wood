@@ -11,7 +11,7 @@ import js.wood.WoodException;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class MetaDescriptor implements IMetaDescriptor {
+class MetaDescriptor implements IMetaDescriptor {
 	private String name;
 	private String httpEquiv;
 	private String property;
