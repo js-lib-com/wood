@@ -25,13 +25,13 @@ public class PreviewProjectTest {
 
 	@Test
 	public void previewThemeStyles() {
-		ThemeStyles styles = project.getThemeStyles();
-		assertThat(styles, notNullValue());
-		assertThat(styles.reset, notNullValue());
-		assertThat(styles.fx, notNullValue());
-		assertThat(styles.styles, hasSize(2));
+		ThemeStyles theme = project.getThemeStyles();
+		assertThat(theme, notNullValue());
+		assertThat(theme.getReset(), notNullValue());
+		assertThat(theme.getFx(), notNullValue());
+		assertThat(theme.getStyles(), hasSize(2));
 		
-		List<String> fileNames = styles.styles.stream().map(file -> file.value()).collect(Collectors.toList());
+		List<String> fileNames = theme.getStyles().stream().map(file -> file.value()).collect(Collectors.toList());
 		assertThat(fileNames, contains("res/theme/form.css", "res/theme/style.css"));
 	}
 }

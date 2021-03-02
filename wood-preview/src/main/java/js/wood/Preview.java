@@ -99,13 +99,13 @@ public final class Preview {
 		}
 
 		ThemeStyles themeStyles = project.getThemeStyles();
-		if (themeStyles.reset != null) {
-			addStyle(doc, absoluteUrlPath(themeStyles.reset));
+		if (themeStyles.getReset() != null) {
+			addStyle(doc, absoluteUrlPath(themeStyles.getReset()));
 		}
-		if (themeStyles.fx != null) {
-			addStyle(doc, absoluteUrlPath(themeStyles.fx));
+		if (themeStyles.getFx() != null) {
+			addStyle(doc, absoluteUrlPath(themeStyles.getFx()));
 		}
-		for (FilePath style : themeStyles.styles) {
+		for (FilePath style : themeStyles.getStyles()) {
 			addStyle(doc, absoluteUrlPath(style));
 		}
 
