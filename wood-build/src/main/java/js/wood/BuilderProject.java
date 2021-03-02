@@ -3,9 +3,9 @@ package js.wood;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import js.wood.impl.FilesHandler;
@@ -18,33 +18,83 @@ import js.wood.impl.ResourceType;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	private final File buildDir;
-
-	private final Variables assetVariables;
-
+	/**
+	 * Style files from theme source directory. Theme styles are global per project and are loaded for all pages. Rules declared
+	 * on theme styles are related to general aspect rather than size and position.
+	 */
 	private final ThemeStyles themeStyles;
 
-	/** Cache for resource variables. */
-	private final Map<DirPath, Variables> variables;
-
-	private final Collection<CompoPath> pages;
+	/**
+	 * Variables declared on assets directory. Asset variables are used when source directory variables miss a certain value.
+	 */
+	private final Variables assetVariables;
 
 	/**
-	 * Test constructor.
-	 * 
-	 * @param projectDir project root directory.
-	 * @param file
-	 * @throws IOException
+	 * Cache for resource variables. Parse variables declared on a source file directory and store in a dictionary with
+	 * directory as key.
 	 */
-	public BuilderProject(File projectDir, File buildDir) throws IOException {
+	private final Map<DirPath, Variables> variables;
+
+	/** Project page components. */
+	private final List<CompoPath> pages;
+
+	/**
+	 * Construct builder project and scan project file system for theme styles, variables and page components.
+	 * 
+	 * @param projectDir project root directory,
+	 * @param buildDir build directory.
+	 */
+	public BuilderProject(File projectDir, File buildDir) {
 		super(projectDir);
-		this.buildDir = buildDir;
+
 		this.excludes.add(createDirPath(buildDir));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
 		this.variables = new HashMap<>();
 		this.pages = new ArrayList<>();
+
 		scan(getProjectDir());
+	}
+
+	/**
+	 * Get project theme styles.
+	 * 
+	 * @return project theme styles.
+	 * @see #themeStyles
+	 */
+	@Override
+	public ThemeStyles getThemeStyles() {
+		return themeStyles;
+	}
+
+	/**
+	 * Get global variables declared on project assets.
+	 * 
+	 * @return assets variables.
+	 * @see #assetVariables
+	 */
+	public Variables getAssetVariables() {
+		return assetVariables;
+	}
+
+	/**
+	 * Get project variables mapped to parent directories. Returned map is not modifiable.
+	 * 
+	 * @return project variables.
+	 * @see #variables
+	 */
+	public Map<DirPath, Variables> getVariables() {
+		return Collections.unmodifiableMap(variables);
+	}
+
+	/**
+	 * Get project pages.
+	 * 
+	 * @return project pages.
+	 * @see #pages
+	 */
+	public List<CompoPath> getPages() {
+		return Collections.unmodifiableList(pages);
 	}
 
 	/**
@@ -56,35 +106,25 @@ class BuilderProject extends Project {
 		return getLocales().size() > 1;
 	}
 
-	@Override
-	public ThemeStyles getThemeStyles() {
-		return themeStyles;
-	}
-
-	public Variables getAssetVariables() {
-		return assetVariables;
-	}
-
 	/**
-	 * Get project variables mapped to parent directories. Returned map is not modifiable. Every variables instance from map has
-	 * a reference to project asset variables, used when variables miss a reference value.
+	 * Load file content and return it as a string. This method is applicable only to text files; using non binary files does
+	 * not render predictable results.
 	 * 
-	 * @return project variables.
-	 * @see #variables
+	 * @param path file path relative to project root.
+	 * @return requested file text content.
+	 * @throws IOException if file reading fails.
 	 */
-	public Map<DirPath, Variables> getVariables() {
-		return Collections.unmodifiableMap(variables);
-	}
-
-	public Collection<CompoPath> getPages() {
-		return Collections.unmodifiableCollection(pages);
-	}
-
 	public String loadFile(String path) throws IOException {
 		return new FilePath(this, path).load();
 	}
 
-	private void scan(DirPath dir) {
+	/**
+	 * Scan project directories to discover page components and variable definition files. This method is executed recursively
+	 * in depth-first order.
+	 * 
+	 * @param dir current directory.
+	 */
+	void scan(DirPath dir) {
 		dir.files(new FilesHandler() {
 			@Override
 			public void onDirectory(DirPath dir) {
@@ -116,16 +156,5 @@ class BuilderProject extends Project {
 				}
 			}
 		});
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Test support
-
-	File getBuildDir() {
-		return buildDir;
-	}
-
-	File getBuildFile(String path) {
-		return new File(buildDir, path);
 	}
 }
