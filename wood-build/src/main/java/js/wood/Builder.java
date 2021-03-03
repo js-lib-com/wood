@@ -1,11 +1,10 @@
 package js.wood;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 
+import js.lang.BugError;
+import js.lang.Handler;
 import js.log.Log;
 import js.log.LogFactory;
 
@@ -36,10 +35,10 @@ public class Builder implements IReferenceHandler {
 	/** Class logger. */
 	private static final Log log = LogFactory.getLog(Builder.class);
 
-	/** Project instance. */
+	/** Builder project instance. */
 	private final BuilderProject project;
 
-	/** Current processing build file system, that is, build site directory. */
+	/** Build file system is there all pages and resources are created. */
 	private final BuildFS buildFS;
 
 	/** Current processing locale variant. */
@@ -49,11 +48,9 @@ public class Builder implements IReferenceHandler {
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
 	 * and script files and initialize project pages and variables map. Create build FS instance.
 	 * 
-	 * @param projectDir path to existing project root directory,
-	 * @param siteDir
-	 * @throws IOException
+	 * @param config builder configuration.
 	 */
-	public Builder(BuilderConfig config) throws IOException {
+	public Builder(BuilderConfig config) {
 		log.trace("Builder(BuilderConfig)");
 		this.project = new BuilderProject(config.getProjectDir(), config.getBuildDir());
 		this.buildFS = new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber());
@@ -62,21 +59,10 @@ public class Builder implements IReferenceHandler {
 	/**
 	 * Test constructor.
 	 * 
-	 * @param project
-	 * @throws IOException
+	 * @param project builder project,
+	 * @param buildFS build file system.
 	 */
-	public Builder(BuilderProject project) throws IOException {
-		this(project, new DefaultBuildFS(new File(project.getProjectRoot(), BuildFS.DEF_BUILD_DIR), 0));
-	}
-
-	/**
-	 * Test constructor.
-	 * 
-	 * @param project
-	 * @param buildFS
-	 * @throws IOException
-	 */
-	public Builder(BuilderProject project, BuildFS buildFS) throws IOException {
+	Builder(BuilderProject project, BuildFS buildFS) {
 		this.project = project;
 		this.buildFS = buildFS;
 	}
@@ -95,7 +81,10 @@ public class Builder implements IReferenceHandler {
 			}
 
 			for (CompoPath page : project.getPages()) {
-				buildPage(page);
+				Component pageComponent = new Component(page, this);
+				pageComponent.clean();
+				currentCompo.set(pageComponent);
+				buildPage(pageComponent);
 			}
 		}
 	}
@@ -122,16 +111,11 @@ public class Builder implements IReferenceHandler {
 	 * @param compoPath page component path.
 	 * @throws IOException if files operation fails.
 	 */
-	void buildPage(CompoPath compoPath) throws IOException {
-		log.debug("Build page |%s|.", compoPath);
-
-		Component pageComponent = new Component(compoPath, this);
-		pageComponent.clean();
-		pageComponent.getLayout().getDocument().dump();
-		currentCompo.set(pageComponent);
+	void buildPage(Component pageComponent) throws IOException {
+		log.debug("Build page |%s|.", pageComponent);
 
 		PageDocument pageDocument = new PageDocument(pageComponent);
-		pageDocument.setLanguage((locale != null ? locale : project.getDefaultLocale()).toLanguageTag());
+		pageDocument.setLanguage(locale.toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");
 		pageDocument.setTitle(pageComponent.getDisplay());
 		pageDocument.setAuthor(project.getAuthor());
@@ -164,13 +148,13 @@ public class Builder implements IReferenceHandler {
 		}
 
 		ThemeStyles themeStyles = project.getThemeStyles();
-		if (themeStyles.reset != null) {
-			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.reset, this));
+		if (themeStyles.getReset() != null) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getReset(), this));
 		}
-		if (themeStyles.fx != null) {
-			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.fx, this));
+		if (themeStyles.getFx() != null) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getFx(), this));
 		}
-		for (FilePath styleFile : themeStyles.styles) {
+		for (FilePath styleFile : themeStyles.getStyles()) {
 			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
 		}
 
@@ -179,10 +163,10 @@ public class Builder implements IReferenceHandler {
 		}
 
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
-			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
+			pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
 		}
 		for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
-			pageDocument.addScript(script, file -> buildFS.writeScript(pageComponent, file, this));
+			pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
 		}
 
 		buildFS.writePage(pageComponent, pageDocument.getDocument());
@@ -202,7 +186,7 @@ public class Builder implements IReferenceHandler {
 	@Override
 	public String onResourceReference(Reference reference, FilePath source) throws IOException, WoodException {
 		if (locale == null) {
-			throw new IllegalStateException("Builder locale not initialized.");
+			throw new BugError("Builder locale not initialized.");
 		}
 		if (reference.isVariable()) {
 			String value = null;
@@ -240,6 +224,23 @@ public class Builder implements IReferenceHandler {
 	}
 
 	// --------------------------------------------------------------------------------------------
+
+	@FunctionalInterface
+	public interface ThrowingConsumer<Value, Argument> {
+		Value accept(Argument argument) throws Exception;
+	}
+
+	private static <Value, Argument> Handler<Value, Argument> exlambda(ThrowingConsumer<Value, Argument> handler) {
+		return argument -> {
+			try {
+				return handler.accept(argument);
+			} catch (Exception ex) {
+				throw new WoodException(ex);
+			}
+		};
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Test Support
 
 	BuilderProject getProject() {
@@ -248,14 +249,6 @@ public class Builder implements IReferenceHandler {
 
 	BuildFS getBuildFS() {
 		return buildFS;
-	}
-
-	Collection<CompoPath> getPages() {
-		return project.getPages();
-	}
-
-	Map<DirPath, Variables> getVariables() {
-		return project.getVariables();
 	}
 
 	void setLocale(Locale locale) {
