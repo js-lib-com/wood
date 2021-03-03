@@ -166,17 +166,13 @@ public abstract class BuildFS {
 	 * @param styleFile style file,
 	 * @param referenceHandler resource references handler.
 	 * @return URL path relative to page location.
-	 * @throws WoodException if write operation fails.
+	 * @throws IOException if write operation fails.
 	 */
-	public String writeStyle(Component page, FilePath styleFile, IReferenceHandler referenceHandler) throws WoodException {
+	public String writeStyle(Component page, FilePath styleFile, IReferenceHandler referenceHandler) throws IOException {
 		String fileName = insertBuildNumber(formatStyleName(styleFile));
 		File targetFile = new File(getStyleDir(), fileName);
 		if (!processedFiles.contains(targetFile)) {
-			try {
-				Files.copy(new SourceReader(new StyleReader(styleFile), styleFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
-			} catch (IOException e) {
-				throw new WoodException(e);
-			}
+			Files.copy(new SourceReader(new StyleReader(styleFile), styleFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
@@ -191,17 +187,13 @@ public abstract class BuildFS {
 	 * @param scriptFile script file,
 	 * @param referenceHandler resource references handler.
 	 * @return URL path relative to page location.
-	 * @throws WoodException if write operation fails.
+	 * @throws IOException if write operation fails.
 	 */
-	public String writeScript(Component page, FilePath scriptFile, IReferenceHandler referenceHandler) {
+	public String writeScript(Component page, FilePath scriptFile, IReferenceHandler referenceHandler) throws IOException {
 		File targetFile = new File(getScriptDir(), insertBuildNumber(formatScriptName(scriptFile)));
 		targetFile.getParentFile().mkdirs();
 		if (!processedFiles.contains(targetFile)) {
-			try {
-				Files.copy(new SourceReader(scriptFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
-			} catch (IOException e) {
-				throw new WoodException(e);
-			}
+			Files.copy(new SourceReader(scriptFile, referenceHandler), new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
