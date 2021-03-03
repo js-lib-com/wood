@@ -60,39 +60,6 @@ public class BuildPageTest {
 		builder = new Builder(project, buildFS);
 	}
 
-	private List<IMetaDescriptor> metas(String property, String content) {
-		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
-		when(meta.getProperty()).thenReturn(property);
-		when(meta.getContent()).thenReturn(content);
-		return Arrays.asList(meta);
-	}
-
-	private List<ILinkDescriptor> styles(String... sources) {
-		List<ILinkDescriptor> styles = new ArrayList<>();
-		for (String source : sources) {
-			ILinkDescriptor style = Mockito.mock(ILinkDescriptor.class);
-			when(style.getRelationship()).thenReturn("stylesheet");
-			when(style.getHref()).thenReturn(source);
-			styles.add(style);
-		}
-		return styles;
-	}
-
-	private List<IScriptDescriptor> scripts(String... sources) {
-		List<IScriptDescriptor> scripts = new ArrayList<>();
-		for (String source : sources) {
-			IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
-			when(script.getSource()).thenReturn(source);
-			if (FilePath.accept(source)) {
-				FilePath path = new FilePath(project, source);
-				when(project.createFilePath(source)).thenReturn(path);
-				when(buildFS.writeScript(any(Component.class), eq(path), any(IReferenceHandler.class))).thenReturn("scripts/" + path.getName());
-			}
-			scripts.add(script);
-		}
-		return scripts;
-	}
-
 	@Test
 	public void buildPage() throws IOException {
 		// project fixture
@@ -117,6 +84,10 @@ public class BuildPageTest {
 		when(theme.getFx()).thenReturn(themeFx);
 		when(buildFS.writeStyle(any(Component.class), eq(themeFx), any(IReferenceHandler.class))).thenReturn("styles/fx.css");
 
+		FilePath themeStyle = Mockito.mock(FilePath.class);
+		when(theme.getStyles()).thenReturn(Arrays.asList(themeStyle));
+		when(buildFS.writeStyle(any(Component.class), eq(themeStyle), any(IReferenceHandler.class))).thenReturn("styles/form.css");
+		
 		// page fixture
 
 		List<IMetaDescriptor> pageMetas = metas("og:title", "Test Page");
@@ -127,6 +98,11 @@ public class BuildPageTest {
 
 		List<IScriptDescriptor> pageScripts = scripts("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js");
 		when(page.getScriptDescriptors()).thenReturn(pageScripts);
+
+		FilePath pageStyleFile = Mockito.mock(FilePath.class);
+		when(page.getStyleFiles()).thenReturn(Arrays.asList(pageStyleFile));
+		when(buildFS.writeStyle(any(Component.class), eq(pageStyleFile), any(IReferenceHandler.class))).thenReturn("styles/page.css");
+
 		String layout = "" + //
 				"<body>" + //
 				"	<h1>Test Page</h1>" + //
@@ -171,6 +147,8 @@ public class BuildPageTest {
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "http://fonts.googleapis.com/css?family=Lato", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/reset.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/fx.css", "type", "text/css");
+		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/form.css", "type", "text/css");
+		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/page.css", "type", "text/css");
 		assertHead(heads.item(index++), "script", "src", "scripts/js-lib.js", "type", "text/javascript");
 		assertHead(heads.item(index++), "script", "src", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", "type", "text/javascript");
 
@@ -179,23 +157,60 @@ public class BuildPageTest {
 		assertThat(body.getByTag("h1").getText(), equalTo("Test Page"));
 	}
 
-	private void assertHead(Element element, String tag, String textContent) {
+	// --------------------------------------------------------------------------------------------
+	
+	private List<IScriptDescriptor> scripts(String... sources) throws IOException {
+		List<IScriptDescriptor> scripts = new ArrayList<>();
+		for (String source : sources) {
+			IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
+			when(script.getSource()).thenReturn(source);
+			if (FilePath.accept(source)) {
+				FilePath path = new FilePath(project, source);
+				when(project.createFilePath(source)).thenReturn(path);
+				when(buildFS.writeScript(any(Component.class), eq(path), any(IReferenceHandler.class))).thenReturn("scripts/" + path.getName());
+			}
+			scripts.add(script);
+		}
+		return scripts;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	private static void assertHead(Element element, String tag, String textContent) {
 		assertThat(element, notNullValue());
 		assertThat(element.getTag(), equalTo(tag));
 	}
 
-	private void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2) {
+	private static void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2) {
 		assertThat(element, notNullValue());
 		assertThat(element.getTag(), equalTo(tag));
 		assertThat(element.getAttr(attribute1), equalTo(value1));
 		assertThat(element.getAttr(attribute2), equalTo(value2));
 	}
 
-	private void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2, String attribute3, String value3) {
+	private static void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2, String attribute3, String value3) {
 		assertThat(element, notNullValue());
 		assertThat(element.getTag(), equalTo(tag));
 		assertThat(element.getAttr(attribute1), equalTo(value1));
 		assertThat(element.getAttr(attribute2), equalTo(value2));
 		assertThat(element.getAttr(attribute3), equalTo(value3));
+	}
+
+	private static List<IMetaDescriptor> metas(String property, String content) {
+		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
+		when(meta.getProperty()).thenReturn(property);
+		when(meta.getContent()).thenReturn(content);
+		return Arrays.asList(meta);
+	}
+
+	private static List<ILinkDescriptor> styles(String... sources) {
+		List<ILinkDescriptor> styles = new ArrayList<>();
+		for (String source : sources) {
+			ILinkDescriptor style = Mockito.mock(ILinkDescriptor.class);
+			when(style.getRelationship()).thenReturn("stylesheet");
+			when(style.getHref()).thenReturn(source);
+			styles.add(style);
+		}
+		return styles;
 	}
 }
