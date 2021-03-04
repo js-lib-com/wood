@@ -7,12 +7,10 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import js.lang.BugError;
-import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
-import js.wood.impl.EditablePath;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
@@ -38,6 +36,8 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @since 1.0
  */
 public class Project {
+	protected final Factory factory;
+
 	/** Project root directory. All project file are included here, no external references allowed. */
 	private final File projectRoot;
 
@@ -100,15 +100,16 @@ public class Project {
 	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
-	Project(File projectRoot, ProjectDescriptor descriptor) {
+	Project(File projectRoot, ProjectDescriptor descriptor, Factory... factory) {
 		Params.isDirectory(projectRoot, "Project directory");
+		this.factory = factory.length == 1 ? factory[0] : new Factory(this);
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
 		this.descriptor = descriptor;
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> new DirPath(this, exclude)).collect(Collectors.toList());
 
-		this.assetsDir = createDirPath(CT.ASSETS_DIR);
-		this.themeDir = createDirPath(CT.THEME_DIR);
+		this.assetsDir = this.factory.createDirPath(CT.ASSETS_DIR);
+		this.themeDir = this.factory.createDirPath(CT.THEME_DIR);
 
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
@@ -129,6 +130,10 @@ public class Project {
 		default:
 			operatorsHandler = null;
 		}
+	}
+
+	public Factory getFactory() {
+		return factory;
 	}
 
 	/**
@@ -348,33 +353,6 @@ public class Project {
 	 */
 	public boolean hasNamespace() {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
-	}
-
-	public FilePath createFilePath(File file) {
-		return createFilePath(Files.getRelativePath(projectRoot, file, true));
-	}
-
-	public FilePath createFilePath(String path) {
-		return new FilePath(this, path);
-	}
-	
-	public DirPath createDirPath(File file) {
-		return createDirPath(Files.getRelativePath(projectRoot, file, true));
-	}
-
-	public DirPath createDirPath(String path) {
-		if (!path.endsWith(Path.SEPARATOR)) {
-			path += Path.SEPARATOR_CHAR;
-		}
-		return new DirPath(this, path);
-	}
-
-	public CompoPath createCompoPath(String path) {
-		return new CompoPath(this, path);
-	}
-
-	public EditablePath createEditablePath(String path) {
-		return new EditablePath(this, path);
 	}
 
 	// --------------------------------------------------------------------------------------------

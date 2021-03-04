@@ -38,6 +38,8 @@ import js.wood.impl.XmlnsOperatorsHandler;
 public class ComponentInheritanceTest {
 	@Mock
 	private Project project;
+	@Mock
+	private Factory factory;
 
 	@Mock
 	private FilePath pageLayout; // layout file for page template
@@ -84,6 +86,7 @@ public class ComponentInheritanceTest {
 			}
 		};
 
+		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
@@ -126,7 +129,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -169,7 +172,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("fieldset");
-		when(project.createEditablePath("res/template#fieldset")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#fieldset")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -205,8 +208,8 @@ public class ComponentInheritanceTest {
 
 		when(templateEditable.getEditableName()).thenReturn("section-1");
 		when(templateEditable2.getEditableName()).thenReturn("section-2");
-		when(project.createEditablePath("res/template#section-1")).thenReturn(templateEditable);
-		when(project.createEditablePath("res/template#section-2")).thenReturn(templateEditable2);
+		when(factory.createEditablePath("res/template#section-1")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section-2")).thenReturn(templateEditable2);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -248,10 +251,10 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(pageEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/page#section")).thenReturn(pageEditable);
+		when(factory.createEditablePath("res/page#section")).thenReturn(pageEditable);
 
 		when(templateEditable.getEditableName()).thenReturn("paragraph");
-		when(project.createEditablePath("res/template#paragraph")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#paragraph")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -285,7 +288,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element section = compo.getLayout().getByTag("section");
@@ -316,7 +319,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element section = compo.getLayout().getByTag("section");
@@ -340,7 +343,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(project.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 
@@ -375,7 +378,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(project.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		List<IScriptDescriptor> scripts = compo.getScriptDescriptors();
@@ -402,7 +405,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -427,7 +430,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("section");
-		when(project.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		compo.clean();
@@ -449,7 +452,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("fake");
-		when(project.createEditablePath("res/template#fake")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#fake")).thenReturn(templateEditable);
 
 		new Component(compoPath, referenceHandler);
 	}
@@ -464,7 +467,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 
 		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(project.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
 
 		new Component(compoPath, referenceHandler);
 	}

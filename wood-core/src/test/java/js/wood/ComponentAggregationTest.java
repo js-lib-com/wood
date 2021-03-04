@@ -26,6 +26,8 @@ import js.wood.impl.XmlnsOperatorsHandler;
 public class ComponentAggregationTest {
 	@Mock
 	private Project project;
+	@Mock
+	private Factory factory;
 
 	@Mock
 	private CompoPath compoPath;
@@ -52,6 +54,7 @@ public class ComponentAggregationTest {
 			}
 		};
 
+		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
@@ -82,7 +85,7 @@ public class ComponentAggregationTest {
 
 		CompoPath childCompoPath = Mockito.mock(CompoPath.class);
 		when(childCompoPath.getLayoutPath()).thenReturn(childLayoutPath);
-		when(project.createCompoPath("res/child")).thenReturn(childCompoPath);
+		when(factory.createCompoPath("res/child")).thenReturn(childCompoPath);
 
 		String compoHTML = "" + //
 				"<section xmlns:w='js-lib.com/wood'>" + //
@@ -118,7 +121,7 @@ public class ComponentAggregationTest {
 
 		CompoPath childCompoPath = Mockito.mock(CompoPath.class);
 		when(childCompoPath.getLayoutPath()).thenReturn(childLayoutPath);
-		when(project.createCompoPath("res/child")).thenReturn(childCompoPath);
+		when(factory.createCompoPath("res/child")).thenReturn(childCompoPath);
 
 		String compoHTML = "" + //
 				"<section xmlns:w='js-lib.com/wood'>" + //

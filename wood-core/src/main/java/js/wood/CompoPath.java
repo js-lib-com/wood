@@ -146,7 +146,7 @@ public class CompoPath extends DirPath {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
 
-		FilePath layoutPath = project.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+		FilePath layoutPath = factory.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
 		if (!layoutPath.exists()) {
 			throw new WoodException("Missing component |%s|.", file);
 		}

@@ -37,6 +37,8 @@ public abstract class Path {
 	/** Parent project reference. All paths are always relative to this parent project. */
 	protected final Project project;
 
+	protected final Factory factory;
+
 	/** Path value relative to project root. */
 	protected final String value;
 
@@ -52,6 +54,7 @@ public abstract class Path {
 	protected Path(Project project) {
 		Params.notNull(project, "Project");
 		this.project = project;
+		this.factory = project.getFactory();
 		this.value = ".";
 		this.file = project.getProjectRoot();
 	}
@@ -67,6 +70,7 @@ public abstract class Path {
 		Params.notNull(project, "Project");
 		Params.notNullOrEmpty(value, "Path value");
 		this.project = project;
+		this.factory = project.getFactory();
 		this.value = value;
 		this.file = new File(project.getProjectRoot(), value);
 	}
@@ -79,6 +83,7 @@ public abstract class Path {
 	 */
 	Path(Project project, File file) {
 		this.project = project;
+		this.factory = project.getFactory();
 		String value = file.getPath().replace('\\', SEPARATOR_CHAR);
 		if (file.isDirectory()) {
 			value += SEPARATOR_CHAR;

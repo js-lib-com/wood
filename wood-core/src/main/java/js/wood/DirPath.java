@@ -120,7 +120,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return path of child file.
 	 */
 	public FilePath getFilePath(String fileName) {
-		return project.createFilePath(value + fileName);
+		return factory.createFilePath(value + fileName);
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return path of child directory.
 	 */
 	public DirPath getSubdirPath(String path) {
-		return project.createDirPath(value + path);
+		return factory.createDirPath(value + path);
 	}
 
 	/**
@@ -238,11 +238,11 @@ public class DirPath extends Path implements Iterable<FilePath> {
 			}
 
 			if (file.isDirectory()) {
-				handler.onDirectory(project.createDirPath(file));
+				handler.onDirectory(factory.createDirPath(file));
 				continue;
 			}
 
-			FilePath filePath = project.createFilePath(file);
+			FilePath filePath = factory.createFilePath(file);
 			if (!handler.accept(filePath)) {
 				continue;
 			}
@@ -353,7 +353,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 		 */
 		@Override
 		public FilePath next() {
-			return project.createFilePath(files[index]);
+			return factory.createFilePath(files[index]);
 		}
 
 		/**

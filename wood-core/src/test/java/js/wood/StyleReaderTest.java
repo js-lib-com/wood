@@ -33,10 +33,13 @@ public class StyleReaderTest {
 	@Mock
 	private Project project;
 	@Mock
+	private Factory factory;
+	@Mock
 	private FilePath styleFile;
 
 	@Before
 	public void beforeTest() {
+		when(project.getFactory()).thenReturn(factory);
 	}
 
 	@Test
@@ -87,7 +90,7 @@ public class StyleReaderTest {
 		};
 		for(File styleFile:styleFiles) {
 			FilePath stylePath = new FilePath(project, styleFile);
-			when(project.createFilePath(styleFile)).thenReturn(stylePath);
+			when(factory.createFilePath(styleFile)).thenReturn(stylePath);
 		}
 
 		File stylesDir = Mockito.mock(File.class);

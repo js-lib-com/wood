@@ -20,10 +20,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class CompoPathTest {
 	@Mock
 	private Project project;
+	@Mock
+	private Factory factory;
 
 	@Before
 	public void beforeTest() {
 		when(project.getProjectRoot()).thenReturn(new File("."));
+		when(project.getFactory()).thenReturn(factory);
 	}
 
 	@Test
@@ -49,7 +52,7 @@ public class CompoPathTest {
 	public void getLayoutPath() {
 		FilePath layoutPath = Mockito.mock(FilePath.class);
 		when(layoutPath.value()).thenReturn("res/page/page.htm");
-		when(project.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
+		when(factory.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
 
 		File path = Mockito.mock(File.class);
 		when(path.isDirectory()).thenReturn(true);
@@ -67,7 +70,7 @@ public class CompoPathTest {
 	@Test(expected = WoodException.class)
 	public void getLayoutPath_MissingInlineComponent() {
 		FilePath layoutPath = Mockito.mock(FilePath.class);
-		when(project.createFilePath("res/page.htm")).thenReturn(layoutPath);
+		when(factory.createFilePath("res/page.htm")).thenReturn(layoutPath);
 
 		File path = Mockito.mock(File.class);
 		when(path.getPath()).thenReturn("res/page/");

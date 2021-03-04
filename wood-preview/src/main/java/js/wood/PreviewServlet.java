@@ -90,9 +90,11 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	private static final String LAYOUT_PREVIEW = "preview.htm";
 
 	private static final ThreadLocal<String> CONTEXT_PATH = new ThreadLocal<>();
-	
+
 	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
 	private PreviewProject project;
+
+	private Factory factory;
 
 	/** Variables cache initialized before every component preview processing. */
 	private VariablesCache variables;
@@ -118,6 +120,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		super.init(config);
 		ServletContext context = config.getServletContext();
 		project = new PreviewProject(new File(context.getInitParameter(PROJECT_DIR_PARAM)));
+		factory = project.getFactory();
 		variables = new VariablesCache(project);
 	}
 
@@ -165,7 +168,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		final String contextPath = httpRequest.getContextPath();
 		CONTEXT_PATH.set(contextPath);
-		
+
 		// request path is request URI without context; it does not starts with a path separator
 		String requestPath = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length() + 1);
 		log.debug("Request |%s| on context |%s|.", requestPath, contextPath);
@@ -186,7 +189,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		if (CompoPath.accept(requestPath)) {
-			CompoPath compoPath = new CompoPath(project, requestPath);
+			CompoPath compoPath = factory.createCompoPath(requestPath);
 			FilePath layoutPath = compoPath.getLayoutPath();
 
 			// if component has preview layout uses it instead of component layout

@@ -32,10 +32,13 @@ import js.wood.impl.FilesHandler;
 public class DirPathTest {
 	@Mock
 	private Project project;
+	@Mock
+	private Factory factory;
 
 	@Before
 	public void beforeTest() {
 		when(project.getProjectRoot()).thenReturn(new File("."));
+		when(project.getFactory()).thenReturn(factory);
 	}
 
 	@Test
@@ -83,8 +86,8 @@ public class DirPathTest {
 	public void getFilePath() {
 		FilePath filePath = Mockito.mock(FilePath.class);
 		when(filePath.value()).thenReturn("res/page/strings.xml");
-		when(project.createFilePath("res/page/strings.xml")).thenReturn(filePath);
-		
+		when(factory.createFilePath("res/page/strings.xml")).thenReturn(filePath);
+
 		DirPath dirPath = new DirPath(project, "res/page/");
 		filePath = dirPath.getFilePath("strings.xml");
 		assertThat(filePath, notNullValue());
@@ -95,8 +98,8 @@ public class DirPathTest {
 	public void getSubdirPath() {
 		DirPath subdirPath = Mockito.mock(DirPath.class);
 		when(subdirPath.value()).thenReturn("res/page/media/");
-		when(project.createDirPath("res/page/media")).thenReturn(subdirPath);
-		
+		when(factory.createDirPath("res/page/media")).thenReturn(subdirPath);
+
 		DirPath dirPath = new DirPath(project, "res/page/");
 		subdirPath = dirPath.getSubdirPath("media");
 		assertThat(subdirPath, notNullValue());
@@ -107,8 +110,8 @@ public class DirPathTest {
 	public void getSubdirPath_WithTrailingSeparator() {
 		DirPath subdirPath = Mockito.mock(DirPath.class);
 		when(subdirPath.value()).thenReturn("res/page/media/");
-		when(project.createDirPath("res/page/media/")).thenReturn(subdirPath);
-		
+		when(factory.createDirPath("res/page/media/")).thenReturn(subdirPath);
+
 		DirPath dirPath = new DirPath(project, "res/page/");
 		subdirPath = dirPath.getSubdirPath("media/");
 		assertThat(subdirPath, notNullValue());
@@ -300,7 +303,7 @@ public class DirPathTest {
 		File[] sources = new File[] { new SourceDirectory("media") };
 
 		DirPath subdir = new DirPath(project, "media/");
-		when(project.createDirPath(sources[0])).thenReturn(subdir);
+		when(factory.createDirPath(sources[0])).thenReturn(subdir);
 
 		DirPath dirPath = new DirPath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
@@ -430,11 +433,11 @@ public class DirPathTest {
 			}
 			if (files[i] instanceof SourceDirectory) {
 				DirPath path = new DirPath(project, files[i]);
-				when(project.createDirPath(files[i])).thenReturn(path);
+				when(factory.createDirPath(files[i])).thenReturn(path);
 				paths.add(path);
 			} else if (files[i] instanceof SourceFile) {
 				FilePath path = new FilePath(project, files[i]);
-				when(project.createFilePath(files[i])).thenReturn(path);
+				when(factory.createFilePath(files[i])).thenReturn(path);
 				paths.add(path);
 			}
 		}

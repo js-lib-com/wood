@@ -33,6 +33,8 @@ public class BuildPageTest {
 	@Mock
 	private BuilderProject project;
 	@Mock
+	private Factory factory;
+	@Mock
 	private Component page;
 	@Mock
 	private BuildFS buildFS;
@@ -49,6 +51,7 @@ public class BuildPageTest {
 
 	@Before
 	public void beforeTest() throws IOException {
+		when(project.getFactory()).thenReturn(factory);
 		when(project.getAuthor()).thenReturn("Iulian Rotaru");
 		when(project.getFavicon()).thenReturn(favicon);
 		when(project.getThemeStyles()).thenReturn(theme);
@@ -166,7 +169,7 @@ public class BuildPageTest {
 			when(script.getSource()).thenReturn(source);
 			if (FilePath.accept(source)) {
 				FilePath path = new FilePath(project, source);
-				when(project.createFilePath(source)).thenReturn(path);
+				when(factory.createFilePath(source)).thenReturn(path);
 				when(buildFS.writeScript(any(Component.class), eq(path), any(IReferenceHandler.class))).thenReturn("scripts/" + path.getName());
 			}
 			scripts.add(script);

@@ -53,6 +53,8 @@ public class Component {
 	/** Parent project reference. */
 	private final Project project;
 
+	private final Factory factory;
+	
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
 
@@ -135,6 +137,7 @@ public class Component {
 		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		this.project = layoutPath.getProject();
+		this.factory = this.project.getFactory();
 		this.operators = this.project.getOperatorsHandler();
 		this.layoutParameters = new LayoutParameters();
 		this.referenceHandler = referenceHandler;
@@ -207,7 +210,7 @@ public class Component {
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = project.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
+			CompoPath compoPath = factory.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
 
 			FilePath descriptorFile = compoPath.getLayoutPath().cloneTo(FileType.XML);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
@@ -299,7 +302,7 @@ public class Component {
 		Editables editables = null;
 
 		for (Element contentElement : contentElements) {
-			EditablePath editablePath = project.createEditablePath(operators.getOperand(contentElement, Operator.TEMPLATE));
+			EditablePath editablePath = factory.createEditablePath(operators.getOperand(contentElement, Operator.TEMPLATE));
 
 			if (template == null) {
 				// prepare layout parameters, possible empty, before loading template from source file

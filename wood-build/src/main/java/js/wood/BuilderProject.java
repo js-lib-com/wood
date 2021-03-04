@@ -47,7 +47,7 @@ class BuilderProject extends Project {
 	public BuilderProject(File projectDir, File buildDir) {
 		super(projectDir);
 
-		this.excludes.add(createDirPath(buildDir));
+		this.excludes.add(factory.createDirPath(buildDir));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
 		this.variables = new HashMap<>();
@@ -151,7 +151,7 @@ class BuilderProject extends Project {
 
 				// XML component descriptor for pages has root 'page'
 				if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
-					pages.add(createCompoPath(parentDir.value()));
+					pages.add(factory.createCompoPath(parentDir.value()));
 					return;
 				}
 			}
