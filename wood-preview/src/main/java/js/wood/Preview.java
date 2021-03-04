@@ -251,20 +251,10 @@ public final class Preview {
 	 * @return file absolute URL path.
 	 */
 	private String absoluteUrlPath(FilePath filePath) {
-		return absoluteUrlPath(filePath.value());
-	}
-
-	/**
-	 * Build absolute URL path for given file path value. Returned path contains project context but not protocol or host name.
-	 * 
-	 * @param filePath file path value.
-	 * @return file absolute URL path.
-	 */
-	private String absoluteUrlPath(String filePath) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
 		builder.append(Path.SEPARATOR_CHAR);
-		builder.append(filePath);
+		builder.append(filePath.value());
 		return builder.toString();
 	}
 }
