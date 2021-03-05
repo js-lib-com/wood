@@ -236,13 +236,6 @@ public class ProjectTest {
 		assertThat(foundFile, equalTo(mediaFile));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void badConstructor() {
-		File projectRoot = Mockito.mock(File.class);
-		when(projectRoot.isDirectory()).thenReturn(false);
-		new Project(projectRoot, descriptor);
-	}
-
 	@Test(expected = BugError.class)
 	public void getThemeStyles() {
 		project = new Project(projectRoot);

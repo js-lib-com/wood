@@ -10,18 +10,20 @@ import java.util.Map;
  * @author Iulian Rotaru
  */
 public class VariablesCache {
-	private final PreviewProject project;
+	private final Project project;
+
+	private final Factory factory;
 
 	/** Project asset variables. */
 	private final Variables assetVariables;
 
 	/** Components variables. */
-	private final Map<DirPath, Variables> variablesMap;
+	private final Map<DirPath, Variables> variablesMap = new HashMap<>();
 
-	public VariablesCache(PreviewProject project) {
+	public VariablesCache(Project project) {
 		this.project = project;
-		this.assetVariables = new Variables(project.getAssetsDir());
-		this.variablesMap = new HashMap<>();
+		this.factory = project.getFactory();
+		this.assetVariables = this.factory.createVariables(project.getAssetsDir());
 	}
 
 	/**
@@ -42,20 +44,27 @@ public class VariablesCache {
 	 * @return component variables.
 	 */
 	public String get(Locale locale, Reference reference, FilePath sourcePath, IReferenceHandler handler) {
-		Variables variables = variablesMap.get(sourcePath.getParentDirPath());
-		if (variables == null) {
+		Variables sourceVariables = variablesMap.get(sourcePath.getParentDirPath());
+		if (sourceVariables == null) {
 			synchronized (this) {
-				if (variables == null) {
-					variables = new Variables(sourcePath.getParentDirPath());
-					variablesMap.put(sourcePath.getParentDirPath(), variables);
+				if (sourceVariables == null) {
+					sourceVariables = factory.createVariables(sourcePath.getParentDirPath());
+					variablesMap.put(sourcePath.getParentDirPath(), sourceVariables);
 				}
 			}
 		}
 
-		String value = variables.get(locale, reference, sourcePath, handler);
+		String value = sourceVariables.get(locale, reference, sourcePath, handler);
 		if (value == null) {
 			value = assetVariables.get(locale, reference, sourcePath, handler);
 		}
 		return value;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+	
+	Map<DirPath, Variables> getVariablesMap() {
+		return variablesMap;
 	}
 }

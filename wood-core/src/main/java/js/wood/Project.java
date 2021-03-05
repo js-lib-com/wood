@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import js.lang.BugError;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttOperatorsHandler;
@@ -36,7 +35,7 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @since 1.0
  */
 public class Project {
-	protected final Factory factory;
+	protected Factory factory;
 
 	/** Project root directory. All project file are included here, no external references allowed. */
 	private final File projectRoot;
@@ -98,10 +97,8 @@ public class Project {
 	 * 
 	 * @param projectRoot path to existing project root directory,
 	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
-	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
 	Project(File projectRoot, ProjectDescriptor descriptor, Factory... factory) {
-		Params.isDirectory(projectRoot, "Project directory");
 		this.factory = factory.length == 1 ? factory[0] : new Factory(this);
 		this.projectRoot = projectRoot;
 		this.projectDir = new DirPath(this);
@@ -271,13 +268,11 @@ public class Project {
 
 	/**
 	 * Get style files declared into project theme directory. Returned instance is immutable.
-	 * <p>
-	 * This method should be overridden by builder and preview project subclasses.
 	 * 
 	 * @return theme styles.
 	 */
 	public ThemeStyles getThemeStyles() {
-		throw new BugError("Abstract method invoked.");
+		return new ThemeStyles(getThemeDir());
 	}
 
 	/**

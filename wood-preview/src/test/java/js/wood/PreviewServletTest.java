@@ -2,22 +2,26 @@ package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,200 +30,56 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
-import js.dom.EList;
-import js.dom.w3c.DocumentBuilderImpl;
+import js.rmi.BusinessException;
 import js.util.Classes;
-import js.wood.FilePath;
-import js.wood.PreviewProject;
-import js.wood.PreviewServlet;
-import js.wood.Reference;
-import js.wood.VariablesCache;
-import js.wood.WoodException;
+import js.util.Strings;
 import js.wood.impl.ResourceType;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PreviewServletTest {
-	private PreviewProject project;
+	@Mock
+	private Project project;
+	@Mock
+	private Factory factory;
+	@Mock
+	private VariablesCache variables;
+	@Mock
+	private IReferenceHandler referenceHandler;
+
+	@Mock
+	private ServletConfig servletConfig;
+	@Mock
+	private ServletContext servletContext;
+	@Mock
+	private HttpServletRequest httpRequest;
+	@Mock
+	private HttpServletResponse httpResponse;
+
+	private PreviewServlet servlet;
 	private StringWriter responseWriter = new StringWriter();
 	private ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+	private String responseContentType;
+	private int responseStatus;
 
-	@Test
-	public void contextInitialization() throws Exception {
-		HttpServletResponse httpResponse = exercise("styles", "/test/res/page/page.css");
-		assertNotNull(project.getProjectRoot());
+	@Before
+	public void beforeTest() throws IOException {
+		when(project.getFactory()).thenReturn(factory);
+		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
+		when(project.getThemeStyles()).thenReturn(mock(ThemeStyles.class));
 
-		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
-		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
-		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void badContextInitialization() throws Exception {
-		exercise("fake-project", "/test/res/page/page.css");
-	}
-
-	@Test
-	public void layout() throws Exception {
-		exercise("project", "/test/res/page/index");
-		DocumentBuilder builder = new DocumentBuilderImpl();
-		assertIndexPage(builder.parseHTML(responseWriter.toString()));
-	}
-
-	@Test
-	public void compoPreview() throws Exception {
-		exercise("styles", "/test/res/compo");
-		DocumentBuilder builder = new DocumentBuilderImpl();
-		Document doc = builder.parseHTML(responseWriter.toString());
-
-		assertThat(doc.getByTag("title").getText(), equalTo("Styles / Preview"));
-
-		EList styles = doc.findByTag("link");
-		assertThat(styles.size(), equalTo(6));
-
-		int index = 0;
-		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/theme/reset.css"));
-		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/theme/fx.css"));
-
-		// site theme styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/styles.css']"));
-		index += 2; // skip form.css and styles.css
-
-		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/compo/compo.css"));
-		assertThat(styles.item(index++).getAttr("href"), equalTo("/test/res/compo/preview.css"));
-	}
-
-	@Test
-	public void style() throws Throwable {
-		HttpServletResponse httpResponse = exercise("styles", "/test/res/page/page.css");
-		String style = responseWriter.toString();
-
-		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
-		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
-		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
-
-		assertTrue(style.startsWith("body {"));
-	}
-
-	@Test
-	public void styleReset() throws Throwable {
-		HttpServletResponse httpResponse = exercise("styles", "/test/res/theme/reset.css");
-		String style = responseWriter.toString();
-
-		ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
-		verify(httpResponse, times(1)).setContentType(contentTypeCaptor.capture());
-		assertThat(contentTypeCaptor.getValue(), equalTo("text/css;charset=UTF-8"));
-
-		assertTrue(style.contains("h1,h2,h3,h4,h5,h6 {"));
-		assertTrue(style.contains("list-style-type: none;"));
-		assertTrue(style.contains("quotes: none;"));
-		assertTrue(style.contains("text-decoration: none;"));
-		assertTrue(style.contains("border-collapse: collapse;"));
-	}
-
-	@Test
-	public void script() throws Throwable {
-		exercise("strings", "/test/script/js/wood/Compo.js");
-		String script = responseWriter.toString();
-
-		assertTrue(script.startsWith("$package(\"js.wood\");"));
-		assertTrue(script.contains("this.setCaption('Hello');"));
-		assertTrue(script.contains("this.setName('Component Name');"));
-		assertTrue(script.contains("this.setDescription('This is <strong>script</strong> <em>description</em>.');"));
-	}
-
-	@Test
-	public void image() throws Throwable {
-		exercise("images", "/test/res/compo/logo.png");
-		byte[] image = responseStream.toByteArray();
-		assertThat(image[1], equalTo((byte) 'P'));
-		assertThat(image[2], equalTo((byte) 'N'));
-		assertThat(image[3], equalTo((byte) 'G'));
-	}
-
-	@Test
-	public void imageVariant() throws Throwable {
-		exercise("images-variant", "/test/res/asset/logo_ro.png");
-		byte[] image = responseStream.toByteArray();
-		assertThat(image[1], equalTo((byte) 'P'));
-		assertThat(image[2], equalTo((byte) 'N'));
-		assertThat(image[3], equalTo((byte) 'G'));
-	}
-
-	@Test(expected = ServletException.class)
-	public void missingImage() throws Exception {
-		exercise("images", "/test/res/compo/fake.png");
-	}
-
-	@Test
-	public void resourceReference() {
-		project = new PreviewProject(new File("src/test/resources/project"));
-		VariablesCache variables = new VariablesCache(project);
-
-		PreviewServlet servlet = new PreviewServlet();
-		Classes.setFieldValue(servlet, "project", project);
-		Classes.setFieldValue(servlet, "variables", variables);
-
-		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		Reference reference = new Reference(source, ResourceType.STRING, "title");
-		assertThat(servlet.onResourceReference(reference, source), equalTo("Index Page"));
-
-		reference = new Reference(source, ResourceType.IMAGE, "logo");
-		source = new FilePath(project, "res/template/page/page.htm");
-		assertThat(servlet.onResourceReference(reference, source), equalTo("/test/res/template/page/logo.jpg"));
-	}
-
-	@Test
-	public void badVariableOnResourceReference() {
-		project = new PreviewProject(new File("src/test/resources/project"));
-		VariablesCache variables = new VariablesCache(project);
-
-		PreviewServlet servlet = new PreviewServlet();
-		Classes.setFieldValue(servlet, "project", project);
-		Classes.setFieldValue(servlet, "variables", variables);
-
-		FilePath source = new FilePath(project, "res/page/index/index.htm");
-		Reference reference = new Reference(source, ResourceType.STRING, "fake-variable");
-		assertThat(servlet.onResourceReference(reference, source), equalTo(reference.toString()));
-	}
-
-	@Test(expected = WoodException.class)
-	public void servletBadMediaOnResourceReference() {
-		project = new PreviewProject(new File("src/test/resources/project"));
-		PreviewServlet servlet = new PreviewServlet();
-		Classes.setFieldValue(servlet, "project", project);
-
-		FilePath source = new FilePath(project, "res/template/page/page.htm");
-		Reference reference = new Reference(source, ResourceType.IMAGE, "fake-media");
-		servlet.onResourceReference(reference, source);
-	}
-
-	private HttpServletResponse exercise(String projectDirName, String requestURI, String... headers) throws Exception {
-		ServletContext context = mock(ServletContext.class);
-		when(context.getInitParameter("PROJECT_DIR")).thenReturn("src/test/resources/" + projectDirName);
-
-		ServletConfig config = mock(ServletConfig.class);
-		when(config.getServletContext()).thenReturn(context);
-
-		PreviewServlet servlet = new PreviewServlet();
-		servlet.init(config);
-
-		project = servlet.getProject();
-
-		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-		when(httpRequest.getContextPath()).thenReturn("/test");
-		when(httpRequest.getRequestURI()).thenReturn(requestURI);
-		for (int i = 0; i < headers.length; i += 2) {
-			// TestCase.assertTrue(headers.length > i + 1);
-			// httpRequest.headers.put(headers[i], headers[i + 1]);
-		}
-
-		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
+		when(httpRequest.getContextPath()).thenReturn("/test-preview");
 		when(httpResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
+
 		when(httpResponse.getOutputStream()).thenReturn(new ServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
@@ -236,59 +96,210 @@ public class PreviewServletTest {
 			}
 		});
 
-		servlet.getVariables().update();
-		servlet.service(httpRequest, httpResponse);
-		return httpResponse;
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				responseStatus = invocation.getArgument(0);
+				return null;
+			}
+		}).when(httpResponse).setStatus(anyInt());
+		
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				responseContentType = invocation.getArgument(0);
+				return null;
+			}
+		}).when(httpResponse).setContentType(anyString());
+
+		servlet = new PreviewServlet(servletContext, project, variables);
 	}
 
-	private static void assertIndexPage(Document doc) {
-		assertThat(doc.getByTag("title").getText(), equalTo("Test Project / Index"));
+	@Test
+	public void init() throws Exception {
+		when(servletConfig.getServletContext()).thenReturn(servletContext);
+		when(servletContext.getInitParameter("PROJECT_DIR")).thenReturn("/absolute/path/to/project");
 
-		EList links = doc.findByTag("link");
-		assertThat(links.size(), equalTo(12));
+		servlet.init(servletConfig);
 
-		int index = 0;
-		assertThat(links.item(index++).getAttr("href"), equalTo("http://fonts.googleapis.com/css?family=Roboto"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("http://fonts.googleapis.com/css?family=Great+Vibes"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/theme/reset.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/theme/fx.css"));
+		assertThat(servlet.getProject(), notNullValue());
+		assertThat(servlet.getFactory(), notNullValue());
+		assertThat(servlet.getVariables(), notNullValue());
+	}
 
-		// site styles order, beside reset and fx is not guaranteed
-		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/form.css']"));
-		assertNotNull(doc.getByXPath("//LINK[@href='/test/res/theme/style.css']"));
+	@Test
+	public void service_Component() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo");
 
-		index += 2; // skip form.css and styles.css
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/dialog/dialog.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/lib/paging/paging.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/lib/list-view/list-view.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/page/page.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/template/sidebar-page/sidebar-page.css"));
-		assertThat(links.item(index++).getAttr("href"), equalTo("/test/res/page/index/index.css"));
+		FilePath layoutPreview = mock(FilePath.class);
+		when(layoutPreview.exists()).thenReturn(true);
 
-		EList elist = doc.findByTag("script");
-		List<String> scripts = new ArrayList<>();
-		// first is analytics inline code
-		for (int i = 0; i < elist.size(); ++i) {
-			scripts.add(elist.item(i).getAttr("src"));
-		}
-		assertThat(scripts, hasSize(10));
+		CompoPath compoPath = mock(CompoPath.class);
+		when(factory.createCompoPath("res/compo")).thenReturn(compoPath);
+		when(compoPath.getFilePath("preview.htm")).thenReturn(layoutPreview);
 
-		assertTrue(scripts.indexOf("/test/script/hc/page/Index.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/test/script/hc/view/DiscographyView.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/test/script/hc/view/DiscographyView.js") > scripts.indexOf("/test/script/hc/view/VideoPlayer.js"));
-		assertTrue(scripts.indexOf("/test/script/hc/view/VideoPlayer.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.indexOf("/test/script/hc/view/VideoPlayer.js") > scripts.indexOf("/test/script/js.compo.Dialog.js"));
-		assertTrue(scripts.indexOf("/test/script/js/compo/Dialog.js") > scripts.indexOf("/test/lib/js-lib/js-lib.js"));
+		Component compo = mock(Component.class);
+		when(factory.createComponent(any(FilePath.class), any(IReferenceHandler.class))).thenReturn(compo);
 
-		assertTrue(scripts.contains("/test/lib/js-lib/js-lib.js"));
-		assertTrue(scripts.contains("/test/script/hc/page/Index.js"));
-		assertTrue(scripts.contains("/test/gen/js/controller/MainController.js"));
-		assertTrue(scripts.contains("/test/script/js/hood/MainMenu.js"));
-		assertTrue(scripts.contains("/test/script/hc/view/VideoPlayer.js"));
-		assertTrue(scripts.contains("/test/lib/list-view/list-view.js"));
-		assertTrue(scripts.contains("/test/lib/paging/paging.js"));
-		assertTrue(scripts.contains("/test/script/js/compo/Dialog.js"));
-		assertTrue(scripts.contains("/test/script/js/hood/TopMenu.js"));
-		assertTrue(scripts.contains("/test/script/hc/view/DiscographyView.js"));
+		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+		when(compo.getLayout()).thenReturn(documentBuilder.parseXML("<body><h1>Test Compo</h1></body>").getRoot());
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseStatus, equalTo(200));
+		assertThat(responseContentType, nullValue());
+
+		Document document = documentBuilder.parseXML(responseWriter.toString());
+		assertThat(document.getRoot().getTag(), equalTo("html"));
+		assertThat(document.getByTag("H1").getText(), equalTo("Test Compo"));
+	}
+
+	@Test
+	public void service_Style() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.css");
+
+		FilePath stylePath = mock(FilePath.class);
+		when(factory.createFilePath("res/compo/compo.css")).thenReturn(stylePath);
+		when(stylePath.exists()).thenReturn(true);
+		when(stylePath.isStyle()).thenReturn(true);
+		when(stylePath.getReader()).thenReturn(new StringReader("body { width: 1200px; }"));
+		when(stylePath.getParentDirPath()).thenReturn(mock(DirPath.class));
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseWriter.toString(), equalTo("body { width: 1200px; }"));
+		assertThat(responseStatus, equalTo(200));
+		assertThat(responseContentType, equalTo("text/css;charset=UTF-8"));
+	}
+
+	@Test
+	public void service_Style_Variants() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo_w800.css");
+
+		FilePath stylePath = mock(FilePath.class);
+		when(factory.createFilePath("res/compo/compo_w800.css")).thenReturn(stylePath);
+		when(stylePath.isStyle()).thenReturn(true);
+		when(stylePath.hasVariants()).thenReturn(true);
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseContentType, nullValue());
+		verify(stylePath, times(0)).copyTo(any(OutputStream.class));
+	}
+
+	@Test
+	public void service_Script() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/lib/js-lib.js");
+
+		FilePath scriptPath = mock(FilePath.class);
+		when(scriptPath.exists()).thenReturn(true);
+		when(scriptPath.isScript()).thenReturn(true);
+		when(scriptPath.getReader()).thenReturn(new StringReader("alert('test');"));
+		when(factory.createFilePath("lib/js-lib.js")).thenReturn(scriptPath);
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseWriter.toString(), equalTo("alert('test');"));
+		assertThat(responseStatus, equalTo(200));
+		assertThat(responseContentType, equalTo("application/javascript;charset=UTF-8"));
+	}
+
+	@Test
+	public void service_Media() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/asset/logo.png");
+
+		FilePath mediaPath = mock(FilePath.class);
+		when(mediaPath.getExtension()).thenReturn("png");
+		when(factory.createFilePath("res/asset/logo.png")).thenReturn(mediaPath);
+
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				OutputStream stream = invocation.getArgument(0);
+				Strings.save("PNG", stream);
+				return null;
+			}
+		}).when(mediaPath).copyTo(any(OutputStream.class));
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseStatus, equalTo(200));
+		assertThat(responseContentType, equalTo("image/png"));
+		assertThat(new String(responseStream.toByteArray()), equalTo("PNG"));
+	}
+
+	@Test
+	public void service_RMI() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/com/kidscademy/Controller/page.rmi");
+
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		ServletContext appcontext = mock(ServletContext.class);
+		when(appcontext.getRequestDispatcher("/com/kidscademy/Controller/page.rmi")).thenReturn(dispatcher);
+		when(servletContext.getContext("/test")).thenReturn(appcontext);
+
+		servlet.service(httpRequest, httpResponse);
+		verify(dispatcher, times(1)).forward(httpRequest, httpResponse);
+	}
+
+	@Test(expected = ServletException.class)
+	public void service_RMI_MissingContext() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/com/kidscademy/Controller/page.rmi");
+		servlet.service(httpRequest, httpResponse);
+	}
+
+	/** Bad file extension is treated as HTML! */
+	@Test
+	public void service_BadExtension() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.xxx");
+
+		FilePath filePath = mock(FilePath.class);
+		when(filePath.getExtension()).thenReturn("xxx");
+		when(factory.createFilePath("res/compo/compo.xxx")).thenReturn(filePath);
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseStatus, equalTo(200));
+		assertThat(responseContentType, equalTo("text/html;charset=UTF-8"));
+	}
+
+	@Test
+	public void service_BusinessException() throws ServletException, IOException {
+		when(httpRequest.getRequestURI()).thenThrow(new RuntimeException(new BusinessException()));
+
+		servlet.service(httpRequest, httpResponse);
+		assertThat(responseStatus, equalTo(400));
+		assertThat(responseContentType, equalTo("application/json"));
+	}
+
+	@Test
+	public void onResourceReference_Variable() {
+		Reference reference = new Reference(ResourceType.STRING, "title");
+		FilePath source = mock(FilePath.class);
+		when(variables.get(Locale.ENGLISH, reference, source, servlet)).thenReturn("Compo Title");
+		assertThat(servlet.onResourceReference(reference, source), equalTo("Compo Title"));
+	}
+
+	@Test
+	public void onResourceReference_Variable_NotDefined() {
+		Reference reference = new Reference(ResourceType.STRING, "title");
+		FilePath source = mock(FilePath.class);
+		assertThat(servlet.onResourceReference(reference, source), equalTo("@string/title"));
+	}
+
+	@Test
+	public void onResourceReference_Media() {
+		Reference reference = new Reference(ResourceType.IMAGE, "res/asset/logo.png");
+		FilePath source = mock(FilePath.class);
+
+		DirPath mediaDir = mock(DirPath.class);
+		when(mediaDir.value()).thenReturn("res/asset/");
+
+		FilePath media = mock(FilePath.class);
+		when(media.getParentDirPath()).thenReturn(mediaDir);
+		when(media.getName()).thenReturn("logo.png");
+		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(media);
+
+		assertThat(servlet.onResourceReference(reference, source), equalTo("/test-preview/res/asset/logo.png"));
+	}
+
+	@Test(expected = WoodException.class)
+	public void onResourceReference_Media_Missing() {
+		Reference reference = new Reference(ResourceType.IMAGE, "res/asset/logo.png");
+		FilePath source = mock(FilePath.class);
+		servlet.onResourceReference(reference, source);
 	}
 }

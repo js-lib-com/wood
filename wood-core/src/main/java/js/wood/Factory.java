@@ -38,4 +38,12 @@ public class Factory {
 	public EditablePath createEditablePath(String path) {
 		return new EditablePath(project, path);
 	}
+	
+	public Component createComponent(FilePath layoutPath, IReferenceHandler referenceHandler) {
+		return new Component(layoutPath, referenceHandler);
+	}
+
+	public Variables createVariables(DirPath dir) {
+		return new Variables(dir);
+	}
 }

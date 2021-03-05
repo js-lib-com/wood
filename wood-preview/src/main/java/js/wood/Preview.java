@@ -19,11 +19,11 @@ import js.util.Classes;
  * 
  * @author Iulian Rotaru
  */
-public final class Preview {
+public class Preview {
 	private final String contextPath;
 
 	/** Project reference. */
-	private final PreviewProject project;
+	private final Project project;
 
 	/** Wrapped component. */
 	private final Component compo;
@@ -33,7 +33,7 @@ public final class Preview {
 	 * 
 	 * @param compo component.
 	 */
-	public Preview(String contextPath, PreviewProject project, Component compo) {
+	public Preview(String contextPath, Project project, Component compo) {
 		this.contextPath = contextPath;
 		this.project = project;
 		this.compo = compo;
@@ -60,14 +60,18 @@ public final class Preview {
 
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
-		head.addChild(doc.createElement("title").setText(compo.getDisplay()));
-		head.addText("\r\n");
+		if (compo.getDisplay() != null) {
+			head.addChild(doc.createElement("title").setText(compo.getDisplay()));
+			head.addText("\r\n");
+		}
 		if (project.getAuthor() != null) {
 			head.addChild(doc.createElement("meta", "name", "Author", "content", project.getAuthor()));
 			head.addText("\r\n");
 		}
-		head.addChild(doc.createElement("meta", "name", "Description", "content", compo.getDescription()));
-		head.addText("\r\n");
+		if (compo.getDescription() != null) {
+			head.addChild(doc.createElement("meta", "name", "Description", "content", compo.getDescription()));
+			head.addText("\r\n");
+		}
 
 		for (IMetaDescriptor meta : project.getMetaDescriptors()) {
 			addMeta(doc, meta);

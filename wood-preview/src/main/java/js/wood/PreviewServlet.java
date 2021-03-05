@@ -91,20 +91,19 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 	private static final ThreadLocal<String> CONTEXT_PATH = new ThreadLocal<>();
 
+	private ServletContext servletContext;
+
 	/** Project instance initialized from Servlet context parameter on Servlet initialization. */
-	private PreviewProject project;
+	private Project project;
 
 	private Factory factory;
 
 	/** Variables cache initialized before every component preview processing. */
 	private VariablesCache variables;
 
-	PreviewProject getProject() {
-		return project;
-	}
-
-	VariablesCache getVariables() {
-		return variables;
+	public PreviewServlet() {
+		super();
+		log.trace("PreviewServlet()");
 	}
 
 	/**
@@ -118,8 +117,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		ServletContext context = config.getServletContext();
-		project = new PreviewProject(new File(context.getInitParameter(PROJECT_DIR_PARAM)));
+		servletContext = config.getServletContext();
+		project = new Project(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
 		factory = project.getFactory();
 		variables = new VariablesCache(project);
 	}
@@ -143,6 +142,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		try {
 			doService(httpRequest, httpResponse);
 		} catch (BusinessException e) {
+			// ignored since is processed below
 		} catch (Throwable e) {
 			if (e.getCause() instanceof BusinessException) {
 				sendThrowable(httpResponse, HttpServletResponse.SC_BAD_REQUEST, e.getCause());
@@ -178,7 +178,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			int suffixSeparatorPosition = contextPath.lastIndexOf('-');
 			String contextName = contextPath.substring(0, suffixSeparatorPosition);
 
-			ServletContext context = getServletContext().getContext(contextName);
+			ServletContext context = servletContext.getContext(contextName);
 			if (context == null) {
 				throw new BugError("Application context |%s| is not deployed or preview context is not configured with crossContext='true'", contextName);
 			}
@@ -188,6 +188,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			return;
 		}
 
+		httpResponse.setStatus(HttpServletResponse.SC_OK);
+		
 		if (CompoPath.accept(requestPath)) {
 			CompoPath compoPath = factory.createCompoPath(requestPath);
 			FilePath layoutPath = compoPath.getLayoutPath();
@@ -203,13 +205,13 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			variables.update();
 
 			// create component with support for preview script
-			Component component = new Component(layoutPath, this);
-			Preview preview = new Preview(contextPath, project, component);
+			Component compo = factory.createComponent(layoutPath, this);
+			Preview preview = new Preview(contextPath, project, compo);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}
 
-		FilePath filePath = new FilePath(project, requestPath);
+		FilePath filePath = factory.createFilePath(requestPath);
 		if (filePath.isStyle()) {
 			if (!filePath.hasVariants()) {
 				httpResponse.setContentType(TEXT_CSS);
@@ -332,7 +334,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		return contentType;
 	}
 
-	private static String forwardPath(PreviewProject project, String requestPath) {
+	private static String forwardPath(Project project, String requestPath) {
 		// assume we are into preview for component '/res/compos/dialogs/alert'
 		// current loaded content is the last part of the path, i.e. 'alert'
 		// from a component script there is a RMI request for sixqs.site.controller.MainController#getCategoriesSelect
@@ -367,5 +369,28 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 		// /sixqs/site/controller/MainController/getCategoriesSelect.rmi
 		return builder.toString();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	Project getProject() {
+		return project;
+	}
+
+	PreviewServlet(ServletContext servletContext, Project project, VariablesCache variables) {
+		super();
+		this.servletContext = servletContext;
+		this.project = project;
+		this.factory = project.getFactory();
+		this.variables = variables;
+	}
+
+	Factory getFactory() {
+		return factory;
+	}
+
+	VariablesCache getVariables() {
+		return variables;
 	}
 }

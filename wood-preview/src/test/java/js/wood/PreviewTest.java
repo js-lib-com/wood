@@ -29,7 +29,7 @@ import js.util.Classes;
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewTest {
 	@Mock
-	private PreviewProject project;
+	private Project project;
 	@Mock
 	private Component compo;
 
