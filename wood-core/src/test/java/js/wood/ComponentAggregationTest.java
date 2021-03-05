@@ -96,7 +96,6 @@ public class ComponentAggregationTest {
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
-		layout.getDocument().dump();
 
 		EList headings = layout.findByTag("h1");
 		assertThat(headings.size(), equalTo(2));
@@ -132,7 +131,6 @@ public class ComponentAggregationTest {
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
-		layout.getDocument().dump();
 		assertThat(layout.getByXPathNS(namespace, "//*[@w:compo]"), nullValue());
 		assertThat(layout.getByXPathNS(namespace, "//*[@w:param]"), nullValue());
 	}

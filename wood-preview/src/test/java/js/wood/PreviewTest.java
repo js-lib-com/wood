@@ -100,8 +100,6 @@ public class PreviewTest {
 		Writer writer = new StringWriter();
 		preview.serialize(writer);
 
-		System.out.println(writer);
-		
 		Document document = documentBuilder.parseXML(writer.toString());
 		Element html = document.getByTag("HTML");
 		assertThat(html, notNullValue());

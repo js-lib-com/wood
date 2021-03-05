@@ -133,9 +133,7 @@ public class ComponentIntegrationTest {
 		assertTrue(layout.hasAttr("xmlns:w"));
 		assertTrue(layout.getByTag("section").hasAttr("xmlns:w"));
 
-		layout.getDocument().dump();
 		compo.clean();
-		layout.getDocument().dump();
 
 		assertFalse(layout.hasAttr("xmlns:w"));
 		assertFalse(layout.getByTag("section").hasAttr("xmlns:w"));

@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.lang.BugError;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
@@ -112,7 +111,7 @@ public class ProjectTest {
 	public void getMediaQueryDefinition() {
 		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
 		project = new Project(projectRoot, descriptor);
-		
+
 		MediaQueryDefinition query = project.getMediaQueryDefinition("w800");
 		assertThat(query, notNullValue());
 		assertThat(query.getAlias(), equalTo("w800"));
@@ -236,10 +235,10 @@ public class ProjectTest {
 		assertThat(foundFile, equalTo(mediaFile));
 	}
 
-	@Test(expected = BugError.class)
+	@Test
 	public void getThemeStyles() {
 		project = new Project(projectRoot);
-		project.getThemeStyles();
+		assertThat(project.getThemeStyles(), notNullValue());
 	}
 
 	// --------------------------------------------------------------------------------------------

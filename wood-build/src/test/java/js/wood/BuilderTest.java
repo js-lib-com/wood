@@ -87,7 +87,6 @@ public class BuilderTest {
 		Document document = documentArgument.getValue();
 		assertThat(document, notNullValue());
 
-		document.dump();
 		Element html = document.getByTag("html");
 		assertThat(html, notNullValue());
 		assertThat(html.getAttr("lang"), equalTo("en"));
