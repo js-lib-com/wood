@@ -9,17 +9,22 @@ import js.dom.Element;
 import js.util.Classes;
 
 /**
- * Component preview wraps component in standard HTML document and serialize it to given writer. This component preview class is
+ * Preview wraps a component in standard HTML document and serialize it to given writer. This component preview class is
  * companion for {@link PreviewServlet}; it hides details regarding component layout dynamic generation.
  * <p>
  * When create preview instance a fully aggregated component instance is supplied. This component instance already have
- * variables injected and media file path resolved. Component layout supplies the body for generated preview document. Header is
- * inserted by {@link #serialize(Writer)} method logic. Note that for style and script links preview always uses absolute URL
- * path.
+ * variables injected and media file references resolved. Component layout supplies the body for generated preview document.
+ * Header is inserted by {@link #serialize(Writer)} method logic. Note that for style and script links preview always uses URL
+ * absolute path.
  * 
  * @author Iulian Rotaru
+ * @since 1.0
  */
 public class Preview {
+	/**
+	 * Runtime context path used to create links for page resource files - preview always uses URL absolute path in which this
+	 * application context is included.
+	 */
 	private final String contextPath;
 
 	/** Project reference. */
@@ -31,6 +36,8 @@ public class Preview {
 	/**
 	 * Create component preview instance.
 	 * 
+	 * @param contextPath runtime context path,
+	 * @param project WOOD project context,
 	 * @param compo component.
 	 */
 	public Preview(String contextPath, Project project, Component compo) {
@@ -104,17 +111,17 @@ public class Preview {
 
 		ThemeStyles themeStyles = project.getThemeStyles();
 		if (themeStyles.getReset() != null) {
-			addStyle(doc, absoluteUrlPath(themeStyles.getReset()));
+			addStyle(doc, urlAbsolutePath(themeStyles.getReset()));
 		}
 		if (themeStyles.getFx() != null) {
-			addStyle(doc, absoluteUrlPath(themeStyles.getFx()));
+			addStyle(doc, urlAbsolutePath(themeStyles.getFx()));
 		}
 		for (FilePath style : themeStyles.getStyles()) {
-			addStyle(doc, absoluteUrlPath(style));
+			addStyle(doc, urlAbsolutePath(style));
 		}
 
 		for (FilePath style : compo.getStyleFiles()) {
-			addStyle(doc, absoluteUrlPath(style));
+			addStyle(doc, urlAbsolutePath(style));
 		}
 
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
@@ -132,6 +139,12 @@ public class Preview {
 		doc.serialize(writer, true);
 	}
 
+	/**
+	 * Add meta element to page head.
+	 * 
+	 * @param doc page document,
+	 * @param meta meta element descriptor.
+	 */
 	private static void addMeta(Document doc, IMetaDescriptor meta) {
 		Element head = doc.getByTag("head");
 
@@ -164,6 +177,12 @@ public class Preview {
 
 	}
 
+	/**
+	 * Add link element to page head.
+	 * 
+	 * @param doc page document,
+	 * @param link link element descriptor.
+	 */
 	private static void addLink(Document doc, ILinkDescriptor link) {
 		Element head = doc.getByTag("head");
 
@@ -188,6 +207,15 @@ public class Preview {
 		head.addText("\r\n");
 	}
 
+	/**
+	 * Set element attribute value, with alternative default if provided value is null. If value argument is null and no default
+	 * is provided this method does nothing.
+	 * 
+	 * @param element page document element,
+	 * @param name attribute name,
+	 * @param value attribute value, possible null,
+	 * @param defaultValue optional default value, used when provided attribute value is null.
+	 */
 	private static void setAttr(Element element, String name, String value, String... defaultValue) {
 		if (value == null && defaultValue.length == 1) {
 			value = defaultValue[0];
@@ -226,7 +254,7 @@ public class Preview {
 		}
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = absoluteUrlPath(new FilePath(project, src));
+				src = urlAbsolutePath(new FilePath(project, src));
 			}
 			scriptElement.setAttr("src", src);
 		}
@@ -254,7 +282,7 @@ public class Preview {
 	 * @param filePath file path.
 	 * @return file absolute URL path.
 	 */
-	private String absoluteUrlPath(FilePath filePath) {
+	private String urlAbsolutePath(FilePath filePath) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
 		builder.append(Path.SEPARATOR_CHAR);

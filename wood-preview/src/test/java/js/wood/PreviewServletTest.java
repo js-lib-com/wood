@@ -72,12 +72,14 @@ public class PreviewServletTest {
 	private int responseStatus;
 
 	@Before
-	public void beforeTest() throws IOException {
+	public void beforeTest() throws IOException, ServletException {
 		when(project.getFactory()).thenReturn(factory);
 		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
 		when(project.getThemeStyles()).thenReturn(mock(ThemeStyles.class));
 
-		when(httpRequest.getContextPath()).thenReturn("/test-preview");
+		when(servletContext.getContextPath()).thenReturn("/test-preview");
+
+		// when(httpRequest.getContextPath()).thenReturn("/test-preview");
 		when(httpResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
 
 		when(httpResponse.getOutputStream()).thenReturn(new ServletOutputStream() {
@@ -103,7 +105,7 @@ public class PreviewServletTest {
 				return null;
 			}
 		}).when(httpResponse).setStatus(anyInt());
-		
+
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -161,6 +163,7 @@ public class PreviewServletTest {
 		when(factory.createFilePath("res/compo/compo.css")).thenReturn(stylePath);
 		when(stylePath.exists()).thenReturn(true);
 		when(stylePath.isStyle()).thenReturn(true);
+		when(stylePath.getMimeType()).thenReturn("text/css;charset=UTF-8");
 		when(stylePath.getReader()).thenReturn(new StringReader("body { width: 1200px; }"));
 		when(stylePath.getParentDirPath()).thenReturn(mock(DirPath.class));
 
@@ -191,6 +194,7 @@ public class PreviewServletTest {
 		FilePath scriptPath = mock(FilePath.class);
 		when(scriptPath.exists()).thenReturn(true);
 		when(scriptPath.isScript()).thenReturn(true);
+		when(scriptPath.getMimeType()).thenReturn("application/javascript;charset=UTF-8");
 		when(scriptPath.getReader()).thenReturn(new StringReader("alert('test');"));
 		when(factory.createFilePath("lib/js-lib.js")).thenReturn(scriptPath);
 
@@ -205,7 +209,7 @@ public class PreviewServletTest {
 		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/asset/logo.png");
 
 		FilePath mediaPath = mock(FilePath.class);
-		when(mediaPath.getExtension()).thenReturn("png");
+		when(mediaPath.getMimeType()).thenReturn("image/png");
 		when(factory.createFilePath("res/asset/logo.png")).thenReturn(mediaPath);
 
 		doAnswer(new Answer<Void>() {
@@ -242,18 +246,15 @@ public class PreviewServletTest {
 		servlet.service(httpRequest, httpResponse);
 	}
 
-	/** Bad file extension is treated as HTML! */
-	@Test
+	@Test(expected = ServletException.class)
 	public void service_BadExtension() throws ServletException, IOException {
 		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.xxx");
 
 		FilePath filePath = mock(FilePath.class);
-		when(filePath.getExtension()).thenReturn("xxx");
+		when(filePath.getMimeType()).thenThrow(WoodException.class);
 		when(factory.createFilePath("res/compo/compo.xxx")).thenReturn(filePath);
 
 		servlet.service(httpRequest, httpResponse);
-		assertThat(responseStatus, equalTo(200));
-		assertThat(responseContentType, equalTo("text/html;charset=UTF-8"));
 	}
 
 	@Test

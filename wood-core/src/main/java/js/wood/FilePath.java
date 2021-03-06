@@ -61,7 +61,7 @@ public class FilePath extends Path {
 			"((?:[a-z]+)/(?:[a-z0-9-]+/)*)?" + // directory path
 			"([a-z0-9-\\.]+)" + // base name is file name without variants or extension
 			"(?:_([a-z0-9][a-z0-9-_]*))?" + // variants
-			"\\.([a-z0-9]{2,3})" + // file extension
+			"\\.([a-z0-9]{2,5})" + // file extension
 			"$", //
 			Pattern.CASE_INSENSITIVE);
 
@@ -73,8 +73,6 @@ public class FilePath extends Path {
 
 	/** File name including extension but no trailing file separator nor variants. */
 	private final String name;
-
-	private final String extension;
 
 	/** Optional variants, empty if file path has none. */
 	private final Variants variants;
@@ -98,14 +96,10 @@ public class FilePath extends Path {
 
 		this.parentDirPath = matcher.group(1) != null ? new DirPath(project, matcher.group(1)) : project.getProjectDir();
 		this.basename = matcher.group(2);
-		this.extension = matcher.group(4);
-		this.name = Strings.concat(this.basename, '.', this.extension);
+		String extension = matcher.group(4);
+		this.name = Strings.concat(this.basename, '.', extension);
 		this.variants = new Variants(this, matcher.group(3));
-		this.fileType = FileType.forExtension(this.extension.toLowerCase());
-	}
-
-	FilePath(Project project, File file) {
-		this(project, Files.getRelativePath(project.getProjectRoot(), file, true));
+		this.fileType = FileType.forExtension(extension.toLowerCase());
 	}
 
 	/**
@@ -119,6 +113,21 @@ public class FilePath extends Path {
 	}
 
 	/**
+	 * Guess MIME type for this file path. Note that returned value is not <code>Content-Type</code>, therefore it does not
+	 * contain characters set.
+	 * 
+	 * @return MIME type.
+	 * @throws IOException
+	 */
+	public String getMimeType() throws IOException {
+		if (fileType == FileType.SCRIPT) {
+			// Java NIO returns "text/plain"
+			return "application/javascript";
+		}
+		return java.nio.file.Files.probeContentType(file.toPath());
+	}
+
+	/**
 	 * Get this file name with extension but not variants.
 	 * 
 	 * @return file name.
@@ -126,10 +135,6 @@ public class FilePath extends Path {
 	 */
 	public String getName() {
 		return name;
-	}
-
-	String getExtension() {
-		return extension;
 	}
 
 	/**
@@ -325,5 +330,18 @@ public class FilePath extends Path {
 	public static boolean accept(String path) {
 		Matcher matcher = PATTERN.matcher(path);
 		return matcher.find();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	/**
+	 * Test constructor.
+	 * 
+	 * @param project WOOD project context,
+	 * @param file underlying Java file.
+	 */
+	FilePath(Project project, File file) {
+		this(project, Files.getRelativePath(project.getProjectRoot(), file, true));
 	}
 }

@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -223,8 +224,25 @@ public class FilePathTest {
 		assertTrue(FilePath.accept("template/page/page_ro.htm"));
 		assertTrue(FilePath.accept("dir/template/page/page_w800_ro.htm"));
 		assertTrue(FilePath.accept("project.xml"));
-		
+
 		assertFalse(FilePath.accept("res/template/page/page.htm#body"));
 		assertFalse(FilePath.accept("dir/template/page#body"));
+	}
+
+	@Test
+	public void getMimeType() throws IOException {
+		assertThat(new FilePath(project, "file.htm").getMimeType(), equalTo("text/html"));
+		assertThat(new FilePath(project, "file.html").getMimeType(), equalTo("text/html"));
+		assertThat(new FilePath(project, "file.xhtml").getMimeType(), equalTo("application/xhtml+xml"));
+		assertThat(new FilePath(project, "file.xml").getMimeType(), equalTo("text/xml"));
+		assertThat(new FilePath(project, "file.css").getMimeType(), equalTo("text/css"));
+		assertThat(new FilePath(project, "file.js").getMimeType(), equalTo("application/javascript"));
+		assertThat(new FilePath(project, "file.json").getMimeType(), equalTo("application/json"));
+		assertThat(new FilePath(project, "file.png").getMimeType(), equalTo("image/png"));
+		assertThat(new FilePath(project, "file.jpg").getMimeType(), equalTo("image/jpeg"));
+		assertThat(new FilePath(project, "file.jpeg").getMimeType(), equalTo("image/jpeg"));
+		assertThat(new FilePath(project, "file.gif").getMimeType(), equalTo("image/gif"));
+		assertThat(new FilePath(project, "file.tiff").getMimeType(), equalTo("image/tiff"));
+		assertThat(new FilePath(project, "file.svg").getMimeType(), equalTo("image/svg+xml"));
 	}
 }
