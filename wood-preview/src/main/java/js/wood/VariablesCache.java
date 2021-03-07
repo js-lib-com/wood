@@ -8,8 +8,9 @@ import java.util.Map;
  * Variable caches used to speed up preview process. Cache life span last for a component preview session.
  * 
  * @author Iulian Rotaru
+ * @since 1.0
  */
-public class VariablesCache {
+class VariablesCache {
 	private final Project project;
 
 	private final Factory factory;

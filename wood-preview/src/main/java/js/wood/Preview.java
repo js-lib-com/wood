@@ -20,7 +20,7 @@ import js.util.Classes;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class Preview {
+class Preview {
 	/**
 	 * Runtime context path used to create links for page resource files - preview always uses URL absolute path in which this
 	 * application context is included.

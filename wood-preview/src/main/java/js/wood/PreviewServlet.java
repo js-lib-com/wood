@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -17,14 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import js.json.Json;
-import js.lang.BugError;
 import js.log.Log;
 import js.log.LogContext;
 import js.log.LogFactory;
 import js.rmi.BusinessException;
 import js.util.Classes;
 import js.util.Files;
-import js.util.Strings;
 
 /**
  * Preview Servlet allows access from browser to project components and resource files. This allows to use browser for
@@ -57,11 +53,6 @@ import js.util.Strings;
  * 
  * Preview WAR archive is actually empty; it contains only <code>web.xml</code> descriptor, that is, no Java classes nor static
  * content.
- * <p>
- * Preview Servlet is able to forward requests to server side logic implemented by target project. By convention preview context
- * path is the same as target context path plus <code>-preview</code> suffix. For example, if target project is named
- * <code>site</code>, preview context path should be <code>site-preview</code>. By default web servers disable cross context
- * requests dispatch. To enable it, need to add <code>crossContext="true"</code> to preview context.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -86,7 +77,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	private static final AtomicInteger REQUEST_ID = new AtomicInteger();
 
 	/** Servlet context init parameter for project directory. */
-	private static final String PROJECT_DIR_PARAM = "PROJECT_DIR";
+	public static final String PROJECT_DIR_PARAM = "PROJECT_DIR";
 
 	/**
 	 * Preview layout is a special layout used for component unit test. It is returned instead of component; preview layout uses
@@ -94,7 +85,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	private static final String LAYOUT_PREVIEW = "preview.htm";
 
-	/** Cache Servlet context reference since it is not changed on this class lie cycle. */
+	/** Cache Servlet context reference since it is not changed on this class life cycle. */
 	private ServletContext servletContext;
 
 	/** Cache context path used by {@link Preview} to generate URL absolute paths. */
@@ -111,7 +102,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	/** Variables cache initialized before every component preview processing. */
 	private VariablesCache variables;
 
-	/** Default constructor required by Servlet container. */
+	/** Default constructor mandated by Servlet container. */
 	public PreviewServlet() {
 		super();
 		log.trace("PreviewServlet()");
@@ -129,9 +120,14 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		servletContext = config.getServletContext();
+		log.trace("Initialize servlet |%s#%s|.", servletContext.getServletContextName(), config.getServletName());
 		contextPath = servletContext.getContextPath();
 
-		project = new Project(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
+		project = (Project) servletContext.getAttribute(Project.class.getName());
+		if (project == null) {
+			project = new Project(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
+			servletContext.setAttribute(Project.class.getName(), project);
+		}
 		factory = project.getFactory();
 		variables = new VariablesCache(project);
 	}
@@ -178,27 +174,11 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	private void doService(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
 		httpResponse.setCharacterEncoding("UTF-8");
+		httpResponse.setStatus(HttpServletResponse.SC_OK);
 
 		// request path is request URI without context; it does not starts with a path separator
 		String requestPath = httpRequest.getRequestURI().substring(contextPath.length() + 1);
 		log.debug("Request |%s| on context |%s|.", requestPath, contextPath);
-
-		if (needForward(requestPath)) {
-			// by convention preview context has suffix -preview
-			int suffixSeparatorPosition = contextPath.lastIndexOf('-');
-			String contextName = contextPath.substring(0, suffixSeparatorPosition);
-
-			ServletContext context = servletContext.getContext(contextName);
-			if (context == null) {
-				throw new BugError("Application context |%s| is not deployed or preview context is not configured with crossContext='true'", contextName);
-			}
-
-			RequestDispatcher dispatcher = context.getRequestDispatcher(forwardPath(project, requestPath));
-			dispatcher.forward(httpRequest, httpResponse);
-			return;
-		}
-
-		httpResponse.setStatus(HttpServletResponse.SC_OK);
 
 		if (CompoPath.accept(requestPath)) {
 			CompoPath compoPath = factory.createCompoPath(requestPath);
@@ -292,56 +272,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		httpResponse.setContentLength(bytes.length);
 		httpResponse.getOutputStream().write(bytes);
 		httpResponse.getOutputStream().flush();
-	}
-
-	private static boolean needForward(String requestPath) {
-		if (requestPath.endsWith(".rmi")) {
-			return true;
-		}
-		if (requestPath.contains("/rest/")) {
-			return true;
-		}
-		if (requestPath.endsWith(".xsp") || requestPath.contains("/captcha/image")) {
-			return true;
-		}
-		return false;
-	}
-
-	private static String forwardPath(Project project, String requestPath) {
-		// assume we are into preview for component '/res/compos/dialogs/alert'
-		// current loaded content is the last part of the path, i.e. 'alert'
-		// from a component script there is a RMI request for sixqs.site.controller.MainController#getCategoriesSelect
-
-		// in this case browser generated URL is like
-		// http://localhost/site2/compos/dialog/sixqs/site/controller/MainController/getCategoriesSelect.rmi
-		// note that from prefix path 'alert' is missing since is current loaded content
-
-		// in order to discover RMI class path need to remove prefix path, after extension remove
-		// for that remove from request path the paths components that are directories into project resources
-		// in above example remove 'compos/dialogs/'
-
-		// compos/dialogs/sixqs/site/controller/MainController/getCategoriesSelect.rmi
-		List<String> pathParts = Strings.split(requestPath, '/');
-		// [ compos, dialogs, sixqs, site, controller, MainController, getCategoriesSelect.rmi]
-
-		// remove path parts that are directories into project resources
-		File resourcesPath = project.getProjectRoot();
-		for (;;) {
-			resourcesPath = new File(resourcesPath, pathParts.get(0));
-			if (!resourcesPath.isDirectory()) {
-				break;
-			}
-			pathParts.remove(0);
-		}
-
-		// [ sixqs, site, controller, MainController, getCategoriesSelect.rmi]
-		StringBuilder builder = new StringBuilder();
-		for (String pathPart : pathParts) {
-			builder.append('/');
-			builder.append(pathPart);
-		}
-		// /sixqs/site/controller/MainController/getCategoriesSelect.rmi
-		return builder.toString();
 	}
 
 	// --------------------------------------------------------------------------------------------
