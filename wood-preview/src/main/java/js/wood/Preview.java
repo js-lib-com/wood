@@ -7,6 +7,7 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
+import js.util.Strings;
 
 /**
  * Preview wraps a component in standard HTML document and serialize it to given writer. This component preview class is
@@ -124,6 +125,7 @@ class Preview {
 			addStyle(doc, urlAbsolutePath(style));
 		}
 
+		addControlScript(doc);
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
 			addScript(doc, script);
 		}
@@ -238,11 +240,27 @@ class Preview {
 	}
 
 	/**
-	 * Add script element to HTML document head.
+	 * Control script is embedded into generated component preview and perform tool related tasks like page auto-reload.
+	 * 
+	 * @param doc HTML document.
+	 * @throws IOException if script source reading fails.
+	 */
+	private void addControlScript(Document doc) throws IOException {
+		Element scriptElement = doc.createElement("script", "type", "text/javascript");
+		scriptElement.setText(Strings.load(Classes.getResourceAsReader("wood.js")));
+
+		Element head = doc.getByTag("head");
+		head.addChild(scriptElement);
+		head.addText("\r\n");
+	}
+
+	/**
+	 * Add script element to HTML document head. If script is embedded its source file is loaded into script element text
+	 * content.
 	 * 
 	 * @param doc HTML document,
 	 * @param src the source of script.
-	 * @throws IOException
+	 * @throws IOException if script source loading fails.
 	 */
 	private void addScript(Document doc, IScriptDescriptor script) throws IOException {
 		String src = script.getSource();

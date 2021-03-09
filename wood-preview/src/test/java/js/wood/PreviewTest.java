@@ -121,6 +121,7 @@ public class PreviewTest {
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "test/theme/fx.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "test/theme/form.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "test/compo/compo.css", "type", "text/css");
+		assertHead(heads.item(index++), "script", "src", null, "type", "text/javascript");
 		assertHead(heads.item(index++), "script", "src", "test/lib/js-lib.js", "type", "text/javascript");
 		assertHead(heads.item(index++), "script", "src", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", "type", "text/javascript");
 
