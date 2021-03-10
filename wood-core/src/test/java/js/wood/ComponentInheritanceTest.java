@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.dom.EList;
 import js.dom.Element;
 import js.dom.NamespaceContext;
+import js.dom.w3c.DomException;
 import js.wood.impl.EditablePath;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
@@ -145,6 +146,50 @@ public class ComponentInheritanceTest {
 		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
 		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
 		assertTrue(section.hasAttr("xmlns:w"));
+	}
+
+	@Test
+	public void parameter() {
+		String templateHTML = "" + //
+				"<body title='@param/caption' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>@param/title</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section w:template='res/template#section' w:param='caption:Compo Caption;title:Compo Title' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		when(templateEditable.getEditableName()).thenReturn("section");
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		
+		assertThat(layout.getAttr("title"), equalTo("Compo Caption"));
+		assertThat(layout.getByTag("h1").getText(), equalTo("Compo Title"));
+	}
+
+	@Test(expected = DomException.class)
+	public void parameter_Missing() {
+		String templateHTML = "" + //
+				"<body title='@param/caption' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section w:template='res/template#section' w:param='title:Compo Title' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+
+		new Component(compoPath, referenceHandler);
 	}
 
 	/** Component with template and multiple implementations for the same editable element. */
