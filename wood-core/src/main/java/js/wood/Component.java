@@ -221,7 +221,7 @@ public class Component {
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
 			// source reader takes care to inject parameter values into widget layout
-			layoutParameters.load(operators.getOperand(widgetPathElement, Operator.PARAM));
+			layoutParameters.reload(operators.getOperand(widgetPathElement, Operator.PARAM));
 			operators.removeOperator(widgetPathElement, Operator.PARAM);
 			Element widgetLayout = scanComponentsTree(compoPath.getLayoutPath(), guardCount);
 
@@ -308,7 +308,7 @@ public class Component {
 				// prepare layout parameters, possible empty, before loading template from source file
 				// subsequent loadLayoutDocument passes parameters to source reader
 				// source reader takes care to inject parameter values into template layout
-				layoutParameters.load(operators.getOperand(contentElement, Operator.PARAM));
+				layoutParameters.reload(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
 
 				FilePath templateLayoutPath = editablePath.getLayoutPath();
