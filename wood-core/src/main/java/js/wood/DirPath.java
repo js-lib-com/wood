@@ -252,15 +252,6 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	}
 
 	/**
-	 * Test if this directory path is excluded from build process.
-	 * 
-	 * @return true if this directory path is excluded from build.
-	 */
-	public boolean isExcluded() {
-		return project.getExcludes().contains(this);
-	}
-
-	/**
 	 * Test if this directory path is a HTML component.
 	 * 
 	 * @return true if this directory path is a HTML component.

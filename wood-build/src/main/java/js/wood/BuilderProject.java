@@ -128,7 +128,7 @@ class BuilderProject extends Project {
 		dir.files(new FilesHandler() {
 			@Override
 			public void onDirectory(DirPath dir) {
-				if (!dir.isExcluded()) {
+				if (!excludes.contains(dir)) {
 					scan(dir);
 				}
 			}

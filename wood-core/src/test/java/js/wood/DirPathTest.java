@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -378,15 +377,6 @@ public class DirPathTest {
 		assertFalse(DirPath.accept("lib/video-player"));
 		assertFalse(DirPath.accept("lib/video-player/video-player.htm"));
 		assertFalse(DirPath.accept("lib/video-player#body"));
-	}
-
-	@Test
-	public void excluded() {
-		DirPath dirPath = new DirPath(project, "res/page/about/");
-		when(project.getExcludes()).thenReturn(Arrays.asList(dirPath));
-
-		assertTrue(new DirPath(project, "res/page/about/").isExcluded());
-		assertFalse(new DirPath(project, "res/compo/fake/").isExcluded());
 	}
 
 	// --------------------------------------------------------------------------------------------
