@@ -16,7 +16,7 @@ import js.wood.IScriptDescriptor;
 import js.wood.WoodException;
 
 /**
- * Common logic for both component and project descriptors.
+ * Common logic for both project and component descriptors.
  * 
  * @author Iulian Rotaru
  * @since 1.0

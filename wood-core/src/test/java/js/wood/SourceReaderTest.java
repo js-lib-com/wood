@@ -149,7 +149,7 @@ public class SourceReaderTest {
 		when(sourceFile.isLayout()).thenReturn(true);
 
 		LayoutParameters parameters = new LayoutParameters();
-		parameters.load("title:Component Parameter;");
+		parameters.reload("title:Component Parameter;");
 
 		SourceReader reader = new SourceReader(sourceFile, parameters, handler);
 		StringWriter writer = new StringWriter();

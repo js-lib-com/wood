@@ -120,21 +120,21 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 */
 	private final List<Locale> locales = new ArrayList<>();
 
+	/** Media query definitions. */
 	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
-
-	/**
-	 * Create project descriptor instance. Every <em>WOOD</em> project should have descriptor with at least <locale> element
-	 * declared.
-	 *
-	 * @param descriptorFile descriptor file, absolute path.
-	 */
-	public ProjectDescriptor(FilePath descriptorFile) {
-		super(descriptorFile);
-		init();
-	}
 
 	public ProjectDescriptor(File file) {
 		super(file);
+		init();
+	}
+
+	/**
+	 * Test constructor.
+	 * 
+	 * @param descriptorFile descriptor file.
+	 */
+	ProjectDescriptor(FilePath descriptorFile) {
+		super(descriptorFile);
 		init();
 	}
 
@@ -209,7 +209,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * @return naming strategy for <em>WOOD</em> operators.
 	 */
 	public NamingStrategy getNamingStrategy() {
-		return NamingStrategy.valueOf(text("naming-strategy", NamingStrategy.XMLNS.name()));
+		return NamingStrategy.valueOf(text("naming", NamingStrategy.XMLNS.name()));
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get the list of paths excluded from build process. Returned list is empty if <code>excludes</code> element is not
+	 * Get the list of pages excluded from build process. Returned list is empty if <code>excludes</code> element is not
 	 * present.
 	 * 
 	 * @return unmodifiable excluded paths list, possible empty.

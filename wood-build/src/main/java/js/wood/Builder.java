@@ -9,6 +9,9 @@ import js.log.Log;
 import js.log.LogFactory;
 
 /**
+ * Builder generates site files from project components. It reads component source and resource files from project, consolidates
+ * them into pages and write to build file system.
+ * 
  * Project builder for user interface resources. Builder acts as a bridge between {@link Project} and {@link BuildFS}. It reads
  * component source and resource files from project, consolidates them into pages then write to build site directory. Build
  * class implements {@link #onResourceReference(Reference, FilePath)} used to process resource references declared into source

@@ -17,19 +17,19 @@ import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
- * Project global context. A project has a root directory and all {@link Path} instances are relative to this project root. This
- * class provides basic functionality but there are specialized project classes for build and preview. Project is initialized
- * from {@link ProjectDescriptor}, that is optional. If project descriptor file is missing there are sensible defaults.
+ * A WOOD project is a collection of loosely coupled components. It has a root directory and all paths are relative to this
+ * project root. Project instance is initialized from {@link ProjectDescriptor}, but all descriptor properties have sensible
+ * default values, therefore descriptor is optional.
  * <p>
  * Project is a not constrained tree of directories and files, source files - layouts, styles, scripts, medias and variables,
  * and descriptors. Directories hierarchy is indeed not constrained but there are naming conventions for component files - see
  * {@link Component} class description.
  * <p>
- * Is recommended as good practice to have separated modules for user interface and back-end logic. Anyway, there are no
- * constraints that impose this separation of concerns. It is allowed to embed WOOD project directories in a master Java
- * project, perhaps Eclipse. For example, is possible to have a <code>lib</code> directory for both WOOD components and Java
- * archives. Anyway, master project files must not use extensions expected by this tool library and file name should obey syntax
- * described by {@link Path} classes hierarchy.
+ * It is recommended as good practice to have separated modules for user interface and back-end logic. Anyway, there are no
+ * constraints that impose this separation of concerns. It is, for example, allowed to embed WOOD project directories in a
+ * master Java project, perhaps Eclipse, e.g. a <code>lib</code> directory for both WOOD components and Java archives. Anyway,
+ * master project files must not use file extensions expected by this tool library and files name should obey syntax described
+ * by {@link Path} classes hierarchy. Finally, there is the option to exclude certain directories from WOOD builder processing.
  * 
  * @author Iulian Rotaru
  * @since 1.0
