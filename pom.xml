@@ -33,6 +33,7 @@
 		<module>wood-core</module>
 		<module>wood-build</module>
 		<module>wood-preview</module>
+		<module>wood-cli</module>
 	</modules>
 
 	<properties>
