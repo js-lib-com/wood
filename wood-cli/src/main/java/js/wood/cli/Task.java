@@ -1,6 +1,9 @@
 package js.wood.cli;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 
 import picocli.CommandLine.Command;
@@ -32,6 +35,18 @@ public abstract class Task implements Runnable {
 	protected static void print(String format, Object... args) {
 		System.out.printf(format, args);
 		System.out.println();
+	}
+
+	protected static void print() {
+		System.out.println();
+	}
+
+	protected static boolean confirm(String message, String positiveAnswer) throws IOException {
+		System.out.println(message);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+			String answer = reader.readLine();
+			return answer.equalsIgnoreCase(positiveAnswer);
+		}
 	}
 
 	protected static File workingDir() {
