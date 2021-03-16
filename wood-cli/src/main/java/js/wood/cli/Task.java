@@ -41,12 +41,19 @@ public abstract class Task implements Runnable {
 		System.out.println();
 	}
 
+	private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+	protected static String input(String message) throws IOException {
+		System.out.print("- ");
+		System.out.print(message);
+		System.out.print(": ");
+		return reader.readLine();
+	}
+
 	protected static boolean confirm(String message, String positiveAnswer) throws IOException {
 		System.out.println(message);
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-			String answer = reader.readLine();
-			return answer.equalsIgnoreCase(positiveAnswer);
-		}
+		String answer = reader.readLine();
+		return answer.equalsIgnoreCase(positiveAnswer);
 	}
 
 	protected static File workingDir() {

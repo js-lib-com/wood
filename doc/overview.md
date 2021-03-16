@@ -85,7 +85,9 @@ To sum-up, WOOD tools uses major object oriented features as follow:
 | __aggregation__ | using child components that can also have own child components, in tree of not restricted complexity |
 | __unit test__ | unit testing is not strictly speaking specific to OOP but is well supported by encapsulation|
 
-Below is a more complex example. This diagram focuses on component relations that are represented as arrows, simple arrow for inheritance and arrow with diamond for aggregation. Note that inheritance is also know as `IS A` relation whereas aggregation is a `HAS A` relation. Also, a component that implements content for an editable area is known as content component, whereas a component that has child components is named parent component.
+Below is a more complex example. It is a contrived example but helps in getting the big picture.
+
+It focuses on component relations that are represented as arrows, simple arrow for inheritance and arrow with diamond for aggregation. Note that inheritance is also know as `IS A` relation whereas aggregation is a `HAS A` relation. Also, a component that implements content for an editable area is known as content component, whereas a component that has child components is named parent component.
 
 ![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\components-sample.svg)
 
