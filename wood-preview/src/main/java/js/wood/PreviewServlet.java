@@ -197,7 +197,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 			// create component with support for preview script
 			Component compo = factory.createComponent(layoutPath, this);
-			Preview preview = new Preview(contextPath, project, compo);
+			boolean controlScript = httpRequest.getServletContext().getAttribute(EventsServlet.class.getName()) != null; 
+			Preview preview = new Preview(project, compo, contextPath, controlScript);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}

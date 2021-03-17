@@ -32,7 +32,6 @@ public class PreviewTest {
 	private Project project;
 	@Mock
 	private Component compo;
-
 	@Mock
 	private ThemeStyles theme;
 
@@ -40,7 +39,7 @@ public class PreviewTest {
 
 	@Before
 	public void beforeTest() {
-		preview = new Preview("test", project, compo);
+		preview = new Preview(project, compo, "test", true);
 	}
 
 	@Test
@@ -97,9 +96,11 @@ public class PreviewTest {
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		when(compo.getLayout()).thenReturn(documentBuilder.parseHTML(layout).getRoot());
 
+		// exercise test
 		Writer writer = new StringWriter();
 		preview.serialize(writer);
 
+		// verify test
 		Document document = documentBuilder.parseXML(writer.toString());
 		Element html = document.getByTag("HTML");
 		assertThat(html, notNullValue());

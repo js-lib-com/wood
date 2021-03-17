@@ -22,12 +22,6 @@ import js.util.Strings;
  * @since 1.0
  */
 class Preview {
-	/**
-	 * Runtime context path used to create links for page resource files - preview always uses URL absolute path in which this
-	 * application context is included.
-	 */
-	private final String contextPath;
-
 	/** Project reference. */
 	private final Project project;
 
@@ -35,16 +29,27 @@ class Preview {
 	private final Component compo;
 
 	/**
+	 * Runtime context path used to create links for page resource files - preview always uses URL absolute path in which this
+	 * application context is included.
+	 */
+	private final String contextPath;
+
+	/** Enable control script injection only if events stream servlet is declared on preview web.xml */
+	private final boolean controlScript;
+
+	/**
 	 * Create component preview instance.
 	 * 
-	 * @param contextPath runtime context path,
 	 * @param project WOOD project context,
-	 * @param compo component.
+	 * @param compo component,
+	 * @param contextPath runtime context path,
+	 * @param controlScript enable control script injection.
 	 */
-	public Preview(String contextPath, Project project, Component compo) {
-		this.contextPath = contextPath;
+	public Preview(Project project, Component compo, String contextPath, boolean controlScript) {
 		this.project = project;
 		this.compo = compo;
+		this.contextPath = contextPath;
+		this.controlScript = controlScript;
 	}
 
 	/**
@@ -125,7 +130,9 @@ class Preview {
 			addStyle(doc, urlAbsolutePath(style));
 		}
 
-		addControlScript(doc);
+		if (controlScript) {
+			addControlScript(doc);
+		}
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
 			addScript(doc, script);
 		}

@@ -132,6 +132,7 @@ public class PreviewServletTest {
 
 	@Test
 	public void service_Component() throws ServletException, IOException {
+		when(httpRequest.getServletContext()).thenReturn(servletContext);
 		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo");
 
 		FilePath layoutPreview = mock(FilePath.class);

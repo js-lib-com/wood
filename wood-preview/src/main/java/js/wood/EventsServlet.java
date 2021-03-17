@@ -8,6 +8,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +55,23 @@ public class EventsServlet extends HttpServlet {
 		log.trace("EventsServlet()");
 		this.json = Classes.loadService(Json.class);
 		this.eventsManager = EventsManager.instance();
+	}
+
+	/**
+	 * Servlet instance initialization. This hook is invoked by servlet container on instance creation. Since this servlet is
+	 * declared <code>load-on-startup</code> this initialization occurs at application deployment.
+	 * <p>
+	 * Current implementation just create boolean attribute with this servlet class name, so that {@link PreviewServlet} is able
+	 * to detect if events servlet is configured and configure preview control script accordingly.
+	 * 
+	 * @param config servlet configuration.
+	 */
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		ServletContext servletContext = config.getServletContext();
+		log.trace("Initialize servlet |%s#%s|.", servletContext.getServletContextName(), config.getServletName());
+		servletContext.setAttribute(EventsServlet.class.getName(), true);
 	}
 
 	/**
