@@ -83,7 +83,7 @@ import js.util.Params;
 public class CompoPath extends DirPath {
 	/** Component path pattern. */
 	protected static final Pattern PATTERN = Pattern.compile("^(" + //
-			"(?:[a-z0-9-]+/)+" + // path segments
+			"(?:[a-z0-9-]+/)*" + // path segments
 			"[a-z0-9-]+" + // component name
 			")/?$", //
 			Pattern.CASE_INSENSITIVE);

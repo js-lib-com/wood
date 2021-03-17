@@ -93,8 +93,8 @@ public class CompoPathTest {
 		assertTrue(CompoPath.accept("path/compo"));
 		assertTrue(CompoPath.accept("path/compo/"));
 		assertTrue(CompoPath.accept("res/path/compo"));
-
-		assertFalse(CompoPath.accept("compo"));
+		assertTrue(CompoPath.accept("compo"));
+		
 		assertFalse(CompoPath.accept("res/path/compo/compo.htm"));
 		assertFalse(CompoPath.accept("res/path/compo/compo.htm#fragment-id"));
 		assertFalse(CompoPath.accept("res/path/compo/compo.css"));
