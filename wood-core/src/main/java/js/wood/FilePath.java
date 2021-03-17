@@ -58,7 +58,7 @@ public class FilePath extends Path {
 
 	/** Pattern for file path accordingly syntax described by class description. */
 	private static final Pattern PATTERN = Pattern.compile("^" + //
-			"((?:[a-z]+)/(?:[a-z0-9-]+/)*)?" + // directory path
+			"((?:[a-z0-9-]+)/(?:[a-z0-9-]+/)*)?" + // directory path
 			"([a-z0-9-\\.]+)" + // base name is file name without variants or extension
 			"(?:_([a-z0-9][a-z0-9-_]*))?" + // variants
 			"\\.([a-z0-9]{2,5})" + // file extension
