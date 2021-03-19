@@ -12,21 +12,21 @@ import js.dom.Element;
 import js.lang.BugError;
 import js.util.Classes;
 import js.util.Files;
-import js.util.Strings;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ITypeConverter;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "import", description = "Import component.")
+@Command(name = "import", description = "Import component from repository.")
 public final class CompoImport extends Task {
+	@Option(names = { "-r", "--reload" }, description = "Force reload from repository. Local component files are deleted.")
+	private boolean reload;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
 	private boolean verbose;
 
-	@Parameters(index = "0", description = "Component versioned name, e.g. com.js-lib:captcha:1.1", converter = NameConverter.class)
-	private Name name;
-	@Parameters(index = "1", description = "Project library path.")
+	@Parameters(index = "0", description = "Component versioned name, e.g. com.js-lib.web:captcha:1.1", converter = CompoNameConverter.class)
+	private CompoName name;
+	@Parameters(index = "1", description = "Target directory path, relative to project root.")
 	private String path;
 
 	@Override
@@ -43,23 +43,33 @@ public final class CompoImport extends Task {
 			throw new BugError("Missing repository.");
 		}
 
-		File groupDir = new File(mavenRepositoryDir, name.groupId.replace('.', File.separatorChar));
-		File artifactDir = new File(groupDir, name.artifactId);
+		File groupDir = new File(mavenRepositoryDir, name.getGroupId().replace('.', File.separatorChar));
+		File artifactDir = new File(groupDir, name.getArtifactId());
 		// version is the last directory from path that hosts component files
-		File compoDir = new File(artifactDir, name.version);
+		File compoDir = new File(artifactDir, name.getVersion());
 
-		if (!compoDir.exists()) {
-			if (!compoDir.mkdirs()) {
+		if (reload) {
+			if (!compoDir.exists() && !compoDir.mkdirs()) {
 				throw new IOException("Cannot create component directory.");
 			}
 			downloadCompoment(name, compoDir);
+		} else {
+			if (!compoDir.exists()) {
+				if (!compoDir.mkdirs()) {
+					throw new IOException("Cannot create component directory.");
+				}
+				downloadCompoment(name, compoDir);
+			}
 		}
 
 		File workingDir = workingDir();
 		File targetDir = new File(workingDir, path);
-		targetDir = new File(targetDir, name.artifactId);
+		targetDir = new File(targetDir, name.getArtifactId());
 		if (!targetDir.exists() && !targetDir.mkdirs()) {
 			throw new IOException("Cannot create component directory.");
+		}
+		if (reload) {
+			Files.removeFilesHierarchy(targetDir);
 		}
 
 		File[] compoFiles = compoDir.listFiles();
@@ -87,8 +97,8 @@ public final class CompoImport extends Task {
 	 * @param targetDir target directory.
 	 * @throws IOException if download fails for whatever reason.
 	 */
-	private void downloadCompoment(Name name, File targetDir) throws IOException {
-		URL indexPageURL = new URL(String.format("http://maven.js-lib.com/%s/%s/%s/", name.groupId.replace('.', '/'), name.artifactId, name.version));
+	private void downloadCompoment(CompoName name, File targetDir) throws IOException {
+		URL indexPageURL = new URL(String.format("http://maven.js-lib.com/%s/", name.toPath()));
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
 
@@ -102,36 +112,6 @@ public final class CompoImport extends Task {
 				}
 				Files.copy(linkURL, new File(targetDir, link));
 			}
-		}
-	}
-
-	private static class Name {
-		final String groupId;
-		final String artifactId;
-		final String version;
-
-		public Name(String groupId, String artifactId, String version) {
-			this.groupId = groupId;
-			this.artifactId = artifactId;
-			this.version = version;
-		}
-
-		@Override
-		public String toString() {
-			return Strings.concat(groupId, ':', artifactId, ':', version);
-		}
-	}
-
-	private static class NameConverter implements ITypeConverter<Name> {
-		private static final Pattern MAVEN_COORDINATES = Pattern.compile("^([^:]+):([^:]+):([^:]+)$", Pattern.CASE_INSENSITIVE);
-
-		@Override
-		public Name convert(String value) throws Exception {
-			Matcher matcher = MAVEN_COORDINATES.matcher(value);
-			if (matcher.find()) {
-				return new Name(matcher.group(1), matcher.group(2), matcher.group(3));
-			}
-			return null;
 		}
 	}
 }
