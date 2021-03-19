@@ -6,6 +6,8 @@ import js.wood.cli.compo.CompoDelete;
 import js.wood.cli.compo.CompoExport;
 import js.wood.cli.compo.CompoImport;
 import js.wood.cli.compo.CompoMove;
+import js.wood.cli.compo.CompoOpen;
+import js.wood.cli.compo.CompoPreview;
 import js.wood.cli.compo.CompoRename;
 import js.wood.cli.project.ProjectBuild;
 import js.wood.cli.project.ProjectClean;
@@ -36,6 +38,8 @@ public class Main {
 		compoCommands.addSubcommand("delete", CompoDelete.class);
 		compoCommands.addSubcommand("rename", CompoRename.class);
 		compoCommands.addSubcommand("move", CompoMove.class);
+		compoCommands.addSubcommand("open", CompoOpen.class);
+		compoCommands.addSubcommand("preview", CompoPreview.class);
 		compoCommands.addSubcommand("import", CompoImport.class);
 		compoCommands.addSubcommand("export", CompoExport.class);
 
