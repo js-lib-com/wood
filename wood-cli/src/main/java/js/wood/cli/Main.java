@@ -3,6 +3,7 @@ package js.wood.cli;
 import js.wood.cli.compo.CompoCommands;
 import js.wood.cli.compo.CompoCreate;
 import js.wood.cli.compo.CompoDelete;
+import js.wood.cli.compo.CompoExport;
 import js.wood.cli.compo.CompoImport;
 import js.wood.cli.compo.CompoMove;
 import js.wood.cli.compo.CompoRename;
@@ -36,6 +37,7 @@ public class Main {
 		compoCommands.addSubcommand("rename", CompoRename.class);
 		compoCommands.addSubcommand("move", CompoMove.class);
 		compoCommands.addSubcommand("import", CompoImport.class);
+		compoCommands.addSubcommand("export", CompoExport.class);
 
 		CommandLine runtimeCommands = new CommandLine(new RuntimeCommands());
 		runtimeCommands.addSubcommand("create", RuntimeCreate.class);
