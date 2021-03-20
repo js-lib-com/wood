@@ -8,7 +8,6 @@ import java.util.Map;
 import js.wood.cli.Task;
 import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
-import js.wood.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -67,7 +66,7 @@ public class ProjectCreate extends Task {
 		variables.put("locale", locale);
 
 		TemplateProcessor processor = new TemplateProcessor(projectDir, TemplateType.project, verbose);
-		processor.exec(Files.basename(type), variables);
+		processor.exec(type, variables);
 
 		return 0;
 	}

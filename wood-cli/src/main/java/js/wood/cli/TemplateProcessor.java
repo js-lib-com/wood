@@ -42,8 +42,12 @@ public class TemplateProcessor {
 					continue;
 				}
 
-				if (zipEntryName.startsWith("$")) {
-					copy(zipInputStream, zipEntryName, variables);
+				String[] zipEntryNameSegments = zipEntryName.split("/");
+				String fileName = zipEntryNameSegments[zipEntryNameSegments.length - 1];
+				// by convention, for formatted files, file name starts with dollar ($)
+				if (fileName.startsWith("$")) {
+					zipEntryNameSegments[zipEntryNameSegments.length - 1] = fileName.substring(1);
+					copy(zipInputStream, Strings.join(zipEntryNameSegments, '/'), variables);
 				} else {
 					copy(zipInputStream, zipEntryName);
 				}
@@ -64,8 +68,7 @@ public class TemplateProcessor {
 	private void copy(ZipInputStream zipInputStream, String zipEntryName, Map<String, String> variables) throws IOException {
 		char[] buffer = new char[2048];
 
-		// by convention, for formatted files, ZIP entry name starts with dollar ($)
-		File file = new File(targetDir, zipEntryName.substring(1));
+		File file = new File(targetDir, zipEntryName);
 		if (verbose) {
 			print("Create file '%s'.", file);
 		}
