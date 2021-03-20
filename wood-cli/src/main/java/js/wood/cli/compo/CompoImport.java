@@ -33,13 +33,10 @@ public final class CompoImport extends Task {
 	protected int exec() throws IOException {
 		print("Import component %s into %s", coordinates, path);
 
-		File mavenHomeDir = new File(property("MAVEN_HOME"));
-		if (!mavenHomeDir.exists()) {
-			throw new BugError("Missing Maven home.");
-		}
-		File repositoryDir = new File(mavenHomeDir, "repository");
+		File woodHome = new File(property("WOOD_HOME"));
+		File repositoryDir = new File(woodHome, "repository");
 		if (!repositoryDir.exists()) {
-			throw new BugError("Missing Maven repository.");
+			throw new BugError("Missing components repository.");
 		}
 
 		File compoDir = new File(repositoryDir, coordinates.toFile());

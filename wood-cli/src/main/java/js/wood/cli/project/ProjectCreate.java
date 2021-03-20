@@ -1,6 +1,5 @@
 package js.wood.cli.project;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,17 +15,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import js.io.VariablesWriter;
-import js.util.Classes;
-import js.util.Strings;
 import js.wood.cli.Task;
+import js.wood.cli.TemplateType;
+import js.wood.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "create", description = "Create named project into current directory.")
 public class ProjectCreate extends Task {
-	@Option(names = "--type", description = "Project type. Valid values: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}.", defaultValue = "standard")
-	private Type type;
+	@Option(names = { "-z", "--type" }, description = "Project template from ${WOOD_HOME}/template/project directory.")
+	private String type;
 
 	@Option(names = { "-a", "--author" }, description = "Developer name.")
 	private String author;
@@ -76,15 +75,13 @@ public class ProjectCreate extends Task {
 		variables.put("description", description);
 		variables.put("locale", locale);
 
-		createProject(projectDir, "standard", variables);
+		createProject(projectDir, Files.basename(type), variables);
 
 		return 0;
 	}
 
-	private void createProject(File projectDir, String template, Map<String, String> variables) throws IOException {
-		String templateResource = Strings.concat("/project/", template, ".zip");
-
-		try (ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(Classes.getResourceAsStream(templateResource)))) {
+	private void createProject(File projectDir, String templateName, Map<String, String> variables) throws IOException {
+		try (ZipInputStream zipInputStream = template(TemplateType.project, templateName)) {
 			ZipEntry zipEntry;
 			while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 				String zipEntryName = zipEntry.getName();
@@ -145,10 +142,6 @@ public class ProjectCreate extends Task {
 				fileOutputStream.write(buffer, 0, len);
 			}
 		}
-	}
-
-	public static enum Type {
-		simple, standard, full
 	}
 
 	// --------------------------------------------------------------------------------------------
