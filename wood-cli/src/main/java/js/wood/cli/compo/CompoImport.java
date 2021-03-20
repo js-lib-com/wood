@@ -24,47 +24,46 @@ public final class CompoImport extends Task {
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
 	private boolean verbose;
 
-	@Parameters(index = "0", description = "Component versioned name, e.g. com.js-lib.web:captcha:1.1", converter = CompoNameConverter.class)
-	private CompoName name;
+	@Parameters(index = "0", description = "Component versioned name, e.g. com.js-lib.web:captcha:1.1", converter = CompoCoordinatesConverter.class)
+	private CompoCoordinates coordinates;
 	@Parameters(index = "1", description = "Target directory path, relative to project root.")
 	private String path;
 
 	@Override
 	protected int exec() throws IOException {
-		print("Import component %s into %s", name, path);
+		print("Import component %s into %s", coordinates, path);
 
 		String mavenHome = System.getProperty("MAVEN_HOME");
 		if (mavenHome == null) {
 			throw new BugError("Missing -DMAVEN_HOME from Java arguments.");
 		}
 		File mavenHomeDir = new File(mavenHome);
-		File mavenRepositoryDir = new File(mavenHomeDir, "repository");
-		if (!mavenRepositoryDir.exists()) {
-			throw new BugError("Missing repository.");
+		if(!mavenHomeDir.exists()) {
+			throw new BugError("Missing Maven home.");
+		}
+		File repositoryDir = new File(mavenHomeDir, "repository");
+		if (!repositoryDir.exists()) {
+			throw new BugError("Missing Maven repository.");
 		}
 
-		File groupDir = new File(mavenRepositoryDir, name.getGroupId().replace('.', File.separatorChar));
-		File artifactDir = new File(groupDir, name.getArtifactId());
-		// version is the last directory from path that hosts component files
-		File compoDir = new File(artifactDir, name.getVersion());
-
+		File compoDir = new File(repositoryDir, coordinates.toFile());
 		if (reload) {
 			if (!compoDir.exists() && !compoDir.mkdirs()) {
 				throw new IOException("Cannot create component directory.");
 			}
-			downloadCompoment(name, compoDir);
+			downloadCompoment(coordinates, compoDir);
 		} else {
 			if (!compoDir.exists()) {
 				if (!compoDir.mkdirs()) {
 					throw new IOException("Cannot create component directory.");
 				}
-				downloadCompoment(name, compoDir);
+				downloadCompoment(coordinates, compoDir);
 			}
 		}
 
 		File workingDir = workingDir();
 		File targetDir = new File(workingDir, path);
-		targetDir = new File(targetDir, name.getArtifactId());
+		targetDir = new File(targetDir, coordinates.getArtifactId());
 		if (!targetDir.exists() && !targetDir.mkdirs()) {
 			throw new IOException("Cannot create component directory.");
 		}
@@ -97,7 +96,7 @@ public final class CompoImport extends Task {
 	 * @param targetDir target directory.
 	 * @throws IOException if download fails for whatever reason.
 	 */
-	private void downloadCompoment(CompoName name, File targetDir) throws IOException {
+	private void downloadCompoment(CompoCoordinates name, File targetDir) throws IOException {
 		URL indexPageURL = new URL(String.format("http://maven.js-lib.com/%s/", name.toPath()));
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);

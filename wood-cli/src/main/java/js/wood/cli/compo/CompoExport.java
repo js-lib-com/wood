@@ -51,8 +51,8 @@ public class CompoExport extends Task {
 		if (!descriptorFile.exists()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", path));
 		}
-		CompoName compoName = compoName(descriptorFile);
-		if (!compoName.isValid()) {
+		CompoCoordinates compoCoordinates = compoCoordinates(descriptorFile);
+		if (!compoCoordinates.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Invalid descriptor for component %s. Missing component coordinates.", path));
 		}
 
@@ -62,19 +62,19 @@ public class CompoExport extends Task {
 		}
 
 		if (verbose) {
-			print("Cleanup repository component %s.", compoName);
+			print("Cleanup repository component %s.", compoCoordinates);
 		}
-		cleanupRepositoryComponent(compoName);
+		cleanupRepositoryComponent(compoCoordinates);
 		for (File compoFile : compoFiles) {
 			if (verbose) {
 				print("Upload file %s.", compoFile);
 			}
-			uploadComponentFile(compoFile, compoName);
+			uploadComponentFile(compoFile, compoCoordinates);
 		}
 		return 0;
 	}
 
-	private static void cleanupRepositoryComponent(CompoName compoName) throws IOException {
+	private static void cleanupRepositoryComponent(CompoCoordinates compoName) throws IOException {
 		String url = String.format("http://maven.js-lib.com/%s/", compoName.toPath());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpDelete httpDelete = new HttpDelete(url);
@@ -85,7 +85,7 @@ public class CompoExport extends Task {
 		}
 	}
 
-	private static void uploadComponentFile(File compoFile, CompoName compoName) throws IOException {
+	private static void uploadComponentFile(File compoFile, CompoCoordinates compoName) throws IOException {
 		String url = String.format("http://maven.js-lib.com/%s/%s", compoName.toPath(), compoFile.getName());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpPost httpPost = new HttpPost(url);
@@ -99,13 +99,13 @@ public class CompoExport extends Task {
 		}
 	}
 
-	private static CompoName compoName(File descriptorFile) throws FileNotFoundException {
+	private static CompoCoordinates compoCoordinates(File descriptorFile) throws FileNotFoundException {
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document descriptorDoc = documentBuilder.loadXML(descriptorFile);
 		String groupId = text(descriptorDoc, "groupId");
 		String artifactId = text(descriptorDoc, "artifactId");
 		String version = text(descriptorDoc, "version");
-		return new CompoName(groupId, artifactId, version);
+		return new CompoCoordinates(groupId, artifactId, version);
 	}
 
 	private static String text(Document doc, String tagName) {

@@ -1,13 +1,15 @@
 package js.wood.cli.compo;
 
-import js.util.Strings;
+import static js.util.Strings.concat;
 
-class CompoName {
+import java.io.File;
+
+class CompoCoordinates {
 	private final String groupId;
 	private final String artifactId;
 	private final String version;
 
-	public CompoName(String groupId, String artifactId, String version) {
+	public CompoCoordinates(String groupId, String artifactId, String version) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
@@ -29,12 +31,16 @@ class CompoName {
 		return groupId != null && artifactId != null && version != null;
 	}
 
+	public String toFile() {
+		return concat(groupId.replace('.', File.separatorChar), File.separatorChar, artifactId, File.separatorChar, version);
+	}
+
 	public String toPath() {
-		return Strings.concat(groupId.replace('.', '/'), '/', artifactId, '/', version);
+		return concat(groupId.replace('.', '/'), '/', artifactId, '/', version);
 	}
 
 	@Override
 	public String toString() {
-		return Strings.concat(groupId, ':', artifactId, ':', version);
+		return concat(groupId, ':', artifactId, ':', version);
 	}
 }

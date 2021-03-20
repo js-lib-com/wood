@@ -5,14 +5,14 @@ import java.util.regex.Pattern;
 
 import picocli.CommandLine.ITypeConverter;
 
-class CompoNameConverter implements ITypeConverter<CompoName> {
+class CompoCoordinatesConverter implements ITypeConverter<CompoCoordinates> {
 	private static final Pattern MAVEN_COORDINATES = Pattern.compile("^([^:]+):([^:]+):([^:]+)$", Pattern.CASE_INSENSITIVE);
 
 	@Override
-	public CompoName convert(String value) throws Exception {
+	public CompoCoordinates convert(String value) throws Exception {
 		Matcher matcher = MAVEN_COORDINATES.matcher(value);
 		if (matcher.find()) {
-			return new CompoName(matcher.group(1), matcher.group(2), matcher.group(3));
+			return new CompoCoordinates(matcher.group(1), matcher.group(2), matcher.group(3));
 		}
 		return null;
 	}
