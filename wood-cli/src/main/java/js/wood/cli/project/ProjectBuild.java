@@ -1,4 +1,4 @@
-	package js.wood.cli.project;
+package js.wood.cli.project;
 
 import static java.lang.String.format;
 
@@ -21,6 +21,8 @@ public class ProjectBuild extends Task {
 	private String targetDir;
 	@Option(names = { "-n", "--number" }, description = "Build number. Default: ${DEFAULT-VALUE}", defaultValue = "0", paramLabel = "number")
 	private int buildNumber;
+	@Option(names = { "-r", "--runtime" }, description = "Runtime server name. Default: project name.")
+	private String runtime;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
 	private boolean verbose;
 
@@ -45,12 +47,19 @@ public class ProjectBuild extends Task {
 		builder.build();
 
 		File runtimeHome = new File(property("RUNTIME_HOME"));
-		File projectRuntimeDir = new File(runtimeHome, workingDir.getName());
+		File projectRuntimeDir = new File(runtimeHome, runtime != null ? runtime : workingDir.getName());
+		if (!projectRuntimeDir.exists()) {
+			// it is legal to not have runtime in which case deploy is not performed
+			return 0;
+		}
+
 		File webappsDir = new File(projectRuntimeDir, "webapps");
-		File deployDir = new File(webappsDir, workingDir.getName());
-		if (!deployDir.exists()) {
+		if (!webappsDir.exists()) {
 			throw new BugError("Invalid runtime. Web apps directory not found.");
 		}
+		File deployDir = new File(webappsDir, workingDir.getName());
+		// ensure deploy directory is created
+		deployDir.mkdir();
 
 		print("Deploying project %s...", workingDir);
 		deploy(buildDir.getPath().length(), deployDir, buildDir);
