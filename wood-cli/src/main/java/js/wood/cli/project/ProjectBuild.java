@@ -1,8 +1,11 @@
-package js.wood.cli.project;
+	package js.wood.cli.project;
+
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
 
+import js.lang.BugError;
 import js.wood.Builder;
 import js.wood.BuilderConfig;
 import js.wood.cli.Task;
@@ -18,6 +21,8 @@ public class ProjectBuild extends Task {
 	private String targetDir;
 	@Option(names = { "-n", "--number" }, description = "Build number. Default: ${DEFAULT-VALUE}", defaultValue = "0", paramLabel = "number")
 	private int buildNumber;
+	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
+	private boolean verbose;
 
 	@Override
 	protected int exec() throws IOException {
@@ -25,7 +30,7 @@ public class ProjectBuild extends Task {
 		File buildDir = new File(workingDir, targetDir);
 
 		if (clean) {
-			print("Cleaning build files for project%s...", workingDir);
+			print("Cleaning build files %s...", buildDir);
 			Files.removeFilesHierarchy(buildDir);
 		}
 
@@ -39,6 +44,37 @@ public class ProjectBuild extends Task {
 		Builder builder = new Builder(config);
 		builder.build();
 
+		File runtimeHome = new File(property("RUNTIME_HOME"));
+		File projectRuntimeDir = new File(runtimeHome, workingDir.getName());
+		File webappsDir = new File(projectRuntimeDir, "webapps");
+		File deployDir = new File(webappsDir, workingDir.getName());
+		if (!deployDir.exists()) {
+			throw new BugError("Invalid runtime. Web apps directory not found.");
+		}
+
+		print("Deploying project %s...", workingDir);
+		deploy(buildDir.getPath().length(), deployDir, buildDir);
 		return 0;
+	}
+
+	private void deploy(int buildDirPathLength, File deployDir, File currentDir) throws IOException {
+		File[] files = currentDir.listFiles();
+		if (files == null) {
+			throw new IOException(format("Fail to list files on directory %s.", currentDir));
+		}
+		for (File file : files) {
+			if (file.isDirectory()) {
+				deploy(buildDirPathLength, deployDir, file);
+				continue;
+			}
+
+			String path = file.getPath().substring(buildDirPathLength + 1);
+			File deployFile = new File(deployDir, path);
+			deployFile.getParentFile().mkdirs();
+			if (verbose) {
+				print("Deploy file %s.", file);
+			}
+			Files.copy(file, deployFile);
+		}
 	}
 }
