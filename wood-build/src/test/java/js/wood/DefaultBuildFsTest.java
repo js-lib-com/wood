@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +23,10 @@ public class DefaultBuildFsTest {
 		File projectRoot = new File("src/test/resources/build-fs");
 		buildDir = new File(projectRoot, "site");
 		if (buildDir.exists()) {
-			Files.removeFilesHierarchy(buildDir);
+			try {
+				Files.removeFilesHierarchy(buildDir);
+			} catch (IOException ignore) {
+			}
 		}
 
 		project = new BuilderProject(projectRoot, buildDir);

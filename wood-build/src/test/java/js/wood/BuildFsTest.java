@@ -5,26 +5,29 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Locale;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -44,15 +47,19 @@ public class BuildFsTest {
 	private BuildFS buildFS;
 
 	@Before
-	public void beforeTest() throws Exception {
+	public void beforeTest() {
 		documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		File projectRoot = new File("src/test/resources/build-fs");
 		buildDir = new File(projectRoot, "site");
+		buildFS = new TestBuildFS(buildDir, 0);
+	}
+
+	@After
+	public void afterTest() throws IOException {
 		if (buildDir.exists()) {
 			Files.removeFilesHierarchy(buildDir);
 		}
-		buildFS = new TestBuildFS(buildDir, 0);
 	}
 
 	@Test
@@ -145,7 +152,17 @@ public class BuildFsTest {
 	@Test(expected = IOException.class)
 	public void writePageMedia_IOException() throws IOException {
 		FilePath mediaFile = file("background.jpg");
-		when(mediaFile.getReader()).thenReturn(new ExceptionalReader());
+
+		// need to ensure stream is closed otherwise file delete on @After hook will fail
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				OutputStream stream = invocation.getArgument(0);
+				stream.close();
+				throw new IOException();
+			}
+		}).when(mediaFile).copyTo(any(OutputStream.class));
+
 		buildFS.writePageMedia(null, mediaFile);
 	}
 
@@ -177,7 +194,17 @@ public class BuildFsTest {
 	@Test(expected = IOException.class)
 	public void writeStyleMedia_IOException() throws IOException {
 		FilePath mediaFile = file("background.jpg");
-		when(mediaFile.getReader()).thenReturn(new ExceptionalReader());
+
+		// need to ensure stream is closed otherwise file delete on @After hook will fail
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				OutputStream stream = invocation.getArgument(0);
+				stream.close();
+				throw new IOException();
+			}
+		}).when(mediaFile).copyTo(any(OutputStream.class));
+
 		buildFS.writeStyleMedia(mediaFile);
 	}
 
@@ -302,7 +329,17 @@ public class BuildFsTest {
 		when(file.exists()).thenReturn(true);
 		when(file.getName()).thenReturn(fileName);
 		when(file.getReader()).thenReturn(new StringReader("CONTENT"));
-		doCallRealMethod().when(file).copyTo((Writer) any());
+
+		// need to ensure stream is closed otherwise file delete on @After hook will fail
+		doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				OutputStream stream = invocation.getArgument(0);
+				stream.close();
+				return null;
+			}
+		}).when(file).copyTo(any(OutputStream.class));
+
 		return file;
 	}
 

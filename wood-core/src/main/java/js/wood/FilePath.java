@@ -294,8 +294,8 @@ public class FilePath extends Path {
 		Files.copy(getReader(), writer);
 	}
 
-	public void copyTo(OutputStream stream) throws IOException {
-		Files.copy(file, stream);
+	public void copyTo(OutputStream outputStream) throws IOException {
+		Files.copy(file, outputStream);
 	}
 
 	public String load() throws IOException {
