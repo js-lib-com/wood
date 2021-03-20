@@ -1,17 +1,12 @@
 package js.wood.cli;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.util.zip.ZipInputStream;
 
 import js.lang.BugError;
-import js.util.Strings;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -72,11 +67,5 @@ public abstract class Task implements Runnable {
 			throw new BugError("Missing property %s.", key);
 		}
 		return property.endsWith("/") ? property.substring(0, property.length() - 1) : property;
-	}
-
-	protected static ZipInputStream template(TemplateType type, String name) throws FileNotFoundException {
-		File woodHome = new File(property("WOOD_HOME"));
-		File templateFile = new File(woodHome, Strings.concat("template", File.separatorChar, type, File.separatorChar, name, ".zip"));
-		return new ZipInputStream(new BufferedInputStream(new FileInputStream(templateFile)));
 	}
 }
