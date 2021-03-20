@@ -33,12 +33,8 @@ public final class CompoImport extends Task {
 	protected int exec() throws IOException {
 		print("Import component %s into %s", coordinates, path);
 
-		String mavenHome = System.getProperty("MAVEN_HOME");
-		if (mavenHome == null) {
-			throw new BugError("Missing -DMAVEN_HOME from Java arguments.");
-		}
-		File mavenHomeDir = new File(mavenHome);
-		if(!mavenHomeDir.exists()) {
+		File mavenHomeDir = new File(property("MAVEN_HOME"));
+		if (!mavenHomeDir.exists()) {
 			throw new BugError("Missing Maven home.");
 		}
 		File repositoryDir = new File(mavenHomeDir, "repository");
@@ -97,7 +93,7 @@ public final class CompoImport extends Task {
 	 * @throws IOException if download fails for whatever reason.
 	 */
 	private void downloadCompoment(CompoCoordinates name, File targetDir) throws IOException {
-		URL indexPageURL = new URL(String.format("http://maven.js-lib.com/%s/", name.toPath()));
+		URL indexPageURL = new URL(String.format("%s/%s/", property("REPOSITORY_URL"), name.toPath()));
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
 

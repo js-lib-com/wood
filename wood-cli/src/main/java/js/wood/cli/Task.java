@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 
+import js.lang.BugError;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -58,5 +59,13 @@ public abstract class Task implements Runnable {
 
 	protected static File workingDir() {
 		return Paths.get("").toAbsolutePath().toFile();
+	}
+
+	protected static String property(String key) {
+		String property = System.getProperty(key);
+		if (property == null) {
+			throw new BugError("Missing property %s.", key);
+		}
+		return property.endsWith("/") ? property.substring(0, property.length() - 1) : property;
 	}
 }

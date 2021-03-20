@@ -36,7 +36,7 @@ public class ProjectDestroy extends Task {
 		File descriptorFile = new File(projectDir, "project.xml");
 		if (!force && !descriptorFile.exists()) {
 			print("Project descriptor file not found. Is %s indeed a WOOD project?", projectDir);
-			print("ALL DIRECTORY FILES WILL BE PERMANANTLY REMOVED!");
+			print("ALL DIRECTORY FILES WILL BE PERMANENTLY REMOVED!");
 			print();
 			print("If you are sure please use --force-destroy option.");
 			print("Command aborted.");

@@ -78,7 +78,7 @@ public class CompoExport extends Task {
 	}
 
 	private static void cleanupRepositoryComponent(CompoCoordinates compoName) throws IOException {
-		String url = String.format("http://maven.js-lib.com/%s/", compoName.toPath());
+		String url = String.format("%s/%s/", property("REPOSITORY_URL"), compoName.toPath());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpDelete httpDelete = new HttpDelete(url);
 			CloseableHttpResponse response = client.execute(httpDelete);
@@ -89,7 +89,7 @@ public class CompoExport extends Task {
 	}
 
 	private static void uploadComponentFile(File compoFile, CompoCoordinates compoName) throws IOException {
-		String url = String.format("http://maven.js-lib.com/%s/%s", compoName.toPath(), compoFile.getName());
+		String url = String.format("%s/%s/%s", property("REPOSITORY_URL"), compoName.toPath(), compoFile.getName());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpPost httpPost = new HttpPost(url);
 			httpPost.setHeader("Content-Type", "application/octet-stream");
