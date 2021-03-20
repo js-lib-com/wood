@@ -25,38 +25,41 @@ public class CompoOpen extends Task {
 	@Option(names = { "-p", "--preview" }, description = "Force preview mode.")
 	private boolean preview;
 
-	@Parameters(index = "0", description = "Component path relative to project root.")
-	private String path;
+	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
+	private CompoName name;
 
 	@Override
 	protected int exec() throws Exception {
-		print("Opening component %s...", path);
+		if (!name.isValid()) {
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
+		}
 
 		File workingDir = workingDir();
-		File compoDir = new File(workingDir, path);
+		File compoDir = new File(workingDir, name.path());
 		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", path));
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
 		}
 
 		// WOOD project naming convention: descriptor file basename is the same as component directory
 		File descriptorFile = new File(compoDir, compoDir.getName() + ".xml");
 		if (!descriptorFile.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", path));
+			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", name));
 		}
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document descriptorDoc = documentBuilder.loadXML(descriptorFile);
 
+		print("Opening component %s...", name);
 		int port = 80;
 		String context;
 		if (!preview && descriptorDoc.getRoot().getTag().equals("page")) {
 			context = workingDir.getName();
 			// WOOD project naming convention: layout file basename is the same as component directory
-			path = compoDir.getName() + ".htm";
+			name = new CompoName(compoDir.getName() + ".htm");
 		} else {
 			context = workingDir.getName() + "-preview";
 		}
 
-		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, path)));
+		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
 
 		return 0;
 	}

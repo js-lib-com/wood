@@ -18,22 +18,25 @@ public class CompoPreview extends Task {
 	@Spec
 	private CommandSpec commandSpec;
 
-	@Parameters(index = "0", description = "Component path relative to project root.")
-	private String path;
+	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
+	private CompoName name;
 
 	@Override
 	protected int exec() throws Exception {
-		print("Opening component preview %s...", path);
-
-		File workingDir = workingDir();
-		File compoDir = new File(workingDir, path);
-		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", path));
+		if (!name.isValid()) {
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
+		File workingDir = workingDir();
+		File compoDir = new File(workingDir, name.toString());
+		if (!compoDir.exists()) {
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
+		}
+
+		print("Opening component preview %s...", name);
 		int port = 80;
 		String context = workingDir.getName() + "-preview";
-		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, path)));
+		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
 
 		return 0;
 	}

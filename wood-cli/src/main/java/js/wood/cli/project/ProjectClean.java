@@ -8,7 +8,7 @@ import js.wood.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "build", description = "Clean build files from current working directory.")
+@Command(name = "clean", description = "Clean build files from current working directory.")
 public class ProjectClean extends Task {
 	@Option(names = { "-t", "--target" }, description = "Build directory relative to working directory. Default: ${DEFAULT-VALUE}.", defaultValue = "site", paramLabel = "target")
 	private String targetDir;

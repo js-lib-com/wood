@@ -33,27 +33,29 @@ public class CompoExport extends Task {
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about exported files.")
 	private boolean verbose;
 
-	@Parameters(index = "0", description = "Component path relative to project root.")
-	private String path;
+	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
+	private CompoName name;
 
 	@Override
 	protected int exec() throws Exception {
-		print("Exporting component %s...", path);
+		if (!name.isValid()) {
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
+		}
 
 		File workingDir = workingDir();
-		File compoDir = new File(workingDir, path);
+		File compoDir = new File(workingDir, name.path());
 		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", path));
+			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
 		}
 
 		// WOOD project naming convention: descriptor file basename is the same as component directory
 		File descriptorFile = new File(compoDir, compoDir.getName() + ".xml");
 		if (!descriptorFile.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", path));
+			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", name));
 		}
 		CompoCoordinates compoCoordinates = compoCoordinates(descriptorFile);
 		if (!compoCoordinates.isValid()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Invalid descriptor for component %s. Missing component coordinates.", path));
+			throw new ParameterException(commandSpec.commandLine(), format("Invalid descriptor for component %s. Missing component coordinates.", name));
 		}
 
 		File[] compoFiles = compoDir.listFiles();
@@ -61,6 +63,7 @@ public class CompoExport extends Task {
 			throw new IOException(format("Cannot list files for component %s.", compoDir));
 		}
 
+		print("Exporting component %s...", name);
 		if (verbose) {
 			print("Cleanup repository component %s.", compoCoordinates);
 		}

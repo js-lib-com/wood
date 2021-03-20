@@ -24,7 +24,7 @@ public final class CompoImport extends Task {
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
 	private boolean verbose;
 
-	@Parameters(index = "0", description = "Component versioned name, e.g. com.js-lib.web:captcha:1.1", converter = CompoCoordinatesConverter.class)
+	@Parameters(index = "0", description = "Component repository coordinates, e.g. com.js-lib.web:captcha:1.1", converter = CompoCoordinatesConverter.class)
 	private CompoCoordinates coordinates;
 	@Parameters(index = "1", description = "Target directory path, relative to project root.")
 	private String path;

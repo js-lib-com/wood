@@ -56,7 +56,7 @@ public class Main {
 		commandLine.addSubcommand(projectCommands);
 		commandLine.addSubcommand(compoCommands);
 		commandLine.addSubcommand(runtimeCommands);
-		commandLine.addSubcommand(task(ProjectBuild.class));
+		commandLine.addSubcommand(projectCommands.getSubcommands().get("build"));
 
 		System.exit(commandLine.execute(args));
 	}
