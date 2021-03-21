@@ -35,6 +35,13 @@ public class Config {
 		}
 	}
 
+	public void unset(String key) throws IOException {
+		projectProperties().remove(key);
+		try (Writer writer = new FileWriter(projectPropertiesFile())) {
+			projectProperties().store(writer, "project properties");
+		}
+	}
+
 	public <T> T get(String key, Class<T> type) throws IOException {
 		Object value = projectProperties().get(key);
 		if (value == null) {
