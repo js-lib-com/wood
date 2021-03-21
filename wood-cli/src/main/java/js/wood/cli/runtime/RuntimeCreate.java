@@ -39,18 +39,19 @@ public class RuntimeCreate extends Task {
 		}
 		print("Creating runtime %s...", name);
 
-		File runtimeHome = new File(property("RUNTIME_HOME"));
-		File projectRuntimeDir = new File(runtimeHome, name);
-		if (projectRuntimeDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Runtime %s already existing.", projectRuntimeDir));
+		File runtimeDir = new File(config.get("runtime.home", File.class), name);
+		if (runtimeDir.exists()) {
+			throw new ParameterException(commandSpec.commandLine(), format("Runtime %s already existing.", runtimeDir));
 		}
 
 		Map<String, String> variables = new HashMap<>();
 		variables.put("port", Integer.toString(port));
 
-		TemplateProcessor processor = new TemplateProcessor(projectRuntimeDir, TemplateType.runtime, verbose);
+		TemplateProcessor processor = new TemplateProcessor(runtimeDir, TemplateType.runtime, verbose);
 		processor.exec(type, variables);
 
+		config.set("runtime.name", name);
+		config.set("runtime.port", port);
 		return 0;
 	}
 }

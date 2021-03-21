@@ -77,19 +77,19 @@ public class CompoExport extends Task {
 		return 0;
 	}
 
-	private static void cleanupRepositoryComponent(CompoCoordinates compoName) throws IOException {
-		String url = String.format("%s/%s/", property("REPOSITORY_URL"), compoName.toPath());
+	private void cleanupRepositoryComponent(CompoCoordinates coordinates) throws IOException {
+		String url = String.format("%s/%s/", config.get("repository.url"), coordinates.toPath());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpDelete httpDelete = new HttpDelete(url);
 			CloseableHttpResponse response = client.execute(httpDelete);
 			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new IOException(format("Fail to cleanup component %s", compoName));
+				throw new IOException(format("Fail to cleanup component %s", coordinates));
 			}
 		}
 	}
 
-	private static void uploadComponentFile(File compoFile, CompoCoordinates compoName) throws IOException {
-		String url = String.format("%s/%s/%s", property("REPOSITORY_URL"), compoName.toPath(), compoFile.getName());
+	private void uploadComponentFile(File compoFile, CompoCoordinates coordinates) throws IOException {
+		String url = String.format("%s/%s/%s", config.get("repository.url"), coordinates.toPath(), compoFile.getName());
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpPost httpPost = new HttpPost(url);
 			httpPost.setHeader("Content-Type", "application/octet-stream");

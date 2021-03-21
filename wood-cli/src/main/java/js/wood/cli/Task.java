@@ -15,6 +15,12 @@ public abstract class Task implements Runnable {
 	@Option(names = "--time", description = "Measure execution time. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean time;
 
+	protected Config config;
+
+	void setConfig(Config config) {
+		this.config = config;
+	}
+
 	@Override
 	public void run() {
 		long start = System.nanoTime();
@@ -61,7 +67,7 @@ public abstract class Task implements Runnable {
 		return Paths.get("").toAbsolutePath().toFile();
 	}
 
-	protected static String property(String key) {
+	protected String propertyEOL(String key) {
 		String property = System.getProperty(key);
 		if (property == null) {
 			throw new BugError("Missing property %s.", key);

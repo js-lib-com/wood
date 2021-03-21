@@ -1,6 +1,7 @@
 package js.wood.cli;
 
 import java.lang.annotation.Annotation;
+import java.util.Properties;
 
 import js.lang.BugError;
 import js.wood.cli.compo.CompoCommands;
@@ -29,6 +30,21 @@ import picocli.CommandLine.Command;
 @Command(name = "wood", description = "Command line interface for WOOD tools.", mixinStandardHelpOptions = true, version = "wood-cli, version 1.0.0")
 public class Main {
 	public static void main(String... args) {
+		Properties globalProperties = new Properties();
+		Properties projectProperties = new Properties();
+		Config config = new Config(globalProperties, projectProperties);
+
+		Main main = new Main(config);
+		main.run(args);
+	}
+
+	private final Config config;
+
+	public Main(Config config) {
+		this.config = config;
+	}
+
+	private void run(String... args) {
 		CommandLine projectCommands = new CommandLine(ProjectCommands.class);
 		projectCommands.addSubcommand(task(ProjectCreate.class));
 		projectCommands.addSubcommand(task(ProjectBuild.class));
@@ -52,7 +68,7 @@ public class Main {
 		runtimeCommands.addSubcommand(task(RuntimeStop.class));
 		runtimeCommands.addSubcommand(task(RuntimeDestroy.class));
 
-		CommandLine commandLine = new CommandLine(new Main());
+		CommandLine commandLine = new CommandLine(this);
 		commandLine.addSubcommand(projectCommands);
 		commandLine.addSubcommand(compoCommands);
 		commandLine.addSubcommand(runtimeCommands);
@@ -61,13 +77,14 @@ public class Main {
 		System.exit(commandLine.execute(args));
 	}
 
-	private static Object task(Class<? extends Task> taskClass) {
+	private Object task(Class<? extends Task> taskClass) {
 		Annotation commandAnnotation = taskClass.getAnnotation(Command.class);
 		if (commandAnnotation == null) {
 			throw new BugError("Not annotated task class |%s|.", taskClass);
 		}
 		try {
 			Task task = taskClass.newInstance();
+			task.setConfig(config);
 			return task;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new BugError("Not instantiable task class |%s|.", taskClass);

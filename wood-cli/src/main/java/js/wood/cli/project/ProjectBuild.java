@@ -38,22 +38,21 @@ public class ProjectBuild extends Task {
 
 		print("Building project %s...", workingDir);
 
-		BuilderConfig config = new BuilderConfig();
-		config.setProjectDir(workingDir);
-		config.setBuildDir(buildDir);
-		config.setBuildNumber(buildNumber);
+		BuilderConfig builderConfig = new BuilderConfig();
+		builderConfig.setProjectDir(workingDir);
+		builderConfig.setBuildDir(buildDir);
+		builderConfig.setBuildNumber(buildNumber);
 
-		Builder builder = new Builder(config);
+		Builder builder = new Builder(builderConfig);
 		builder.build();
 
-		File runtimeHome = new File(property("RUNTIME_HOME"));
-		File projectRuntimeDir = new File(runtimeHome, runtime != null ? runtime : workingDir.getName());
-		if (!projectRuntimeDir.exists()) {
+		File runtimeDir = new File(config.get("runtime.home", File.class), runtime != null ? runtime : workingDir.getName());
+		if (!runtimeDir.exists()) {
 			// it is legal to not have runtime in which case deploy is not performed
 			return 0;
 		}
 
-		File webappsDir = new File(projectRuntimeDir, "webapps");
+		File webappsDir = new File(runtimeDir, "webapps");
 		if (!webappsDir.exists()) {
 			throw new BugError("Invalid runtime. Web apps directory not found.");
 		}

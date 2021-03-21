@@ -1,5 +1,7 @@
 package js.wood.cli.compo;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,7 +11,6 @@ import java.util.regex.Pattern;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.lang.BugError;
 import js.util.Classes;
 import js.util.Files;
 import js.wood.cli.Task;
@@ -33,12 +34,7 @@ public final class CompoImport extends Task {
 	protected int exec() throws IOException {
 		print("Import component %s into %s", coordinates, path);
 
-		File woodHome = new File(property("WOOD_HOME"));
-		File repositoryDir = new File(woodHome, "repository");
-		if (!repositoryDir.exists()) {
-			throw new BugError("Missing components repository.");
-		}
-
+		File repositoryDir = config.get("repository.dir", File.class);
 		File compoDir = new File(repositoryDir, coordinates.toFile());
 		if (reload) {
 			if (!compoDir.exists() && !compoDir.mkdirs()) {
@@ -48,7 +44,7 @@ public final class CompoImport extends Task {
 		} else {
 			if (!compoDir.exists()) {
 				if (!compoDir.mkdirs()) {
-					throw new IOException("Cannot create component directory.");
+					throw new IOException(format("Cannot create component directory %s.", compoDir));
 				}
 				downloadCompoment(coordinates, compoDir);
 			}
@@ -90,7 +86,7 @@ public final class CompoImport extends Task {
 	 * @throws IOException if download fails for whatever reason.
 	 */
 	private void downloadCompoment(CompoCoordinates name, File targetDir) throws IOException {
-		URL indexPageURL = new URL(String.format("%s/%s/", property("REPOSITORY_URL"), name.toPath()));
+		URL indexPageURL = new URL(String.format("%s/%s/", config.get("repository.url"), name.toPath()));
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
 
