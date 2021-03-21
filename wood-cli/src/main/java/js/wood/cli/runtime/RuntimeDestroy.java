@@ -20,8 +20,6 @@ public class RuntimeDestroy extends Task {
 	@Override
 	protected int exec() throws Exception {
 		String name = config.get("runtime.name");
-		print("Destroying runtime %s...", name);
-
 		File runtimeDir = new File(config.get("runtime.home", File.class), name);
 		if (!runtimeDir.exists()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Runtime %s does not exist.", runtimeDir));
@@ -35,6 +33,7 @@ public class RuntimeDestroy extends Task {
 			return 0;
 		}
 
+		print("Destroying runtime %s...", name);
 		Files.removeFilesHierarchy(runtimeDir);
 		if (!runtimeDir.delete()) {
 			throw new IOException(format("Cannot remove runtime directory %s.", runtimeDir));

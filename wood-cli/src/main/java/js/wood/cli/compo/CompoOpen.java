@@ -49,7 +49,7 @@ public class CompoOpen extends Task {
 		Document descriptorDoc = documentBuilder.loadXML(descriptorFile);
 
 		print("Opening component %s...", name);
-		int port = 80;
+		int port = config.get("runtime.port", int.class);
 		String context;
 		if (!preview && descriptorDoc.getRoot().getTag().equals("page")) {
 			context = workingDir.getName();

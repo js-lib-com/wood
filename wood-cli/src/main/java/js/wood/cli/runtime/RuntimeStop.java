@@ -1,12 +1,11 @@
 package js.wood.cli.runtime;
 
-import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 
-@Command(name = "stop", description = "Stop runtime.")
-public class RuntimeStop extends Task {
+@Command(name = "stop", description = "Stop project runtime.")
+public class RuntimeStop extends RuntimeScriptTask {
 	@Override
-	protected int exec() throws Exception {
-		return 0;
+	protected String getScriptName() {
+		return "shutdown";
 	}
 }
