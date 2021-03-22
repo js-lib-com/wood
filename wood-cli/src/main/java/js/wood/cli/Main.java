@@ -13,6 +13,7 @@ import js.wood.cli.compo.CompoMove;
 import js.wood.cli.compo.CompoOpen;
 import js.wood.cli.compo.CompoPreview;
 import js.wood.cli.compo.CompoRename;
+import js.wood.cli.compo.CompoUpdate;
 import js.wood.cli.project.ProjectBuild;
 import js.wood.cli.project.ProjectClean;
 import js.wood.cli.project.ProjectCommands;
@@ -61,6 +62,7 @@ public class Main {
 		compoCommands.addSubcommand(task(CompoPreview.class));
 		compoCommands.addSubcommand(task(CompoImport.class));
 		compoCommands.addSubcommand(task(CompoExport.class));
+		compoCommands.addSubcommand(task(CompoUpdate.class));
 
 		CommandLine runtimeCommands = new CommandLine(new RuntimeCommands());
 		runtimeCommands.addSubcommand(task(RuntimeCreate.class));
