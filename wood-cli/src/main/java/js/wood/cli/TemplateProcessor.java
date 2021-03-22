@@ -22,20 +22,18 @@ import js.util.Strings;
 
 public class TemplateProcessor {
 	private final File targetDir;
-	private final TemplateType type;
 	private final boolean verbose;
 
-	public TemplateProcessor(File targetDir, TemplateType type, boolean verbose) {
+	public TemplateProcessor(File targetDir, boolean verbose) {
 		this.targetDir = targetDir;
-		this.type = type;
 		this.verbose = verbose;
 	}
 
-	public void exec(String templateName, Map<String, String> variables) throws IOException {
+	public void exec(TemplateType type, String templateName, Map<String, String> variables) throws IOException {
 		try (ZipInputStream zipInputStream = template(type, templateName)) {
 			ZipEntry zipEntry;
 			while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-				String zipEntryName = zipEntry.getName();
+				String zipEntryName = Strings.injectVariables(zipEntry.getName(), variables);
 
 				if (zipEntryName.endsWith("/")) {
 					mkdirs(zipEntryName);
@@ -45,7 +43,7 @@ public class TemplateProcessor {
 				String[] zipEntryNameSegments = zipEntryName.split("/");
 				String fileName = zipEntryNameSegments[zipEntryNameSegments.length - 1];
 				// by convention, for formatted files, file name starts with dollar ($)
-				if (fileName.startsWith("$")) {
+				if (fileName.startsWith("!")) {
 					zipEntryNameSegments[zipEntryNameSegments.length - 1] = fileName.substring(1);
 					copy(zipInputStream, Strings.join(zipEntryNameSegments, '/'), variables);
 				} else {
