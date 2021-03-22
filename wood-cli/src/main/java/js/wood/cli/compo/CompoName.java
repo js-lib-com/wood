@@ -5,6 +5,8 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Value class for component name.
@@ -42,12 +44,22 @@ public class CompoName {
 		File workingDir = Paths.get("").toAbsolutePath().toFile();
 
 		int workingDirPathLength = workingDir.getPath().length();
-		String path = search(workingDir, prefix);
-		// component path is relative to working (project) directory; +1 is for path separator
-		return path != null ? path.substring(workingDirPathLength + 1) : null;
+		List<String> paths = new ArrayList<>();
+		search(workingDir, prefix, paths);
+		switch (paths.size()) {
+		case 0:
+			return null;
+
+		case 1:
+			// component path is relative to working (project) directory; +1 is for path separator
+			return paths.get(0).substring(workingDirPathLength + 1);
+
+		default:
+			throw new IllegalStateException("Multiple components found. Please refine search criterion.");
+		}
 	}
 
-	private static String search(File dir, String prefix) throws IOException {
+	private static String search(File dir, String prefix, List<String> paths) throws IOException {
 		assert dir.isDirectory();
 		File[] files = dir.listFiles();
 		if (files == null) {
@@ -59,9 +71,9 @@ public class CompoName {
 				if (file.getName().startsWith(prefix)) {
 					return file.getPath().replace('\\', '/');
 				}
-				String path = search(file, prefix);
+				String path = search(file, prefix, paths);
 				if (path != null) {
-					return path;
+					paths.add(path);
 				}
 			}
 		}
