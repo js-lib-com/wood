@@ -67,6 +67,15 @@ public abstract class Task implements Runnable {
 		return Paths.get("").toAbsolutePath().toFile();
 	}
 
+	protected static File projectDir() {
+		File projectDir = Paths.get("").toAbsolutePath().toFile();
+		File propertiesFile = new File(projectDir, ".project.properties");
+		if (!propertiesFile.exists()) {
+			throw new BugError("Invalid project. Missing project properties file %s.", propertiesFile);
+		}
+		return projectDir;
+	}
+
 	protected String propertyEOL(String key) {
 		String property = System.getProperty(key);
 		if (property == null) {

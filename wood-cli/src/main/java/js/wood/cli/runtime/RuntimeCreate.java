@@ -47,8 +47,8 @@ public class RuntimeCreate extends Task {
 		Map<String, String> variables = new HashMap<>();
 		variables.put("port", Integer.toString(port));
 
-		TemplateProcessor processor = new TemplateProcessor(runtimeDir, TemplateType.runtime, verbose);
-		processor.exec(type, variables);
+		TemplateProcessor processor = new TemplateProcessor(runtimeDir, verbose);
+		processor.exec(TemplateType.runtime, type, variables);
 
 		config.set("runtime.name", name);
 		config.set("runtime.port", port);

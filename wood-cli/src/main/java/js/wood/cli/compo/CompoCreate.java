@@ -2,31 +2,103 @@ package js.wood.cli.compo;
 
 import static java.lang.String.format;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import js.dom.Document;
+import js.dom.DocumentBuilder;
+import js.dom.Element;
+import js.dom.NamespaceContext;
+import js.lang.BugError;
+import js.util.Classes;
+import js.util.Files;
+import js.util.Strings;
+import js.wood.WOOD;
 import js.wood.cli.Task;
+import js.wood.cli.TemplateProcessor;
+import js.wood.cli.TemplateType;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "create", description = "Create component.")
 public class CompoCreate extends Task {
 	@Spec
 	private CommandSpec commandSpec;
 
+	@Option(names = { "-t", "--template" }, description = "Template component name, path relative to project root. Ex: res/template/page", converter = CompoNameConverter.class)
+	private CompoName template;
 	@Option(names = "--no-script", description = "Do not create script file.")
 	private boolean noScript;
+	@Option(names = { "-p", "--page" }, description = "Component to create is a page.")
+	private boolean page;
 
-	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
-	private CompoName name;
+	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
+	private boolean verbose;
+
+	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home")
+	private String name;
 
 	@Override
 	protected int exec() throws Exception {
-		if (!name.isValid()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
+		File projectDir = projectDir();
+
+		File compoDir = new File(projectDir, name);
+		if (compoDir.exists()) {
+			throw new BugError("Component already exist %s.", compoDir);
 		}
-		print("Create component %s.", name);
+		print("Create component %s.", compoDir);
+		if(!compoDir.mkdirs()) {
+			throw new IOException(format("Cannot create component path %s.", compoDir));
+		}
+
+		if (template != null) {
+			File templateDir = new File(projectDir, template.path());
+			if (!templateDir.exists()) {
+				throw new BugError("Missing template component %s.", templateDir);
+			}
+			File templateFile = Arrays.stream(templateDir.listFiles()).filter(file -> file.getPath().endsWith(".htm")).findFirst().get();
+
+			DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+			Document templateDoc = documentBuilder.loadXML(templateFile);
+			Element editableElement = templateDoc.getByXPathNS(new NamespaceContext() {
+				@Override
+				public String getNamespaceURI(String prefix) {
+					return WOOD.NS;
+				}
+			}, "//*[@editable]");
+			if (editableElement == null) {
+				throw new BugError("Bad template component %s. Missing editable element.", templateDir);
+			}
+
+			Map<String, String> variables = new HashMap<>();
+			variables.put("page", compoDir.getName());
+
+			variables.put("tag", editableElement.getTag());
+			variables.put("class", compoDir.getName());
+			variables.put("template", template.path());
+			variables.put("editable", editableElement.getAttrNS(WOOD.NS, "editable"));
+			variables.put("editable", "section");
+			variables.put("xmlns", WOOD.NS);
+			
+			variables.put("root", page ? "page" : "component");
+			variables.put("groupId", "com.js-lib");
+			variables.put("artifactId", Files.basename(template.path()));
+			variables.put("version", "1.0");
+			variables.put("title", Strings.toTitleCase(Strings.concat(compoDir.getName(), page ? " page" : " component")));
+			variables.put("description", Strings.concat(Strings.toTitleCase(compoDir.getName()), page ? " page" : " component", " description."));
+
+
+			TemplateProcessor processor = new TemplateProcessor(compoDir, verbose);
+			processor.exec(TemplateType.compo, "page", variables);
+
+		}
+		
 		return 0;
 	}
 }

@@ -60,13 +60,15 @@ public class ProjectCreate extends Task {
 		}
 
 		Map<String, String> variables = new HashMap<>();
+		variables.put("package", "com.jslib.app");
+		variables.put("package-path", variables.get("package").replace('.', '/'));
 		variables.put("author", author);
 		variables.put("title", title);
 		variables.put("description", description);
 		variables.put("locale", locale);
 
-		TemplateProcessor processor = new TemplateProcessor(projectDir, TemplateType.project, verbose);
-		processor.exec(type, variables);
+		TemplateProcessor processor = new TemplateProcessor(projectDir, verbose);
+		processor.exec(TemplateType.project, type, variables);
 
 		return 0;
 	}
