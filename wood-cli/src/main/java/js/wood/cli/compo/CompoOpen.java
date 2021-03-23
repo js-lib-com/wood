@@ -50,13 +50,12 @@ public class CompoOpen extends Task {
 
 		print("Opening component %s...", name);
 		int port = config.get("runtime.port", int.class);
-		String context;
+		String context = config.get("runtime.context", workingDir.getName());
 		if (!preview && descriptorDoc.getRoot().getTag().equals("page")) {
-			context = workingDir.getName();
 			// WOOD project naming convention: layout file basename is the same as component directory
 			name = new CompoName(compoDir.getName() + ".htm");
 		} else {
-			context = workingDir.getName() + "-preview";
+			context += "-preview";
 		}
 
 		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));

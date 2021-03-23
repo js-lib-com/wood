@@ -46,7 +46,8 @@ public class ProjectBuild extends Task {
 		Builder builder = new Builder(builderConfig);
 		builder.build();
 
-		File runtimeDir = new File(config.get("runtime.home", File.class), runtime != null ? runtime : workingDir.getName());
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : workingDir.getName());
+		File runtimeDir = new File(config.get("runtime.home", File.class), runtimeName);
 		if (!runtimeDir.exists()) {
 			// it is legal to not have runtime in which case deploy is not performed
 			return 0;
@@ -56,7 +57,7 @@ public class ProjectBuild extends Task {
 		if (!webappsDir.exists()) {
 			throw new BugError("Invalid runtime. Web apps directory not found.");
 		}
-		File deployDir = new File(webappsDir, workingDir.getName());
+		File deployDir = new File(webappsDir, config.get("runtime.context", workingDir.getName()));
 		// ensure deploy directory is created
 		deployDir.mkdir();
 
