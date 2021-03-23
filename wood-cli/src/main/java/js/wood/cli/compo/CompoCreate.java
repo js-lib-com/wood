@@ -4,14 +4,17 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.dom.NamespaceContext;
 import js.lang.BugError;
 import js.util.Classes;
 import js.util.Files;
@@ -53,7 +56,7 @@ public class CompoCreate extends Task {
 			throw new BugError("Component already exist %s.", compoDir);
 		}
 		print("Create component %s.", compoDir);
-		if(!compoDir.mkdirs()) {
+		if (!compoDir.mkdirs()) {
 			throw new IOException(format("Cannot create component path %s.", compoDir));
 		}
 
@@ -66,14 +69,22 @@ public class CompoCreate extends Task {
 
 			DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 			Document templateDoc = documentBuilder.loadXML(templateFile);
-			Element editableElement = templateDoc.getByXPathNS(new NamespaceContext() {
-				@Override
-				public String getNamespaceURI(String prefix) {
-					return WOOD.NS;
-				}
-			}, "//*[@editable]");
+			Element editableElement = templateDoc.getByXPathNS(WOOD.NS, "//*[@editable]");
 			if (editableElement == null) {
 				throw new BugError("Bad template component %s. Missing editable element.", templateDir);
+			}
+
+			List<String> params = new ArrayList<>();
+			Pattern paramPattern = Pattern.compile("\\@param\\/([a-z]+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+			Matcher paramMatcher = paramPattern.matcher(Strings.load(templateFile));
+			if (paramMatcher.find()) {
+				print();
+				print("Template parameters:");
+				for (int i = 0; i < paramMatcher.groupCount(); ++i) {
+					String param = paramMatcher.group(i + 1);
+					params.add(Strings.concat(param, ":", input(format("template %s", param), param)));
+				}
+				print();
 			}
 
 			Map<String, String> variables = new HashMap<>();
@@ -84,8 +95,9 @@ public class CompoCreate extends Task {
 			variables.put("template", template.path());
 			variables.put("editable", editableElement.getAttrNS(WOOD.NS, "editable"));
 			variables.put("editable", "section");
+			variables.put("template-params", format("w:param=\"%s\"", Strings.join(params, ';')));
 			variables.put("xmlns", WOOD.NS);
-			
+
 			variables.put("root", page ? "page" : "component");
 			variables.put("groupId", "com.js-lib");
 			variables.put("artifactId", Files.basename(template.path()));
@@ -93,12 +105,11 @@ public class CompoCreate extends Task {
 			variables.put("title", Strings.toTitleCase(Strings.concat(compoDir.getName(), page ? " page" : " component")));
 			variables.put("description", Strings.concat(Strings.toTitleCase(compoDir.getName()), page ? " page" : " component", " description."));
 
-
 			TemplateProcessor processor = new TemplateProcessor(compoDir, verbose);
 			processor.exec(TemplateType.compo, "page", variables);
 
 		}
-		
+
 		return 0;
 	}
 }

@@ -50,11 +50,15 @@ public abstract class Task implements Runnable {
 
 	private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-	protected static String input(String message) throws IOException {
+	protected static String input(String message, String... defaultValue) throws IOException {
 		System.out.print("- ");
 		System.out.print(message);
 		System.out.print(": ");
-		return reader.readLine();
+		if (defaultValue.length == 1) {
+			System.out.printf("[%s]: ", defaultValue[0]);
+		}
+		String value = reader.readLine();
+		return value.isEmpty() ? defaultValue[0] : value;
 	}
 
 	protected static boolean confirm(String message, String positiveAnswer) throws IOException {
