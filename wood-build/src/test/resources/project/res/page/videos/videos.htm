@@ -1,9 +1,11 @@
-<div w:template="res/template/sidebar-page#main-panel" class="main-panel" xmlns:w="js-lib.com/wood">
-	<div w:compo="res/compo/video-player" class="video-player"></div>
-	<ul w:compo="lib/paging" class="paging"></ul>
-</div>
+<div w:template="res/template/sidebar-page" xmlns:w="js-lib.com/wood">
+	<div w:content="main-panel" class="main-panel">
+		<div w:compo="res/compo/video-player" class="video-player"></div>
+		<ul w:compo="lib/paging" class="paging"></ul>
+	</div>
 
-<div w:template="res/template/sidebar-page#sidebar" class="sidebar" xmlns:w="js-lib.com/wood">
-	<h1>@string/discography</h1>
-	<div w:compo="res/compo/discography" class="discography"></div>
+	<div w:content="sidebar" class="sidebar">
+		<h1>@string/discography</h1>
+		<div w:compo="res/compo/discography" class="discography"></div>
+	</div>
 </div>

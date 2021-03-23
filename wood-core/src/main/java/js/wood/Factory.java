@@ -3,7 +3,6 @@ package js.wood;
 import java.io.File;
 
 import js.util.Files;
-import js.wood.impl.EditablePath;
 
 public class Factory {
 	private final Project project;
@@ -35,10 +34,6 @@ public class Factory {
 		return new CompoPath(project, path);
 	}
 
-	public EditablePath createEditablePath(String path) {
-		return new EditablePath(project, path);
-	}
-	
 	public Component createComponent(FilePath layoutPath, IReferenceHandler referenceHandler) {
 		return new Component(layoutPath, referenceHandler);
 	}

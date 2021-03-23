@@ -12,11 +12,4 @@
 	<name>WOOD Core</name>
 	<description>Core logic for both WOOD builder and preview.</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-dom-api</artifactId>
-			<version>1.2</version>
-		</dependency>
-	</dependencies>
 </project>

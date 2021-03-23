@@ -14,14 +14,13 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
+import js.dom.w3c.DomException;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
-import js.wood.impl.EditablePath;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.LayoutParameters;
-import js.wood.impl.LayoutReader;
 import js.wood.impl.Operator;
 import js.wood.impl.ScriptDescriptor;
 
@@ -54,7 +53,7 @@ public class Component {
 	private final Project project;
 
 	private final Factory factory;
-	
+
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
 
@@ -238,9 +237,7 @@ public class Component {
 			operators.removeOperator(widgetPathElement, Operator.COMPO);
 		}
 
-		// component layout is loaded with LayoutReader decorator that insert XML declaration and root element
-		// this is needed because component layout file may have more HTML fragments and XML requires single root
-		return layout.getRoot().getFirstChild();
+		return layout.getRoot();
 	}
 
 	/**
@@ -268,42 +265,63 @@ public class Component {
 			throw new WoodException("Circular templates references suspicion. Too many nesting levels on |%s|. Please check 'template' attributes!", layoutPath);
 		}
 
-		Reader reader = new LayoutReader(new SourceReader(layoutPath, layoutParameters, referenceHandler));
-		Document layout = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
+		Reader reader = new SourceReader(layoutPath, layoutParameters, referenceHandler);
+		Document layout;
+		try {
+			layout = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
+		} catch (DomException e) {
+			throw new WoodException("Invalid layout document |%s|.", layoutPath);
+		}
 
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
 
-		// content element is the root of content layout designed to replace an editable element from a template
-		// a content element is an element with 'template' attribute
-		// if this layout has no content elements it does not use templates and return it as it is
-
-		// 'template' attribute contains the path to template named editable area
-		EList contentElements = operators.findByOperator(layout, Operator.TEMPLATE);
-		if (contentElements.isEmpty()) {
+		// 'template' operator has the path to template component and optional editable area name, separated by hash
+		// editable name can be present only if there are no child elements with 'content' operator
+		Element templateElement = operators.getByOperator(layout, Operator.TEMPLATE);
+		// if there is no 'template' operator currently loaded layout does not inherit from a template component
+		if (templateElement == null) {
 			return layout;
 		}
 
-		// current component describe content for a template because it has at least one reference to an editable element
-		// an editable element is a template hole that need to be filled
-		// since templates can have more than one editable element, editable path should identify both the template and
-		// editable element: EDITABLE_PATH := TEMPLATE_PATH # EDITABLE_NAME
+		// here we know there is a template component that current components inherits from
+		// current component is named content component because it provides content for template editable areas
 
-		// current component should define content for all editable elements from template
+		// a content component can inherit from only one template; multiple inheritance is not supported
+		// the root element of the content component always has 'template' operator
+		// a content component has one or more content elements identified by 'content' operator
+		// 'content' operator has the name for the editable area for which it provides content
+		// if there is a single content element is allowed to combine template path and editable name
+		// TEMPLATE_PATH # EDITABLE_NAME
+
+		// current content component should define content for all editable elements from template
 		// if not it become a template too and creates a hierarchy of templates similar to class inheritance
 
-		// a content layout file may contain content elements for multiple editable elements from template
-		// but all pointing to the same template layout file
-		// uses first content element to acquire template layout path and load template layout document
-		// also load layout parameters from content element data-param operator
-		// layout parameters are used by layout source file reader to inject parameter values
+		// load all content elements from current content component
+		List<Element> contentElements = new ArrayList<>();
+		for (Element contentElement : operators.findByOperator(layout, Operator.CONTENT)) {
+			contentElements.add(contentElement);
+		}
+		if (contentElements.isEmpty()) {
+			contentElements.add(templateElement);
+		}
+
+		// at this point we know there is a template operator and we load its value (operand)
+		// template operator value is the template path and optional editable name separated by hash
+		String templatePath = operators.getOperand(templateElement, Operator.TEMPLATE);
+		String templatePathEditableName = null;
+		int separatorPosition = templatePath.indexOf('#');
+		if (separatorPosition != -1) {
+			templatePathEditableName = templatePath.substring(separatorPosition + 1);
+			templatePath = templatePath.substring(0, separatorPosition);
+		}
+
+		CompoPath templateCompoPath = factory.createCompoPath(templatePath);
+		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
 
 		Document template = null;
 		Editables editables = null;
-
 		for (Element contentElement : contentElements) {
-			EditablePath editablePath = factory.createEditablePath(operators.getOperand(contentElement, Operator.TEMPLATE));
-
 			if (template == null) {
 				// prepare layout parameters, possible empty, before loading template from source file
 				// subsequent loadLayoutDocument passes parameters to source reader
@@ -311,7 +329,6 @@ public class Component {
 				layoutParameters.reload(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
 
-				FilePath templateLayoutPath = editablePath.getLayoutPath();
 				template = loadLayoutDocument(templateLayoutPath, guardCount);
 				editables = new Editables(template);
 
@@ -322,10 +339,19 @@ public class Component {
 				addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 			}
 
+			// load editable name from 'content' operator; if missing we should have editable name in template path
+			String editableName = operators.getOperand(contentElement, Operator.CONTENT);
+			if (editableName == null) {
+				if (templatePathEditableName == null) {
+					throw new WoodException("Invalid content layout |%s|. Missing editable name.", layoutPath);
+				}
+				editableName = templatePathEditableName;
+			}
+
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
-			Element editableElement = editables.get(editablePath.getEditableName());
+			Element editableElement = editables.get(editableName);
 			if (editableElement == null) {
-				throw new WoodException("Invalid template source code. Missing editable |%s| requested from component |%s|.", editablePath, layoutPath);
+				throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, layoutPath);
 			}
 
 			// insert content element - and all its descendants into template document, before editable element

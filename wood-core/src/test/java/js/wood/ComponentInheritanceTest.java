@@ -20,8 +20,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.w3c.DomException;
-import js.wood.impl.EditablePath;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.Operator;
@@ -48,7 +46,7 @@ public class ComponentInheritanceTest {
 	@Mock
 	private FilePath pageStyle; // style file for page template
 	@Mock
-	private EditablePath pageEditable; // path to page editable element, declared on template
+	private CompoPath pageCompo; // path to page editable element, declared on template
 
 	@Mock
 	private FilePath templateLayout; // layout file for template component
@@ -57,9 +55,9 @@ public class ComponentInheritanceTest {
 	@Mock
 	private FilePath templateStyle; // style file for template component
 	@Mock
-	private EditablePath templateEditable; // path to template editable element, declared on component
+	private CompoPath templateCompo; // path to template editable element, declared on component
 	@Mock
-	private EditablePath templateEditable2; // path to second template editable element, declared on component
+	private CompoPath templateCompo2; // path to second template editable element, declared on component
 
 	@Mock
 	private CompoPath compoPath;
@@ -88,13 +86,13 @@ public class ComponentInheritanceTest {
 		when(pageLayout.isLayout()).thenReturn(true);
 		when(pageLayout.cloneTo(FileType.XML)).thenReturn(pageDescriptor);
 		when(pageLayout.cloneTo(FileType.STYLE)).thenReturn(pageStyle);
-		when(pageEditable.getLayoutPath()).thenReturn(pageLayout);
+		when(pageCompo.getLayoutPath()).thenReturn(pageLayout);
 
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 		when(templateLayout.cloneTo(FileType.XML)).thenReturn(templateDescriptor);
 		when(templateLayout.cloneTo(FileType.STYLE)).thenReturn(templateStyle);
-		when(templateEditable.getLayoutPath()).thenReturn(templateLayout);
+		when(templateCompo.getLayoutPath()).thenReturn(templateLayout);
 
 		when(compoPath.getLayoutPath()).thenReturn(compoLayout);
 
@@ -120,9 +118,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -154,18 +150,16 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
-		
+
 		assertThat(layout.getAttr("title"), equalTo("Compo Caption"));
 		assertThat(layout.getByTag("h1").getText(), equalTo("Compo Title"));
 	}
 
-	@Test(expected = DomException.class)
+	@Test(expected = WoodException.class)
 	public void parameter_Missing() {
 		String templateHTML = "" + //
 				"<body title='@param/caption' xmlns:w='js-lib.com/wood'>" + //
@@ -178,8 +172,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		new Component(compoPath, referenceHandler);
 	}
@@ -195,21 +188,21 @@ public class ComponentInheritanceTest {
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
 
 		String compoHTML = "" + //
-				"<fieldset w:template='res/template#fieldset' xmlns:w='js-lib.com/wood'>" + //
-				"	<input name='user-name' />" + //
-				"</fieldset>" + //
+				"<embed type='text/html' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<fieldset w:content='fieldset'>" + //
+				"		<input name='user-name' />" + //
+				"	</fieldset>" + //
 				"" + //
-				"<fieldset w:template='res/template#fieldset' xmlns:w='js-lib.com/wood'>" + //
-				"	<input name='address' />" + //
-				"</fieldset>" + //
+				"	<fieldset w:content='fieldset'>" + //
+				"		<input name='address' />" + //
+				"	</fieldset>" + //
 				"" + //
-				"<fieldset w:template='res/template#fieldset' xmlns:w='js-lib.com/wood'>" + //
-				"    <input name='password' />" + //
-				"</fieldset>";
+				"	<fieldset w:content='fieldset'>" + //
+				"		<input name='password' />" + //
+				"	</fieldset>" + //
+				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("fieldset");
-		when(factory.createEditablePath("res/template#fieldset")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -234,19 +227,17 @@ public class ComponentInheritanceTest {
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
 
 		String compoHTML = "" + //
-				"<section w:template='res/template#section-1' xmlns:w='js-lib.com/wood'>" + //
-				"	<h1>Content One</h1>" + //
-				"</section>" + //
+				"<embed type='text/html' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:content='section-1'>" + //
+				"		<h1>Content One</h1>" + //
+				"	</section>" + //
 				"" + //
-				"<section w:template='res/template#section-2' xmlns:w='js-lib.com/wood'>" + //
-				"	<h1>Content Two</h1>" + //
-				"</section>";
+				"	<section w:content='section-2'>" + //
+				"		<h1>Content Two</h1>" + //
+				"	</section>" + //
+				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section-1");
-		when(templateEditable2.getEditableName()).thenReturn("section-2");
-		when(factory.createEditablePath("res/template#section-1")).thenReturn(templateEditable);
-		when(factory.createEditablePath("res/template#section-2")).thenReturn(templateEditable2);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -286,12 +277,8 @@ public class ComponentInheritanceTest {
 				"	<h1>Component</h1>" + //
 				"</div>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(pageEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/page#section")).thenReturn(pageEditable);
-
-		when(templateEditable.getEditableName()).thenReturn("paragraph");
-		when(factory.createEditablePath("res/template#paragraph")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/page")).thenReturn(pageCompo);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -323,9 +310,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element section = compo.getLayout().getByTag("section");
@@ -354,9 +339,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element section = compo.getLayout().getByTag("section");
@@ -373,14 +356,15 @@ public class ComponentInheritanceTest {
 		when(compoStyle.exists()).thenReturn(true);
 		when(compoStyle.value()).thenReturn("compo.css");
 
-		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
+		String templateLayoutHTML = "" + //
+				"<div>" + //
+				"	<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>" + //
+				"</div>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 
@@ -400,7 +384,10 @@ public class ComponentInheritanceTest {
 		when(templateDescriptor.exists()).thenReturn(true);
 		when(templateDescriptor.getReader()).thenReturn(new StringReader(templateDescriptorXML));
 
-		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
+		String templateLayoutHTML = "" + //
+				"<div>" + //
+				"	<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>" + //
+				"</div>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
 		String compoDescriptorXML = "" + //
@@ -413,9 +400,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		List<IScriptDescriptor> scripts = compo.getScriptDescriptors();
@@ -440,9 +425,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
@@ -465,9 +448,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("section");
-		when(factory.createEditablePath("res/template#section")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		Component compo = new Component(compoPath, referenceHandler);
 		compo.clean();
@@ -487,9 +468,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("fake");
-		when(factory.createEditablePath("res/template#fake")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		new Component(compoPath, referenceHandler);
 	}
@@ -502,9 +481,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-
-		when(templateEditable.getEditableName()).thenReturn("h1");
-		when(factory.createEditablePath("res/template#h1")).thenReturn(templateEditable);
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		new Component(compoPath, referenceHandler);
 	}
