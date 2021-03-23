@@ -3,7 +3,6 @@ package js.wood.impl;
 import js.dom.Element;
 import js.util.Params;
 import js.wood.ILinkDescriptor;
-import js.wood.WoodException;
 
 /**
  * Descriptor for page link element. This class is loaded from <code>link</code> element of project or page descriptor. All
@@ -197,9 +196,7 @@ class LinkDescriptor implements ILinkDescriptor {
 
 	public static LinkDescriptor create(Element linkElement, ILinkDescriptor defaults) {
 		final String href = linkElement.getAttr("href");
-		if (href == null) {
-			throw new WoodException("Invalid project configuration file. Missing 'href' attribute from <style> element.");
-		}
+		assert href != null;
 		LinkDescriptor link = new LinkDescriptor(href);
 
 		link.setHreflang(value(linkElement.getAttr("hreflang"), defaults.getHreflang()));

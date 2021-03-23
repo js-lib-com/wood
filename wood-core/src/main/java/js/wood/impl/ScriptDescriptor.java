@@ -2,7 +2,6 @@ package js.wood.impl;
 
 import js.dom.Element;
 import js.wood.IScriptDescriptor;
-import js.wood.WoodException;
 
 /**
  * Descriptor for page script element. This class is loaded from <code>script</code> element of project or page descriptor. All
@@ -147,9 +146,7 @@ public class ScriptDescriptor implements IScriptDescriptor {
 
 	public static ScriptDescriptor create(Element scriptElement, IScriptDescriptor defaults) {
 		final String src = scriptElement.getAttr("src");
-		if (src == null) {
-			throw new WoodException("Invalid descriptor file. Missing 'src' attribute from <script> element.");
-		}
+		assert src != null;
 		ScriptDescriptor script = new ScriptDescriptor(src);
 
 		script.setType(value(scriptElement.getAttr("type"), defaults.getType()));

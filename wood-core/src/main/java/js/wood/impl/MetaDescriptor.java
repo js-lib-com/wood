@@ -2,7 +2,6 @@ package js.wood.impl;
 
 import js.dom.Element;
 import js.wood.IMetaDescriptor;
-import js.wood.WoodException;
 
 /**
  * Descriptor for page meta element. This class is loaded from <code>meta</code> element of project or page descriptor. All
@@ -106,17 +105,10 @@ class MetaDescriptor implements IMetaDescriptor {
 	}
 
 	public static MetaDescriptor create(Element metaElement) {
-		final String name = metaElement.getAttr("name");
-		final String httpEquiv = metaElement.getAttr("http-equiv");
-		final String property = metaElement.getAttr("property");
-		if (name == null && httpEquiv == null && property == null) {
-			throw new WoodException("Invalid meta descriptor. Missing 'name', 'http-equiv' or 'property' attribute from <meta> element.");
-		}
-
 		MetaDescriptor meta = new MetaDescriptor();
-		meta.setName(name);
-		meta.setHttpEquiv(httpEquiv);
-		meta.setProperty(property);
+		meta.setName(metaElement.getAttr("name"));
+		meta.setHttpEquiv(metaElement.getAttr("http-equiv"));
+		meta.setProperty(metaElement.getAttr("property"));
 		meta.setContent(metaElement.getAttr("content"));
 		meta.setCharset(metaElement.getAttr("charset"));
 

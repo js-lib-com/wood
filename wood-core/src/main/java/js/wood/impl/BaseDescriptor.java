@@ -32,6 +32,7 @@ abstract class BaseDescriptor {
 	/** XML DOM document. */
 	protected final Document doc;
 
+	private final String descriptorFile;
 	private final ILinkDescriptor linkDefaults;
 	private final IScriptDescriptor scriptDefaults;
 
@@ -39,6 +40,7 @@ abstract class BaseDescriptor {
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		this.doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
 
+		this.descriptorFile = descriptorFile.value();
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
 	}
@@ -52,6 +54,7 @@ abstract class BaseDescriptor {
 			doc = EMPTY_DOC;
 		}
 
+		this.descriptorFile = descriptorFile.getPath();
 		this.doc = doc;
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
@@ -88,6 +91,9 @@ abstract class BaseDescriptor {
 	public List<IMetaDescriptor> getMetaDescriptors() {
 		List<IMetaDescriptor> descriptors = new ArrayList<>();
 		for (Element element : doc.findByTag("meta")) {
+			if (!(element.hasAttr("name") || element.hasAttr("http-equiv") || element.hasAttr("property"))) {
+				throw new WoodException("Invalid descriptor file |%s|. Missing 'name', 'http-equiv' or 'property' attribute from <meta> element.", descriptorFile);
+			}
 			MetaDescriptor descriptor = MetaDescriptor.create(element);
 			if (descriptors.contains(descriptor)) {
 				throw new WoodException("Duplicate meta |%s| in project descriptor.", descriptor);
@@ -100,6 +106,9 @@ abstract class BaseDescriptor {
 	public List<ILinkDescriptor> getLinkDescriptors() {
 		List<ILinkDescriptor> descriptors = new ArrayList<>();
 		for (Element element : doc.findByTag("link")) {
+			if (!element.hasAttr("href")) {
+				throw new WoodException("Invalid descriptor file |%s|. Missing 'href' attribute from <style> element.", descriptorFile);
+			}
 			LinkDescriptor descriptor = LinkDescriptor.create(element, linkDefaults);
 			if (descriptors.contains(descriptor)) {
 				throw new WoodException("Duplicate link |%s| in project descriptor.", descriptor);
@@ -136,6 +145,9 @@ abstract class BaseDescriptor {
 	public List<IScriptDescriptor> getScriptDescriptors() {
 		List<IScriptDescriptor> descriptors = new ArrayList<>();
 		for (Element element : doc.findByTag("script")) {
+			if (!element.hasAttr("src")) {
+				throw new WoodException("Invalid descriptor file |%s|. Missing 'src' attribute from <script> element.", descriptorFile);
+			}
 			ScriptDescriptor descriptor = ScriptDescriptor.create(element, scriptDefaults);
 			if (descriptors.contains(descriptor)) {
 				throw new WoodException("Duplicate script |%s| in project descriptor.", descriptor);
