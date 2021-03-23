@@ -20,7 +20,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.NamespaceContext;
 import js.dom.w3c.DomException;
 import js.wood.impl.EditablePath;
 import js.wood.impl.FileType;
@@ -75,17 +74,10 @@ public class ComponentInheritanceTest {
 	private IReferenceHandler referenceHandler;
 
 	private IOperatorsHandler operatorsHandler;
-	private NamespaceContext namespace;
 
 	@Before
 	public void beforeTest() {
 		operatorsHandler = new XmlnsOperatorsHandler();
-		namespace = new NamespaceContext() {
-			@Override
-			public String getNamespaceURI(String prefix) {
-				return WOOD.NS;
-			}
-		};
 
 		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
@@ -454,8 +446,8 @@ public class ComponentInheritanceTest {
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
-		assertThat(layout.getByXPathNS(namespace, "//*[@w:template]"), nullValue());
-		assertThat(layout.getByXPathNS(namespace, "//*[@w:editable]"), nullValue());
+		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:template]"), nullValue());
+		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:editable]"), nullValue());
 	}
 
 	@Test

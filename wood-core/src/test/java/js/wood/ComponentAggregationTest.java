@@ -16,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.NamespaceContext;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.Operator;
@@ -42,17 +41,10 @@ public class ComponentAggregationTest {
 	private IReferenceHandler referenceHandler;
 
 	private IOperatorsHandler operatorsHandler;
-	private NamespaceContext namespace;
 
 	@Before
 	public void beforeTest() {
 		operatorsHandler = new XmlnsOperatorsHandler();
-		namespace = new NamespaceContext() {
-			@Override
-			public String getNamespaceURI(String prefix) {
-				return WOOD.NS;
-			}
-		};
 
 		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
@@ -131,7 +123,7 @@ public class ComponentAggregationTest {
 
 		Component compo = new Component(compoPath, referenceHandler);
 		Element layout = compo.getLayout();
-		assertThat(layout.getByXPathNS(namespace, "//*[@w:compo]"), nullValue());
-		assertThat(layout.getByXPathNS(namespace, "//*[@w:param]"), nullValue());
+		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:compo]"), nullValue());
+		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:param]"), nullValue());
 	}
 }
