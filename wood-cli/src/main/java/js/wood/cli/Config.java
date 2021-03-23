@@ -1,5 +1,7 @@
 package js.wood.cli;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -42,19 +44,23 @@ public class Config {
 		}
 	}
 
-	public <T> T get(String key, Class<T> type) throws IOException {
+	public <T> T get(String key, Class<T> type, String... defaultValue) throws IOException {
 		Object value = projectProperties().get(key);
 		if (value == null) {
 			value = globalProperties().get(key);
 			if (value == null) {
-				throw new BugError("Property not found |%s|.", key);
+				if (defaultValue.length == 1) {
+					value = defaultValue[0];
+				} else {
+					throw new BugError("Property not found |%s|.", key);
+				}
 			}
 		}
 		return converter.asObject(Strings.injectProperties(value.toString()), type);
 	}
 
-	public String get(String key) throws IOException {
-		return get(key, String.class);
+	public String get(String key, String... defaultValue) throws IOException {
+		return get(key, String.class, defaultValue);
 	}
 
 	private Properties globalProperties() throws IOException {
@@ -99,11 +105,11 @@ public class Config {
 		return projectProperties;
 	}
 
-	private static File projectPropertiesFile() {
+	private static File projectPropertiesFile() throws IOException {
 		File workingDir = Paths.get("").toAbsolutePath().toFile();
 		File propertiesFile = new File(workingDir, PROJECT_PROPERTIES_FILE);
-		if (!propertiesFile.exists()) {
-			throw new BugError("Invalid WOOD project setup. Missing project properties file |%s|.", propertiesFile);
+		if (!propertiesFile.exists() && !propertiesFile.createNewFile()) {
+			throw new IOException(format("Cannot create project properties file |%s|.", propertiesFile));
 		}
 		return propertiesFile;
 	}
