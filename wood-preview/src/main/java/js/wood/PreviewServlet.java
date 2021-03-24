@@ -182,7 +182,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		if (CompoPath.accept(requestPath)) {
 			CompoPath compoPath = factory.createCompoPath(requestPath);
-			FilePath layoutPath = compoPath.getLayoutPath();
+			FilePath layoutPath = compoPath.getLayoutPathEx();
 
 			// if component has preview layout uses it instead of component layout
 			// preview layout should use component as widget

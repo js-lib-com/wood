@@ -52,7 +52,7 @@ public class ComponentTest {
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
 
-		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
+		when(compoPath.getLayoutPathEx()).thenReturn(layoutPath);
 
 		when(layoutPath.getName()).thenReturn("layout.htm");
 		when(layoutPath.getBaseName()).thenReturn("layout");
@@ -163,12 +163,12 @@ public class ComponentTest {
 	}
 	
 	/**
-	 * Create component from CompoPath. If {@link CompoPath#getLayoutPath()} fails to find layout file, component constructor
+	 * Create component from CompoPath. If {@link CompoPath#getLayoutPathEx()} fails to find layout file, component constructor
 	 * should throw {@link WoodException}.
 	 */
 	@Test(expected = WoodException.class)
 	public void missingLayoutFile() {
-		when(compoPath.getLayoutPath()).thenThrow(WoodException.class);
+		when(compoPath.getLayoutPathEx()).thenThrow(WoodException.class);
 		new Component(compoPath, referenceHandler);
 	}
 }

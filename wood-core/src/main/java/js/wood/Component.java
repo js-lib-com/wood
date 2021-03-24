@@ -118,7 +118,7 @@ public class Component {
 	 * @param referenceHandler resource references handler.
 	 */
 	public Component(CompoPath compoPath, IReferenceHandler referenceHandler) {
-		this(compoPath.getLayoutPath(), referenceHandler);
+		this(compoPath.getLayoutPathEx(), referenceHandler);
 	}
 
 	/**
@@ -211,7 +211,12 @@ public class Component {
 			// descendants are guaranteed to be resolved
 			CompoPath compoPath = factory.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
 
-			FilePath descriptorFile = compoPath.getLayoutPath().cloneTo(FileType.XML);
+			FilePath childLayoutPath = compoPath.getLayoutPath();
+			if(!childLayoutPath.exists()) {
+				throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", childLayoutPath, layoutPath);
+			}
+			
+			FilePath descriptorFile = childLayoutPath.cloneTo(FileType.XML);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 			addAll(metaDescriptors, descriptor.getMetaDescriptors());
 			addAll(linkDescriptors, descriptor.getLinkDescriptors());
@@ -222,7 +227,7 @@ public class Component {
 			// source reader takes care to inject parameter values into widget layout
 			layoutParameters.reload(operators.getOperand(widgetPathElement, Operator.PARAM));
 			operators.removeOperator(widgetPathElement, Operator.PARAM);
-			Element widgetLayout = scanComponentsTree(compoPath.getLayoutPath(), guardCount);
+			Element widgetLayout = scanComponentsTree(childLayoutPath, guardCount);
 
 			// update widget path element attributes with values from the widget layout root
 			// widget path element has precedence over widget layout attributes so that parent can control widget attributes
@@ -318,6 +323,9 @@ public class Component {
 
 		CompoPath templateCompoPath = factory.createCompoPath(templatePath);
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
+		if(!templateLayoutPath.exists()) {
+			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, layoutPath);
+		}
 
 		Document template = null;
 		Editables editables = null;

@@ -51,6 +51,7 @@ public class CompoPathTest {
 	@Test
 	public void getLayoutPath() {
 		FilePath layoutPath = Mockito.mock(FilePath.class);
+		when(layoutPath.exists()).thenReturn(true);
 		when(layoutPath.value()).thenReturn("res/page/page.htm");
 		when(factory.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
 
@@ -60,7 +61,7 @@ public class CompoPathTest {
 		when(path.getName()).thenReturn("page");
 
 		CompoPath compo = new CompoPath(project, path);
-		assertThat(compo.getLayoutPath().value(), equalTo("res/page/page.htm"));
+		assertThat(compo.getLayoutPathEx().value(), equalTo("res/page/page.htm"));
 	}
 
 	/**
@@ -76,7 +77,7 @@ public class CompoPathTest {
 		when(path.getPath()).thenReturn("res/page/");
 
 		CompoPath compo = new CompoPath(project, path);
-		compo.getLayoutPath();
+		compo.getLayoutPathEx();
 	}
 
 	@Test

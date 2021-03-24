@@ -94,7 +94,7 @@ public class ComponentInheritanceTest {
 		when(templateLayout.cloneTo(FileType.STYLE)).thenReturn(templateStyle);
 		when(templateCompo.getLayoutPath()).thenReturn(templateLayout);
 
-		when(compoPath.getLayoutPath()).thenReturn(compoLayout);
+		when(compoPath.getLayoutPathEx()).thenReturn(compoLayout);
 
 		when(compoLayout.getProject()).thenReturn(project);
 		when(compoLayout.exists()).thenReturn(true);

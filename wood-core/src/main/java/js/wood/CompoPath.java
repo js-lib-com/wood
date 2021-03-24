@@ -68,8 +68,8 @@ import js.util.Params;
  *         |     |      / index /        --> res/page/index
  * </pre>
  * <p>
- * This class provides convenient method to retrieve layout file path, see {@link #getLayoutPath()}. In above diagram it returns
- * <code>res/template/page/page.htm</code> for component path <code>res/template/page</code>. For inline component
+ * This class provides convenient method to retrieve layout file path, see {@link #getLayoutPathEx()}. In above diagram it
+ * returns <code>res/template/page/page.htm</code> for component path <code>res/template/page</code>. For inline component
  * <code>res/template/select</code> returned layout file path is <code>res/template/select.htm</code>.
  * <p>
  * Note that for a full component this component path points to an existing directory. By contrast, inline component path is
@@ -141,16 +141,19 @@ public class CompoPath extends DirPath {
 	 * 
 	 * @return component layout.
 	 */
+	public FilePath getLayoutPathEx() {
+		FilePath layoutPath = getLayoutPath();
+		if (!layoutPath.exists()) {
+			throw new WoodException("Missing component layout |%s|.", layoutPath);
+		}
+		return layoutPath;
+	}
+
 	public FilePath getLayoutPath() {
 		if (file.isDirectory()) {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
-
-		FilePath layoutPath = factory.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
-		if (!layoutPath.exists()) {
-			throw new WoodException("Missing component |%s|.", file);
-		}
-		return layoutPath;
+		return factory.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
 	}
 
 	/**

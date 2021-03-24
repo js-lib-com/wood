@@ -51,7 +51,7 @@ public class ComponentAggregationTest {
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
 
-		when(compoPath.getLayoutPath()).thenReturn(compoLayout);
+		when(compoPath.getLayoutPathEx()).thenReturn(compoLayout);
 
 		when(compoLayout.getProject()).thenReturn(project);
 		when(compoLayout.exists()).thenReturn(true);

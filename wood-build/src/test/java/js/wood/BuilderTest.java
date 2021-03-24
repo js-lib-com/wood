@@ -70,7 +70,7 @@ public class BuilderTest {
 
 		CompoPath compoPath = Mockito.mock(CompoPath.class);
 		when(project.getPages()).thenReturn(Arrays.asList(compoPath));
-		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
+		when(compoPath.getLayoutPathEx()).thenReturn(layoutPath);
 
 		builder.build();
 
