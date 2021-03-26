@@ -1,5 +1,6 @@
 package js.wood.cli.compo;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -14,8 +15,8 @@ public class CompoUpdate extends Task {
 	private CompoName name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		print("Update component %s", name);
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

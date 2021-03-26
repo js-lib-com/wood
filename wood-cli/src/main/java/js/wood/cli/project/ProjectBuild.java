@@ -8,6 +8,7 @@ import java.io.IOException;
 import js.lang.BugError;
 import js.wood.Builder;
 import js.wood.BuilderConfig;
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.util.Files;
 import picocli.CommandLine.Command;
@@ -27,7 +28,7 @@ public class ProjectBuild extends Task {
 	private boolean verbose;
 
 	@Override
-	protected int exec() throws IOException {
+	protected ExitCode exec() throws IOException {
 		File workingDir = workingDir();
 		File buildDir = new File(workingDir, targetDir);
 
@@ -50,7 +51,7 @@ public class ProjectBuild extends Task {
 		File runtimeDir = new File(config.get("runtime.home", File.class), runtimeName);
 		if (!runtimeDir.exists()) {
 			// it is legal to not have runtime in which case deploy is not performed
-			return 0;
+			return ExitCode.SUCCESS;
 		}
 
 		File webappsDir = new File(runtimeDir, "webapps");
@@ -63,7 +64,7 @@ public class ProjectBuild extends Task {
 
 		print("Deploying project %s...", workingDir);
 		deploy(buildDir.getPath().length(), deployDir, buildDir);
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 
 	private void deploy(int buildDirPathLength, File deployDir, File currentDir) throws IOException {

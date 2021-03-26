@@ -20,6 +20,7 @@ import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
 import js.wood.WOOD;
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
@@ -48,7 +49,7 @@ public class CompoCreate extends Task {
 	private String name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		File projectDir = projectDir();
 
 		File compoDir = new File(projectDir, name);
@@ -110,6 +111,6 @@ public class CompoCreate extends Task {
 
 		}
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

@@ -6,15 +6,16 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "create", description = "Create runtime.")
 public class RuntimeCreate extends Task {
@@ -32,7 +33,7 @@ public class RuntimeCreate extends Task {
 	private String name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		File projectDir = workingDir();
 		if (name == null) {
 			name = projectDir.getName();
@@ -52,6 +53,6 @@ public class RuntimeCreate extends Task {
 
 		config.set("runtime.name", name);
 		config.set("runtime.port", port);
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import js.lang.BugError;
@@ -15,29 +18,47 @@ public abstract class Task implements Runnable {
 	@Option(names = "--time", description = "Measure execution time. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean time;
 
+	protected FileSystem fileSystem;
+	protected Console console;
 	protected Config config;
 
-	void setConfig(Config config) {
+	protected Task() {
+		this.fileSystem = FileSystems.getDefault();
+		this.console = new Console();
+	}
+
+	public void setFileSystem(FileSystem fileSystem) {
+		this.fileSystem = fileSystem;
+	}
+
+	public void setConsole(Console console) {
+		this.console = console;
+	}
+
+	public void setConfig(Config config) {
 		this.config = config;
 	}
 
 	@Override
 	public void run() {
 		long start = System.nanoTime();
-		int exitCode = 0;
+		ExitCode exitCode = ExitCode.SUCCESS;
 		try {
 			exitCode = exec();
+		} catch (IOException e) {
+			e.printStackTrace();
+			exitCode = ExitCode.SYSTEM_FAIL;
 		} catch (Exception e) {
 			e.printStackTrace();
-			exitCode = -1;
+			exitCode = ExitCode.APPLICATION_FAIL;
 		}
 		if (time) {
 			print("Processing time: %.04f msec.", (System.nanoTime() - start) / 1000000.0);
 		}
-		System.exit(exitCode);
+		System.exit(exitCode.ordinal());
 	}
 
-	protected abstract int exec() throws Exception;
+	protected abstract ExitCode exec() throws Exception;
 
 	protected static void print(String format, Object... args) {
 		System.out.printf(format, args);
@@ -62,13 +83,18 @@ public abstract class Task implements Runnable {
 	}
 
 	protected static boolean confirm(String message, String positiveAnswer) throws IOException {
-		System.out.println(message);
+		System.out.print(message);
+		System.out.print(": ");
 		String answer = reader.readLine();
 		return answer.equalsIgnoreCase(positiveAnswer);
 	}
 
-	protected static File workingDir() {
-		return Paths.get("").toAbsolutePath().toFile();
+	protected Path workingPath() {
+		return fileSystem.getPath("").toAbsolutePath();
+	}
+
+	protected File workingDir() {
+		return fileSystem.getPath("").toAbsolutePath().toFile();
 	}
 
 	protected static File projectDir() {

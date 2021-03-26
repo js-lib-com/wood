@@ -17,6 +17,7 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -37,7 +38,7 @@ public class CompoExport extends Task {
 	private CompoName name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
@@ -74,7 +75,7 @@ public class CompoExport extends Task {
 			}
 			uploadComponentFile(compoFile, compoCoordinates);
 		}
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 
 	private void cleanupRepositoryComponent(CompoCoordinates coordinates) throws IOException {

@@ -6,6 +6,7 @@ import static js.util.Strings.concat;
 import java.io.File;
 import java.io.IOException;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.cli.TextReplace;
 import picocli.CommandLine.Command;
@@ -29,7 +30,7 @@ public class CompoMove extends Task {
 	private String target;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
@@ -52,7 +53,7 @@ public class CompoMove extends Task {
 				}
 			} else {
 				print("User abort.");
-				return 0;
+				return ExitCode.ABORT;
 			}
 		}
 
@@ -96,6 +97,6 @@ public class CompoMove extends Task {
 			textReplace.setFileExtension("xml");
 			textReplace.replaceAll(workingDir, compoScript, newCompoScript);
 		}
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

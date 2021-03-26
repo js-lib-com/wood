@@ -3,6 +3,7 @@ package js.wood.cli.project;
 import java.io.File;
 import java.io.IOException;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.util.Files;
 import picocli.CommandLine.Command;
@@ -14,13 +15,13 @@ public class ProjectClean extends Task {
 	private String targetDir;
 
 	@Override
-	protected int exec() throws IOException {
+	protected ExitCode exec() throws IOException {
 		File workingDir = workingDir();
 		File buildDir = new File(workingDir, targetDir);
 
 		print("Cleaning build files for project%s...", workingDir);
 		Files.removeFilesHierarchy(buildDir);
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

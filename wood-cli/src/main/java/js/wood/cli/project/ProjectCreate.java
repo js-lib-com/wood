@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
@@ -33,7 +34,7 @@ public class ProjectCreate extends Task {
 	private String name;
 
 	@Override
-	protected int exec() throws IOException {
+	protected ExitCode exec() throws IOException {
 		File projectDir = new File(name);
 		if (projectDir.exists()) {
 			throw new IOException("Existing directory.");
@@ -70,7 +71,7 @@ public class ProjectCreate extends Task {
 		TemplateProcessor processor = new TemplateProcessor(projectDir, verbose);
 		processor.exec(TemplateType.project, type, variables);
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 
 	// --------------------------------------------------------------------------------------------

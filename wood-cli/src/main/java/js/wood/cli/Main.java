@@ -20,6 +20,7 @@ import js.wood.cli.project.ProjectCommands;
 import js.wood.cli.project.ProjectCreate;
 import js.wood.cli.project.ProjectDeploy;
 import js.wood.cli.project.ProjectDestroy;
+import js.wood.cli.project.ProjectList;
 import js.wood.cli.runtime.RuntimeCommands;
 import js.wood.cli.runtime.RuntimeCreate;
 import js.wood.cli.runtime.RuntimeDestroy;
@@ -52,6 +53,7 @@ public class Main {
 		projectCommands.addSubcommand(task(ProjectClean.class));
 		projectCommands.addSubcommand(task(ProjectDeploy.class));
 		projectCommands.addSubcommand(task(ProjectDestroy.class));
+		projectCommands.addSubcommand(task(ProjectList.class));
 
 		CommandLine compoCommands = new CommandLine(new CompoCommands());
 		compoCommands.addSubcommand(task(CompoCreate.class));

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.util.Files;
 import picocli.CommandLine.Command;
@@ -18,7 +19,7 @@ public class RuntimeDestroy extends Task {
 	private CommandSpec commandSpec;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		String name = config.get("runtime.name");
 		File runtimeDir = new File(config.get("runtime.home", File.class), name);
 		if (!runtimeDir.exists()) {
@@ -30,7 +31,7 @@ public class RuntimeDestroy extends Task {
 		print();
 		if (!confirm("Please confirm: yes | [no]", "yes")) {
 			print("User abort.");
-			return 0;
+			return ExitCode.ABORT;
 		}
 
 		print("Destroying runtime %s...", name);
@@ -41,6 +42,6 @@ public class RuntimeDestroy extends Task {
 
 		config.unset("runtime.name");
 		config.unset("runtime.port");
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

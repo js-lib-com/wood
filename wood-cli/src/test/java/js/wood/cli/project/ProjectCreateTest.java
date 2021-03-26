@@ -1,13 +1,19 @@
 package js.wood.cli.project;
 
 import java.io.IOException;
+import java.nio.file.spi.FileSystemProvider;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@Ignore
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectCreateTest {
+	@Mock
+	private FileSystemProvider provider;
+	
 	private ProjectCreate task;
 
 	@Before
@@ -20,6 +26,8 @@ public class ProjectCreateTest {
 
 	@Test
 	public void exec() throws IOException {
-		task.exec();
+		// task.exec();
+
+		//System.setProperty("java.nio.file.spi.DefaultFileSystemProvider", provider.get);
 	}
 }

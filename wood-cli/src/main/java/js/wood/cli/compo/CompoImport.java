@@ -13,6 +13,7 @@ import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
 import js.util.Files;
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -31,7 +32,7 @@ public final class CompoImport extends Task {
 	private String path;
 
 	@Override
-	protected int exec() throws IOException {
+	protected ExitCode exec() throws IOException {
 		print("Import component %s into %s", coordinates, path);
 
 		File repositoryDir = config.get("repository.dir", File.class);
@@ -71,7 +72,7 @@ public final class CompoImport extends Task {
 			Files.copy(compoFile, new File(targetDir, compoFile.getName()));
 		}
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 
 	/** Pattern for files listed on index page. */

@@ -6,6 +6,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.net.URI;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -22,7 +23,7 @@ public class CompoPreview extends Task {
 	private CompoName name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
@@ -38,6 +39,6 @@ public class CompoPreview extends Task {
 		String context = workingDir.getName() + "-preview";
 		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

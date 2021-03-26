@@ -2,12 +2,13 @@ package js.wood.cli.compo;
 
 import static java.lang.String.format;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "delete", description = "Remove component.")
 public class CompoDelete extends Task {
@@ -18,10 +19,10 @@ public class CompoDelete extends Task {
 	private CompoName name;
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 }

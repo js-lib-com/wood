@@ -10,11 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import js.lang.BugError;
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 public abstract class RuntimeScriptTask extends Task {
 	@Spec
@@ -32,7 +33,7 @@ public abstract class RuntimeScriptTask extends Task {
 	protected abstract String getScriptName();
 
 	@Override
-	protected int exec() throws Exception {
+	protected ExitCode exec() throws Exception {
 		String name = config.get("runtime.name");
 		File runtimeDir = new File(config.get("runtime.home", File.class), name);
 		if (!runtimeDir.exists()) {
@@ -80,7 +81,7 @@ public abstract class RuntimeScriptTask extends Task {
 			print("Standard input reader thread closed.");
 		}
 
-		return 0;
+		return ExitCode.SUCCESS;
 	}
 
 	private static String getExtension() {
