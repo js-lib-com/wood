@@ -2,11 +2,12 @@ package js.wood.cli.project;
 
 import static java.lang.String.format;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
-import js.wood.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -26,37 +27,50 @@ public class ProjectDestroy extends Task {
 	private String name;
 
 	@Override
-	protected int exec() throws Exception {
-		File workingDir = workingDir();
-		File projectDir = new File(workingDir, name);
-		if (!projectDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Project directory %s not found.", projectDir.getAbsolutePath()));
+	protected ExitCode exec() throws IOException  {
+		Path workingDir = workingPath();
+		Path projectDir = workingDir.resolve(name);
+		if (!Files.exists(projectDir)) {
+			throw new ParameterException(commandSpec.commandLine(), format("Project directory %s not found.", projectDir));
 		}
 
-		File descriptorFile = new File(projectDir, "project.xml");
-		if (!force && !descriptorFile.exists()) {
-			print("Project descriptor file not found. Is %s indeed a WOOD project?", projectDir);
-			print("ALL DIRECTORY FILES WILL BE PERMANENTLY REMOVED!");
-			print();
-			print("If you are sure please use --force-destroy option.");
-			print("Command aborted.");
-			return 0;
+		Path descriptorFile = projectDir.resolve("project.xml");
+		if (!force && !Files.exists(descriptorFile)) {
+			console.print("Project descriptor file not found. Is %s indeed a WOOD project?", projectDir);
+			console.warning("All directory files will be permanently removed!");
+			console.print();
+			console.print("If you are sure please use --force-destroy option.");
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
-		print("You are about to destroy project '%s'.", name);
-		print("Project location: %s", projectDir.getAbsolutePath());
-		print();
-		if (!confirm("Please confirm: yes | [no]", "yes")) {
-			print("User abort.");
-			return 0;
+		console.warning("You are about to destroy project '%s'.", name);
+		console.warning("Project location: %s", projectDir);
+		console.print();
+		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
+			console.print("User cancel.");
+			return ExitCode.CANCEL;
 		}
 
-		print("Destroying files for project %s...", projectDir);
-		Files.removeFilesHierarchy(projectDir);
-		if (!projectDir.delete()) {
-			throw new IOException("Cannot remove project directory.");
-		}
+		console.print("Destroying files for project %s...", projectDir);
+		js.util.Files.removeFilesHierarchy(projectDir.toFile());
+		Files.delete(projectDir);
 
-		return 0;
+		return ExitCode.SUCCESS;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCommandSpec(CommandSpec commandSpec) {
+		this.commandSpec = commandSpec;
+	}
+
+	void setForce(boolean force) {
+		this.force = force;
+	}
+
+	void setName(String name) {
+		this.name = name;
 	}
 }
