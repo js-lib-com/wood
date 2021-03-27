@@ -38,7 +38,7 @@ public class ProjectDestroy extends Task {
 		if (!force && !Files.exists(descriptorFile)) {
 			console.print("Project descriptor file not found. Is %s indeed a WOOD project?", projectDir);
 			console.warning("All directory files will be permanently removed!");
-			console.print();
+			console.crlf();
 			console.print("If you are sure please use --force-destroy option.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
@@ -46,7 +46,7 @@ public class ProjectDestroy extends Task {
 
 		console.warning("You are about to destroy project '%s'.", name);
 		console.warning("Project location: %s", projectDir);
-		console.print();
+		console.crlf();
 		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
 			console.print("User cancel.");
 			return ExitCode.CANCEL;

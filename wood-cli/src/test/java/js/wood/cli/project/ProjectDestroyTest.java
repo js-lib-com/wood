@@ -77,7 +77,7 @@ public class ProjectDestroyTest {
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 		verify(console, times(1)).confirm(anyString(), anyString());
-		verify(console, times(1)).print();
+		verify(console, times(1)).crlf();
 		verify(console, times(0)).print(anyString());
 	}
 
@@ -90,7 +90,7 @@ public class ProjectDestroyTest {
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.CANCEL));
-		verify(console, times(1)).print();
+		verify(console, times(1)).crlf();
 		verify(console, times(1)).print(anyString());
 	}
 
@@ -107,7 +107,7 @@ public class ProjectDestroyTest {
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.BAD_PARAMETER));
-		verify(console, times(0)).print();
+		verify(console, times(0)).crlf();
 		verify(console, times(0)).print(anyString());
 	}
 
@@ -124,7 +124,7 @@ public class ProjectDestroyTest {
 		verify(console, times(0)).confirm(anyString(), anyString());
 		verify(console, times(1)).print(anyString(), eq(projectDir));
 		verify(console, times(2)).print(anyString());
-		verify(console, times(1)).print();
+		verify(console, times(1)).crlf();
 		verify(console, times(1)).warning(anyString());
 	}
 
@@ -145,7 +145,7 @@ public class ProjectDestroyTest {
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 		verify(console, times(1)).confirm(anyString(), anyString());
-		verify(console, times(1)).print();
+		verify(console, times(1)).crlf();
 		verify(console, times(0)).print(anyString());
 	}
 }
