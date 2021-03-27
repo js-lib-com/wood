@@ -1,8 +1,6 @@
 package js.wood.cli.project;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -33,8 +31,9 @@ public class ProjectList extends Task {
 	@Parameters(index = "0", description = "Optional directory to list, default to project root.", arity = "0..1")
 	private String path;
 
+	private Utils utils = new Utils();
 	private int found;
-	
+
 	@Override
 	protected ExitCode exec() throws IOException {
 		Path dir = workingPath();
@@ -42,12 +41,12 @@ public class ProjectList extends Task {
 			dir = dir.resolve(path);
 		}
 
-		if (tree) {
-			tree(dir);
+		if (page) {
+			pages(dir);
 		} else if (template) {
 			templates(dir);
-		} else if (page) {
-			pages(dir);
+		} else if (tree) {
+			tree(dir);
 		} else {
 			list(dir);
 		}
@@ -57,100 +56,167 @@ public class ProjectList extends Task {
 		return ExitCode.SUCCESS;
 	}
 
-	private void tree(Path workingDir) throws IOException {
-		Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path relativeDir = workingDir.relativize(dir);
-				if (isExcluded(relativeDir)) {
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				console.print("+ %s", relativeDir);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				console.print("|\t- %s", file.getFileName().toString());
-				++found;
-				return FileVisitResult.CONTINUE;
-			}
-		});
+	private void pages(Path workingDir) throws IOException {
+		Files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
 	}
 
 	private void templates(Path workingDir) throws IOException {
-		Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path relativeDir = workingDir.relativize(dir);
-				if (isExcluded(relativeDir)) {
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				if (isXML(dir.resolve(dir.getFileName() + ".xml"), "template")) {
-					console.print(relativeDir);
-					++found;
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
+		Files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
 	}
 
-	private void pages(Path workingDir) throws IOException {
-		Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path relativeDir = workingDir.relativize(dir);
-				if (isExcluded(relativeDir)) {
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				if (isXML(dir.resolve(dir.getFileName() + ".xml"), "page")) {
-					console.print(relativeDir);
-					++found;
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
+	private void tree(Path workingDir) throws IOException {
+		Files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
 	}
 
 	private void list(Path workingDir) throws IOException {
-		Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				return isExcluded(workingDir.relativize(dir)) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				console.print(workingDir.relativize(file));
-				++found;
-				return FileVisitResult.CONTINUE;
-			}
-		});
+		Files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
 	}
 
-	private boolean isExcluded(Path dir) {
-		for (String exclude : excludes) {
-			if (dir.toString().startsWith(exclude)) {
-				return true;
-			}
+	class PageFileVisitor extends SimpleFileVisitor<Path> {
+		private Path workingDir;
+
+		public PageFileVisitor(Path workingDir) {
+			this.workingDir = workingDir;
 		}
-		return false;
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			Path relativeDir = workingDir.relativize(dir);
+			if (utils.isExcluded(relativeDir)) {
+				return FileVisitResult.SKIP_SUBTREE;
+			}
+			if (utils.isXML(dir.resolve(dir.getFileName() + ".xml"), "page")) {
+				console.print(relativeDir);
+				++found;
+			}
+			return FileVisitResult.CONTINUE;
+		}
 	}
 
-	private static boolean isXML(Path path, String root) throws IOException {
-		File file = path.toFile();
-		if (!file.exists()) {
+	class TemplateFileVisitor extends SimpleFileVisitor<Path> {
+		private Path workingDir;
+
+		public TemplateFileVisitor(Path workingDir) {
+			this.workingDir = workingDir;
+		}
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			Path relativeDir = workingDir.relativize(dir);
+			if (utils.isExcluded(relativeDir)) {
+				return FileVisitResult.SKIP_SUBTREE;
+			}
+			if (utils.isXML(dir.resolve(dir.getFileName() + ".xml"), "template")) {
+				console.print(relativeDir);
+				++found;
+			}
+			return FileVisitResult.CONTINUE;
+		}
+	}
+
+	class TreeFileVisitor extends SimpleFileVisitor<Path> {
+		private Path workingDir;
+
+		public TreeFileVisitor(Path workingDir) {
+			this.workingDir = workingDir;
+		}
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			Path relativeDir = workingDir.relativize(dir);
+			if (utils.isExcluded(relativeDir)) {
+				return FileVisitResult.SKIP_SUBTREE;
+			}
+			console.print("+ %s", relativeDir);
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			console.print("|\t- %s", file.getFileName());
+			++found;
+			return FileVisitResult.CONTINUE;
+		}
+	}
+
+	class ListFileVisitor extends SimpleFileVisitor<Path> {
+		private Path workingDir;
+
+		public ListFileVisitor(Path workingDir) {
+			this.workingDir = workingDir;
+		}
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			return utils.isExcluded(workingDir.relativize(dir)) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			console.print(workingDir.relativize(file));
+			++found;
+			return FileVisitResult.CONTINUE;
+		}
+	}
+
+	class Utils {
+		boolean isExcluded(Path dir) {
+			for (String exclude : excludes) {
+				if (dir.toString().startsWith(exclude)) {
+					return true;
+				}
+			}
 			return false;
 		}
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			String line = reader.readLine();
-			if (line.startsWith("<?")) {
-				line = reader.readLine();
+
+		boolean isXML(Path file, String root) throws IOException {
+			if (!Files.exists(file)) {
+				return false;
 			}
-			if (line.startsWith(Strings.concat('<', root, '>'))) {
-				return true;
+			try (BufferedReader reader = Files.newBufferedReader(file)) {
+				String line = reader.readLine();
+				if (line.startsWith("<?")) {
+					line = reader.readLine();
+				}
+				if (line == null) {
+					return false;
+				}
+				if (line.startsWith(Strings.concat('<', root, '>'))) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Test support
+
+	void setUtils(Utils utils) {
+		this.utils = utils;
+	}
+
+	void setTree(boolean tree) {
+		this.tree = tree;
+	}
+
+	void setTemplate(boolean template) {
+		this.template = template;
+	}
+
+	void setPage(boolean page) {
+		this.page = page;
+	}
+
+	void setExcludes(List<String> excludes) {
+		this.excludes = excludes;
+	}
+
+	void setPath(String path) {
+		this.path = path;
+	}
+
+	int getFound() {
+		return found;
 	}
 }
