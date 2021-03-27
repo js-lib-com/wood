@@ -11,12 +11,7 @@ public class Console {
 	}
 
 	public void print(Object object) {
-		System.out.print(object.toString());
-		System.out.println();
-	}
-
-	public void warning(String warning) {
-		System.out.println(warning);
+		System.out.println(object.toString());
 	}
 
 	public void warning(String format, Object... args) {
@@ -24,13 +19,17 @@ public class Console {
 		System.out.println();
 	}
 
-	public void info(String info) {
-		System.out.println(info);
+	public void warning(Object object) {
+		System.out.println(object.toString());
 	}
 
 	public void info(String format, Object... args) {
 		System.out.printf(format, args);
 		System.out.println();
+	}
+
+	public void info(Object object) {
+		System.out.println(object.toString());
 	}
 
 	private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
