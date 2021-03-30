@@ -34,7 +34,8 @@ res/template/page/page.htm
 	<h1>@param/title</h1>
 	<section w:editable="section"></section>
 </body>
-
+```
+```
 res/compo/dialog/dialog.htm
 <div>
 	<div class="close"></div>
@@ -45,7 +46,8 @@ res/compo/dialog/dialog.htm
 	</form>	
 	<button>Save</button>
 </div>
-
+```
+```
 res/page/home/home.htm
 <section w:template="res/template/page" w:param="title:Page Title" xmlns:w="js-lib.com/wood">
 	<h2>Section Title</h2>

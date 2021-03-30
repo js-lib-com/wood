@@ -172,6 +172,8 @@ public class ProjectListTest {
 
 		// when
 		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.visitFile(null, attributes);
+		visitor.postVisitDirectory(workingDir, null);
 
 		// then
 		verify(console, times(1)).print(null);
@@ -187,6 +189,8 @@ public class ProjectListTest {
 
 		// when
 		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.visitFile(null, attributes);
+		visitor.postVisitDirectory(workingDir, null);
 
 		// then
 		verify(console, times(0)).print(null);
@@ -230,7 +234,9 @@ public class ProjectListTest {
 
 		// when
 		visitor.preVisitDirectory(workingDir, attributes);
-
+		visitor.visitFile(null, attributes);
+		visitor.postVisitDirectory(workingDir, null);
+		
 		// then
 		verify(console, times(1)).print(null);
 		assertThat(task.getFound(), equalTo(1));
@@ -245,6 +251,8 @@ public class ProjectListTest {
 
 		// when
 		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.visitFile(null, attributes);
+		visitor.postVisitDirectory(workingDir, null);
 
 		// then
 		verify(console, times(0)).print(null);

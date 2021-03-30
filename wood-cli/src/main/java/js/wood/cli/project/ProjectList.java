@@ -7,6 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +29,8 @@ public class ProjectList extends Task {
 	private boolean template;
 	@Option(names = { "-p", "--page" }, description = "List only page components.")
 	private boolean page;
+	@Option(names = { "-a", "--attributes" }, description = "Add modification time and file size to generated listing.")
+	private boolean attributes;
 	@Option(names = { "-e", "--excludes" }, description = "Comma separated list of directories to exclude.", split = ",")
 	private List<String> excludes = Collections.emptyList();
 
@@ -32,23 +38,24 @@ public class ProjectList extends Task {
 	private String path;
 
 	private Utils utils = new Utils();
+	private Path workingDir;
 	private int found;
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		Path dir = workingPath();
+		workingDir = workingPath();
 		if (path != null) {
-			dir = dir.resolve(path);
+			workingDir = workingDir.resolve(path);
 		}
 
 		if (page) {
-			pages(dir);
+			pages();
 		} else if (template) {
-			templates(dir);
+			templates();
 		} else if (tree) {
-			tree(dir);
+			tree();
 		} else {
-			list(dir);
+			list();
 		}
 
 		console.crlf();
@@ -56,24 +63,37 @@ public class ProjectList extends Task {
 		return ExitCode.SUCCESS;
 	}
 
-	private void pages(Path workingDir) throws IOException {
+	private void pages() throws IOException {
 		Files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
 	}
 
-	private void templates(Path workingDir) throws IOException {
+	private void templates() throws IOException {
 		Files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
 	}
 
-	private void tree(Path workingDir) throws IOException {
+	private void tree() throws IOException {
 		Files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
 	}
 
-	private void list(Path workingDir) throws IOException {
+	private void list() throws IOException {
 		Files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
 	}
 
+	private void print(Path file, FileTime modifiedTime, long fileSize) {
+		if (attributes) {
+			LocalDateTime dt = modifiedTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			console.print("%s\t%-8d %s", dt.format(dtf), fileSize, file);
+		} else {
+			console.print(file);
+		}
+	}
+
 	class PageFileVisitor extends SimpleFileVisitor<Path> {
-		private Path workingDir;
+		private final Path workingDir;
+
+		private FileTime modifiedTime;
+		private long dirSize;
 
 		public PageFileVisitor(Path workingDir) {
 			this.workingDir = workingDir;
@@ -81,12 +101,24 @@ public class ProjectList extends Task {
 
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-			Path relativeDir = workingDir.relativize(dir);
-			if (utils.isExcluded(relativeDir)) {
+			if (utils.isExcluded(workingDir.relativize(dir))) {
 				return FileVisitResult.SKIP_SUBTREE;
 			}
+			modifiedTime = attrs.lastModifiedTime();
+			dirSize = 0;
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			dirSize += attrs.size();
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 			if (utils.isXML(dir.resolve(dir.getFileName() + ".xml"), "page")) {
-				console.print(relativeDir);
+				print(workingDir.relativize(dir), modifiedTime, dirSize);
 				++found;
 			}
 			return FileVisitResult.CONTINUE;
@@ -96,18 +128,33 @@ public class ProjectList extends Task {
 	class TemplateFileVisitor extends SimpleFileVisitor<Path> {
 		private Path workingDir;
 
+		private FileTime modifiedTime;
+		private long dirSize;
+
 		public TemplateFileVisitor(Path workingDir) {
 			this.workingDir = workingDir;
 		}
 
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-			Path relativeDir = workingDir.relativize(dir);
-			if (utils.isExcluded(relativeDir)) {
+			if (utils.isExcluded(workingDir.relativize(dir))) {
 				return FileVisitResult.SKIP_SUBTREE;
 			}
+			modifiedTime = attrs.lastModifiedTime();
+			dirSize = 0;
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			dirSize += attrs.size();
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 			if (utils.isXML(dir.resolve(dir.getFileName() + ".xml"), "template")) {
-				console.print(relativeDir);
+				print(workingDir.relativize(dir), modifiedTime, dirSize);
 				++found;
 			}
 			return FileVisitResult.CONTINUE;
@@ -153,7 +200,7 @@ public class ProjectList extends Task {
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			console.print(workingDir.relativize(file));
+			print(workingDir.relativize(file), attrs.lastModifiedTime(), attrs.size());
 			++found;
 			return FileVisitResult.CONTINUE;
 		}
