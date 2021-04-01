@@ -1,7 +1,7 @@
 package js.wood.cli.project;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,31 +33,35 @@ public class ProjectCreate extends Task {
 	@Parameters(index = "0", description = "Project name.")
 	private String name;
 
+	private TemplateProcessor template = new TemplateProcessor();
+
 	@Override
 	protected ExitCode exec() throws IOException {
-		File projectDir = new File(name);
-		if (projectDir.exists()) {
-			throw new IOException("Existing directory.");
-		}
-		print("Creating project %s.", name);
-		if (!projectDir.mkdir()) {
-			throw new IOException("Fail to create project directory.");
+		Path workingDir = files.getWorkingDir();
+		Path projectDir = workingDir.resolve(name);
+		if (files.exists(projectDir)) {
+			console.print("Project directory %s already existing.", projectDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
+		console.print("Creating project %s.", name);
+		files.createDirectory(projectDir);
+
 		if (author == null) {
-			author = System.getProperty("user.name");
+			author = config.get("user.name");
 		}
 		if (author == null) {
-			author = input("developer name");
+			author = console.input("developer name");
 		}
 		if (title == null) {
-			title = input("site title");
+			title = console.input("site title");
 		}
 		if (description == null) {
-			description = input("project short description");
+			description = console.input("project short description");
 		}
 		if (locale == null) {
-			locale = input("list of comma separated locale");
+			locale = console.input("list of comma separated locale");
 		}
 
 		Map<String, String> variables = new HashMap<>();
@@ -68,8 +72,9 @@ public class ProjectCreate extends Task {
 		variables.put("description", description);
 		variables.put("locale", locale);
 
-		TemplateProcessor processor = new TemplateProcessor(projectDir, verbose);
-		processor.exec(TemplateType.project, type, variables);
+		template.setTargetDir(projectDir.toFile());
+		template.setVerbose(verbose);
+		template.exec(TemplateType.project, type, variables);
 
 		return ExitCode.SUCCESS;
 	}
@@ -77,15 +82,11 @@ public class ProjectCreate extends Task {
 	// --------------------------------------------------------------------------------------------
 	// Test support
 
+	void setTemplate(TemplateProcessor template) {
+		this.template = template;
+	}
+
 	void setName(String name) {
 		this.name = name;
-	}
-
-	void setAuthor(String author) {
-		this.author = author;
-	}
-
-	void setLocale(String locale) {
-		this.locale = locale;
 	}
 }

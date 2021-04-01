@@ -34,6 +34,11 @@ public class FilesUtil {
 		return fileSystem.getPath("").toAbsolutePath().getFileName().toString();
 	}
 
+	public void createDirectory(Path dir) throws IOException {
+		Params.notNull(dir, "Directory");
+		Files.createDirectory(dir);
+	}
+
 	public Path createDirectories(String first, String... more) throws IOException {
 		Params.notNullOrEmpty(first, "First path component");
 		Params.notNullOrEmpty(more, "More path components");
