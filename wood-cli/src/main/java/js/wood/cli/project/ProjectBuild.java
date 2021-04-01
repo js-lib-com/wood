@@ -1,16 +1,17 @@
 package js.wood.cli.project;
 
-import static java.lang.String.format;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
-import js.lang.BugError;
 import js.wood.Builder;
 import js.wood.BuilderConfig;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
-import js.wood.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -27,64 +28,92 @@ public class ProjectBuild extends Task {
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
 	private boolean verbose;
 
+	private BuilderConfig builderConfig = new BuilderConfig();
+
 	@Override
 	protected ExitCode exec() throws IOException {
-		File workingDir = workingDir();
-		File buildDir = new File(workingDir, targetDir);
+		Path workingDir = workingPath();
+		Path buildDir = workingDir.resolve(targetDir);
 
 		if (clean) {
-			print("Cleaning build files %s...", buildDir);
-			Files.removeFilesHierarchy(buildDir);
+			console.print("Cleaning build files %s...", buildDir);
+			cleanBuildFiles(buildDir);
 		}
 
-		print("Building project %s...", workingDir);
+		console.print("Building project %s...", workingDir);
 
-		BuilderConfig builderConfig = new BuilderConfig();
-		builderConfig.setProjectDir(workingDir);
-		builderConfig.setBuildDir(buildDir);
+		builderConfig.setProjectDir(workingDir.toFile());
+		builderConfig.setBuildDir(buildDir.toFile());
 		builderConfig.setBuildNumber(buildNumber);
 
-		Builder builder = new Builder(builderConfig);
+		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : workingDir.getName());
-		File runtimeDir = new File(config.get("runtime.home", File.class), runtimeName);
-		if (!runtimeDir.exists()) {
-			// it is legal to not have runtime in which case deploy is not performed
-			return ExitCode.SUCCESS;
-		}
+		String workingDirName = workingDir.getFileName().toString();
+		String contextName = config.get("runtime.context", workingDirName);
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : workingDirName);
+		Path deployDir = fileSystem.getPath(config.get("runtime.home"), runtimeName, "webapps", contextName);
+		// ensure deploy directory is created; there is no exception if deploy directory already exist
+		Files.createDirectories(deployDir);
 
-		File webappsDir = new File(runtimeDir, "webapps");
-		if (!webappsDir.exists()) {
-			throw new BugError("Invalid runtime. Web apps directory not found.");
-		}
-		File deployDir = new File(webappsDir, config.get("runtime.context", workingDir.getName()));
-		// ensure deploy directory is created
-		deployDir.mkdir();
-
-		print("Deploying project %s...", workingDir);
-		deploy(buildDir.getPath().length(), deployDir, buildDir);
+		console.print("Deploying project %s...", workingDir);
+		deployBuildFiles(buildDir, deployDir);
 		return ExitCode.SUCCESS;
 	}
 
-	private void deploy(int buildDirPathLength, File deployDir, File currentDir) throws IOException {
-		File[] files = currentDir.listFiles();
-		if (files == null) {
-			throw new IOException(format("Fail to list files on directory %s.", currentDir));
-		}
-		for (File file : files) {
-			if (file.isDirectory()) {
-				deploy(buildDirPathLength, deployDir, file);
-				continue;
+	private void cleanBuildFiles(Path buildDir) throws IOException {
+		// walk file tree is depth-first so that the most inner files and directories are removed first
+		Files.walkFileTree(buildDir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (verbose) {
+					console.print("Delete file %s.", file);
+				}
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
 			}
 
-			String path = file.getPath().substring(buildDirPathLength + 1);
-			File deployFile = new File(deployDir, path);
-			deployFile.getParentFile().mkdirs();
-			if (verbose) {
-				print("Deploy file %s.", file);
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if (verbose) {
+					console.print("Delete directory %s.", dir);
+				}
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
 			}
-			Files.copy(file, deployFile);
-		}
+
+		});
+	}
+
+	private void deployBuildFiles(Path buildDir, Path deployDir) throws IOException {
+		Files.walkFileTree(buildDir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (verbose) {
+					print("Deploy file %s.", file);
+				}
+				Files.copy(file, deployDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setBuilderConfig(BuilderConfig builderConfig) {
+		this.builderConfig = builderConfig;
+	}
+
+	void setClean(boolean clean) {
+		this.clean = clean;
+	}
+
+	void setBuildNumber(int buildNumber) {
+		this.buildNumber = buildNumber;
+	}
+
+	void setTargetDir(String targetDir) {
+		this.targetDir = targetDir;
 	}
 }

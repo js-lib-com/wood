@@ -39,4 +39,8 @@ public class BuilderConfig {
 	public void setBuildFS(BuildFS buildFS) {
 		this.buildFS = buildFS;
 	}
+
+	public Builder createBuilder() {
+		return new Builder(this);
+	}
 }
