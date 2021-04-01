@@ -3,7 +3,6 @@ package js.wood.cli.project;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import js.wood.cli.ExitCode;
@@ -22,20 +21,22 @@ public class ProjectDestroy extends Task {
 
 	@Option(names = "--force-destroy", description = "Force destroy even if project description not found.")
 	private boolean force;
+	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deleted files.")
+	private boolean verbose;
 
 	@Parameters(index = "0", description = "Project name, relative to current working directory.")
 	private String name;
 
 	@Override
 	protected ExitCode exec() throws IOException  {
-		Path workingDir = workingPath();
+		Path workingDir = files.getWorkingDir();
 		Path projectDir = workingDir.resolve(name);
-		if (!Files.exists(projectDir)) {
+		if (!files.exists(projectDir)) {
 			throw new ParameterException(commandSpec.commandLine(), format("Project directory %s not found.", projectDir));
 		}
 
 		Path descriptorFile = projectDir.resolve("project.xml");
-		if (!force && !Files.exists(descriptorFile)) {
+		if (!force && !files.exists(descriptorFile)) {
 			console.print("Project descriptor file not found. Is %s indeed a WOOD project?", projectDir);
 			console.warning("All directory files will be permanently removed!");
 			console.crlf();
@@ -53,8 +54,7 @@ public class ProjectDestroy extends Task {
 		}
 
 		console.print("Destroying files for project %s...", projectDir);
-		js.util.Files.removeFilesHierarchy(projectDir.toFile());
-		Files.delete(projectDir);
+		files.cleanDirectory(projectDir, verbose);
 
 		return ExitCode.SUCCESS;
 	}

@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import js.lang.BugError;
@@ -18,17 +16,13 @@ public abstract class Task implements Runnable {
 	@Option(names = "--time", description = "Measure execution time. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean time;
 
-	protected FileSystem fileSystem;
 	protected Console console;
 	protected Config config;
+	protected FilesUtil files;
 
 	protected Task() {
-		this.fileSystem = FileSystems.getDefault();
 		this.console = new Console();
-	}
-
-	public void setFileSystem(FileSystem fileSystem) {
-		this.fileSystem = fileSystem;
+		this.files = new FilesUtil(FileSystems.getDefault(), this.console);
 	}
 
 	public void setConsole(Console console) {
@@ -37,6 +31,10 @@ public abstract class Task implements Runnable {
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+
+	public void setFiles(FilesUtil files) {
+		this.files = files;
 	}
 
 	@Override
@@ -89,12 +87,8 @@ public abstract class Task implements Runnable {
 		return answer.equalsIgnoreCase(positiveAnswer);
 	}
 
-	protected Path workingPath() {
-		return fileSystem.getPath("").toAbsolutePath();
-	}
-
 	protected File workingDir() {
-		return fileSystem.getPath("").toAbsolutePath().toFile();
+		return Paths.get("").toAbsolutePath().toFile();
 	}
 
 	protected static File projectDir() {

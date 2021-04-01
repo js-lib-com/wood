@@ -43,7 +43,7 @@ public class ProjectList extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		workingDir = workingPath();
+		workingDir = files.getWorkingDir();
 		if (path != null) {
 			workingDir = workingDir.resolve(path);
 		}
@@ -64,19 +64,19 @@ public class ProjectList extends Task {
 	}
 
 	private void pages() throws IOException {
-		Files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
+		files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
 	}
 
 	private void templates() throws IOException {
-		Files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
+		files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
 	}
 
 	private void tree() throws IOException {
-		Files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
+		files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
 	}
 
 	private void list() throws IOException {
-		Files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
+		files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
 	}
 
 	private void print(Path file, FileTime modifiedTime, long fileSize) {

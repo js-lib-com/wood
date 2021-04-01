@@ -1,23 +1,18 @@
 package js.wood.cli.project;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.spi.FileSystemProvider;
-import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.cli.Console;
+import js.wood.cli.FilesUtil;
 import js.wood.cli.project.ProjectList.ListFileVisitor;
 import js.wood.cli.project.ProjectList.PageFileVisitor;
 import js.wood.cli.project.ProjectList.TemplateFileVisitor;
@@ -35,16 +31,14 @@ import js.wood.cli.project.ProjectList.Utils;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectListTest {
 	@Mock
-	private FileSystemProvider provider;
-	@Mock
-	private FileSystem fileSystem;
-	@Mock
 	private Console console;
 	@Mock
 	private BasicFileAttributes attributes;
 
 	@Mock
 	private Utils utils;
+	@Mock
+	private FilesUtil files;
 
 	@Mock
 	private Path workingDir;
@@ -53,20 +47,15 @@ public class ProjectListTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(fileSystem.provider()).thenReturn(provider);
-		when(fileSystem.getPath("")).thenReturn(workingDir);
-		when(workingDir.toAbsolutePath()).thenReturn(workingDir);
-		when(workingDir.getFileSystem()).thenReturn(fileSystem);
-
-		when(provider.readAttributes(workingDir, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS)).thenReturn(attributes);
+		when(files.getWorkingDir()).thenReturn(workingDir);
 
 		task = new ProjectList();
-		task.setFileSystem(fileSystem);
 		task.setConsole(console);
+		task.setFiles(files);
 	}
 
 	@Test
-	public void exec_GivenPageOption_ThenListNoPages() throws IOException {
+	public void exec_GivenPageOption_ThenUsePageFileVisitor() throws IOException {
 		// given
 		task.setPage(true);
 
@@ -74,9 +63,9 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
+		verify(files, times(1)).walkFileTree(eq(workingDir), any(PageFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
-		assertThat(task.getFound(), equalTo(0));
 	}
 
 	@Test
@@ -88,13 +77,13 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
+		verify(files, times(1)).walkFileTree(eq(workingDir), any(TemplateFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
-		assertThat(task.getFound(), equalTo(0));
 	}
 
 	@Test
-	public void exec_GivenTreeOption_ThenTreeListOnlyRootDirectory() throws IOException {
+	public void exec_GivenTreeOption_ThenUseTreeFileVisitor() throws IOException {
 		// given
 		task.setTree(true);
 
@@ -102,26 +91,26 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
+		verify(files, times(1)).walkFileTree(eq(workingDir), any(TreeFileVisitor.class));
 		verify(console, times(1)).crlf();
-		verify(console, times(1)).info("Found %d objects.", 1);
-		assertThat(task.getFound(), equalTo(1));
+		verify(console, times(1)).info("Found %d objects.", 0);
 	}
 
 	@Test
-	public void exec_GivenNoOptions_ThenListOnlyRootDirectory() throws IOException {
+	public void exec_GivenNoOptions_ThenUseListFileVisitor() throws IOException {
 		// given
 
 		// when
 		task.exec();
 
 		// then
+		verify(files, times(1)).walkFileTree(eq(workingDir), any(ListFileVisitor.class));
 		verify(console, times(1)).crlf();
-		verify(console, times(1)).info("Found %d objects.", 1);
-		assertThat(task.getFound(), equalTo(1));
+		verify(console, times(1)).info("Found %d objects.", 0);
 	}
 
 	@Test
-	public void exec_GivenNoOptionsAndPathParameter_ThenListOnlyRootDirectory() throws IOException {
+	public void exec_GivenNoOptionsAndPathParameter_ThenUseListFileVisitor() throws IOException {
 		// given
 		task.setPath("res");
 		when(workingDir.resolve("res")).thenReturn(workingDir);
@@ -130,9 +119,9 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
+		verify(files, times(1)).walkFileTree(eq(workingDir), any(ListFileVisitor.class));
 		verify(console, times(1)).crlf();
-		verify(console, times(1)).info("Found %d objects.", 1);
-		assertThat(task.getFound(), equalTo(1));
+		verify(console, times(1)).info("Found %d objects.", 0);
 	}
 
 	@Test
@@ -236,7 +225,7 @@ public class ProjectListTest {
 		visitor.preVisitDirectory(workingDir, attributes);
 		visitor.visitFile(null, attributes);
 		visitor.postVisitDirectory(workingDir, null);
-		
+
 		// then
 		verify(console, times(1)).print(null);
 		assertThat(task.getFound(), equalTo(1));
@@ -330,105 +319,5 @@ public class ProjectListTest {
 		verify(console, times(1)).print(null);
 		assertThat(task.getFound(), equalTo(1));
 		assertThat(result, equalTo(FileVisitResult.CONTINUE));
-	}
-
-	@Test
-	public void utils_isExcluded_GivenEmptyExcludesOption_ThenReturnFalse() {
-		// given
-		Utils utils = task.new Utils();
-
-		// when
-		boolean excluded = utils.isExcluded(workingDir);
-
-		// then
-		assertThat(excluded, is(false));
-	}
-
-	@Test
-	public void utils_isExcluded_GivenDirectoryNotInExcludesOption_ThenReturnFalse() {
-		// given
-		when(workingDir.toString()).thenReturn("test");
-		task.setExcludes(Arrays.asList("fake"));
-		Utils utils = task.new Utils();
-
-		// when
-		boolean excluded = utils.isExcluded(workingDir);
-
-		// then
-		assertThat(excluded, is(false));
-	}
-
-	@Test
-	public void utils_isExcluded_GivenDirectoryIsInExcludesOption_ThenReturnTrue() {
-		// given
-		when(workingDir.toString()).thenReturn("test");
-		task.setExcludes(Arrays.asList("test"));
-		Utils utils = task.new Utils();
-
-		// when
-		boolean excluded = utils.isExcluded(workingDir);
-
-		// then
-		assertThat(excluded, is(true));
-	}
-
-	@Test
-	public void utils_isXML_GivenRootMatches_ThenReturnTrue() throws IOException {
-		// given
-		Path file = mock(Path.class);
-		when(file.getFileSystem()).thenReturn(fileSystem);
-		when(provider.newInputStream(file)).thenReturn(new ByteArrayInputStream("<?xml version='1.0' ?>\n<page>\n</page>\n".getBytes()));
-		Utils utils = task.new Utils();
-
-		// when
-		boolean xml = utils.isXML(file, "page");
-
-		// then
-		assertThat(xml, is(true));
-	}
-
-	@Test
-	public void utils_isXML_GivenRootDoesNotMatches_ThenReturnTrue() throws IOException {
-		// given
-		Path file = mock(Path.class);
-		when(file.getFileSystem()).thenReturn(fileSystem);
-		when(provider.newInputStream(file)).thenReturn(new ByteArrayInputStream("<page>\n</page>\n".getBytes()));
-		Utils utils = task.new Utils();
-
-		// when
-		boolean xml = utils.isXML(file, "template");
-
-		// then
-		assertThat(xml, is(false));
-	}
-
-	@Test
-	public void utils_isXML_GivenMissingContent_ThenReturnFalse() throws IOException {
-		// given
-		Path file = mock(Path.class);
-		when(file.getFileSystem()).thenReturn(fileSystem);
-		when(provider.newInputStream(file)).thenReturn(new ByteArrayInputStream("<?xml version='1.0' ?>".getBytes()));
-		Utils utils = task.new Utils();
-
-		// when
-		boolean xml = utils.isXML(file, "page");
-
-		// then
-		assertThat(xml, is(false));
-	}
-
-	@Test
-	public void utils_isXML_GivenFileDoesNotExist_ThenReturnFalse() throws IOException {
-		// given
-		Path file = mock(Path.class);
-		when(file.getFileSystem()).thenReturn(fileSystem);
-		doThrow(IOException.class).when(provider).checkAccess(file);
-		Utils utils = task.new Utils();
-
-		// when
-		boolean xml = utils.isXML(file, "page");
-
-		// then
-		assertThat(xml, is(false));
 	}
 }

@@ -1,12 +1,7 @@
 package js.wood.cli.project;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import js.wood.Builder;
 import js.wood.BuilderConfig;
@@ -32,70 +27,29 @@ public class ProjectBuild extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		Path workingDir = workingPath();
+		Path workingDir = files.getWorkingDir();
 		Path buildDir = workingDir.resolve(targetDir);
 
 		if (clean) {
 			console.print("Cleaning build files %s...", buildDir);
-			cleanBuildFiles(buildDir);
+			files.cleanDirectory(buildDir, verbose);
 		}
-
-		console.print("Building project %s...", workingDir);
 
 		builderConfig.setProjectDir(workingDir.toFile());
 		builderConfig.setBuildDir(buildDir.toFile());
 		builderConfig.setBuildNumber(buildNumber);
 
+		console.print("Building project %s...", workingDir);
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String workingDirName = workingDir.getFileName().toString();
-		String contextName = config.get("runtime.context", workingDirName);
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : workingDirName);
-		Path deployDir = fileSystem.getPath(config.get("runtime.home"), runtimeName, "webapps", contextName);
-		// ensure deploy directory is created; there is no exception if deploy directory already exist
-		Files.createDirectories(deployDir);
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getWorkingDirName());
+		String contextName = config.get("runtime.context", files.getWorkingDirName());
+		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
 
 		console.print("Deploying project %s...", workingDir);
-		deployBuildFiles(buildDir, deployDir);
+		files.copyFiles(buildDir, deployDir, verbose);
 		return ExitCode.SUCCESS;
-	}
-
-	private void cleanBuildFiles(Path buildDir) throws IOException {
-		// walk file tree is depth-first so that the most inner files and directories are removed first
-		Files.walkFileTree(buildDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (verbose) {
-					console.print("Delete file %s.", file);
-				}
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				if (verbose) {
-					console.print("Delete directory %s.", dir);
-				}
-				Files.delete(dir);
-				return FileVisitResult.CONTINUE;
-			}
-
-		});
-	}
-
-	private void deployBuildFiles(Path buildDir, Path deployDir) throws IOException {
-		Files.walkFileTree(buildDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (verbose) {
-					print("Deploy file %s.", file);
-				}
-				Files.copy(file, deployDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-				return FileVisitResult.CONTINUE;
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -111,6 +65,10 @@ public class ProjectBuild extends Task {
 
 	void setBuildNumber(int buildNumber) {
 		this.buildNumber = buildNumber;
+	}
+
+	void setRuntime(String runtime) {
+		this.runtime = runtime;
 	}
 
 	void setTargetDir(String targetDir) {

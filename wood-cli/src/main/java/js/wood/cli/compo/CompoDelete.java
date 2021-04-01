@@ -39,7 +39,7 @@ public class CompoDelete extends Task {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
-		Path workingDir = workingPath();
+		Path workingDir = files.getWorkingDir();
 		Path compoDir = workingDir.resolve(name.path());
 		if (!Files.exists(compoDir)) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));

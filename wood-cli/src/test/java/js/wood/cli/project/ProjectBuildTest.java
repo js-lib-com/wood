@@ -3,20 +3,12 @@ package js.wood.cli.project;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.spi.FileSystemProvider;
-import java.util.Collections;
-import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,19 +20,16 @@ import js.wood.Builder;
 import js.wood.BuilderConfig;
 import js.wood.cli.Config;
 import js.wood.cli.Console;
+import js.wood.cli.FilesUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectBuildTest {
 	@Mock
-	private FileSystemProvider provider;
-	@Mock
-	private FileSystem fileSystem;
-	@Mock
-	private BasicFileAttributes attributes;
-	@Mock
 	private Console console;
 	@Mock
 	private Config config;
+	@Mock
+	private FilesUtil files;
 
 	@Mock
 	private BuilderConfig builderConfig;
@@ -58,44 +47,27 @@ public class ProjectBuildTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(fileSystem.provider()).thenReturn(provider);
-		when(fileSystem.getPath("")).thenReturn(workingDir);
-		when(workingDir.getFileName()).thenReturn(mock(Path.class));
-		when(workingDir.toAbsolutePath()).thenReturn(workingDir);
 		when(workingDir.resolve("build")).thenReturn(buildDir);
-
 		when(builderConfig.createBuilder()).thenReturn(builder);
 
-		when(config.get(eq("runtime.name"), anyString())).thenReturn("test");
 		when(config.get(eq("runtime.home"))).thenReturn("runtimes");
-		when(fileSystem.getPath("runtimes", "test", "webapps", null)).thenReturn(deployDir);
+		when(config.get(eq("runtime.name"), anyString())).thenReturn("test");
+		when(config.get(eq("runtime.context"), anyString())).thenReturn("context");
 
-		when(attributes.isDirectory()).thenReturn(true);
-		when(provider.readAttributes(any(Path.class), eq(BasicFileAttributes.class), eq(LinkOption.NOFOLLOW_LINKS))).thenReturn(attributes);
-		when(provider.newDirectoryStream(eq(buildDir), any())).thenReturn(new DirectoryStream<Path>() {
-			@Override
-			public void close() throws IOException {
-			}
-
-			@Override
-			public Iterator<Path> iterator() {
-				return Collections.emptyIterator();
-			}
-		});
-
-		when(buildDir.getFileSystem()).thenReturn(fileSystem);
-		when(deployDir.getFileSystem()).thenReturn(fileSystem);
+		when(files.getWorkingDir()).thenReturn(workingDir);
+		when(files.getWorkingDirName()).thenReturn("test");
+		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
 
 		task = new ProjectBuild();
-		task.setFileSystem(fileSystem);
 		task.setConsole(console);
 		task.setConfig(config);
+		task.setFiles(files);
 		task.setBuilderConfig(builderConfig);
 		task.setTargetDir("build");
 	}
 
 	@Test
-	public void exec_GivenDefaultOptions_ThenBuildAndDeploy() throws IOException {
+	public void GivenDefaultOptions_ThenBuildAndDeploy() throws IOException {
 		// given
 
 		// when
@@ -106,13 +78,14 @@ public class ProjectBuildTest {
 		verify(builderConfig, times(1)).setBuildDir(any());
 		verify(builderConfig, times(1)).setBuildNumber(0);
 		verify(builder, times(1)).build();
-		
-		verify(provider, times(0)).delete(any());
-		verify(provider, times(1)).createDirectory(eq(deployDir), any());
+
+		verify(files, times(0)).cleanDirectory(any(), eq(false));
+		verify(files, times(1)).createDirectories("runtimes", "test", "webapps", "context");
+		verify(files, times(1)).copyFiles(buildDir, deployDir, false);
 	}
 
 	@Test
-	public void exec_GivenCleanOptionSet_ThenBuildClean() throws IOException {
+	public void GivenCleanOptionSet_ThenBuildClean() throws IOException {
 		// given
 		task.setClean(true);
 
@@ -120,11 +93,11 @@ public class ProjectBuildTest {
 		task.exec();
 
 		// then
-		verify(provider, times(1)).delete(eq(buildDir));
+		verify(files, times(1)).cleanDirectory(any(), eq(false));
 	}
 
 	@Test
-	public void exec_GivenBuildNumberOptionSet_ThenSetBuilderConfig() throws IOException {
+	public void GivenBuildNumberOptionSet_ThenSetBuilderConfig() throws IOException {
 		// given
 		task.setBuildNumber(1964);
 
@@ -133,5 +106,18 @@ public class ProjectBuildTest {
 
 		// then
 		verify(builderConfig, times(1)).setBuildNumber(1964);
+	}
+	
+	@Test
+	public void GivenRuntimeOptionSet_ThenSetDeployDirPath() throws IOException {
+		// given
+		when(config.get("runtime.name", "kids-cademy")).thenReturn("kids-cademy");
+		task.setRuntime("kids-cademy");
+		
+		// when
+		task.exec();
+		
+		// then
+		verify(files, times(1)).createDirectories("runtimes", "kids-cademy", "webapps", "context");
 	}
 }
