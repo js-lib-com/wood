@@ -10,6 +10,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import js.lang.BugError;
 import js.util.Params;
 
 public class FilesUtil {
@@ -32,6 +33,15 @@ public class FilesUtil {
 
 	public String getWorkingDirName() {
 		return fileSystem.getPath("").toAbsolutePath().getFileName().toString();
+	}
+
+	public Path getProjectDir() {
+		Path projectDir = fileSystem.getPath("").toAbsolutePath();
+		Path propertiesFile = projectDir.resolve(".project.properties");
+		if (!Files.exists(propertiesFile)) {
+			throw new BugError("Invalid project. Missing project properties file %s.", propertiesFile);
+		}
+		return projectDir;
 	}
 
 	public void createDirectory(Path dir) throws IOException {
