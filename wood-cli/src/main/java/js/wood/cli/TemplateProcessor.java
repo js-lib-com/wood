@@ -21,11 +21,14 @@ import js.lang.BugError;
 import js.util.Strings;
 
 public class TemplateProcessor {
-	private final File targetDir;
-	private final boolean verbose;
+	private File targetDir;
+	private boolean verbose;
 
-	public TemplateProcessor(File targetDir, boolean verbose) {
+	public void setTargetDir(File targetDir) {
 		this.targetDir = targetDir;
+	}
+
+	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;
 	}
 

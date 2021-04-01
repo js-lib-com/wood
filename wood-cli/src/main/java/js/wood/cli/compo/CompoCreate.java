@@ -48,6 +48,8 @@ public class CompoCreate extends Task {
 	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home")
 	private String name;
 
+	private TemplateProcessor processor = new TemplateProcessor();
+
 	@Override
 	protected ExitCode exec() throws Exception {
 		File projectDir = projectDir();
@@ -106,7 +108,8 @@ public class CompoCreate extends Task {
 			variables.put("title", Strings.toTitleCase(Strings.concat(compoDir.getName(), page ? " page" : " component")));
 			variables.put("description", Strings.concat(Strings.toTitleCase(compoDir.getName()), page ? " page" : " component", " description."));
 
-			TemplateProcessor processor = new TemplateProcessor(compoDir, verbose);
+			processor.setTargetDir(compoDir);
+			processor.setVerbose(verbose);
 			processor.exec(TemplateType.compo, "page", variables);
 
 		}

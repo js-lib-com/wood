@@ -32,6 +32,8 @@ public class RuntimeCreate extends Task {
 	@Parameters(index = "0", description = "Unique runtime name. Default: project name.", arity = "0..1")
 	private String name;
 
+	private TemplateProcessor template = new TemplateProcessor();
+
 	@Override
 	protected ExitCode exec() throws Exception {
 		File projectDir = workingDir();
@@ -48,8 +50,9 @@ public class RuntimeCreate extends Task {
 		Map<String, String> variables = new HashMap<>();
 		variables.put("port", Integer.toString(port));
 
-		TemplateProcessor processor = new TemplateProcessor(runtimeDir, verbose);
-		processor.exec(TemplateType.runtime, type, variables);
+		template.setTargetDir(runtimeDir);
+		template.setVerbose(verbose);
+		template.exec(TemplateType.runtime, type, variables);
 
 		config.set("runtime.name", name);
 		config.set("runtime.port", port);
