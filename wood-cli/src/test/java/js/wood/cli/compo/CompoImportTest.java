@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.nio.file.Path;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -17,6 +18,7 @@ import js.wood.cli.Console;
 import js.wood.cli.ExitCode;
 import js.wood.cli.FilesUtil;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class CompoImportTest {
 	@Mock
