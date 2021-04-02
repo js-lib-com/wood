@@ -55,7 +55,7 @@ public class ProjectBuildTest {
 		when(config.get(eq("runtime.context"), anyString())).thenReturn("context");
 
 		when(files.getWorkingDir()).thenReturn(workingDir);
-		when(files.getWorkingDirName()).thenReturn("test");
+		when(files.getFileName(workingDir)).thenReturn("test");
 		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
 
 		task = new ProjectBuild();

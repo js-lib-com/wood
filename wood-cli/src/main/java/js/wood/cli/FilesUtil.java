@@ -1,6 +1,7 @@
 package js.wood.cli;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Iterator;
 
 import js.lang.BugError;
 import js.util.Params;
@@ -31,8 +33,8 @@ public class FilesUtil {
 		return fileSystem.getPath("").toAbsolutePath();
 	}
 
-	public String getWorkingDirName() {
-		return fileSystem.getPath("").toAbsolutePath().getFileName().toString();
+	public String getFileName(Path file) {
+		return file.getFileName().toString();
 	}
 
 	public Path getProjectDir() {
@@ -100,5 +102,23 @@ public class FilesUtil {
 
 	public void walkFileTree(Path start, FileVisitor<Path> visitor) throws IOException {
 		Files.walkFileTree(start, visitor);
+	}
+
+	public Path findFile(Path dir, String extension) throws IOException {
+		Iterator<Path> it = Files.walk(dir, 1).iterator();
+		while (it.hasNext()) {
+			Path path = it.next();
+			if (Files.isDirectory(path)) {
+				continue;
+			}
+			if (path.endsWith(extension)) {
+				return path;
+			}
+		}
+		return null;
+	}
+
+	public Reader getReader(Path file) throws IOException {
+		return Files.newBufferedReader(file);
 	}
 }

@@ -43,8 +43,8 @@ public class ProjectBuild extends Task {
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getWorkingDirName());
-		String contextName = config.get("runtime.context", files.getWorkingDirName());
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getFileName(workingDir));
+		String contextName = config.get("runtime.context", files.getFileName(workingDir));
 		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
 
 		console.print("Deploying project %s...", workingDir);
