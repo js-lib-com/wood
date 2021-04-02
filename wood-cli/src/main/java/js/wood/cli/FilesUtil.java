@@ -1,8 +1,10 @@
 package js.wood.cli;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -10,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Iterator;
 
 import js.lang.BugError;
 import js.util.Params;
@@ -40,7 +41,7 @@ public class FilesUtil {
 	public Path getProjectDir() {
 		Path projectDir = fileSystem.getPath("").toAbsolutePath();
 		Path propertiesFile = projectDir.resolve(".project.properties");
-		if (!Files.exists(propertiesFile)) {
+		if (!exists(propertiesFile)) {
 			throw new BugError("Invalid project. Missing project properties file %s.", propertiesFile);
 		}
 		return projectDir;
@@ -48,27 +49,43 @@ public class FilesUtil {
 
 	public void createDirectory(Path dir) throws IOException {
 		Params.notNull(dir, "Directory");
-		Files.createDirectory(dir);
+		fileSystem.provider().createDirectory(dir);
 	}
 
 	public Path createDirectories(String first, String... more) throws IOException {
 		Params.notNullOrEmpty(first, "First path component");
 		Params.notNullOrEmpty(more, "More path components");
+
 		Path dir = fileSystem.getPath(first, more);
-		// there is no exception if deploy directory already exist
-		Files.createDirectories(dir);
+		Path parent = dir.getParent();
+		while (parent != null) {
+			if (exists(parent)) {
+				break;
+			}
+			parent = parent.getParent();
+		}
+		if (parent == null) {
+			throw new FileSystemException(dir.toString(), null, "Unable to determine if root directory exists");
+		}
+
+		Path child = parent;
+		for (Path name : parent.relativize(dir)) {
+			child = child.resolve(name);
+			createDirectory(child);
+		}
+
 		return dir;
 	}
 
 	public void cleanDirectory(Path dir, boolean verbose) throws IOException {
 		// walk file tree is depth-first so that the most inner files and directories are removed first
-		Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+		walkFileTree(dir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (verbose) {
 					console.print("Delete file %s.", file);
 				}
-				Files.delete(file);
+				fileSystem.provider().delete(file);
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -77,27 +94,40 @@ public class FilesUtil {
 				if (verbose) {
 					console.print("Delete directory %s.", dir);
 				}
-				Files.delete(dir);
+				fileSystem.provider().delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
 		});
 	}
 
 	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {
-		Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
+		walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (verbose) {
 					console.print("Deploy file %s.", file);
 				}
-				Files.copy(file, targetDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+				fileSystem.provider().copy(file, targetDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
 				return FileVisitResult.CONTINUE;
 			}
 		});
 	}
 
+	public boolean isDirectory(Path path) {
+		try {
+			return fileSystem.provider().readAttributes(path, BasicFileAttributes.class).isDirectory();
+		} catch (IOException unused) {
+			return false;
+		}
+	}
+
 	public boolean exists(Path file) {
-		return Files.exists(file);
+		try {
+			fileSystem.provider().checkAccess(file);
+			return true;
+		} catch (IOException unused) {
+			return false;
+		}
 	}
 
 	public void walkFileTree(Path start, FileVisitor<Path> visitor) throws IOException {
@@ -105,20 +135,25 @@ public class FilesUtil {
 	}
 
 	public Path findFile(Path dir, String extension) throws IOException {
-		Iterator<Path> it = Files.walk(dir, 1).iterator();
-		while (it.hasNext()) {
-			Path path = it.next();
-			if (Files.isDirectory(path)) {
-				continue;
-			}
-			if (path.endsWith(extension)) {
-				return path;
-			}
+		class FoundFile {
+			Path path = null;
 		}
-		return null;
+		final FoundFile foundFile = new FoundFile();
+
+		walkFileTree(dir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (file.endsWith(extension)) {
+					foundFile.path = file;
+					return FileVisitResult.TERMINATE;
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return foundFile.path;
 	}
 
 	public Reader getReader(Path file) throws IOException {
-		return Files.newBufferedReader(file);
+		return new InputStreamReader(fileSystem.provider().newInputStream(file));
 	}
 }
