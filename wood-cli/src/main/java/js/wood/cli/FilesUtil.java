@@ -1,8 +1,10 @@
 package js.wood.cli;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemException;
 import java.nio.file.FileVisitResult;
@@ -188,5 +190,18 @@ public class FilesUtil {
 
 	public Reader getReader(Path file) throws IOException {
 		return new InputStreamReader(fileSystem.provider().newInputStream(file));
+	}
+
+	public InputStream getInputStream(Path file) throws IOException {
+		return fileSystem.provider().newInputStream(file);
+	}
+
+	public Iterable<Path> listFiles(Path dir) throws IOException {
+		return fileSystem.provider().newDirectoryStream(dir, new DirectoryStream.Filter<Path>() {
+			@Override
+			public boolean accept(Path entry) throws IOException {
+				return true;
+			}
+		});
 	}
 }

@@ -75,6 +75,20 @@ public class CompoDeleteTest {
 	}
 
 	@Test
+	public void GivenMissingCompoDir_ThenAbort() throws IOException {
+		// given
+		when(files.exists(compoDir)).thenReturn(false);
+
+		// when
+		ExitCode exitCode = task.exec();
+
+		// then
+		assertThat(exitCode, equalTo(ExitCode.ABORT));
+		verify(files, times(0)).cleanDirectory(compoDir, false);
+		verify(console, times(1)).print("Command abort.");
+	}
+
+	@Test
 	public void GivenCompoIsUsed_ThenAbort() throws IOException {
 		// given
 		when(files.findFilesByContentPattern(projectDir, ".htm", "res/compo/dialog")).thenReturn(Arrays.asList(mock(Path.class)));
@@ -106,17 +120,6 @@ public class CompoDeleteTest {
 	public void GivenInvalidCompoName_ThenParameterException() throws IOException {
 		// given
 		when(compoName.isValid()).thenReturn(false);
-
-		// when
-		task.exec();
-
-		// then
-	}
-
-	@Test(expected = ParameterException.class)
-	public void GivenMissingCompoDir_ThenParameterException() throws IOException {
-		// given
-		when(files.exists(compoDir)).thenReturn(false);
 
 		// when
 		task.exec();

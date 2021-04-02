@@ -2,16 +2,15 @@ package js.wood.cli.compo;
 
 import static java.lang.String.format;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -37,41 +36,46 @@ public class CompoExport extends Task {
 	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
 	private CompoName name;
 
+	private HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
 	@Override
-	protected ExitCode exec() throws Exception {
+	protected ExitCode exec() throws IOException {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
-		File workingDir = workingDir();
-		File compoDir = new File(workingDir, name.path());
-		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
+		Path workingDir = files.getProjectDir();
+		Path compoDir = workingDir.resolve(name.path());
+		if (!files.exists(compoDir)) {
+			console.print("Missing component directory %s.", compoDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
 		// WOOD project naming convention: descriptor file basename is the same as component directory
-		File descriptorFile = new File(compoDir, compoDir.getName() + ".xml");
-		if (!descriptorFile.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Invalid component %s. Missing descriptor.", name));
+		Path descriptorFile = compoDir.resolve(files.getFileName(compoDir) + ".xml");
+		if (!files.exists(descriptorFile)) {
+			console.print("Missing component descriptor %s.", descriptorFile);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
+
 		CompoCoordinates compoCoordinates = compoCoordinates(descriptorFile);
 		if (!compoCoordinates.isValid()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Invalid descriptor for component %s. Missing component coordinates.", name));
+			console.print("Invalid component descriptor %s. Missing component coordinates.", descriptorFile);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
-		File[] compoFiles = compoDir.listFiles();
-		if (compoFiles == null) {
-			throw new IOException(format("Cannot list files for component %s.", compoDir));
-		}
-
-		print("Exporting component %s...", name);
+		console.print("Exporting component %s...", name);
 		if (verbose) {
-			print("Cleanup repository component %s.", compoCoordinates);
+			console.print("Cleanup repository component %s.", compoCoordinates);
 		}
 		cleanupRepositoryComponent(compoCoordinates);
-		for (File compoFile : compoFiles) {
+
+		for (Path compoFile : files.listFiles(compoDir)) {
 			if (verbose) {
-				print("Upload file %s.", compoFile);
+				console.print("Upload file %s.", compoFile);
 			}
 			uploadComponentFile(compoFile, compoCoordinates);
 		}
@@ -80,32 +84,34 @@ public class CompoExport extends Task {
 
 	private void cleanupRepositoryComponent(CompoCoordinates coordinates) throws IOException {
 		String url = String.format("%s/%s/", config.get("repository.url"), coordinates.toPath());
-		try (CloseableHttpClient client = HttpClients.createDefault()) {
+		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			HttpDelete httpDelete = new HttpDelete(url);
-			CloseableHttpResponse response = client.execute(httpDelete);
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new IOException(format("Fail to cleanup component %s", coordinates));
+			try (CloseableHttpResponse response = client.execute(httpDelete)) {
+				if (response.getStatusLine().getStatusCode() != 200) {
+					throw new IOException(format("Fail to cleanup component %s", coordinates));
+				}
 			}
 		}
 	}
 
-	private void uploadComponentFile(File compoFile, CompoCoordinates coordinates) throws IOException {
-		String url = String.format("%s/%s/%s", config.get("repository.url"), coordinates.toPath(), compoFile.getName());
-		try (CloseableHttpClient client = HttpClients.createDefault()) {
+	private void uploadComponentFile(Path compoFile, CompoCoordinates coordinates) throws IOException {
+		String url = String.format("%s/%s/%s", config.get("repository.url"), coordinates.toPath(), files.getFileName(compoFile));
+		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			HttpPost httpPost = new HttpPost(url);
 			httpPost.setHeader("Content-Type", "application/octet-stream");
-			httpPost.setEntity(new FileEntity(compoFile));
+			httpPost.setEntity(new InputStreamEntity(files.getInputStream(compoFile)));
 
-			CloseableHttpResponse response = client.execute(httpPost);
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new IOException(format("Fail to upload file %s", compoFile));
+			try (CloseableHttpResponse response = client.execute(httpPost)) {
+				if (response.getStatusLine().getStatusCode() != 200) {
+					throw new IOException(format("Fail to upload file %s", compoFile));
+				}
 			}
 		}
 	}
 
-	private static CompoCoordinates compoCoordinates(File descriptorFile) throws FileNotFoundException {
+	private CompoCoordinates compoCoordinates(Path descriptorFile) throws IOException {
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
-		Document descriptorDoc = documentBuilder.loadXML(descriptorFile);
+		Document descriptorDoc = documentBuilder.loadXML(files.getReader(descriptorFile));
 		String groupId = text(descriptorDoc, "groupId");
 		String artifactId = text(descriptorDoc, "artifactId");
 		String version = text(descriptorDoc, "version");
@@ -115,5 +121,24 @@ public class CompoExport extends Task {
 	private static String text(Document doc, String tagName) {
 		Element element = doc.getByTag(tagName);
 		return element != null ? element.getText() : null;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCommandSpec(CommandSpec commandSpec) {
+		this.commandSpec = commandSpec;
+	}
+
+	void setName(CompoName name) {
+		this.name = name;
+	}
+
+	void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	void setHttpClientBuilder(HttpClientBuilder httpClientBuilder) {
+		this.httpClientBuilder = httpClientBuilder;
 	}
 }

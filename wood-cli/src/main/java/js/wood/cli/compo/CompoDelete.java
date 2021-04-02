@@ -35,7 +35,9 @@ public class CompoDelete extends Task {
 		Path projectDir = files.getProjectDir();
 		Path compoDir = projectDir.resolve(name.path());
 		if (!files.exists(compoDir)) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
+			console.print("Missing component directory %s.", compoDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
 		List<Path> usedByFiles = files.findFilesByContentPattern(projectDir, ".htm", name.path());
