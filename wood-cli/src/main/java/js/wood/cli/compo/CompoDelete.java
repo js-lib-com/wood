@@ -3,19 +3,14 @@ package js.wood.cli.compo;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
-import js.util.Strings;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
@@ -31,41 +26,24 @@ public class CompoDelete extends Task {
 	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
 	private CompoName name;
 
-	private boolean found;
-
 	@Override
-	protected ExitCode exec() throws Exception {
+	protected ExitCode exec() throws IOException {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
-		Path workingDir = files.getWorkingDir();
-		Path compoDir = workingDir.resolve(name.path());
-		if (!Files.exists(compoDir)) {
+		Path projectDir = files.getProjectDir();
+		Path compoDir = projectDir.resolve(name.path());
+		if (!files.exists(compoDir)) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
 		}
 
-		PathMatcher matcher = workingDir.getFileSystem().getPathMatcher("glob:**.htm");
-		Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (!matcher.matches(file)) {
-					return FileVisitResult.CONTINUE;
-				}
-				if (!Strings.load(Files.newBufferedReader(file)).contains(name.path())) {
-					return FileVisitResult.CONTINUE;
-				}
-
-				if (!found) {
-					console.warning("Component %s is used by:", name);
-				}
-				found = true;
-				console.warning("- %s", workingDir.relativize(file));
-				return FileVisitResult.CONTINUE;
+		List<Path> usedByFiles = files.findFilesByContentPattern(projectDir, ".htm", name.path());
+		if (!usedByFiles.isEmpty()) {
+			console.warning("Component %s is used by:", name);
+			for (Path usedByFile : usedByFiles) {
+				console.warning("- %s", projectDir.relativize(usedByFile));
 			}
-		});
-
-		if (found) {
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
@@ -76,26 +54,19 @@ public class CompoDelete extends Task {
 			return ExitCode.CANCEL;
 		}
 
-		Files.walkFileTree(compoDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				Files.delete(dir);
-				if (verbose) {
-					console.print("Remove component directory %s.", workingDir.relativize(dir));
-				}
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.delete(file);
-				if (verbose) {
-					console.print("Remove component file %s.", workingDir.relativize(file));
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
+		files.cleanDirectory(compoDir, verbose);
 
 		return ExitCode.SUCCESS;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCommandSpec(CommandSpec commandSpec) {
+		this.commandSpec = commandSpec;
+	}
+
+	void setName(CompoName name) {
+		this.name = name;
 	}
 }
