@@ -71,7 +71,7 @@ public class CompoCreate extends Task {
 				return ExitCode.ABORT;
 			}
 
-			Path templateLayoutFile = files.findFile(compoTemplateDir, "htm");
+			Path templateLayoutFile = files.getFileByExtension(compoTemplateDir, ".htm");
 			if (templateLayoutFile == null) {
 				console.print("Missing layout file for component template %s.", compoTemplateDir);
 				console.print("Command abort.");

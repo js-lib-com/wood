@@ -12,9 +12,12 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 import js.lang.BugError;
 import js.util.Params;
+import js.util.Strings;
 
 public class FilesUtil {
 	private final FileSystem fileSystem;
@@ -134,7 +137,7 @@ public class FilesUtil {
 		Files.walkFileTree(start, visitor);
 	}
 
-	public Path findFile(Path dir, String extension) throws IOException {
+	public Path getFileByExtension(Path dir, String extension) throws IOException {
 		class FoundFile {
 			Path path = null;
 		}
@@ -151,6 +154,36 @@ public class FilesUtil {
 			}
 		});
 		return foundFile.path;
+	}
+
+	public List<Path> findFilesByExtension(Path dir, String extension) throws IOException {
+		List<Path> files = new ArrayList<>();
+		walkFileTree(dir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (file.endsWith(extension)) {
+					files.add(file);
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return files;
+	}
+
+	public List<Path> findFilesByContentPattern(Path dir, String extension, String pattern) throws IOException {
+		List<Path> files = new ArrayList<>();
+		walkFileTree(dir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (file.endsWith(extension)) {
+					if (Strings.load(getReader(file)).contains(pattern)) {
+						files.add(file);
+					}
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return files;
 	}
 
 	public Reader getReader(Path file) throws IOException {

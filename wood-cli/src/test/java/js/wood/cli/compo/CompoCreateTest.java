@@ -105,7 +105,7 @@ public class CompoCreateTest {
 	public void GivenTemplateOption_ThenCreateCompo() throws IOException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
-		when(files.findFile(compoTemplateDir, "htm")).thenReturn(templateLayoutFile);
+		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
 		String layoutDocument = "<body><section w:editable='section'></section></body>";
 		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
@@ -126,7 +126,7 @@ public class CompoCreateTest {
 	public void GivenTemplateOptionAndLayoutParameters_ThenConsoleInput() throws IOException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
-		when(files.findFile(compoTemplateDir, "htm")).thenReturn(templateLayoutFile);
+		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
 		String layoutDocument = "<body><section w:editable='section'><h1>@param/title</h1></section></body>";
 		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
@@ -161,7 +161,7 @@ public class CompoCreateTest {
 	public void GivenTemplateOptionAndMissingTemplateLayout_ThenAbort() throws IOException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
-		when(files.findFile(compoTemplateDir, "htm")).thenReturn(null);
+		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(null);
 		task.setCompoTemplate(compoTemplate);
 
 		// when
@@ -177,7 +177,7 @@ public class CompoCreateTest {
 	public void GivenTemplateOptionAndMissingEditable_ThenBugError() throws IOException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
-		when(files.findFile(compoTemplateDir, "htm")).thenReturn(templateLayoutFile);
+		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
 		// w:editable is misspelled; it has 's' at the end
 		String layoutDocument = "<body><section w:editables='section'></section></body>";
