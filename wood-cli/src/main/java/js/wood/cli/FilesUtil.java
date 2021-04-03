@@ -1,9 +1,13 @@
 package js.wood.cli;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemException;
@@ -118,6 +122,16 @@ public class FilesUtil {
 		});
 	}
 
+	public void copyFile(URL url, Path path) throws IOException {
+		try (BufferedInputStream inputStream = new BufferedInputStream(url.openStream()); BufferedOutputStream outputStream = new BufferedOutputStream(getOutputStream(path))) {
+			byte[] buffer = new byte[4096];
+			int bytesCount;
+			while ((bytesCount = inputStream.read(buffer, 0, 4096)) != -1) {
+				outputStream.write(buffer, 0, bytesCount);
+			}
+		}
+	}
+
 	public boolean isDirectory(Path path) {
 		try {
 			return fileSystem.provider().readAttributes(path, BasicFileAttributes.class).isDirectory();
@@ -196,6 +210,10 @@ public class FilesUtil {
 		return fileSystem.provider().newInputStream(file);
 	}
 
+	public OutputStream getOutputStream(Path file) throws IOException {
+		return fileSystem.provider().newOutputStream(file);
+	}
+
 	public Iterable<Path> listFiles(Path dir) throws IOException {
 		return fileSystem.provider().newDirectoryStream(dir, new DirectoryStream.Filter<Path>() {
 			@Override
@@ -203,5 +221,9 @@ public class FilesUtil {
 				return true;
 			}
 		});
+	}
+
+	public Path getPath(String path) {
+		return fileSystem.getPath(path);
 	}
 }

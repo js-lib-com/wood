@@ -2,9 +2,9 @@ package js.wood.cli.compo;
 
 import static java.lang.String.format;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +12,6 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
-import js.util.Files;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
@@ -33,62 +32,55 @@ public final class CompoImport extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		print("Import component %s into %s", coordinates, path);
+		console.print("Import component %s into %s", coordinates, path);
 
-		File repositoryDir = config.get("repository.dir", File.class);
-		File compoDir = new File(repositoryDir, coordinates.toFile());
+		Path repositoryDir = files.getPath(config.get("repository.dir"));
+		Path repositoryCompoDir = repositoryDir.resolve(coordinates.toFile());
 		if (reload) {
-			if (!compoDir.exists() && !compoDir.mkdirs()) {
-				throw new IOException("Cannot create component directory.");
+			if (!files.exists(repositoryCompoDir)) {
+				files.createDirectory(repositoryCompoDir);
 			}
-			downloadCompoment(coordinates, compoDir);
+			files.cleanDirectory(repositoryCompoDir, verbose);
+			downloadCompoment(repositoryCompoDir);
 		} else {
-			if (!compoDir.exists()) {
-				if (!compoDir.mkdirs()) {
-					throw new IOException(format("Cannot create component directory %s.", compoDir));
-				}
-				downloadCompoment(coordinates, compoDir);
+			if (!files.exists(repositoryCompoDir)) {
+				files.createDirectory(repositoryCompoDir);
+				downloadCompoment(repositoryCompoDir);
 			}
 		}
 
-		File workingDir = workingDir();
-		File targetDir = new File(workingDir, path);
-		targetDir = new File(targetDir, coordinates.getArtifactId());
-		if (!targetDir.exists() && !targetDir.mkdirs()) {
-			throw new IOException("Cannot create component directory.");
-		}
-		if (reload) {
-			Files.removeFilesHierarchy(targetDir);
+		Path projectDir = files.getProjectDir();
+		Path projectCompoDir = projectDir.resolve(path);
+		projectCompoDir = projectCompoDir.resolve(coordinates.getArtifactId());
+		if (!files.exists(projectCompoDir)) {
+			files.createDirectory(projectCompoDir);
 		}
 
-		File[] compoFiles = compoDir.listFiles();
-		if (compoFiles == null) {
-			throw new IOException("Cannot list component files.");
-		}
-		for (File compoFile : compoFiles) {
-			if (verbose) {
-				print("Import file %s.", compoFile);
-			}
-			Files.copy(compoFile, new File(targetDir, compoFile.getName()));
+		console.warning("All component '%s' files will be permanently removed and replaced.", path);
+		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
+			console.print("User cancel.");
+			return ExitCode.CANCEL;
 		}
 
+		files.cleanDirectory(projectCompoDir, verbose);
+		files.copyFiles(repositoryCompoDir, projectCompoDir, verbose);
 		return ExitCode.SUCCESS;
 	}
 
 	/** Pattern for files listed on index page. */
 	private static final Pattern FILE_PATTERN = Pattern.compile("^[a-z0-9_.\\-]+\\.[a-z0-9]+$", Pattern.CASE_INSENSITIVE);
 
+	private DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+
 	/**
 	 * Download component files from repository into target directory. This method assume repository server is configured with
 	 * page indexing. If first loads remote directory index, then scan and download all links matching {@link #FILE_PATTERN}.
 	 * 
-	 * @param name component name,
 	 * @param targetDir target directory.
 	 * @throws IOException if download fails for whatever reason.
 	 */
-	private void downloadCompoment(CompoCoordinates name, File targetDir) throws IOException {
-		URL indexPageURL = new URL(String.format("%s/%s/", config.get("repository.url"), name.toPath()));
-		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+	private void downloadCompoment(Path targetDir) throws IOException {
+		URL indexPageURL = new URL(format("%s/%s/", config.get("repository.url"), coordinates.toPath()));
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
 
 		for (Element linkElement : indexPageDoc.findByXPath("//*[@href]")) {
@@ -97,10 +89,33 @@ public final class CompoImport extends Task {
 			if (matcher.find()) {
 				URL linkURL = new URL(indexPageURL, link);
 				if (verbose) {
-					print("Download file %s.", linkURL);
+					console.print("Download file %s.", linkURL);
 				}
-				Files.copy(linkURL, new File(targetDir, link));
+				files.copyFile(linkURL, targetDir.resolve(link));
 			}
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCoordinates(CompoCoordinates coordinates) {
+		this.coordinates = coordinates;
+	}
+
+	void setPath(String path) {
+		this.path = path;
+	}
+
+	void setReload(boolean reload) {
+		this.reload = reload;
+	}
+
+	void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	void setDocumentBuilder(DocumentBuilder documentBuilder) {
+		this.documentBuilder = documentBuilder;
 	}
 }
