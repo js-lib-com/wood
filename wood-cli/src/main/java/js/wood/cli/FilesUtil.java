@@ -47,6 +47,10 @@ public class FilesUtil {
 		return file.getFileName().toString();
 	}
 
+	public String getFileBasename(Path file) {
+		return file.getFileName().toString();
+	}
+
 	public Path getProjectDir() {
 		Path projectDir = fileSystem.getPath("").toAbsolutePath();
 		Path propertiesFile = projectDir.resolve(".project.properties");
@@ -122,6 +126,12 @@ public class FilesUtil {
 
 	public void move(Path source, Path target) throws IOException {
 		fileSystem.provider().move(source, target);
+	}
+
+	public String getExtension(Path file) {
+		String path = file.getFileName().toString();
+		int extensionPos = path.lastIndexOf('.');
+		return extensionPos == -1 ? "" : path.substring(extensionPos + 1).toLowerCase();
 	}
 
 	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {
@@ -230,12 +240,11 @@ public class FilesUtil {
 	}
 
 	public Iterable<Path> listFiles(Path dir) throws IOException {
-		return fileSystem.provider().newDirectoryStream(dir, new DirectoryStream.Filter<Path>() {
-			@Override
-			public boolean accept(Path entry) throws IOException {
-				return true;
-			}
-		});
+		return listFiles(dir, path -> true);
+	}
+
+	public Iterable<Path> listFiles(Path dir, DirectoryStream.Filter<Path> filter) throws IOException {
+		return fileSystem.provider().newDirectoryStream(dir, filter);
 	}
 
 	public Path getPath(String path) {
