@@ -61,6 +61,13 @@ public class FilesUtil {
 		fileSystem.provider().createDirectory(dir);
 	}
 
+	public void createDirectoryIfNotExist(Path dir) throws IOException {
+		Params.notNull(dir, "Directory");
+		if (!exists(dir)) {
+			createDirectory(dir);
+		}
+	}
+
 	public Path createDirectories(String first, String... more) throws IOException {
 		Params.notNullOrEmpty(first, "First path component");
 		Params.notNullOrEmpty(more, "More path components");
@@ -94,7 +101,7 @@ public class FilesUtil {
 				if (verbose) {
 					console.print("Delete file %s.", file);
 				}
-				fileSystem.provider().delete(file);
+				delete(file);
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -103,10 +110,18 @@ public class FilesUtil {
 				if (verbose) {
 					console.print("Delete directory %s.", dir);
 				}
-				fileSystem.provider().delete(dir);
+				delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
 		});
+	}
+
+	public void delete(Path path) throws IOException {
+		fileSystem.provider().delete(path);
+	}
+
+	public void move(Path source, Path target) throws IOException {
+		fileSystem.provider().move(source, target);
 	}
 
 	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {

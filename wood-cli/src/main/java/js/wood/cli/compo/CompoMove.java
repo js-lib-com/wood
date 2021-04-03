@@ -3,8 +3,8 @@ package js.wood.cli.compo;
 import static java.lang.String.format;
 import static js.util.Strings.concat;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
@@ -29,74 +29,81 @@ public class CompoMove extends Task {
 	@Parameters(index = "1", description = "Target directory, relative to project root.")
 	private String target;
 
+	private TextReplace textReplace = new TextReplace();
+
 	@Override
-	protected ExitCode exec() throws Exception {
+	protected ExitCode exec() throws IOException {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
-		File workingDir = workingDir();
-		File compoDir = new File(workingDir, name.path());
-		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
+		Path projectDir = files.getProjectDir();
+		Path compoDir = projectDir.resolve(name.path());
+		if (!files.exists(compoDir)) {
+			console.print("Missing component directory %s.", compoDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
+		String compoName = files.getFileName(compoDir);
 
-		if (target.endsWith("/")) {
-			target = target.substring(0, target.length() - 1);
-		}
-		File targetDir = new File(workingDir, target);
-		if (!targetDir.exists()) {
-			print("Directory %s is missing. To create it?", targetDir);
-			if (confirm("Please confirm: yes | [no]", "yes")) {
-				if (!targetDir.mkdirs()) {
-					throw new IOException(format("Cannot create directory %s.", targetDir));
-				}
+		Path targetDir = projectDir.resolve(target);
+		if (!files.exists(targetDir)) {
+			console.print("Directory %s is missing. To create it?", targetDir);
+			if (console.confirm("Please confirm: yes | [no]", "yes")) {
+				files.createDirectory(targetDir);
 			} else {
-				print("User abort.");
-				return ExitCode.ABORT;
+				console.print("User cancel.");
+				return ExitCode.CANCEL;
 			}
 		}
 
-		File targetCompoDir = new File(targetDir, compoDir.getName());
-		if (targetCompoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Target component directory %s already existing.", targetCompoDir));
-		}
-		if (!targetCompoDir.mkdir()) {
-			throw new IOException(format("Fail to create directory %s", targetCompoDir));
-		}
+		Path targetCompoDir = targetDir.resolve(compoDir.getFileName());
+		files.createDirectoryIfNotExist(targetCompoDir);
 
-		print("Moving %s component to %s...", compoDir, targetDir);
-
-		File[] compoFiles = compoDir.listFiles();
-		if (compoFiles == null) {
-			throw new IOException(format("Fail to list files for directory %s.", compoDir));
-		}
-
-		for (File compoFile : compoFiles) {
-			File targetCompoFile = new File(targetCompoDir, compoFile.getName());
+		console.print("Moving %s component to %s...", compoDir, targetDir);
+		for (Path compoFile : files.listFiles(compoDir)) {
+			Path targetCompoFile = targetCompoDir.resolve(compoFile);
 			if (verbose) {
-				print("Move %s file to %s.", compoFile, targetCompoFile);
+				console.print("Move %s file to %s.", compoFile, targetCompoFile);
 			}
-			if (!compoFile.renameTo(targetCompoFile)) {
-				throw new IOException(format("Fail to move %s.", compoFile));
-			}
+			files.move(compoFile, targetCompoFile);
 		}
-		if (!compoDir.delete()) {
-			throw new IOException(format("Fail to delete directory %s.", compoDir));
-		}
+		files.delete(compoDir);
 
-		TextReplace textReplace = new TextReplace();
 		textReplace.addExclude("");
 		textReplace.setFileExtension("htm");
-		textReplace.replaceAll(workingDir, name.path(), format("%s/%s", target, compoDir.getName()));
+		textReplace.replaceAll(projectDir.toFile(), name.path(), format("%s/%s", target, compoName));
 
-		String compoScript = concat(name.path(), '/', compoDir.getName(), ".js");
-		String newCompoScript = concat(target, '/', compoDir.getName(), '/', compoDir.getName(), ".js");
-		File newCompoScriptFile = new File(workingDir, newCompoScript);
-		if (newCompoScriptFile.exists()) {
+		String compoScript = concat(name.path(), '/', compoName, ".js");
+		String newCompoScript = concat(target, '/', compoName, '/', compoName, ".js");
+		Path newCompoScriptFile = projectDir.resolve(newCompoScript);
+		if (files.exists(newCompoScriptFile)) {
 			textReplace.setFileExtension("xml");
-			textReplace.replaceAll(workingDir, compoScript, newCompoScript);
+			textReplace.replaceAll(projectDir.toFile(), compoScript, newCompoScript);
 		}
 		return ExitCode.SUCCESS;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCommandSpec(CommandSpec commandSpec) {
+		this.commandSpec = commandSpec;
+	}
+
+	void setName(CompoName name) {
+		this.name = name;
+	}
+
+	void setTarget(String target) {
+		this.target = target;
+	}
+
+	void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	void setTextReplace(TextReplace textReplace) {
+		this.textReplace = textReplace;
 	}
 }
