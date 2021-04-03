@@ -37,7 +37,7 @@ public class ProjectBuildTest {
 	private Builder builder;
 
 	@Mock
-	private Path workingDir;
+	private Path projectDir;
 	@Mock
 	private Path buildDir;
 	@Mock
@@ -47,15 +47,15 @@ public class ProjectBuildTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(workingDir.resolve("build")).thenReturn(buildDir);
+		when(projectDir.resolve("build")).thenReturn(buildDir);
 		when(builderConfig.createBuilder()).thenReturn(builder);
 
 		when(config.get(eq("runtime.home"))).thenReturn("runtimes");
 		when(config.get(eq("runtime.name"), anyString())).thenReturn("test");
 		when(config.get(eq("runtime.context"), anyString())).thenReturn("context");
 
-		when(files.getWorkingDir()).thenReturn(workingDir);
-		when(files.getFileName(workingDir)).thenReturn("test");
+		when(files.getProjectDir()).thenReturn(projectDir);
+		when(files.getFileName(projectDir)).thenReturn("test");
 		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
 
 		task = new ProjectBuild();

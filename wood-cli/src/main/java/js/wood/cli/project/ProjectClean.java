@@ -17,10 +17,10 @@ public class ProjectClean extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		Path workingDir = files.getWorkingDir();
-		Path buildDir = workingDir.resolve(target);
+		Path projectDir = files.getProjectDir();
+		Path buildDir = projectDir.resolve(target);
 
-		console.print("Cleaning build files for project %s...", workingDir);
+		console.print("Cleaning build files for project %s...", projectDir);
 		files.cleanDirectory(buildDir, verbose);
 
 		return ExitCode.SUCCESS;

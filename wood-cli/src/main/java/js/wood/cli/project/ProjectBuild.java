@@ -27,27 +27,27 @@ public class ProjectBuild extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		Path workingDir = files.getWorkingDir();
-		Path buildDir = workingDir.resolve(targetDir);
+		Path projectDir = files.getProjectDir();
+		Path buildDir = projectDir.resolve(targetDir);
 
 		if (clean) {
 			console.print("Cleaning build files %s...", buildDir);
 			files.cleanDirectory(buildDir, verbose);
 		}
 
-		builderConfig.setProjectDir(workingDir.toFile());
+		builderConfig.setProjectDir(projectDir.toFile());
 		builderConfig.setBuildDir(buildDir.toFile());
 		builderConfig.setBuildNumber(buildNumber);
 
-		console.print("Building project %s...", workingDir);
+		console.print("Building project %s...", projectDir);
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getFileName(workingDir));
-		String contextName = config.get("runtime.context", files.getFileName(workingDir));
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getFileName(projectDir));
+		String contextName = config.get("runtime.context", files.getFileName(projectDir));
 		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
 
-		console.print("Deploying project %s...", workingDir);
+		console.print("Deploying project %s...", projectDir);
 		files.copyFiles(buildDir, deployDir, verbose);
 		return ExitCode.SUCCESS;
 	}

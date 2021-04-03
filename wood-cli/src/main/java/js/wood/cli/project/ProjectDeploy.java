@@ -1,5 +1,7 @@
 package js.wood.cli.project;
 
+import java.nio.file.Path;
+
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
@@ -8,7 +10,9 @@ import picocli.CommandLine.Command;
 public class ProjectDeploy extends Task {
 	@Override
 	protected ExitCode exec() {
-		print("Project deploy.");
+		Path projectDir = files.getProjectDir();
+
+		console.print("Deploy project %s...", projectDir);
 		return ExitCode.SUCCESS;
 	}
 }

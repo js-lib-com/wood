@@ -29,7 +29,7 @@ public class ProjectCleanTest {
 	@Mock
 	private FilesUtil files;
 	@Mock
-	private Path workingDir;
+	private Path projectDir;
 	@Mock
 	private Path buildDir;
 
@@ -37,8 +37,8 @@ public class ProjectCleanTest {
 
 	@Before
 	public void beforeTest() {
-		when(files.getWorkingDir()).thenReturn(workingDir);
-		when(workingDir.resolve((String) null)).thenReturn(buildDir);
+		when(files.getProjectDir()).thenReturn(projectDir);
+		when(projectDir.resolve((String) null)).thenReturn(buildDir);
 
 		task = new ProjectClean();
 		task.setConsole(console);
@@ -55,7 +55,7 @@ public class ProjectCleanTest {
 		// then
 		verify(files, times(1)).cleanDirectory(eq(buildDir), anyBoolean());
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
-		verify(console, times(1)).print(anyString(), eq(workingDir));
+		verify(console, times(1)).print(anyString(), eq(projectDir));
 	}
 
 	@Test
@@ -67,6 +67,6 @@ public class ProjectCleanTest {
 		task.exec();
 
 		// then
-		verify(workingDir, times(1)).resolve("build/site");
+		verify(projectDir, times(1)).resolve("build/site");
 	}
 }

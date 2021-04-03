@@ -41,13 +41,13 @@ public class ProjectListTest {
 	private FilesUtil files;
 
 	@Mock
-	private Path workingDir;
+	private Path projectDir;
 
 	private ProjectList task;
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(files.getWorkingDir()).thenReturn(workingDir);
+		when(files.getProjectDir()).thenReturn(projectDir);
 
 		task = new ProjectList();
 		task.setConsole(console);
@@ -63,7 +63,7 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
-		verify(files, times(1)).walkFileTree(eq(workingDir), any(PageFileVisitor.class));
+		verify(files, times(1)).walkFileTree(eq(projectDir), any(PageFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
 	}
@@ -77,7 +77,7 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
-		verify(files, times(1)).walkFileTree(eq(workingDir), any(TemplateFileVisitor.class));
+		verify(files, times(1)).walkFileTree(eq(projectDir), any(TemplateFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
 	}
@@ -91,7 +91,7 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
-		verify(files, times(1)).walkFileTree(eq(workingDir), any(TreeFileVisitor.class));
+		verify(files, times(1)).walkFileTree(eq(projectDir), any(TreeFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
 	}
@@ -104,7 +104,7 @@ public class ProjectListTest {
 		task.exec();
 
 		// then
-		verify(files, times(1)).walkFileTree(eq(workingDir), any(ListFileVisitor.class));
+		verify(files, times(1)).walkFileTree(eq(projectDir), any(ListFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
 	}
@@ -113,13 +113,13 @@ public class ProjectListTest {
 	public void exec_GivenNoOptionsAndPathParameter_ThenUseListFileVisitor() throws IOException {
 		// given
 		task.setPath("res");
-		when(workingDir.resolve("res")).thenReturn(workingDir);
+		when(projectDir.resolve("res")).thenReturn(projectDir);
 
 		// when
 		task.exec();
 
 		// then
-		verify(files, times(1)).walkFileTree(eq(workingDir), any(ListFileVisitor.class));
+		verify(files, times(1)).walkFileTree(eq(projectDir), any(ListFileVisitor.class));
 		verify(console, times(1)).crlf();
 		verify(console, times(1)).info("Found %d objects.", 0);
 	}
@@ -129,10 +129,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(true);
-		PageFileVisitor visitor = task.new PageFileVisitor(workingDir);
+		PageFileVisitor visitor = task.new PageFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.SKIP_SUBTREE));
@@ -143,10 +143,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(false);
-		PageFileVisitor visitor = task.new PageFileVisitor(workingDir);
+		PageFileVisitor visitor = task.new PageFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.CONTINUE));
@@ -157,12 +157,12 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isXML(null, "page")).thenReturn(true);
-		PageFileVisitor visitor = task.new PageFileVisitor(workingDir);
+		PageFileVisitor visitor = task.new PageFileVisitor(projectDir);
 
 		// when
-		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.preVisitDirectory(projectDir, attributes);
 		visitor.visitFile(null, attributes);
-		visitor.postVisitDirectory(workingDir, null);
+		visitor.postVisitDirectory(projectDir, null);
 
 		// then
 		verify(console, times(1)).print(null);
@@ -174,12 +174,12 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isXML(null, "page")).thenReturn(false);
-		PageFileVisitor visitor = task.new PageFileVisitor(workingDir);
+		PageFileVisitor visitor = task.new PageFileVisitor(projectDir);
 
 		// when
-		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.preVisitDirectory(projectDir, attributes);
 		visitor.visitFile(null, attributes);
-		visitor.postVisitDirectory(workingDir, null);
+		visitor.postVisitDirectory(projectDir, null);
 
 		// then
 		verify(console, times(0)).print(null);
@@ -191,10 +191,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(true);
-		TemplateFileVisitor visitor = task.new TemplateFileVisitor(workingDir);
+		TemplateFileVisitor visitor = task.new TemplateFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.SKIP_SUBTREE));
@@ -205,10 +205,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(false);
-		TemplateFileVisitor visitor = task.new TemplateFileVisitor(workingDir);
+		TemplateFileVisitor visitor = task.new TemplateFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.CONTINUE));
@@ -219,12 +219,12 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isXML(null, "template")).thenReturn(true);
-		TemplateFileVisitor visitor = task.new TemplateFileVisitor(workingDir);
+		TemplateFileVisitor visitor = task.new TemplateFileVisitor(projectDir);
 
 		// when
-		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.preVisitDirectory(projectDir, attributes);
 		visitor.visitFile(null, attributes);
-		visitor.postVisitDirectory(workingDir, null);
+		visitor.postVisitDirectory(projectDir, null);
 
 		// then
 		verify(console, times(1)).print(null);
@@ -236,12 +236,12 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isXML(null, "template")).thenReturn(false);
-		TemplateFileVisitor visitor = task.new TemplateFileVisitor(workingDir);
+		TemplateFileVisitor visitor = task.new TemplateFileVisitor(projectDir);
 
 		// when
-		visitor.preVisitDirectory(workingDir, attributes);
+		visitor.preVisitDirectory(projectDir, attributes);
 		visitor.visitFile(null, attributes);
-		visitor.postVisitDirectory(workingDir, null);
+		visitor.postVisitDirectory(projectDir, null);
 
 		// then
 		verify(console, times(0)).print(null);
@@ -253,10 +253,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(true);
-		TreeFileVisitor visitor = task.new TreeFileVisitor(workingDir);
+		TreeFileVisitor visitor = task.new TreeFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		verify(console, times(0)).print("+ %s", (Object) null);
@@ -268,10 +268,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(false);
-		TreeFileVisitor visitor = task.new TreeFileVisitor(workingDir);
+		TreeFileVisitor visitor = task.new TreeFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		verify(console, times(1)).print("+ %s", (Object) null);
@@ -283,10 +283,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(true);
-		ListFileVisitor visitor = task.new ListFileVisitor(workingDir);
+		ListFileVisitor visitor = task.new ListFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.SKIP_SUBTREE));
@@ -297,10 +297,10 @@ public class ProjectListTest {
 		// given
 		task.setUtils(utils);
 		when(utils.isExcluded(null)).thenReturn(false);
-		ListFileVisitor visitor = task.new ListFileVisitor(workingDir);
+		ListFileVisitor visitor = task.new ListFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.preVisitDirectory(workingDir, attributes);
+		FileVisitResult result = visitor.preVisitDirectory(projectDir, attributes);
 
 		// then
 		assertThat(result, equalTo(FileVisitResult.CONTINUE));
@@ -310,10 +310,10 @@ public class ProjectListTest {
 	public void list_GivenVisitFile_ThenPrintAndContinue() throws IOException {
 		// given
 		task.setUtils(utils);
-		ListFileVisitor visitor = task.new ListFileVisitor(workingDir);
+		ListFileVisitor visitor = task.new ListFileVisitor(projectDir);
 
 		// when
-		FileVisitResult result = visitor.visitFile(workingDir, attributes);
+		FileVisitResult result = visitor.visitFile(projectDir, attributes);
 
 		// then
 		verify(console, times(1)).print(null);

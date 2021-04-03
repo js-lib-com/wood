@@ -43,7 +43,7 @@ public class ProjectList extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		workingDir = files.getWorkingDir();
+		workingDir = files.getProjectDir();
 		if (path != null) {
 			workingDir = workingDir.resolve(path);
 		}
