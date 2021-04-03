@@ -3,8 +3,10 @@ package js.wood.cli.compo;
 import static java.lang.String.format;
 
 import java.awt.Desktop;
-import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
@@ -22,23 +24,42 @@ public class CompoPreview extends Task {
 	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
 	private CompoName name;
 
+	private Desktop desktop = Desktop.getDesktop();
+
 	@Override
-	protected ExitCode exec() throws Exception {
+	protected ExitCode exec() throws IOException, URISyntaxException {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
 
-		File workingDir = workingDir();
-		File compoDir = new File(workingDir, name.toString());
-		if (!compoDir.exists()) {
-			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name));
+		Path projectDir = files.getProjectDir();
+		Path compoDir = projectDir.resolve(name.path());
+		if (!files.exists(compoDir)) {
+			console.print("Missing component directory %s.", compoDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
 		}
 
-		print("Opening component preview %s...", name);
-		int port = 80;
-		String context = workingDir.getName() + "-preview";
-		Desktop.getDesktop().browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
+		console.print("Opening component preview %s...", name);
+		int port = config.get("runtime.port", int.class);
+		String context = config.get("runtime.context", files.getFileName(projectDir)) + "-preview";
+		desktop.browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
 
 		return ExitCode.SUCCESS;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tests support
+
+	void setCommandSpec(CommandSpec commandSpec) {
+		this.commandSpec = commandSpec;
+	}
+
+	void setName(CompoName name) {
+		this.name = name;
+	}
+
+	void setDesktop(Desktop desktop) {
+		this.desktop = desktop;
 	}
 }

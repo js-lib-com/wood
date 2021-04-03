@@ -82,7 +82,7 @@ public class CompoImportTest {
 		task.setDocumentBuilder(documentBuilder);
 	}
 
-	private Document parseHTML(String document) {
+	private static Document parseHTML(String document) {
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		return builder.parseHTML(document);
 	}
