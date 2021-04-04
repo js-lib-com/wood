@@ -82,6 +82,10 @@ public class FilesUtil {
 		Params.notNullOrEmpty(more, "More path components");
 
 		Path dir = fileSystem.getPath(first, more);
+		if(exists(dir)) {
+			return dir;
+		}
+		
 		Path parent = dir.getParent();
 		while (parent != null) {
 			if (exists(parent)) {

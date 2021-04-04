@@ -229,9 +229,10 @@ public class FilesUtilTest {
 	public void createDirectories() throws IOException {
 		// given
 		Path dir = mock(Path.class);
+		doThrow(IOException.class).when(provider).checkAccess(dir); // dir does not exists
 		Path parent = mock(Path.class);
 		Path name = mock(Path.class);
-		
+
 		when(fileSystem.getPath("res", "page", "about")).thenReturn(dir);
 		when(dir.getParent()).thenReturn(parent);
 		when(parent.relativize(dir)).thenReturn(dir);
