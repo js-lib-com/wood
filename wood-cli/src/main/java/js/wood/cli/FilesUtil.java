@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemException;
@@ -43,14 +42,6 @@ public class FilesUtil {
 		return fileSystem.getPath("").toAbsolutePath();
 	}
 
-	public String getFileName(Path file) {
-		return file.getFileName().toString();
-	}
-
-	public String getFileBasename(Path file) {
-		return file.getFileName().toString();
-	}
-
 	public Path getProjectDir() {
 		Path projectDir = fileSystem.getPath("").toAbsolutePath();
 		Path propertiesFile = projectDir.resolve(".project.properties");
@@ -58,6 +49,22 @@ public class FilesUtil {
 			throw new BugError("Invalid project. Missing project properties file %s.", propertiesFile);
 		}
 		return projectDir;
+	}
+
+	public String getFileName(Path file) {
+		return file.getFileName().toString();
+	}
+
+	public String getFileBasename(Path file) {
+		String fileName = file.getFileName().toString();
+		int i = fileName.lastIndexOf('.');
+		return i != -1 ? fileName.substring(0, i) : fileName;
+	}
+
+	public String getExtension(Path file) {
+		String path = file.getFileName().toString();
+		int extensionPos = path.lastIndexOf('.');
+		return extensionPos == -1 ? "" : path.substring(extensionPos + 1).toLowerCase();
 	}
 
 	public void createDirectory(Path dir) throws IOException {
@@ -111,6 +118,9 @@ public class FilesUtil {
 
 			@Override
 			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if(exc != null) {
+					throw exc;
+				}
 				if (verbose) {
 					console.print("Delete directory %s.", dir);
 				}
@@ -126,35 +136,6 @@ public class FilesUtil {
 
 	public void move(Path source, Path target) throws IOException {
 		fileSystem.provider().move(source, target);
-	}
-
-	public String getExtension(Path file) {
-		String path = file.getFileName().toString();
-		int extensionPos = path.lastIndexOf('.');
-		return extensionPos == -1 ? "" : path.substring(extensionPos + 1).toLowerCase();
-	}
-
-	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {
-		walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (verbose) {
-					console.print("Deploy file %s.", file);
-				}
-				fileSystem.provider().copy(file, targetDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	public void copyFile(URL url, Path path) throws IOException {
-		try (BufferedInputStream inputStream = new BufferedInputStream(url.openStream()); BufferedOutputStream outputStream = new BufferedOutputStream(getOutputStream(path))) {
-			byte[] buffer = new byte[4096];
-			int bytesCount;
-			while ((bytesCount = inputStream.read(buffer, 0, 4096)) != -1) {
-				outputStream.write(buffer, 0, bytesCount);
-			}
-		}
 	}
 
 	public boolean isDirectory(Path path) {
@@ -174,8 +155,55 @@ public class FilesUtil {
 		}
 	}
 
+	public Path getPath(String path) {
+		return fileSystem.getPath(path);
+	}
+
+	public Reader getReader(Path file) throws IOException {
+		return new InputStreamReader(fileSystem.provider().newInputStream(file), "UTF-8");
+	}
+
+	public InputStream getInputStream(Path file) throws IOException {
+		return fileSystem.provider().newInputStream(file);
+	}
+
+	public OutputStream getOutputStream(Path file) throws IOException {
+		return fileSystem.provider().newOutputStream(file);
+	}
+
+	public Iterable<Path> listFiles(Path dir, DirectoryStream.Filter<Path> filter) throws IOException {
+		return fileSystem.provider().newDirectoryStream(dir, filter);
+	}
+
+	public Iterable<Path> listFiles(Path dir) throws IOException {
+		return listFiles(dir, path -> true);
+	}
+
 	public void walkFileTree(Path start, FileVisitor<Path> visitor) throws IOException {
 		Files.walkFileTree(start, visitor);
+	}
+
+	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {
+		walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (verbose) {
+					console.print("Deploy file %s.", file);
+				}
+				fileSystem.provider().copy(file, targetDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	public void copyFile(InputStream stream, Path path) throws IOException {
+		try (BufferedInputStream inputStream = new BufferedInputStream(stream); BufferedOutputStream outputStream = new BufferedOutputStream(getOutputStream(path))) {
+			byte[] buffer = new byte[4096];
+			int bytesCount;
+			while ((bytesCount = inputStream.read(buffer, 0, 4096)) != -1) {
+				outputStream.write(buffer, 0, bytesCount);
+			}
+		}
 	}
 
 	public Path getFileByExtension(Path dir, String extension) throws IOException {
@@ -225,29 +253,5 @@ public class FilesUtil {
 			}
 		});
 		return files;
-	}
-
-	public Reader getReader(Path file) throws IOException {
-		return new InputStreamReader(fileSystem.provider().newInputStream(file));
-	}
-
-	public InputStream getInputStream(Path file) throws IOException {
-		return fileSystem.provider().newInputStream(file);
-	}
-
-	public OutputStream getOutputStream(Path file) throws IOException {
-		return fileSystem.provider().newOutputStream(file);
-	}
-
-	public Iterable<Path> listFiles(Path dir) throws IOException {
-		return listFiles(dir, path -> true);
-	}
-
-	public Iterable<Path> listFiles(Path dir, DirectoryStream.Filter<Path> filter) throws IOException {
-		return fileSystem.provider().newDirectoryStream(dir, filter);
-	}
-
-	public Path getPath(String path) {
-		return fileSystem.getPath(path);
 	}
 }

@@ -91,7 +91,7 @@ public final class CompoImport extends Task {
 				if (verbose) {
 					console.print("Download file %s.", linkURL);
 				}
-				files.copyFile(linkURL, targetDir.resolve(link));
+				files.copyFile(linkURL.openStream(), targetDir.resolve(link));
 			}
 		}
 	}
