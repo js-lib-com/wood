@@ -2,6 +2,7 @@ package js.wood.cli.compo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +52,15 @@ public class CompoImportTest {
 	@Mock
 	private DocumentBuilder documentBuilder;
 
+	@Mock
+	private HttpClientBuilder httpClientBuilder;
+	@Mock
+	private CloseableHttpClient httpClient;
+	@Mock
+	private CloseableHttpResponse httpResponse;
+	@Mock
+	private StatusLine statusLine;
+
 	private CompoImport task;
 
 	@Before
@@ -73,6 +87,11 @@ public class CompoImportTest {
 				"</home>";
 		when(documentBuilder.loadHTML(new URL("http://server.com/com/js-lib/web/dialog/1.0/"))).thenReturn(parseHTML(indexPage));
 
+		when(httpClientBuilder.build()).thenReturn(httpClient);
+		when(httpClient.execute(any())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(statusLine);
+		when(statusLine.getStatusCode()).thenReturn(200);
+
 		task = new CompoImport();
 		task.setConfig(config);
 		task.setConsole(console);
@@ -80,6 +99,7 @@ public class CompoImportTest {
 		task.setCoordinates(compoCoordinates);
 		task.setPath("res/compo/dialog");
 		task.setDocumentBuilder(documentBuilder);
+		task.setHttpClientBuilder(httpClientBuilder);
 	}
 
 	private static Document parseHTML(String document) {

@@ -1,7 +1,5 @@
 package js.wood.cli;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -118,7 +116,7 @@ public class FilesUtil {
 
 			@Override
 			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				if(exc != null) {
+				if (exc != null) {
 					throw exc;
 				}
 				if (verbose) {
@@ -194,16 +192,6 @@ public class FilesUtil {
 				return FileVisitResult.CONTINUE;
 			}
 		});
-	}
-
-	public void copyFile(InputStream stream, Path path) throws IOException {
-		try (BufferedInputStream inputStream = new BufferedInputStream(stream); BufferedOutputStream outputStream = new BufferedOutputStream(getOutputStream(path))) {
-			byte[] buffer = new byte[4096];
-			int bytesCount;
-			while ((bytesCount = inputStream.read(buffer, 0, 4096)) != -1) {
-				outputStream.write(buffer, 0, bytesCount);
-			}
-		}
 	}
 
 	public Path getFileByExtension(Path dir, String extension) throws IOException {

@@ -401,22 +401,6 @@ public class FilesUtilTest {
 		assertTrue(filterArgument.getValue().accept(dir));
 	}
 
-	@Test
-	public void copyFile() throws IOException {
-		// given
-		InputStream stream = new ByteArrayInputStream("test".getBytes());
-
-		Path path = mock(Path.class);
-		OutputStream outputStream = new ByteArrayOutputStream();
-		when(provider.newOutputStream(path)).thenReturn(outputStream);
-
-		// when
-		files.copyFile(stream, path);
-
-		// then
-		assertThat(outputStream.toString(), equalTo("test"));
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	private static DirectoryStream<Path> directoryStream(Path... files) {

@@ -8,6 +8,11 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
@@ -71,6 +76,7 @@ public final class CompoImport extends Task {
 	private static final Pattern FILE_PATTERN = Pattern.compile("^[a-z0-9_.\\-]+\\.[a-z0-9]+$", Pattern.CASE_INSENSITIVE);
 
 	private DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+	private HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
 	/**
 	 * Download component files from repository into target directory. This method assume repository server is configured with
@@ -91,7 +97,15 @@ public final class CompoImport extends Task {
 				if (verbose) {
 					console.print("Download file %s.", linkURL);
 				}
-				files.copyFile(linkURL.openStream(), targetDir.resolve(link));
+				
+				try (CloseableHttpClient client = httpClientBuilder.build()) {
+					HttpGet httpGet = new HttpGet(linkURL.toExternalForm());
+					try (CloseableHttpResponse response = client.execute(httpGet)) {
+						if (response.getStatusLine().getStatusCode() != 200) {
+							throw new IOException(format("Fail to cleanup component %s", coordinates));
+						}
+					}
+				}
 			}
 		}
 	}
@@ -117,5 +131,9 @@ public final class CompoImport extends Task {
 
 	void setDocumentBuilder(DocumentBuilder documentBuilder) {
 		this.documentBuilder = documentBuilder;
+	}
+
+	void setHttpClientBuilder(HttpClientBuilder httpClientBuilder) {
+		this.httpClientBuilder = httpClientBuilder;
 	}
 }
