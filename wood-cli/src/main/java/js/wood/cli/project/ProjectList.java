@@ -25,6 +25,8 @@ import picocli.CommandLine.Parameters;
 public class ProjectList extends Task {
 	@Option(names = { "-T", "--tree" }, description = "Display tree like structure.")
 	private boolean tree;
+	@Option(names = { "-c", "--compo" }, description = "List all project components.")
+	private boolean compo;
 	@Option(names = { "-t", "--template" }, description = "List only template components.")
 	private boolean template;
 	@Option(names = { "-p", "--page" }, description = "List only page components.")
@@ -48,35 +50,21 @@ public class ProjectList extends Task {
 			workingDir = workingDir.resolve(path);
 		}
 
-		if (page) {
-			pages();
+		if (compo) {
+			files.walkFileTree(workingDir, new CompoFileVisitor(workingDir));
+		} else if (page) {
+			files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
 		} else if (template) {
-			templates();
+			files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
 		} else if (tree) {
-			tree();
+			files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
 		} else {
-			list();
+			files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
 		}
 
 		console.crlf();
 		console.info("Found %d objects.", found);
 		return ExitCode.SUCCESS;
-	}
-
-	private void pages() throws IOException {
-		files.walkFileTree(workingDir, new PageFileVisitor(workingDir));
-	}
-
-	private void templates() throws IOException {
-		files.walkFileTree(workingDir, new TemplateFileVisitor(workingDir));
-	}
-
-	private void tree() throws IOException {
-		files.walkFileTree(workingDir, new TreeFileVisitor(workingDir));
-	}
-
-	private void list() throws IOException {
-		files.walkFileTree(workingDir, new ListFileVisitor(workingDir));
 	}
 
 	private void print(Path file, FileTime modifiedTime, long fileSize) {
@@ -86,6 +74,42 @@ public class ProjectList extends Task {
 			console.print("%s\t%-8d %s", dt.format(dtf), fileSize, file);
 		} else {
 			console.print(file);
+		}
+	}
+
+	class CompoFileVisitor extends SimpleFileVisitor<Path> {
+		private final Path workingDir;
+
+		private FileTime modifiedTime;
+		private long dirSize;
+
+		public CompoFileVisitor(Path workingDir) {
+			this.workingDir = workingDir;
+		}
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			if (utils.isExcluded(workingDir.relativize(dir))) {
+				return FileVisitResult.SKIP_SUBTREE;
+			}
+			modifiedTime = attrs.lastModifiedTime();
+			dirSize = 0;
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			dirSize += attrs.size();
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			if (utils.isXML(dir.resolve(dir.getFileName() + ".xml"))) {
+				print(workingDir.relativize(dir), modifiedTime, dirSize);
+				++found;
+			}
+			return FileVisitResult.CONTINUE;
 		}
 	}
 
@@ -216,9 +240,13 @@ public class ProjectList extends Task {
 			return false;
 		}
 
-		boolean isXML(Path file, String root) throws IOException {
+		boolean isXML(Path file, String... root) throws IOException {
 			if (!Files.exists(file)) {
 				return false;
+			}
+			if (root.length == 0) {
+				// if no root provided accept all
+				return true;
 			}
 			try (BufferedReader reader = Files.newBufferedReader(file)) {
 				String line = reader.readLine();
@@ -228,7 +256,7 @@ public class ProjectList extends Task {
 				if (line == null) {
 					return false;
 				}
-				if (line.startsWith(Strings.concat('<', root, '>'))) {
+				if (line.startsWith(Strings.concat('<', root[0], '>'))) {
 					return true;
 				}
 			}
