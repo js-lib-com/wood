@@ -1,5 +1,7 @@
 package js.wood.cli.project;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +22,7 @@ import js.wood.Builder;
 import js.wood.BuilderConfig;
 import js.wood.cli.Config;
 import js.wood.cli.Console;
+import js.wood.cli.ExitCode;
 import js.wood.cli.FilesUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -56,6 +59,7 @@ public class ProjectBuildTest {
 
 		when(files.getProjectDir()).thenReturn(projectDir);
 		when(files.getFileName(projectDir)).thenReturn("test");
+		when(files.exists(buildDir)).thenReturn(true);
 		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
 
 		task = new ProjectBuild();
@@ -63,7 +67,7 @@ public class ProjectBuildTest {
 		task.setConfig(config);
 		task.setFiles(files);
 		task.setBuilderConfig(builderConfig);
-		task.setTargetDir("build");
+		task.setTarget("build");
 	}
 
 	@Test
@@ -71,9 +75,11 @@ public class ProjectBuildTest {
 		// given
 
 		// when
-		task.exec();
+		ExitCode exitCode = task.exec();
 
 		// then
+		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
+		
 		verify(builderConfig, times(1)).setProjectDir(any());
 		verify(builderConfig, times(1)).setBuildDir(any());
 		verify(builderConfig, times(1)).setBuildNumber(0);
@@ -119,5 +125,17 @@ public class ProjectBuildTest {
 		
 		// then
 		verify(files, times(1)).createDirectories("runtimes", "kids-cademy", "webapps", "context");
+	}
+	
+	@Test
+	public void GivenMissingBuildDir_ThenAbort() throws IOException {
+		// given
+		when(files.exists(buildDir)).thenReturn(false);
+
+		// when
+		ExitCode exitCode = task.exec();
+
+		// then
+		assertThat(exitCode, equalTo(ExitCode.ABORT));
 	}
 }

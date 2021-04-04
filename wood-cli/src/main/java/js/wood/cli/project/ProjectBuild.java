@@ -2,6 +2,8 @@ package js.wood.cli.project;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
 import js.wood.Builder;
 import js.wood.BuilderConfig;
@@ -14,12 +16,14 @@ import picocli.CommandLine.Option;
 public class ProjectBuild extends Task {
 	@Option(names = { "-c", "--clean" }, description = "Clean build. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean clean;
-	@Option(names = { "-t", "--target" }, description = "Build directory relative to working directory. Default: ${DEFAULT-VALUE}.", defaultValue = "site", paramLabel = "target")
-	private String targetDir;
+	@Option(names = { "-t", "--target" }, description = "Build directory relative to working directory.")
+	private String target;
 	@Option(names = { "-n", "--number" }, description = "Build number. Default: ${DEFAULT-VALUE}", defaultValue = "0", paramLabel = "number")
 	private int buildNumber;
 	@Option(names = { "-r", "--runtime" }, description = "Runtime server name. Default: project name.")
 	private String runtime;
+	@Option(names = { "-e", "--excludes" }, description = "Comma separated list of directories to exclude.", split = ",")
+	private List<String> excludes = Collections.emptyList();
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
 	private boolean verbose;
 
@@ -28,7 +32,16 @@ public class ProjectBuild extends Task {
 	@Override
 	protected ExitCode exec() throws IOException {
 		Path projectDir = files.getProjectDir();
-		Path buildDir = projectDir.resolve(targetDir);
+		
+		if(target == null) {
+			target = config.get("build.target");
+		}
+		Path buildDir = projectDir.resolve(target);
+		if(!files.exists(buildDir)) {
+			console.print("Missing build directory %s.", buildDir);
+			console.print("Command abort.");
+			return ExitCode.ABORT;
+		}
 
 		if (clean) {
 			console.print("Cleaning build files %s...", buildDir);
@@ -71,7 +84,7 @@ public class ProjectBuild extends Task {
 		this.runtime = runtime;
 	}
 
-	void setTargetDir(String targetDir) {
-		this.targetDir = targetDir;
+	void setTarget(String target) {
+		this.target = target;
 	}
 }
