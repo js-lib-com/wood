@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import js.converter.Converter;
 import js.converter.ConverterRegistry;
@@ -28,6 +31,19 @@ public class Config {
 		this.converter = ConverterRegistry.getConverter();
 		this.globalProperties = globalProperties;
 		this.projectProperties = projectProperties;
+	}
+
+	public SortedMap<String, String> properties(boolean includeGlobal) throws IOException {
+		SortedMap<String, String> properties = new TreeMap<>();
+		for (Map.Entry<Object, Object> entry : projectProperties().entrySet()) {
+			properties.put(entry.getKey().toString(), entry.getValue().toString());
+		}
+		if (includeGlobal) {
+			for (Map.Entry<Object, Object> entry : globalProperties().entrySet()) {
+				properties.put(entry.getKey().toString(), entry.getValue().toString());
+			}
+		}
+		return properties;
 	}
 
 	public void set(String key, Object value) throws IOException {

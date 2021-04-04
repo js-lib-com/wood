@@ -14,6 +14,8 @@ import js.wood.cli.compo.CompoOpen;
 import js.wood.cli.compo.CompoPreview;
 import js.wood.cli.compo.CompoRename;
 import js.wood.cli.compo.CompoUpdate;
+import js.wood.cli.config.ConfigCommands;
+import js.wood.cli.config.ConfigList;
 import js.wood.cli.project.ProjectBuild;
 import js.wood.cli.project.ProjectClean;
 import js.wood.cli.project.ProjectCommands;
@@ -72,10 +74,14 @@ public class Main {
 		runtimeCommands.addSubcommand(task(RuntimeStop.class));
 		runtimeCommands.addSubcommand(task(RuntimeDestroy.class));
 
+		CommandLine configCommands = new CommandLine(new ConfigCommands());
+		configCommands.addSubcommand(task(ConfigList.class));
+
 		CommandLine commandLine = new CommandLine(this);
 		commandLine.addSubcommand(projectCommands);
 		commandLine.addSubcommand(compoCommands);
 		commandLine.addSubcommand(runtimeCommands);
+		commandLine.addSubcommand(configCommands);
 		commandLine.addSubcommand(task(ProjectBuild.class));
 
 		System.exit(commandLine.execute(args));
