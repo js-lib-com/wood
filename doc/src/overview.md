@@ -8,7 +8,7 @@ WOOD is a development tool for user interfaces based on web technologies. It use
 
 WOOD promotes an object oriented development paradigm using decomposition of complex user interfaces into user interface components - for short, components. Component is the base unit for code reusability that keeps all its files together, in the component directory. A component can inherit from a component with editable elements - named template, and can aggregate child components. A child component can be reused between multiple parent components. A page is just a component that has the `<body>` element.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\components-overview.svg)
+![](components-overview.svg)
 
 There is no formal limitation on templates inheritance hierarchy. A template can inherit from another template creating an arbitrary long templates chain. The same goes for child components. A component can aggregate more that one single child component that can aggregate its own components, creating a tree of not restricted complexity. And since template is indeed a component it can aggregate its own components tree. 
 
@@ -16,7 +16,7 @@ Components can be exported and imported to / from another projects and can be di
 
 WOOD builder creates site files from project components - resulting files being standard HTML and related styles, scripts and media files. Build process reads component source files and resources from project, consolidates them into pages and write to the target file system. Target file system defines the directories structure for the site files. Different file systems structures are supported but a default implementation exists.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\build-concept.svg)
+![](build-concept.svg)
 
 
 
@@ -24,7 +24,7 @@ The two OOP relations, inheritance and aggregation, supported by WOOD are declar
 
 WOOD builder first aggregates child components tree, in depth-first order, then inject content into editable areas from templates chain, bottom-up. Top template should have `<body>` element.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\relations.svg)
+![](relations.svg)
 
 Here is the HTML code for above diagram. For brevity name space prefix is reduced to 'w'.
 
@@ -91,7 +91,7 @@ Below is a more complex example. It is a contrived example but helps in getting 
 
 It focuses on component relations that are represented as arrows, simple arrow for inheritance and arrow with diamond for aggregation. Note that inheritance is also know as `IS A` relation whereas aggregation is a `HAS A` relation. Also, a component that implements content for an editable area is known as content component, whereas a component that has child components is named parent component.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\components-sample.svg)
+![](components-sample.svg)
 
 
 
@@ -227,7 +227,7 @@ This property is a comma separated list of directory paths - relative to project
 
 Component is designed to break down inherent web interfaces complexity. It is self-containing and fully described and is the basic building block. A component resides in its own directory and all its source, resource and descriptor files are hosted there. Preview files are for unit testing.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\component-structure.svg)
+![](component-structure.svg)
 
 All component files are optional but at least layout or script should exist. It is legal to have a component with only layout, e.g. a select with static options reused in multiple forms. In this case component director can miss.
 
@@ -451,7 +451,7 @@ Because a template layout file can contain multiple editable elements the path r
 
 Below ASCII diagram describe component inheritance via template mechanism. For brevity only one editable is figured but a template may have a not limited number of editable elements. A component that uses a template but does not define content for all template editable elements become a template on its turn. This way one can create an arbitrary large inheritance chain; a sub-template can define content for any super-template from hierarchy and can include its own editable elements.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\inheritance.svg)
+![](inheritance.svg)
 
 Note that multiple inheritance is not supported. A content layout may define content for multiple editable elements but all should belong to the same template.
 
@@ -533,13 +533,13 @@ See {@link js.wood.LayoutParameters} for parameters list syntax and {@link js.wo
 ## Template Sample
 There are three user dialogs for user creation and edit and password change. All have basically the same look but differ by form fields, dialog caption and submit button label.
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\dialogs.svg)
+![](dialogs.svg)
 
 Is obvious we will have a template and three content components. Template `res/compo/form-dialog` has an editable form element. Content components, `res/user/create-dialog`, `res/user/edit-dialog` and `res/user/password-dialog` implements specific form fields. Content components use `wood:template="res/compo/form-dialog#form"` operator to identify template and its editable area.
 
 
 
-![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\dialogs-hierarchy.svg)
+![](dialogs-hierarchy.svg)
 
 To customize dialog caption and submit button label there are `wood:param` operators. For example, on user creation dialog it is `wood:param="caption:CREATE USER;btn:Create"`. Parameters names need to match those declared on template: `@param\caption`, respective `@param\btn`. For other two dialogs parameters handling is similar.
 
