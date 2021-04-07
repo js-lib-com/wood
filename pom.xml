@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.js-lib</groupId>
 	<artifactId>wood</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>WOOD - Web Object Oriented Development</name>
@@ -78,18 +78,8 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M1</version>
-				<configuration>
-					<!-- UTF-8 from properties seems not be working on tests -->
-					<!-- found work around is to pass encoding to JVM arguments -->
-					<argLine>-Dfile.encoding=UTF-8</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.7</version>
+				<version>3.0.0-M1</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -152,7 +142,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-deploy-plugin</artifactId>
-						<version>2.7</version>
+						<version>3.0.0-M1</version>
 						<configuration>
 							<skip>false</skip>
 						</configuration>
@@ -162,10 +152,23 @@
 		</profile>
 	</profiles>
 
+	<repositories>
+		<repository>
+			<id>js-lib</id>
+			<url>http://maven.js-lib.com/</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>js-lib</id>
+			<url>http://maven.js-lib.com/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<distributionManagement>
 		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>js-lib</id>
+			<url>http://maven.js-lib.com/</url>
 		</snapshotRepository>
 		<repository>
 			<id>ossrh</id>
