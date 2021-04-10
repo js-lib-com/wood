@@ -15,6 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +52,14 @@ public class FilesUtil {
 		return projectDir;
 	}
 
+	public Path getWoodHome() {
+		String woodHome = System.getProperty("WOOD_HOME");
+		if (woodHome == null) {
+			throw new BugError("Invalid WOOD setup. Missing WOOD_HOME variable.");
+		}
+		return fileSystem.getPath(woodHome);
+	}
+
 	public String getFileName(Path file) {
 		return file.getFileName().toString();
 	}
@@ -65,6 +76,11 @@ public class FilesUtil {
 		return extensionPos == -1 ? "" : path.substring(extensionPos + 1).toLowerCase();
 	}
 
+	public LocalDateTime getModificationTime(Path file) throws IOException {
+		FileTime fileTime = fileSystem.provider().readAttributes(file, BasicFileAttributes.class).lastModifiedTime();
+		return LocalDateTime.ofInstant(fileTime.toInstant(), ZoneId.systemDefault());
+	}
+
 	public void createDirectory(Path dir) throws IOException {
 		Params.notNull(dir, "Directory");
 		fileSystem.provider().createDirectory(dir);
@@ -79,13 +95,13 @@ public class FilesUtil {
 
 	public Path createDirectories(String first, String... more) throws IOException {
 		Params.notNullOrEmpty(first, "First path component");
-		Params.notNullOrEmpty(more, "More path components");
+		Params.notNull(more, "More path components");
 
 		Path dir = fileSystem.getPath(first, more);
-		if(exists(dir)) {
+		if (exists(dir)) {
 			return dir;
 		}
-		
+
 		Path parent = dir.getParent();
 		while (parent != null) {
 			if (exists(parent)) {

@@ -1,5 +1,6 @@
 package js.wood.cli;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Properties;
 
@@ -31,9 +32,9 @@ import js.wood.cli.runtime.RuntimeStop;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-@Command(name = "wood", description = "Command line interface for WOOD tools.", mixinStandardHelpOptions = true, version = "wood-cli, version 1.0.0")
+@Command(name = "wood", description = "Command line interface for WOOD tools.", mixinStandardHelpOptions = true, version = "wood, version 1.0.4-SNAPSHOT")
 public class Main {
-	public static void main(String... args) {
+	public static void main(String... args) throws IOException {
 		Properties globalProperties = new Properties();
 		Properties projectProperties = new Properties();
 		Config config = new Config(globalProperties, projectProperties);
@@ -83,6 +84,7 @@ public class Main {
 		commandLine.addSubcommand(runtimeCommands);
 		commandLine.addSubcommand(configCommands);
 		commandLine.addSubcommand(task(ProjectBuild.class));
+		commandLine.addSubcommand(task(Update.class));
 
 		System.exit(commandLine.execute(args));
 	}

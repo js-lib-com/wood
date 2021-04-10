@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
@@ -27,23 +29,43 @@ public class Config {
 	private final Properties globalProperties;
 	private final Properties projectProperties;
 
-	public Config(Properties globalProperties, Properties projectProperties) {
+	public Config(Properties globalProperties, Properties projectProperties) throws IOException {
 		this.converter = ConverterRegistry.getConverter();
 		this.globalProperties = globalProperties;
 		this.projectProperties = projectProperties;
+
+		String woodHome = System.getProperty("WOOD_HOME");
+		if (woodHome == null) {
+			throw new BugError("Invalid Java context. Missing WOOD_HOME property.");
+		}
+		Path woodDir = Paths.get(woodHome);
+		Path propertiesFile = woodDir.resolve("bin/wood.properties");
+		if (Files.exists(propertiesFile)) {
+			try (Reader reader = Files.newBufferedReader(propertiesFile)) {
+				globalProperties.load(reader);
+			}
+		}
 	}
 
-	public SortedMap<String, String> properties(boolean includeGlobal) throws IOException {
+	public SortedMap<String, String> getProperties(boolean includeGlobal) throws IOException {
 		SortedMap<String, String> properties = new TreeMap<>();
 		for (Map.Entry<Object, Object> entry : projectProperties().entrySet()) {
 			properties.put(entry.getKey().toString(), entry.getValue().toString());
 		}
 		if (includeGlobal) {
-			for (Map.Entry<Object, Object> entry : globalProperties().entrySet()) {
+			for (Map.Entry<Object, Object> entry : globalProperties.entrySet()) {
 				properties.put(entry.getKey().toString(), entry.getValue().toString());
 			}
 		}
 		return properties;
+	}
+
+	public Properties getGlobalProperties() throws IOException {
+		return globalProperties;
+	}
+
+	public void updateGlobalProperties(Properties properties) throws IOException {
+		properties.forEach((key, value) -> globalProperties.merge(key, value, (oldValue, newValue) -> newValue));
 	}
 
 	public void set(String key, Object value) throws IOException {
@@ -63,7 +85,7 @@ public class Config {
 	public <T> T get(String key, Class<T> type, String... defaultValue) throws IOException {
 		Object value = projectProperties().get(key);
 		if (value == null) {
-			value = globalProperties().get(key);
+			value = globalProperties.get(key);
 			if (value == null) {
 				if (defaultValue.length == 1) {
 					value = defaultValue[0];
@@ -77,35 +99,6 @@ public class Config {
 
 	public String get(String key, String... defaultValue) throws IOException {
 		return get(key, String.class, defaultValue);
-	}
-
-	private Properties globalProperties() throws IOException {
-		if (globalProperties.isEmpty()) {
-			synchronized (globalProperties) {
-				if (globalProperties.isEmpty()) {
-					String woodHome = System.getProperty("WOOD_HOME");
-					if (woodHome == null) {
-						throw new BugError("Invalid Java context. Missing WOOD_HOME property.");
-					}
-					File woodDir = new File(woodHome);
-					if (!woodDir.exists()) {
-						throw new BugError("Invalid Java context. Missing wood directory.");
-					}
-					File binDir = new File(woodDir, "bin");
-					if (!binDir.exists()) {
-						throw new BugError("Invalid WOOD install. Missing binaries directory |%s|.", binDir);
-					}
-					File propertiesFile = new File(binDir, "wood.properties");
-					if (!propertiesFile.exists()) {
-						throw new BugError("Invalid WOOD install. Missing global properties file |%s|.", propertiesFile);
-					}
-					try (Reader reader = new FileReader(propertiesFile)) {
-						globalProperties.load(reader);
-					}
-				}
-			}
-		}
-		return globalProperties;
 	}
 
 	private Properties projectProperties() throws IOException {

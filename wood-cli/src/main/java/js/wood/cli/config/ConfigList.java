@@ -16,7 +16,7 @@ public class ConfigList extends Task {
 
 	@Override
 	protected ExitCode exec() throws Exception {
-		Map<String, String> properties = config.properties(all);
+		Map<String, String> properties = config.getProperties(all);
 		int keyWidth = 0;
 		for (String key : properties.keySet()) {
 			if (keyWidth < key.length()) {
@@ -26,7 +26,7 @@ public class ConfigList extends Task {
 		String message = format(" - %%-%ds : %%s", keyWidth);
 
 		console.crlf();
-		for (Map.Entry<String, String> entry : config.properties(all).entrySet()) {
+		for (Map.Entry<String, String> entry : config.getProperties(all).entrySet()) {
 			console.print(message, entry.getKey(), entry.getValue());
 		}
 
