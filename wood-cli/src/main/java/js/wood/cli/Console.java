@@ -14,6 +14,15 @@ public class Console {
 		System.out.println(object.toString());
 	}
 
+	public void info(String format, Object... args) {
+		System.out.printf(format, args);
+		System.out.println();
+	}
+
+	public void info(Object object) {
+		System.out.println(object.toString());
+	}
+
 	public void warning(String format, Object... args) {
 		System.out.printf(format, args);
 		System.out.println();
@@ -23,12 +32,12 @@ public class Console {
 		System.out.println(object.toString());
 	}
 
-	public void info(String format, Object... args) {
+	public void error(String format, Object... args) {
 		System.out.printf(format, args);
 		System.out.println();
 	}
 
-	public void info(Object object) {
+	public void error(Object object) {
 		System.out.println(object.toString());
 	}
 

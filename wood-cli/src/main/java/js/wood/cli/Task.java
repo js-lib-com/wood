@@ -2,6 +2,8 @@ package js.wood.cli;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.FileSystems;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +16,8 @@ import picocli.CommandLine.Option;
 public abstract class Task implements Runnable {
 	@Option(names = "--time", description = "Measure execution time. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean time;
+	@Option(names = { "-x", "--exception" }, description = "Print stack trace on exception.")
+	private boolean stacktrace;
 
 	protected Console console;
 	protected Config config;
@@ -43,10 +47,10 @@ public abstract class Task implements Runnable {
 		try {
 			exitCode = exec();
 		} catch (IOException e) {
-			e.printStackTrace();
+			handleException(e);
 			exitCode = ExitCode.SYSTEM_FAIL;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			handleException(t);
 			exitCode = ExitCode.APPLICATION_FAIL;
 		}
 		if (time) {
@@ -56,6 +60,17 @@ public abstract class Task implements Runnable {
 	}
 
 	protected abstract ExitCode exec() throws Exception;
+
+	private void handleException(Throwable t) {
+		if (stacktrace) {
+			StringWriter buffer = new StringWriter();
+			t.printStackTrace(new PrintWriter(buffer));
+			console.error(buffer);
+		} else {
+			String message = t.getMessage();
+			console.error(message != null ? message : t.getClass());
+		}
+	}
 
 	// D:\java\wood-1.0\bin\wood-cli-1.0.4-SNAPSHOT.jar
 	private static final Pattern JAR_PATH_PATTERN = Pattern.compile("^(.+)[\\\\/]bin[\\\\/].+\\.jar$");

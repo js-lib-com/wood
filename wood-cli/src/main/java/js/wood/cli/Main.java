@@ -48,9 +48,11 @@ public class Main {
 	}
 
 	private final Config config;
+	private final Console console;
 
 	public Main(Config config) {
 		this.config = config;
+		this.console = new Console();
 	}
 
 	private void run(String... args) {
@@ -102,6 +104,7 @@ public class Main {
 		try {
 			Task task = taskClass.newInstance();
 			task.setConfig(config);
+			task.setConsole(console);
 			return task;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new BugError("Not instantiable task class |%s|.", taskClass);
