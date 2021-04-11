@@ -3,7 +3,6 @@ package js.wood.cli;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,19 +56,6 @@ public abstract class Task implements Runnable {
 	}
 
 	protected abstract ExitCode exec() throws Exception;
-
-	protected File workingDir() {
-		return Paths.get("").toAbsolutePath().toFile();
-	}
-
-	protected static File projectDir() {
-		File projectDir = Paths.get("").toAbsolutePath().toFile();
-		File propertiesFile = new File(projectDir, ".project.properties");
-		if (!propertiesFile.exists()) {
-			throw new BugError("Invalid project. Missing project properties file %s.", propertiesFile);
-		}
-		return projectDir;
-	}
 
 	// D:\java\wood-1.0\bin\wood-cli-1.0.4-SNAPSHOT.jar
 	private static final Pattern JAR_PATH_PATTERN = Pattern.compile("^(.+)[\\\\/]bin[\\\\/].+\\.jar$");

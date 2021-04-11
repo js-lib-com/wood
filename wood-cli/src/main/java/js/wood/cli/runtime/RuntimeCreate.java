@@ -36,7 +36,7 @@ public class RuntimeCreate extends Task {
 
 	@Override
 	protected ExitCode exec() throws Exception {
-		File projectDir = workingDir();
+		File projectDir = files.getWorkingDir().toFile();
 		if (name == null) {
 			name = projectDir.getName();
 		}
