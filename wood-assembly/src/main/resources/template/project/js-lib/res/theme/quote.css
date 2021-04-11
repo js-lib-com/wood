@@ -1,0 +1,48 @@
+blockquote {
+	xmax-width: 800px;
+	margin: 0;
+	padding: 0 0 0 1em;
+	position: relative;
+}
+
+blockquote {
+	font-family: "Great Vibes";
+	font-size: 3.2em;
+	line-height: 1.45;
+	text-shadow: 4px 4px 3px rgba(0, 0, 0, 0.1);
+	color: var(--quote-text-color);
+}
+
+q {
+	color: var(--quote-text-color);
+}
+
+blockquote:before {
+	display: block;
+	content: "\201C";
+	font-family: "Great Vibes";
+	font-size: 120px;
+	position: absolute;
+	left: -10px;
+	top: -30px;
+	color: var(--quote-before-color);
+}
+
+blockquote cite {
+	color: var(--quote-cite--color);
+	font-size: 20px;
+	display: block;
+	margin-top: 5px;
+}
+
+blockquote cite:before {
+	content: "\2014 \2009";
+}
+
+q:before {
+	content: '"';
+}
+
+q:after {
+	content: '"';
+}

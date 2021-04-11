@@ -1,0 +1,103 @@
+form {
+	xmargin-bottom: 40px;
+}
+
+form fieldset {
+	padding: 20px 0;
+	margin-top: 20px;
+}
+
+form fieldset .content {
+	margin-top: 30px;
+	padding: 30px 0;
+	background: radial-gradient(circle at 30% 50%, #FFFFFF, #2d9a27);
+}
+
+form label {
+	display: inline-block;
+	width: 200px;
+	font-size: 18px;
+}
+
+form input {
+	display: inline-block;
+	width: 600px;
+	max-width: 700px;
+	line-height: 22px;
+	padding: 10px;
+	margin-top: 20px;
+	background: 0;
+	border: 0;
+	border-bottom: solid 1px #76be76;
+	font-size: 18px;
+}
+
+form input[disabled] {
+	color: green;
+}
+
+form input.medium {
+	width: 380px;
+	margin-right: 20px;
+}
+
+form input.mini {
+	width: 180px;
+	margin-right: 20px;
+}
+
+form input.large {
+	width: 800px;
+	max-width: 800px;
+}
+
+form textarea {
+}
+
+form textarea {
+	width: 820px;
+	max-width: 1100px;
+	height: 400px;
+	min-height: 200px;
+	overflow:auto;
+	padding-bottom: 10px;
+	font-size: 18px;
+	line-height: 22px;
+	background: 0;
+	border: solid 1px #76be76;
+	resize: none;
+	margin-top: 20px;
+	padding: 10px;
+}
+
+form textarea.auto-size {
+	height: 22px;
+	min-height: 22px;
+	overflow: hidden; 
+}
+
+form textarea.mini {
+	height: 100px;
+	min-height: 100px;
+}
+
+::-webkit-input-placeholder {
+  color: var(--control-placeholder-color);
+}
+
+::-moz-placeholder {
+  color: var(--control-placeholder-color);
+}
+
+:-ms-input-placeholder {
+  color: var(--control-placeholder-color);
+}
+
+::-ms-input-placeholder {
+  color: var(--control-placeholder-color);
+}
+
+/* put standard placeholder syntax after proprietary */
+:placeholder-shown { 
+  color: var(--control-placeholder-color);
+}

@@ -1,0 +1,18 @@
+.expand {
+	animation-name: expand;	
+}
+
+@keyframes expand { 
+    0% { 
+        transform: scaleY(0.2); 
+        opacity:1;
+    }
+    50% { 
+        transform: scaleY(1.2); 
+        
+    }
+    100% { 
+        transform: scaleY(1); 
+        opacity:1;
+    } 
+} 

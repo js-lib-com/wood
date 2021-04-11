@@ -1,0 +1,82 @@
+input[type="text"].small, input[type="file"].small, input[type="password"].small {
+	width: 80px;
+}
+
+input[type="radio"] {
+	width: inherit;
+	height: inherit;
+	line-height: inherit;
+	margin-top: 6px;
+}
+
+input[type="checkbox"] {
+	width: inherit;
+	height: inherit;
+	line-height: inherit;
+	margin-top: 6px;
+}
+
+input[data-type="number"] {
+	width: 30px;
+}
+
+input[data-type="date"] {
+	width: 60px;
+}
+
+input[data-type="time"] {
+	width: 60px;
+}
+
+select {
+	xwidth: 500px;
+	font-size: 18px;
+	padding: 2px 2px 2px 8px;
+	xmargin-bottom: 6px;
+	margin-top: 20px;
+	height: 34px;
+	border-radius: 3px;
+	background: 0;
+	border: solid 1px #76be76;
+}
+
+.gecko select {
+	xposition: relative;
+	xtop: -3px;
+}
+
+select option {
+	xheight: 28px;
+	xline-height: 22px;
+	padding: 2px 2px 2px 8px;
+	border: 0;
+	background-color: #F0F0F0;
+}
+
+textarea {
+	font-size: 18px;
+	width: 500px;
+	height: 120px;
+	padding: 2px 8px;
+	margin-bottom: 6px;
+	overflow: hidden;
+	padding: 2px 8px;
+	border-radius: 3px;
+}
+
+input, textarea, select {
+	margin-right: 6px;
+}
+
+input:hover, textarea:hover, select:hover {
+	border-color: var(--control-hover-border-color);
+}
+
+input.invalid, textarea.invalid, select.invalid, img.invalid {
+	border-color: var(--control-invalid-border-color);
+}
+
+input:focus, textarea:focus, select:focus {
+	background: none;
+	border-color: var(--control-focus-border-color);
+}

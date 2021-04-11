@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<compo>
+	<groupId>com.js-lib</groupId>
+	<artifactId>captcha</artifactId>
+	<version>1.0</version>
+	
+	<description>Client side implementation of the j(s)-lib CAPTCHA.</description>
+</compo>

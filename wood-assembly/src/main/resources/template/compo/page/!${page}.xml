@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<${root}>
+	<groupId>${groupId}</groupId>
+	<artifactId>${artifactId}</artifactId>
+	<version>${version}</version>
+
+	<title>${title}</title>
+	<description>${description}</description>
+</${root}>

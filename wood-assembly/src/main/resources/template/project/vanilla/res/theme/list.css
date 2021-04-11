@@ -1,0 +1,36 @@
+li, li * {
+	font-size: 1.8em;
+}
+
+li {
+	margin-top: 6px;	
+}
+
+li:first-child {
+	margin-top: 0;
+}
+
+ol {
+	list-style-type: decimal;
+	list-style-position: inside;
+}
+
+ol li {
+	color: #378629;
+}
+
+.list-inline {
+	padding-left: 0;
+	margin-left: -5px;
+	list-style: none;
+}
+
+.list-inline>li, .inline>li {
+	display: inline-block;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+
+.list-inline>li.hidden, .inline>li.hidden {
+	display: none;
+}

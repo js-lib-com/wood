@@ -1,0 +1,83 @@
+html {
+	font-family: "Open Sans";
+	font-weight: lighter;
+	font-size: 10px;
+	letter-spacing: 0.04rem;
+}
+
+h1 {
+	font-size: 3.6rem;
+	color: var(--h1-text);
+	margin: 1.0rem 0 1.8rem;
+}
+
+h2 {
+	font-size: 3.0rem;
+	color: var(--h2-text);
+	margin: 1.0rem 0 1.5rem;
+}
+
+h3 {
+	font-size: 2.4rem;
+	color: var(--h3-text);
+	margin: 1.0rem 0 1.2rem;
+}
+
+h4 {
+	font-size: 1.8rem;
+	color: var(--h4-text);
+	margin: 1.0rem 0 0.9rem;
+}
+
+h5 {
+	font-size: 1.4rem;
+	color: var(--h5-text);
+	margin: 1.0rem 0 0.7rem;
+}
+
+h6 {
+	font-size: 1.2rem;
+	color: var(--h6-text);
+	margin: 1.0rem 0 0.6rem;
+}
+
+p {
+	font-size: 1.6rem;
+	line-height: 1.6em;
+	color: black;
+	margin: 1.0em 0 0 0;
+}
+
+p.lead {
+	font-size: 1.8rem;
+	line-height: 2.8rem;
+}
+
+span {
+	font-size: inherit;
+	line-height: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+a {
+	font-size: inherit;
+	line-height: inherit;
+	text-decoration: none;
+	text-transform: uppercase;
+	color: #92A9DC;
+	cursor: pointer;
+}
+
+a:hover {
+	color: #000000;
+}
+
+
+small, .small {
+	font-size: 1.4rem;
+}
+
+.narrow {
+	max-width: 70%;
+}

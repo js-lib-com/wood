@@ -1,0 +1,12 @@
+.icon {
+	width: 60px;
+	height: 60px;
+}
+
+.icon.share {
+	background-size: 32px 32px;
+}
+
+.icon.email {
+	background-size: 32px 32px;
+}

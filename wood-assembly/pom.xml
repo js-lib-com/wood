@@ -22,14 +22,73 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
 				<executions>
 					<execution>
+						<id>compo-page</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
+							<finalName>page</finalName>
+							<outputDirectory>target/template/compo</outputDirectory>
+							<descriptors>
+								<descriptor>src/main/resources/template/compo/page.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>project-jslib</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>js-lib</finalName>
+							<outputDirectory>target/template/project</outputDirectory>
+							<descriptors>
+								<descriptor>src/main/resources/template/project/js-lib.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>project-vanilla</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>vanilla</finalName>
+							<outputDirectory>target/template/project</outputDirectory>
+							<descriptors>
+								<descriptor>src/main/resources/template/project/vanilla.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>runtime-tomcat</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>tomcat</finalName>
+							<outputDirectory>target/template/runtime</outputDirectory>
+							<descriptors>
+								<descriptor>src/main/resources/template/runtime/tomcat.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
 							<descriptors>
 								<descriptor>assembly.xml</descriptor>
 							</descriptors>

@@ -1,0 +1,13 @@
+.collapsible {
+	
+}
+
+.collapsible .head {
+	cursor: pointer;
+}
+
+.collapsible .body {
+	transition: max-height 250ms linear;
+	overflow: hidden;
+	box-sizing: border-box;
+}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<string>
+	<full-date>dd MMMM yyyy</full-date>
+	<full-time>HH:mm:ss Z</full-time>
+	<long-date>dd MMMM yyyy</long-date>
+	<long-time>HH:mm:ss Z</long-time>
+	<medium-date>dd.MM.yyyy</medium-date>
+	<medium-time>HH:mm:ss</medium-time>
+	<short-date>dd.MM.yyyy</short-date>
+	<short-time>HH:mm</short-time>
+
+	<full-jan>ianuarie</full-jan>
+	<full-feb>februarie</full-feb>
+	<full-mar>martie</full-mar>
+	<full-apr>aprilie</full-apr>
+	<full-may>mai</full-may>
+	<full-jun>iunie</full-jun>
+	<full-jul>iulie</full-jul>
+	<full-aug>august</full-aug>
+	<full-sep>septembrie</full-sep>
+	<full-oct>octombrie</full-oct>
+	<full-nov>noiembrie</full-nov>
+	<full-dec>decembrie</full-dec>
+
+	<short-jan>ian</short-jan>
+	<short-feb>feb</short-feb>
+	<short-mar>mar</short-mar>
+	<short-apr>apr</short-apr>
+	<short-may>mai</short-may>
+	<short-jun>iun</short-jun>
+	<short-jul>iul</short-jul>
+	<short-aug>aug</short-aug>
+	<short-sep>sep</short-sep>
+	<short-oct>oct</short-oct>
+	<short-nov>noi</short-nov>
+	<short-dec>dec</short-dec>
+
+	<full-su>duminică</full-su>
+	<full-mo>luni</full-mo>
+	<full-tu>marţi</full-tu>
+	<full-we>miercuri</full-we>
+	<full-th>joi</full-th>
+	<full-fr>vineri</full-fr>
+	<full-sa>sâmbătă</full-sa>
+
+	<short-su>dum</short-su>
+	<short-mo>lun</short-mo>
+	<short-tu>mar</short-tu>
+	<short-we>mie</short-we>
+	<short-th>joi</short-th>
+	<short-fr>vin</short-fr>
+	<short-sa>sâm</short-sa>
+
+	<tiny-su>du</tiny-su>
+	<tiny-mo>lu</tiny-mo>
+	<tiny-tu>ma</tiny-tu>
+	<tiny-we>mi</tiny-we>
+	<tiny-th>jo</tiny-th>
+	<tiny-fr>vi</tiny-fr>
+	<tiny-sa>sâ</tiny-sa>
+	
+	<currency-format>#.###,## LEI</currency-format>
+	<percent-format># %</percent-format>
+</string>

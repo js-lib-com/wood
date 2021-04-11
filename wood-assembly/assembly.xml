@@ -13,18 +13,18 @@
 			<directory>../doc/site</directory>
 			<outputDirectory>manual</outputDirectory>
 		</fileSet>
+		<fileSet>
+			<directory>src/main/resources/bin</directory>
+			<outputDirectory>/bin</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>target/template</directory>
+			<outputDirectory>/template</outputDirectory>
+		</fileSet>
 	</fileSets>
 	<files>
 		<file>
 			<source>../wood-cli/target/wood-cli-${project.version}.jar</source>
-			<outputDirectory>bin</outputDirectory>
-		</file>
-		<file>
-			<source>wood.bat</source>
-			<outputDirectory>bin</outputDirectory>
-		</file>
-		<file>
-			<source>wood.properties</source>
 			<outputDirectory>bin</outputDirectory>
 		</file>
 	</files>

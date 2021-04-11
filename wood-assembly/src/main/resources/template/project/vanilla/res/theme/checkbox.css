@@ -1,0 +1,30 @@
+.checkbox {
+	display: block;
+	margin: 10px 0 0;
+	white-space: nowrap;
+}
+
+.checkbox:first-child {
+	margin: 0;
+}
+
+.checkbox .control {
+	width: 30px;
+	border: solid 1px #888;
+	background-color: white;
+	margin-right: 20px;
+	cursor: pointer;
+}
+
+.checkbox .control.checked {
+	background-image: url(@image/check-icon);
+}
+
+.checkbox span {
+	display: inline-block;
+	height: 30px;
+	line-height: 30px;
+	vertical-align: middle;
+	font-size: 18px;
+	color: white;
+}

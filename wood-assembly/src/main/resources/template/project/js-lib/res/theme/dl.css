@@ -1,0 +1,59 @@
+dl {
+}
+
+dt,dd {
+	font-size: 1.8rem;
+	font-weight: normal;
+}
+
+/** block list */
+/** display definition below term */
+
+dl:not(.inline) dt {
+	margin-top: var(--p-space);
+	margin-bottom: var(--dt-head-space);	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;	
+}
+
+dl:not(.inline) dt:first-child {
+	margin-top: 0;	
+}
+
+dl:not(.inline) dd {
+	font-size: 1.6rem;
+	color: #006600;
+}
+
+/** inline list */
+/** display term and definition in the same line */
+
+dl.inline dt {
+	display: inline-block;
+}
+
+dl.inline dd {
+	display: inline;
+	vertical-align: top;
+	margin-left: 0px;
+	color: #006600;
+	margin-left: 0px;
+}
+
+dl.inline dd>* {
+	display: inline-block;
+}
+
+dl.inline dd * {
+}
+
+dl.inline dd:BEFORE {
+	vertical-align: top;
+	content: "\003A\00A0";
+}
+
+dl.inline dd:AFTER {
+	content: "\A";
+	white-space: pre;
+}

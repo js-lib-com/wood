@@ -1,0 +1,54 @@
+.icon {
+	display: inline-block;
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background-color: rgba(40, 100, 40, 0.8);
+	background-size: 32px 32px;
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.icon.hidden {
+	display: none !important;
+}
+
+.section-icon {
+	position: relative;
+	width: 0;
+	height: 0;
+	left: 80%;
+	/* --section-icon-size * 0.5 + --section-padding */
+	top: 90px;
+}
+
+.section-icon.bottom {
+	top: 10px;
+	/* --section-icon-size * 0.5 + --section-padding */
+	bottom: 90px;
+}
+
+.section-icon img {
+	width: var(--section-icon-size);
+	height: var(--section-icon-size);
+	background-color: var(--teal-100);
+	border-radius: 50%;
+	box-shadow: 0 0 15px #408080;
+	box-sizing: border-box;
+	opacity: 0.8;
+}
+
+.section-icon.big img {
+	width: var(--section-icon-big-size);
+	height: var(--section-icon-big-size);
+	border-radius: 50%;
+}
+
+.section-icon.padding {
+	top: -70px;
+}
+
+.section-icon.padding img {
+	padding: 16px;
+}

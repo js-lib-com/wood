@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template>
+	<groupId>${package}</groupId>
+	<artifactId>page</artifactId>
+	<version>1.0</version>
+
+	<title>Page Template</title>
+	<description>Page template description.</description>
+
+	<scripts>
+		<script src="script/Page.js" defer="true" />
+	</scripts>
+</template>

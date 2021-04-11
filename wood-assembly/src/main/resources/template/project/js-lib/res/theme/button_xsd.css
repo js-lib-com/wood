@@ -1,0 +1,8 @@
+.buttons-bar button {
+	/** --button-space * 0.66 */
+	margin-left: 13.3332px;	
+}
+
+button {
+	padding: 0.2em 1.4em;
+}

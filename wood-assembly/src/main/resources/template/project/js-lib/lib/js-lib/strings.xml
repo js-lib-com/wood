@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<string>
+	<full-date>EEEE, MMMM dd, yyyy</full-date>
+	<full-time>hh:mm:ss a Z</full-time>
+	<long-date>MMMM dd, yyyy</long-date>
+	<long-time>hh:mm:ss a Z</long-time>
+	<medium-date>MMM dd, yyyy</medium-date>
+	<medium-time>hh:mm:ss a</medium-time>
+	<short-date>M/d/yy</short-date>
+	<short-time>hh:mm a</short-time>
+
+	<full-jan>January</full-jan>
+	<full-feb>February</full-feb>
+	<full-mar>March</full-mar>
+	<full-apr>April</full-apr>
+	<full-may>May</full-may>
+	<full-jun>June</full-jun>
+	<full-jul>July</full-jul>
+	<full-aug>August</full-aug>
+	<full-sep>September</full-sep>
+	<full-oct>October</full-oct>
+	<full-nov>November</full-nov>
+	<full-dec>December</full-dec>
+
+	<short-jan>Jan</short-jan>
+	<short-feb>Feb</short-feb>
+	<short-mar>Mar</short-mar>
+	<short-apr>Apr</short-apr>
+	<short-may>May</short-may>
+	<short-jun>Jun</short-jun>
+	<short-jul>Jul</short-jul>
+	<short-aug>Aug</short-aug>
+	<short-sep>Sep</short-sep>
+	<short-oct>Oct</short-oct>
+	<short-nov>Nov</short-nov>
+	<short-dec>Dec</short-dec>
+
+	<full-su>Sunday</full-su>
+	<full-mo>Monday</full-mo>
+	<full-tu>Tuesday</full-tu>
+	<full-we>Wednesday</full-we>
+	<full-th>Thursday</full-th>
+	<full-fr>Friday</full-fr>
+	<full-sa>Saturday</full-sa>
+
+	<short-su>Sun</short-su>
+	<short-mo>Mon</short-mo>
+	<short-tu>Tue</short-tu>
+	<short-we>Wed</short-we>
+	<short-th>Thu</short-th>
+	<short-fr>Fri</short-fr>
+	<short-sa>Sat</short-sa>
+
+	<tiny-su>Su</tiny-su>
+	<tiny-mo>Mo</tiny-mo>
+	<tiny-tu>Tu</tiny-tu>
+	<tiny-we>We</tiny-we>
+	<tiny-th>Th</tiny-th>
+	<tiny-fr>Fr</tiny-fr>
+	<tiny-sa>Sa</tiny-sa>
+		
+	<currency-format>£#,###.##</currency-format>
+	<percent-format>#%</percent-format>
+</string>
