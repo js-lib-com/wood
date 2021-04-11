@@ -26,15 +26,15 @@ public class RuntimeDestroy extends Task {
 			throw new ParameterException(commandSpec.commandLine(), format("Runtime %s does not exist.", runtimeDir));
 		}
 
-		print("You are about to destroy runtime '%s'.", name);
-		print("Runtime location: %s", runtimeDir);
-		print();
-		if (!confirm("Please confirm: yes | [no]", "yes")) {
-			print("User abort.");
+		console.print("You are about to destroy runtime '%s'.", name);
+		console.print("Runtime location: %s", runtimeDir);
+		console.crlf();
+		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
+			console.print("User abort.");
 			return ExitCode.ABORT;
 		}
 
-		print("Destroying runtime %s...", name);
+		console.print("Destroying runtime %s...", name);
 		Files.removeFilesHierarchy(runtimeDir);
 		if (!runtimeDir.delete()) {
 			throw new IOException(format("Cannot remove runtime directory %s.", runtimeDir));

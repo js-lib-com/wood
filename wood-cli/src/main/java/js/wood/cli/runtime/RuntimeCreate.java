@@ -40,7 +40,7 @@ public class RuntimeCreate extends Task {
 		if (name == null) {
 			name = projectDir.getName();
 		}
-		print("Creating runtime %s...", name);
+		console.print("Creating runtime %s...", name);
 
 		File runtimeDir = new File(config.get("runtime.home", File.class), name);
 		if (runtimeDir.exists()) {

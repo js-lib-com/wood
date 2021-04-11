@@ -61,7 +61,7 @@ public abstract class RuntimeScriptTask extends Task {
 		builder.environment().put("CATALINA_HOME", runtimeDir.getAbsolutePath());
 		builder.redirectErrorStream(true);
 
-		print("Starting runtime %s...", runtimeDir);
+		console.print("Starting runtime %s...", runtimeDir);
 		Process process = builder.start();
 
 		Thread stdinReader = new Thread(() -> {
@@ -70,7 +70,7 @@ public abstract class RuntimeScriptTask extends Task {
 				// when process exits its standard output is closed and input reader returns null
 				while ((line = in.readLine()) != null) {
 					if (verbose) {
-						print(line);
+						console.print(line);
 					}
 				}
 			} catch (IOException e) {
@@ -81,11 +81,11 @@ public abstract class RuntimeScriptTask extends Task {
 
 		int exitCode = process.waitFor();
 		if (exitCode != 0) {
-			print("Error on runtime startup. Exit code: %d.", exitCode);
+			console.print("Error on runtime startup. Exit code: %d.", exitCode);
 		}
 		stdinReader.join(4000);
 		if (verbose) {
-			print("Standard input reader thread closed.");
+			console.print("Standard input reader thread closed.");
 		}
 
 		return ExitCode.SUCCESS;
