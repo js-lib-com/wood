@@ -68,6 +68,10 @@ public class FilesUtil {
 		return extensionPos == -1 ? "" : path.substring(extensionPos + 1).toLowerCase();
 	}
 
+	public boolean hasExtension(Path file, String extension) {
+		return file.toString().endsWith(extension);
+	}
+
 	public LocalDateTime getModificationTime(Path file) throws IOException {
 		FileTime fileTime = fileSystem.provider().readAttributes(file, BasicFileAttributes.class).lastModifiedTime();
 		return LocalDateTime.ofInstant(fileTime.toInstant(), ZoneId.systemDefault());
@@ -215,7 +219,7 @@ public class FilesUtil {
 		walkFileTree(dir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (file.endsWith(extension)) {
+				if (hasExtension(file, extension)) {
 					foundFile.path = file;
 					return FileVisitResult.TERMINATE;
 				}
@@ -230,7 +234,7 @@ public class FilesUtil {
 		walkFileTree(dir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (file.endsWith(extension)) {
+				if (hasExtension(file, extension)) {
 					files.add(file);
 				}
 				return FileVisitResult.CONTINUE;
@@ -244,7 +248,7 @@ public class FilesUtil {
 		walkFileTree(dir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (file.endsWith(extension)) {
+				if (hasExtension(file, extension)) {
 					if (Strings.load(getReader(file)).contains(pattern)) {
 						files.add(file);
 					}

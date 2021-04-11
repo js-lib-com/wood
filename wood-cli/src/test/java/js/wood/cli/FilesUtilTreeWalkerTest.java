@@ -166,7 +166,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void getFileByExtension() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(true);
+		when(sourceFile.toString()).thenReturn("dialog.htm");
 
 		// when
 		Path file = files.getFileByExtension(sourceDir, ".htm");
@@ -179,7 +179,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void getFileByExtension_GivenExtensionNotMatch_ThenNull() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(false);
+		when(sourceFile.toString()).thenReturn("dialog.css");
 
 		// when
 		Path file = files.getFileByExtension(sourceDir, ".htm");
@@ -191,7 +191,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void findFilesByExtension() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(true);
+		when(sourceFile.toString()).thenReturn("dialog.htm");
 
 		// when
 		List<Path> filesList = files.findFilesByExtension(sourceDir, ".htm");
@@ -205,7 +205,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void findFilesByExtension_GivenExtensionNotMatch_ThenEmptyList() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(false);
+		when(sourceFile.toString()).thenReturn("dialog.css");
 
 		// when
 		List<Path> filesList = files.findFilesByExtension(sourceDir, ".htm");
@@ -218,7 +218,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void findFilesByContentPattern() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(true);
+		when(sourceFile.toString()).thenReturn("dialog.htm");
 		InputStream inputStream = new ByteArrayInputStream("<div w:compo='res/compo/dialog'></div>".getBytes());
 		when(provider.newInputStream(sourceFile)).thenReturn(inputStream);
 
@@ -234,7 +234,7 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void findFilesByContentPattern_GivenExtensionNotMatch_ThenEmptyList() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(false);
+		when(sourceFile.toString()).thenReturn("dialog.css");
 
 		// when
 		List<Path> filesList = files.findFilesByContentPattern(sourceDir, ".htm", "res/compo/dialog");
@@ -245,9 +245,9 @@ public class FilesUtilTreeWalkerTest {
 	}
 
 	@Test
-	public void findFilesByContentPattern_GivenContentNotMatch_TheEmptyList() throws IOException {
+	public void findFilesByContentPattern_GivenContentNotMatch_ThenEmptyList() throws IOException {
 		// given
-		when(sourceFile.endsWith(".htm")).thenReturn(true);
+		when(sourceFile.toString()).thenReturn("dialog.htm");
 		// res/compo/dialoc is spelled incorrectly
 		InputStream inputStream = new ByteArrayInputStream("<div w:compo='res/compo/dialoc'></div>".getBytes());
 		when(provider.newInputStream(sourceFile)).thenReturn(inputStream);
