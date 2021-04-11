@@ -15,7 +15,7 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "create", description = "Create named project into current directory.")
 public class ProjectCreate extends Task {
-	@Option(names = { "-p", "--project-type" }, description = "Project template from ${WOOD_HOME}/template/project directory.", required = true)
+	@Option(names = { "-p", "--project-type" }, description = "Project template from ${wood.home}/template/project directory.", required = true)
 	private String type;
 
 	@Option(names = { "-a", "--author" }, description = "Developer name.")

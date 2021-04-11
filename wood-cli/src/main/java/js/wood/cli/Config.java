@@ -34,11 +34,7 @@ public class Config {
 		this.globalProperties = globalProperties;
 		this.projectProperties = projectProperties;
 
-		String woodHome = System.getProperty("WOOD_HOME");
-		if (woodHome == null) {
-			throw new BugError("Invalid Java context. Missing WOOD_HOME property.");
-		}
-		Path woodDir = Paths.get(woodHome);
+		Path woodDir = Paths.get(Task.getWoodHome());
 		Path propertiesFile = woodDir.resolve("bin/wood.properties");
 		if (Files.exists(propertiesFile)) {
 			try (Reader reader = Files.newBufferedReader(propertiesFile)) {
@@ -99,6 +95,17 @@ public class Config {
 
 	public String get(String key, String... defaultValue) throws IOException {
 		return get(key, String.class, defaultValue);
+	}
+
+	public boolean has(String key) throws IOException {
+		Object value = projectProperties().get(key);
+		if (value == null) {
+			value = globalProperties.get(key);
+			if (value == null) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Properties projectProperties() throws IOException {

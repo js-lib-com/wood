@@ -40,6 +40,10 @@ public class Main {
 		Config config = new Config(globalProperties, projectProperties);
 
 		Main main = new Main(config);
+		// use wood.home property to detect if WOOD install is properly initialized; force 'setup' if not
+		if (!config.has("wood.home")) {
+			args = new String[] { "setup" };
+		}
 		main.run(args);
 	}
 
@@ -85,6 +89,7 @@ public class Main {
 		commandLine.addSubcommand(configCommands);
 		commandLine.addSubcommand(task(ProjectBuild.class));
 		commandLine.addSubcommand(task(Update.class));
+		commandLine.addSubcommand(task(Setup.class));
 
 		System.exit(commandLine.execute(args));
 	}

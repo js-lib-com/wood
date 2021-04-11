@@ -56,7 +56,7 @@ public class Update extends Task {
 			return ExitCode.ABORT;
 		}
 
-		Path woodHome = files.getWoodHome();
+		Path woodHome = files.getPath(getWoodHome());
 		// uses wood.properties file to detect last update time
 		Path propertiesFile = woodHome.resolve("bin/wood.properties");
 		if (files.exists(propertiesFile)) {

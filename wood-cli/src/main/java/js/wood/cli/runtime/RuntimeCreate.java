@@ -22,7 +22,7 @@ public class RuntimeCreate extends Task {
 	@Spec
 	private CommandSpec commandSpec;
 
-	@Option(names = { "-r", "--runtime-type" }, description = "Runtime template from ${WOOD_HOME}/template/runtime directory.", required = true)
+	@Option(names = { "-r", "--runtime-type" }, description = "Runtime template from ${wood.home}/template/runtime directory.", required = true)
 	private String type;
 	@Option(names = { "-p", "--port" }, description = "Listening port. Default: ${DEFAULT-VALUE}", defaultValue = "8080")
 	private int port;

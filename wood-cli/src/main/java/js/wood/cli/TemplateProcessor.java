@@ -17,7 +17,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import js.io.VariablesWriter;
-import js.lang.BugError;
 import js.util.Strings;
 
 public class TemplateProcessor {
@@ -100,12 +99,7 @@ public class TemplateProcessor {
 	}
 
 	private static ZipInputStream template(TemplateType type, String name) throws FileNotFoundException {
-		String woodHome = System.getProperty("WOOD_HOME");
-		if (woodHome == null) {
-			throw new BugError("Missing property WOOD_HOME.");
-		}
-
-		File woodHomeDir = new File(woodHome);
+		File woodHomeDir = new File(Task.getWoodHome());
 		File templateFile = new File(woodHomeDir, Strings.concat("template", File.separatorChar, type, File.separatorChar, name, ".zip"));
 		return new ZipInputStream(new BufferedInputStream(new FileInputStream(templateFile)));
 	}

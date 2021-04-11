@@ -34,7 +34,7 @@ public abstract class RuntimeScriptTask extends Task {
 
 	@Override
 	protected ExitCode exec() throws Exception {
-		String JAVA_HOME = System.getProperty("JAVA_HOME");
+		String JAVA_HOME = System.getProperty("java.home");
 		if (JAVA_HOME == null) {
 			console.warning("Missing JAVA_HOME environment variable.");
 			console.warning("Command abort.");

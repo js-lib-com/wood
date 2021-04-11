@@ -52,14 +52,6 @@ public class FilesUtil {
 		return projectDir;
 	}
 
-	public Path getWoodHome() {
-		String woodHome = System.getProperty("WOOD_HOME");
-		if (woodHome == null) {
-			throw new BugError("Invalid WOOD setup. Missing WOOD_HOME variable.");
-		}
-		return fileSystem.getPath(woodHome);
-	}
-
 	public String getFileName(Path file) {
 		return file.getFileName().toString();
 	}
