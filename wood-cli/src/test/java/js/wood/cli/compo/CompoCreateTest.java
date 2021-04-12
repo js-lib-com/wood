@@ -13,10 +13,12 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -104,11 +106,12 @@ public class CompoCreateTest {
 	@Test
 	public void GivenTemplateOption_ThenCreateCompo() throws IOException {
 		// given
+		when(files.getFileName(compoDir)).thenReturn("about");
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
-		String layoutDocument = "<body><section w:editable='section'></section></body>";
-		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
+		String templateLayoutDoc = "<body xmlns:w='js-lib.com/wood'><section w:editable='section'></section></body>";
+		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(templateLayoutDoc)).thenReturn(new StringReader(templateLayoutDoc));
 
 		task.setCompoTemplate(compoTemplate);
 
@@ -119,7 +122,25 @@ public class CompoCreateTest {
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 		verify(templateProcessor, times(1)).setTargetDir(null);
 		verify(templateProcessor, times(1)).setVerbose(false);
-		verify(templateProcessor, times(1)).exec(eq(TemplateType.compo), eq("page"), any());
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Map<String, String>> variablesArgument = ArgumentCaptor.forClass(Map.class);
+		verify(templateProcessor, times(1)).exec(eq(TemplateType.compo), eq("page"), variablesArgument.capture());
+
+		Map<String, String> variables = variablesArgument.getValue();
+		assertThat(variables.get("page"), equalTo("about"));
+		assertThat(variables.get("tag"), equalTo("section"));
+		assertThat(variables.get("class"), equalTo("about"));
+		assertThat(variables.get("template"), equalTo("template/page"));
+		assertThat(variables.get("editable"), equalTo("section"));
+		assertThat(variables.get("template-params"), equalTo("w:param=\"\""));
+		assertThat(variables.get("xmlns"), equalTo("js-lib.com/wood"));
+		assertThat(variables.get("root"), equalTo("component"));
+		assertThat(variables.get("groupId"), equalTo("com.js-lib"));
+		assertThat(variables.get("artifactId"), equalTo("page"));
+		assertThat(variables.get("version"), equalTo("1.0"));
+		assertThat(variables.get("title"), equalTo("About Component"));
+		assertThat(variables.get("description"), equalTo("About component description."));
 	}
 
 	@Test
@@ -128,7 +149,7 @@ public class CompoCreateTest {
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
-		String layoutDocument = "<body><section w:editable='section'><h1>@param/title</h1></section></body>";
+		String layoutDocument = "<body xmlns:w='js-lib.com/wood'><section w:editable='section'><h1>@param/title</h1></section></body>";
 		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
 
 		task.setCompoTemplate(compoTemplate);
@@ -180,7 +201,7 @@ public class CompoCreateTest {
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
 
 		// w:editable is misspelled; it has 's' at the end
-		String layoutDocument = "<body><section w:editables='section'></section></body>";
+		String layoutDocument = "<body xmlns:w='com.js-lib/wood'><section w:editables='section'></section></body>";
 		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
 
 		task.setCompoTemplate(compoTemplate);

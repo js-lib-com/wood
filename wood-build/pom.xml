@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>com.js-lib</groupId>
 			<artifactId>js-dom-api</artifactId>
-			<version>1.2</version>
+			<version>1.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.js-lib</groupId>

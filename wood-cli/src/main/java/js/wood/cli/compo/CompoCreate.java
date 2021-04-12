@@ -79,8 +79,8 @@ public class CompoCreate extends Task {
 			}
 
 			DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
-			Document templateDoc = documentBuilder.loadXML(files.getReader(templateLayoutFile));
-			Element editableElement = templateDoc.getByXPathNS(WOOD.NS, "//*[@editable]");
+			Document templateDoc = documentBuilder.loadXMLNS(files.getReader(templateLayoutFile));
+			Element editableElement = templateDoc.getByXPathNS(WOOD.NS, "//*[@wood:editable]");
 			if (editableElement == null) {
 				throw new BugError("Bad template component %s. Missing editable element.", compoTemplateDir);
 			}
@@ -105,7 +105,6 @@ public class CompoCreate extends Task {
 			variables.put("class", compoName);
 			variables.put("template", compoTemplate.path());
 			variables.put("editable", editableElement.getAttrNS(WOOD.NS, "editable"));
-			variables.put("editable", "section");
 			variables.put("template-params", format("w:param=\"%s\"", Strings.join(params, ';')));
 			variables.put("xmlns", WOOD.NS);
 
