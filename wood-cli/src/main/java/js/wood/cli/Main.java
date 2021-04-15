@@ -15,6 +15,7 @@ import js.wood.cli.compo.CompoOpen;
 import js.wood.cli.compo.CompoPreview;
 import js.wood.cli.compo.CompoRename;
 import js.wood.cli.compo.CompoUpdate;
+import js.wood.cli.compo.CompoUsedBy;
 import js.wood.cli.config.ConfigCommands;
 import js.wood.cli.config.ConfigList;
 import js.wood.cli.project.ProjectBuild;
@@ -74,6 +75,7 @@ public class Main {
 		compoCommands.addSubcommand(task(CompoImport.class));
 		compoCommands.addSubcommand(task(CompoExport.class));
 		compoCommands.addSubcommand(task(CompoUpdate.class));
+		compoCommands.addSubcommand(task(CompoUsedBy.class));
 
 		CommandLine runtimeCommands = new CommandLine(new RuntimeCommands());
 		runtimeCommands.addSubcommand(task(RuntimeCreate.class));
