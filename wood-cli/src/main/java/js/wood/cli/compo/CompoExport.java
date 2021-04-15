@@ -87,7 +87,14 @@ public class CompoExport extends Task {
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			HttpDelete httpDelete = new HttpDelete(url);
 			try (CloseableHttpResponse response = client.execute(httpDelete)) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if(statusCode == 404) {
+					if(verbose) {
+						console.print("Component %s not existing on repository.", coordinates.toPath());
+					}
+					return;
+				}
+				if (statusCode != 200) {
 					throw new IOException(format("Fail to cleanup component %s", coordinates));
 				}
 			}
