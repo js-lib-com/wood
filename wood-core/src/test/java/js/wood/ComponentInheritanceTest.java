@@ -137,6 +137,67 @@ public class ComponentInheritanceTest {
 	}
 
 	@Test
+	public void simple_content() {
+		String templateHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<embed w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:content='section'>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</embed>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content"));
+
+		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
+		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
+		assertFalse(section.hasAttr("xmlns:w"));
+	}
+
+	@Test
+	public void simple_list() {
+		String templateHTML = "" + //
+				"<ul class='menu'>" + //
+				"</ul>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<ul id='main' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<li class='selected'>Item <b>#1</b></li>" + //
+				"	<li class='divider'></li>" + //
+				"	<li>Item <b>#2</b></li>" + //
+				"</ul>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("ul"));
+		assertThat(layout.getAttr("class"), equalTo("menu"));
+		assertThat(layout.getAttr("id"), equalTo("main"));
+
+		EList items = layout.findByTag("li");
+		assertThat(items, notNullValue());
+		assertThat(items.size(), equalTo(3));
+	}
+
+	@Test
 	public void parameter() {
 		String templateHTML = "" + //
 				"<body title='@param/caption' xmlns:w='js-lib.com/wood'>" + //

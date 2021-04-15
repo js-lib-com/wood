@@ -212,10 +212,10 @@ public class Component {
 			CompoPath compoPath = factory.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
 
 			FilePath childLayoutPath = compoPath.getLayoutPath();
-			if(!childLayoutPath.exists()) {
+			if (!childLayoutPath.exists()) {
 				throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", childLayoutPath, layoutPath);
 			}
-			
+
 			FilePath descriptorFile = childLayoutPath.cloneTo(FileType.XML);
 			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 			addAll(metaDescriptors, descriptor.getMetaDescriptors());
@@ -323,22 +323,22 @@ public class Component {
 
 		CompoPath templateCompoPath = factory.createCompoPath(templatePath);
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
-		if(!templateLayoutPath.exists()) {
+		if (!templateLayoutPath.exists()) {
 			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, layoutPath);
 		}
 
-		Document template = null;
+		Document templateDoc = null;
 		Editables editables = null;
 		for (Element contentElement : contentElements) {
-			if (template == null) {
+			if (templateDoc == null) {
 				// prepare layout parameters, possible empty, before loading template from source file
 				// subsequent loadLayoutDocument passes parameters to source reader
 				// source reader takes care to inject parameter values into template layout
 				layoutParameters.reload(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
 
-				template = loadLayoutDocument(templateLayoutPath, guardCount);
-				editables = new Editables(template);
+				templateDoc = loadLayoutDocument(templateLayoutPath, guardCount);
+				editables = new Editables(templateDoc);
 
 				FilePath descriptorFile = templateLayoutPath.cloneTo(FileType.XML);
 				ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
@@ -347,29 +347,43 @@ public class Component {
 				addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 			}
 
+			Element editableElement = null;
 			// load editable name from 'content' operator; if missing we should have editable name in template path
 			String editableName = operators.getOperand(contentElement, Operator.CONTENT);
 			if (editableName == null) {
 				if (templatePathEditableName == null) {
-					throw new WoodException("Invalid content layout |%s|. Missing editable name.", layoutPath);
+					editableElement = templateDoc.getRoot();
+				} else {
+					editableName = templatePathEditableName;
 				}
-				editableName = templatePathEditableName;
 			}
 
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
-			Element editableElement = editables.get(editableName);
 			if (editableElement == null) {
-				throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, layoutPath);
+				if (editableName == null) {
+					throw new WoodException("Invalid content layout |%s|. Missing editable name.", layoutPath);
+				}
+				editableElement = editables.get(editableName);
+				if (editableElement == null) {
+					throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, layoutPath);
+				}
 			}
 
 			// insert content element - and all its descendants into template document, before editable element
 			// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
-			editableElement.insertBefore(contentElement);
-			mergeAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+			if (editableElement.getParent() != null) {
+				editableElement.insertBefore(contentElement);
+				mergeAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+			} else {
+				for (Element child : contentElement.getChildren()) {
+					editableElement.addChild(child);
+				}
+				mergeAttrs(editableElement, contentElement.getAttrs());
+			}
 		}
 
 		editables.remove();
-		return template;
+		return templateDoc;
 	}
 
 	/**
