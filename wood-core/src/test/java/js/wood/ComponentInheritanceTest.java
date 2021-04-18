@@ -171,7 +171,38 @@ public class ComponentInheritanceTest {
 	}
 
 	@Test
-	public void simple_list() {
+	public void simple_empty() {
+		String templateHTML = "" + //
+				"<article>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<article w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</article>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("article"));
+		assertTrue(layout.hasAttr("xmlns:w"));
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(1));
+		assertThat(headings.item(0).getText(), equalTo("Content"));
+
+		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
+		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
+	}
+
+	@Test
+	public void simple_empty_list() {
 		String templateHTML = "" + //
 				"<ul class='menu'>" + //
 				"</ul>";
@@ -195,6 +226,83 @@ public class ComponentInheritanceTest {
 		EList items = layout.findByTag("li");
 		assertThat(items, notNullValue());
 		assertThat(items.size(), equalTo(3));
+	}
+
+	@Test
+	public void simple_inline() {
+		String templateHTML = "" + //
+				"<article xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:template='res/template#section'>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content"));
+
+		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
+		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
+		assertFalse(section.hasAttr("xmlns:w"));
+	}
+
+	@Test
+	public void simple_mixed() {
+		String pageHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Page</h1>" + //
+				"	<article w:editable='article'></article>" + //
+				"</body>";
+		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
+		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+
+		String templateHTML = "" + //
+				"<chapter xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Chapter</h1>" + //
+				"	<section w:editable='section'></section>" + //
+				"</chapter>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+
+		String compoHTML = "" + //
+				"<article w:template='res/template/page#article' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:template='res/template/chapter#section'>" + //
+				"		<h1>Section</h1>" + //
+				"	</section>" + //
+				"</article>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(3));
+		assertThat(headings.item(0).getText(), equalTo("Page"));
+		assertThat(headings.item(1).getText(), equalTo("Chapter"));
+		assertThat(headings.item(2).getText(), equalTo("Section"));
+
+		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
+		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
+		assertFalse(section.hasAttr("xmlns:w"));
 	}
 
 	@Test
@@ -240,7 +348,7 @@ public class ComponentInheritanceTest {
 
 	/** Component with template and multiple implementations for the same editable element. */
 	@Test
-	public void multipleRealizations() {
+	public void simple_repeating() {
 		String templateHTML = "" + //
 				"<form xmlns:w='js-lib.com/wood'>" + //
 				"	<fieldset w:editable='fieldset'></fieldset>" + //
@@ -314,6 +422,63 @@ public class ComponentInheritanceTest {
 		assertThat(sections.size(), equalTo(2));
 		assertFalse(sections.item(0).hasAttrNS(WOOD.NS, "editable"));
 		assertFalse(sections.item(1).hasAttrNS(WOOD.NS, "editable"));
+	}
+
+	@Test
+	public void multipleEditables_mixed() {
+		String pageHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section-1'></section>" + //
+				"	<section w:editable='section-2'></section>" + //
+				"</body>";
+		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
+		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+
+		String templateHTML = "" + //
+				"<chapter xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Chapter</h1>" + //
+				"	<section class='chapter' name='chapter-1' w:editable='section'></section>" + //
+				"</chapter>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+
+		String compoHTML = "" + //
+				"<embed type='text/html' w:template='res/template/page' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:content='section-1'>" + //
+				"		<h1>Content One</h1>" + //
+				"		<section id='section-1' class='one' w:template='res/template/chapter#section'>" + //
+				"			<h1>Section</h1>" + //
+				"		</section>" + //
+				"	</section>" + //
+				"" + //
+				"	<section w:content='section-2'>" + //
+				"		<h1>Content Two</h1>" + //
+				"	</section>" + //
+				"</embed>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(5));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content One"));
+		assertThat(headings.item(2).getText(), equalTo("Chapter"));
+		assertThat(headings.item(3).getText(), equalTo("Section"));
+		assertThat(headings.item(4).getText(), equalTo("Content Two"));
+
+		EList sections = layout.findByTag("section");
+		assertThat(sections.size(), equalTo(3));
+		assertThat(sections.item(1).getAttr("class"), equalTo("chapter one"));
+		assertThat(sections.item(1).getAttr("id"), equalTo("section-1"));
+		assertThat(sections.item(1).getAttr("name"), equalTo("chapter-1"));
+
+		assertFalse(sections.item(0).hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(sections.item(1).hasAttrNS(WOOD.NS, "editable"));
+		assertFalse(sections.item(2).hasAttrNS(WOOD.NS, "editable"));
 	}
 
 	/** Component inherits 'paragraph' from template that inherits 'section' from page. */
@@ -471,6 +636,45 @@ public class ComponentInheritanceTest {
 		assertThat(scripts.get(2).getSource(), equalTo("scripts/Compo.js"));
 	}
 
+	@Test
+	public void scriptDescriptors_inline() {
+		String templateDescriptorXML = "" + //
+				"<compo>" + //
+				"	<script src='libs/js-lib.js'></script>" + //
+				"	<script src='scripts/Template.js'></script>" + //
+				"</compo>";
+		when(templateDescriptor.exists()).thenReturn(true);
+		when(templateDescriptor.getReader()).thenReturn(new StringReader(templateDescriptorXML));
+
+		String templateLayoutHTML = "" + //
+				"<div>" + //
+				"	<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>" + //
+				"</div>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
+
+		String compoDescriptorXML = "" + //
+				"<compo>" + //
+				"	<script src='libs/js-lib.js'></script>" + //
+				"	<script src='scripts/Compo.js'></script>" + //
+				"</compo>";
+		when(compoDescriptor.exists()).thenReturn(true);
+		when(compoDescriptor.getReader()).thenReturn(new StringReader(compoDescriptorXML));
+
+		String compoLayoutHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1 w:template='res/template#h1'><b>Content</b></h1>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		Component compo = new Component(compoPath, referenceHandler);
+		List<IScriptDescriptor> scripts = compo.getScriptDescriptors();
+		assertThat(scripts, hasSize(3));
+		assertThat(scripts.get(0).getSource(), equalTo("libs/js-lib.js"));
+		assertThat(scripts.get(1).getSource(), equalTo("scripts/Template.js"));
+		assertThat(scripts.get(2).getSource(), equalTo("scripts/Compo.js"));
+	}
+
 	/** {@link Operator#TEMPLATE} and {@link Operator#EDITABLE} should be erased from layout. */
 	@Test
 	public void operatorsErasure() {
@@ -524,7 +728,7 @@ public class ComponentInheritanceTest {
 	/** Template editable element is named 'h1' but component fragment references it as 'fake'. */
 	@Test(expected = WoodException.class)
 	public void missingEditable() {
-		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1>";
+		String templateLayoutHTML = "<body><h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1></body>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
 		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'></h1>";

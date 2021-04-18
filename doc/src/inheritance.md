@@ -1,18 +1,69 @@
 ## Inheritance
 
-OOP inheritance is emulated using templates with editable elements. An editable is an element with `wood:editable` operator; attribute value is that editable name. A component with layout with editable elements is called template. An editable element define an insertion point where content layout will be injected by WOOD tool. Content element is the root of content layout and will literally replace editable element from template. A content element is an element that has `wood:template` operator that contains the path to named editable element. In resulting page, template styles are included before content style so that content component can overwrite template styles. Variables are replaced by their defined values at layout and style files reading, on the fly.
+WOOD emulates OOP inheritance using templates with editable regions. A template has a fixed region -  also known as template chrome, and one or more editable regions. A content component that extends the template provides the content fragment that replaces editable element. A content component is a component specifically crafted to provide content for a template and content fragment is a tree of HTML elements that has a single root element and one or many content elements.
 
-Because a template layout file can contain multiple editable elements the path referring to an editable element should include both component path and editable name, e.g. 'template/page#body' . See below simplified rule and {@link js.wood.EditablePath} for details about path syntax.
 
-```
-    editable-path = component-path '#' editable-name
-```
 
-Below ASCII diagram describe component inheritance via template mechanism. For brevity only one editable is figured but a template may have a not limited number of editable elements. A component that uses a template but does not define content for all template editable elements become a template on its turn. This way one can create an arbitrary large inheritance chain; a sub-template can define content for any super-template from hierarchy and can include its own editable elements.
+![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\src\template-concept.png)
 
-![](inheritance.svg)
 
-Note that multiple inheritance is not supported. A content layout may define content for multiple editable elements but all should belong to the same template.
+
+After build we have a layout that inherits chrome from template plus injected content fragment. Building process also takes care to merge styles, scripts and resources from template and component.
+
+
+
+### Template
+
+A template is a component with some fixed layout and empty placeholders that need to be replaced by custom layout. These empty placeholders are named editable regions or, for short, editables.
+
+An editable is an element with `wood:editable` operator that contains the named of the editable region, unique at template level.
+
+Editable element define an insertion point where content fragment will be injected by building tool. Content fragment will literally replace editable element from template. In resulting component, template styles are included before content style so that content component can overwrite template styles.
+
+
+### Content Fragment
+
+Editable regions from template are actually empty elements which need to be replaced with custom content. For that we use content fragments, provided by the components extending the template.
+
+At the source code level, content fragment is a tree of HTML elements. The fragment has a single root element and one or many content elements, that are direct children of the root element. Root element has `wood:template` operator to declare the path to the template; this path is always relative to project root. Content element has `wood:content` operator that declare the editable region name, where it should be injected. Content element and its descendants replaces the template editable element, with attributes merge.
+
+
+
+![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\src\content-fragment.png)
+
+
+
+If there is only one content element - see (2), there is the option to use a shorter notation: concatenate both template path and editable name in the `wood:template` operator from content fragment root. Uses hash (#) as separator.
+
+
+
+### Standalone vs Inline
+
+So far we considered only standalone templating - see section (1) from below diagram; only one template and one content component are allowed in this relationship. Also content component has a single content fragment that is the root of the content document. It is true that content fragment can have multiple content elements but still a single content fragment. In this design only template can have chrome.
+
+
+
+![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\src\standalone-vs-inline.png)
+
+
+
+In `standalone templating` content fragments are injected into the template document, which is the building process artifact. There is also the option to inject the resolved template inline into the component; in this case the component document is the build artifact. This new design is named `inline templating` - see section (2) from diagram.
+
+Inline templating design define a relationship between one component and a number - possible more than a single one, of templates. All components and templates can have chrome. Component can contain any number of content fragments and is legal to have many content fragments extending the same template.
+
+
+
+### Relationship Description
+
+Below diagram describe component inheritance via template mechanism. For brevity only one editable is figured in diagram but a template may have a not limited number of editable elements. A component that uses a template but does not define content for all template editable elements become a template on its turn. This way one can create an inheritance chain of  arbitrary length; a sub-template can define content for any super-template from hierarchy and can include its own editable elements.
+
+
+
+![](inheritance.png)
+
+
+
+Note that multiple inheritance is not supported. A content component may define content for multiple editable elements but all should belong to the same template.
 
 ```
     grand-parent.htm
@@ -20,13 +71,17 @@ Note that multiple inheritance is not supported. A content layout may define con
         <h1>Grand Parent</h1> 
         <section wood:editable="section"></section>
     </body> 
-                                   
+```
+
+```
     parent.htm        
     <section wood:template="grand-parent#section">                    
         <h2>Parent</h2>                       
         <div wood:editable="paragraph"></div>
     </section>
-    
+```
+
+```
     child.htm
     <div wood:template="parent#paragraph">
         <h3>Child</h3>
@@ -51,9 +106,9 @@ Child <div> and its descendants replaces parent <div>. Parent <section> and its 
 
 
 
-## Template Parameters
+### Template Parameters
 
-Beside editable areas a template may contain parameter references for template customization - see `@param/title` . For example, a template for a dialog box may have a title and every dialog, based on this dialog template, can have its own title value.
+Beside editable regions a template may contain parameter references for template customization - see `@param/title` . For example, a template for a dialog box may have a title and every dialog, based on this dialog template, can have its own title value.
 
 ```
     template/dialog/dialog.htm
@@ -64,7 +119,8 @@ Beside editable areas a template may contain parameter references for template c
         <div wood:editable="body"></div>
         ...
     </div>
-    
+```
+```
     dialog/user/user.htm
     <div wood:template="template/dialog#body" wood:param="title:Edit User">
         <form>
@@ -89,21 +145,24 @@ Generated user dialog layout will look like below sample code. Body editable is 
     </div>
 ```
 
-See {@link js.wood.LayoutParameters} for parameters list syntax and {@link js.wood.SourceReader} for parameters injection.
 
 
+### Case Study
 
-## Template Sample
+Lets consider three user dialogs for user creation and edit and password change. All have basically the same look but differ by form fields, dialog caption and submit button label.
 
-There are three user dialogs for user creation and edit and password change. All have basically the same look but differ by form fields, dialog caption and submit button label.
+
 
 ![](dialogs.svg)
 
-Is obvious we will have a template and three content components. Template `res/compo/form-dialog` has an editable form element. Content components, `res/user/create-dialog`, `res/user/edit-dialog` and `res/user/password-dialog` implements specific form fields. Content components use `wood:template="res/compo/form-dialog#form"` operator to identify template and its editable area.
+
+
+Is obvious we will have a template and three content components. Template `res/compo/form-dialog` has an editable form element. Content components, `res/user/create-dialog`, `res/user/edit-dialog` and `res/user/password-dialog` implements specific form fields. Content components use short notation `wood:template="res/compo/form-dialog#form"` to identify template and its editable region.
 
 
 
 ![](dialogs-hierarchy.svg)
 
-To customize dialog caption and submit button label there are `wood:param` operators. For example, on user creation dialog it is `wood:param="caption:CREATE USER;btn:Create"`. Parameters names need to match those declared on template: `@param\caption`, respective `@param\btn`. For other two dialogs parameters handling is similar.
 
+
+To customize dialog caption and submit button label there are `wood:param` operators. For example, on user creation dialog it is `wood:param="caption:CREATE USER;btn:Create"`. Parameters names need to match those declared on template: `@param\caption`, respective `@param\btn`. For other two dialogs parameters handling is similar.

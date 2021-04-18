@@ -16,7 +16,7 @@ import js.wood.WOOD;
  */
 public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	/** Name space context used by document search by XPath expression with name space. */
-	private NamespaceContext namespaceContext = new NamespaceContext() {
+	private static final NamespaceContext namespaceContext = new NamespaceContext() {
 		@Override
 		public String getNamespaceURI(String prefix) {
 			return WOOD.NS;
@@ -74,7 +74,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	 */
 	private static String buildAttrXPath(String name, String... value) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("//*[@wood:");
+		sb.append("descendant-or-self::node()[@wood:");
 		sb.append(name);
 		if (value.length == 1) {
 			sb.append("='");

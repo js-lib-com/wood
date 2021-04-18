@@ -18,6 +18,7 @@ import js.dom.w3c.DomException;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
+import js.wood.impl.ContentFragment;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.LayoutParameters;
@@ -47,6 +48,8 @@ import js.wood.impl.ScriptDescriptor;
  * @author Iulian Rotaru
  */
 public class Component {
+	private static final int MAX_NESTING_LEVELS = 8;
+
 	private final DocumentBuilder documentBuilder;
 
 	/** Parent project reference. */
@@ -216,11 +219,7 @@ public class Component {
 				throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", childLayoutPath, layoutPath);
 			}
 
-			FilePath descriptorFile = childLayoutPath.cloneTo(FileType.XML);
-			ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-			addAll(metaDescriptors, descriptor.getMetaDescriptors());
-			addAll(linkDescriptors, descriptor.getLinkDescriptors());
-			addAll(scriptDescriptors, descriptor.getScriptDescriptors());
+			mergeDescriptor(childLayoutPath);
 
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
@@ -246,34 +245,33 @@ public class Component {
 	}
 
 	/**
-	 * Load document layout resolving template(s), if the case and delegates resources processing, on the fly to
+	 * Load document layout resolving template(s), if the case and delegating resources processing on the fly to
 	 * {@link #referenceHandler}. If present, template(s) are processed invoking this method recursively till entire hierarchy
 	 * is done.
 	 * <p>
 	 * Returns loaded layout document. Anyway, if template is used, returns template document instead - with this layout content
 	 * inserted in template editable area.
 	 * <p>
-	 * Document file is loaded using {@link LayoutReader} and {@link SourceReader} decorators. Layout reader insert XML
-	 * declaration and document root; component layout is child to injected document root. Source reader detects resource
-	 * references and invoke {@link #referenceHandler} that handle variables replacement and media files processing.
+	 * Document file is loaded using {@link SourceReader} decorator. Source reader detects resource references and invoke
+	 * {@link #referenceHandler} that handle variables replacement and media files processing.
 	 * <p>
 	 * This method insert the related style file into {@link #styleReferences} list. By convention layout and style files have
 	 * the same name; anyway, style file is not mandatory. Also takes care to insert style file path in the proper order,
 	 * suitable for page header inclusion.
 	 * 
-	 * @param layoutPath component layout path,
-	 * @param guardCount circular reference guard.
+	 * @param layoutPath component layout file path,
+	 * @param guardCounter nesting level guard counter for protection against circular dependencies.
 	 * @return layout document.
 	 */
-	private Document loadLayoutDocument(FilePath layoutPath, int guardCount) {
-		if (guardCount++ == 8) {
+	private Document loadLayoutDocument(FilePath layoutPath, int guardCounter) {
+		if (guardCounter++ == MAX_NESTING_LEVELS) {
 			throw new WoodException("Circular templates references suspicion. Too many nesting levels on |%s|. Please check 'template' attributes!", layoutPath);
 		}
 
 		Reader reader = new SourceReader(layoutPath, layoutParameters, referenceHandler);
-		Document layout;
+		Document layoutDoc;
 		try {
-			layout = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
+			layoutDoc = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
 		} catch (DomException e) {
 			throw new WoodException("Invalid layout document |%s|.", layoutPath);
 		}
@@ -281,55 +279,57 @@ public class Component {
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
 
-		// 'template' operator has the path to template component and optional editable area name, separated by hash
-		// editable name can be present only if there are no child elements with 'content' operator
-		Element templateElement = operators.getByOperator(layout, Operator.TEMPLATE);
-		// if there is no 'template' operator currently loaded layout does not inherit from a template component
-		if (templateElement == null) {
-			return layout;
+		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
+		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
+		if (contentFragments.isEmpty()) {
+			// if there are no content fragments, currently loaded layout does not inherit from a template component
+			return layoutDoc;
 		}
 
-		// here we know there is a template component that current components inherits from
-		// current component is named content component because it provides content for template editable areas
+		// if content fragment is the document root we have a stand alone content component
+		// it is not allowed to have multiple content fragments in a stand alone content component
+		ContentFragment contentFragment = new ContentFragment(operators, contentFragments.item(0));
+		if (contentFragment.isRoot()) {
+			for (int i = 1; i < contentFragments.size(); ++i) {
+				Element inlineContentFragment = contentFragments.item(i);
+				Document templateDoc = consolidateTemplate(layoutPath, new ContentFragment(operators, inlineContentFragment), guardCounter);
+				inlineContentFragment.replace(templateDoc.getRoot());
+			}
 
-		// a content component can inherit from only one template; multiple inheritance is not supported
-		// the root element of the content component always has 'template' operator
-		// a content component has one or more content elements identified by 'content' operator
-		// 'content' operator has the name for the editable area for which it provides content
-		// if there is a single content element is allowed to combine template path and editable name
-		// TEMPLATE_PATH # EDITABLE_NAME
-
-		// current content component should define content for all editable elements from template
-		// if not it become a template too and creates a hierarchy of templates similar to class inheritance
-
-		// load all content elements from current content component
-		List<Element> contentElements = new ArrayList<>();
-		for (Element contentElement : operators.findByOperator(layout, Operator.CONTENT)) {
-			contentElements.add(contentElement);
-		}
-		if (contentElements.isEmpty()) {
-			contentElements.add(templateElement);
+			// return consolidated template document
+			return consolidateTemplate(layoutPath, contentFragment, guardCounter);
 		}
 
-		// at this point we know there is a template operator and we load its value (operand)
-		// template operator value is the template path and optional editable name separated by hash
-		String templatePath = operators.getOperand(templateElement, Operator.TEMPLATE);
-		String templatePathEditableName = null;
-		int separatorPosition = templatePath.indexOf('#');
-		if (separatorPosition != -1) {
-			templatePathEditableName = templatePath.substring(separatorPosition + 1);
-			templatePath = templatePath.substring(0, separatorPosition);
+		// at this point we have one or many inline content fragments
+		// consolidate template for content fragment then replace it with consolidated document root
+		for (Element inlineContentFragment : contentFragments) {
+			Document templateDoc = consolidateTemplate(layoutPath, new ContentFragment(operators, inlineContentFragment), guardCounter);
+			inlineContentFragment.replace(templateDoc.getRoot());
 		}
+		// return component layout document with inline content fragments replaces by consolidated template documents
+		return layoutDoc;
+	}
 
-		CompoPath templateCompoPath = factory.createCompoPath(templatePath);
+	/**
+	 * Create template document declared by given content fragment and resolve editable areas. Component content fragment
+	 * provides both information about template location and content elements to be injected into editable areas.
+	 * 
+	 * @param componentLayoutPath file path for component layout, for logging,
+	 * @param contentFragment HTML fragment from component that defined content to be injected into template editable,
+	 * @param guardCounter nesting level guard counter for protection against circular dependencies.
+	 * @return newly created template document with editable areas resolved.
+	 */
+	private Document consolidateTemplate(FilePath componentLayoutPath, ContentFragment contentFragment, int guardCounter) {
+		CompoPath templateCompoPath = factory.createCompoPath(contentFragment.getTemplatePath());
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
 		if (!templateLayoutPath.exists()) {
-			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, layoutPath);
+			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, componentLayoutPath);
 		}
+		mergeDescriptor(templateLayoutPath);
 
 		Document templateDoc = null;
 		Editables editables = null;
-		for (Element contentElement : contentElements) {
+		for (Element contentElement : contentFragment.getContentElements()) {
 			if (templateDoc == null) {
 				// prepare layout parameters, possible empty, before loading template from source file
 				// subsequent loadLayoutDocument passes parameters to source reader
@@ -337,37 +337,22 @@ public class Component {
 				layoutParameters.reload(operators.getOperand(contentElement, Operator.PARAM));
 				operators.removeOperator(contentElement, Operator.PARAM);
 
-				templateDoc = loadLayoutDocument(templateLayoutPath, guardCount);
+				templateDoc = loadLayoutDocument(templateLayoutPath, guardCounter);
 				editables = new Editables(templateDoc);
-
-				FilePath descriptorFile = templateLayoutPath.cloneTo(FileType.XML);
-				ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
-				addAll(metaDescriptors, descriptor.getMetaDescriptors());
-				addAll(linkDescriptors, descriptor.getLinkDescriptors());
-				addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 			}
 
-			Element editableElement = null;
-			// load editable name from 'content' operator; if missing we should have editable name in template path
-			String editableName = operators.getOperand(contentElement, Operator.CONTENT);
-			if (editableName == null) {
-				if (templatePathEditableName == null) {
-					editableElement = templateDoc.getRoot();
-				} else {
-					editableName = templatePathEditableName;
+			String editableName = contentFragment.getEditableName(contentElement);
+			Element editableElement = editables.get(editableName);
+			if (editableElement == null) {
+				// it is legal to have empty template in which case consider entire template as editable
+				// anyway, if template document has children is mandatory to have editable element
+				if (templateDoc.getRoot().hasChildren()) {
+					throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, componentLayoutPath);
 				}
+				editableElement = templateDoc.getRoot();
 			}
 
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
-			if (editableElement == null) {
-				if (editableName == null) {
-					throw new WoodException("Invalid content layout |%s|. Missing editable name.", layoutPath);
-				}
-				editableElement = editables.get(editableName);
-				if (editableElement == null) {
-					throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, layoutPath);
-				}
-			}
 
 			// insert content element - and all its descendants into template document, before editable element
 			// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
@@ -566,6 +551,14 @@ public class Component {
 			array[i] = elist.item(i);
 		}
 		return array;
+	}
+
+	private void mergeDescriptor(FilePath layoutPath) {
+		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
+		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		addAll(metaDescriptors, descriptor.getMetaDescriptors());
+		addAll(linkDescriptors, descriptor.getLinkDescriptors());
+		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 	}
 
 	/**

@@ -61,6 +61,24 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
+	public void findByOperator_NotRootElement() {
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:editable='section-1'></section>" + //
+				"	<div>" + //
+				"		<section w:editable='section-2'></section>" + //
+				"	</div>" + //
+				"</body>";
+		Document doc = builder.parseXMLNS(xml);
+		Element div = doc.getByTag("div");
+
+		EList elist = operators.findByOperator(div, Operator.EDITABLE);
+		assertThat(elist, notNullValue());
+		assertThat(elist.size(), equalTo(1));
+		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-2"));
+	}
+
+	@Test
 	public void getByOperator_Document() {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
