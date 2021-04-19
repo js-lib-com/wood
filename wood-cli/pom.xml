@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.js-lib</groupId>
 		<artifactId>wood</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>${project.version}</version>
 	</parent>
 	<artifactId>wood-cli</artifactId>
 
@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>com.js-lib</groupId>
 			<artifactId>wood-build</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>

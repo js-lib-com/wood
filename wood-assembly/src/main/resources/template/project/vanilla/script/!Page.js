@@ -1,4 +1,0 @@
-Page = class {
-	constructor() {
-	}
-};
