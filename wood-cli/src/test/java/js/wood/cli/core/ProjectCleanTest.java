@@ -57,7 +57,7 @@ public class ProjectCleanTest {
 		// then
 		verify(files, times(1)).cleanDirectory(eq(buildDir), anyBoolean());
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
-		verify(console, times(1)).print(anyString(), eq(projectDir));
+		verify(console, times(1)).print(anyString(), eq(buildDir));
 	}
 
 	@Test

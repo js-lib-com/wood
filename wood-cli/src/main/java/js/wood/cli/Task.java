@@ -67,8 +67,13 @@ public abstract class Task implements Runnable {
 			t.printStackTrace(new PrintWriter(buffer));
 			console.error(buffer);
 		} else {
-			String message = t.getMessage();
-			console.error(message != null ? message : t.getClass());
+			StringBuilder message = new StringBuilder();
+			message.append(t.getClass().getSimpleName());
+			if (t.getMessage() != null) {
+				message.append(": ");
+				message.append(t.getMessage());
+			}
+			console.error(message.toString());
 		}
 	}
 

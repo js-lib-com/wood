@@ -10,18 +10,18 @@ import picocli.CommandLine.Option;
 
 @Command(name = "clean", description = "Clean build files from current working directory.")
 public class ProjectClean extends Task {
-	@Option(names = { "-t", "--target" }, description = "Build directory relative to working directory. Default: ${DEFAULT-VALUE}.", defaultValue = "site")
+	@Option(names = { "-t", "--target" }, description = "Build target directory, relative to project root.")
 	private String target;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deleted files.")
 	private boolean verbose;
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		if(target == null) {
+		if (target == null) {
 			target = config.get("build.target");
 		}
-		if(target == null) {
-			console.print("Missing build directory parameter.");
+		if (target == null) {
+			console.print("Missing build target parameter or build.target property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
@@ -29,8 +29,10 @@ public class ProjectClean extends Task {
 		Path projectDir = files.getProjectDir();
 		Path buildDir = projectDir.resolve(target);
 
-		console.print("Cleaning build files for project %s...", projectDir);
+		console.print("Cleaning build directory %s...", buildDir);
 		files.cleanDirectory(buildDir, verbose);
+		// files.cleanDirectory removes build directory; takes care to recreate it
+		files.createDirectory(buildDir);
 
 		return ExitCode.SUCCESS;
 	}
