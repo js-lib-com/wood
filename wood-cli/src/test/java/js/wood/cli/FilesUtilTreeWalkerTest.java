@@ -1,5 +1,6 @@
 package js.wood.cli;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -9,6 +10,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,13 +77,6 @@ public class FilesUtilTreeWalkerTest {
 		when(sourceDir.getFileSystem()).thenReturn(fileSystem);
 		when(provider.readAttributes(sourceDir, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS)).thenReturn(dirAttrs);
 		when(provider.newDirectoryStream(eq(sourceDir), any(DirectoryStream.Filter.class))).thenReturn(directoryStream(sourceFile));
-
-		when(targetDir.resolve(sourceFile)).thenReturn(targetFile);
-
-//		when(visitor.preVisitDirectory(sourceDir, dirAttrs)).thenReturn(FileVisitResult.TERMINATE);
-//		when(visitor.postVisitDirectory(eq(sourceDir), any(IOException.class))).thenReturn(FileVisitResult.TERMINATE);
-//		when(visitor.visitFile(sourceFile, fileAttrs)).thenReturn(FileVisitResult.TERMINATE);
-//		when(visitor.visitFileFailed(eq(sourceFile), any(IOException.class))).thenReturn(FileVisitResult.TERMINATE);
 		
 		files = new FilesUtil(fileSystem, console);
 	}
@@ -142,24 +137,37 @@ public class FilesUtilTreeWalkerTest {
 	@Test
 	public void copyFiles() throws IOException {
 		// given
+		Path relativeFile = mock(Path.class);
+		when(sourceDir.relativize(sourceFile)).thenReturn(relativeFile);
+		when(targetDir.resolve(relativeFile)).thenReturn(targetFile);
+		
+		Path parentDir = mock(Path.class);
+		when(targetFile.getParent()).thenReturn(parentDir);
 
 		// when
 		files.copyFiles(sourceDir, targetDir, true);
 
 		// then
+		verify(sourceDir, times(1)).relativize(sourceFile);
+		verify(targetDir, times(1)).resolve(relativeFile);
 		verify(provider, times(1)).copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-		verify(console, times(1)).print(anyString(), eq(sourceFile));
+		verify(console, times(1)).print(anyString(), eq(relativeFile));
 	}
 
 	@Test
 	public void copyFiles_GivenNotVebose_ThenNoConsolePrint() throws IOException {
 		// given
-
+		Path relativeFile = mock(Path.class);
+		when(sourceDir.relativize(sourceFile)).thenReturn(relativeFile);
+		when(targetDir.resolve(relativeFile)).thenReturn(targetFile);
+		
+		Path parentDir = mock(Path.class);
+		when(targetFile.getParent()).thenReturn(parentDir);
+		
 		// when
 		files.copyFiles(sourceDir, targetDir, false);
 
 		// then
-		verify(provider, times(1)).copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
 		verify(console, times(0)).print(anyString(), eq(sourceFile));
 	}
 

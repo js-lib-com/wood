@@ -15,6 +15,16 @@ public class ProjectClean extends Task {
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deleted files.")
 	private boolean verbose;
 
+	public ProjectClean() {
+		super();
+	}
+
+	public ProjectClean(Task parent, String target, boolean verbose) {
+		super(parent);
+		this.target = target;
+		this.verbose = verbose;
+	}
+
 	@Override
 	protected ExitCode exec() throws IOException {
 		if (target == null) {

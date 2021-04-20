@@ -201,10 +201,13 @@ public class FilesUtil {
 		walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Path relativeFile = sourceDir.relativize(file);
 				if (verbose) {
-					console.print("Deploy file %s.", file);
+					console.print("Copy file %s", relativeFile);
 				}
-				fileSystem.provider().copy(file, targetDir.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+				Path targetFile = targetDir.resolve(relativeFile);
+				createDirectoryIfNotExist(targetFile.getParent());
+				fileSystem.provider().copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
 				return FileVisitResult.CONTINUE;
 			}
 		});
@@ -257,5 +260,9 @@ public class FilesUtil {
 			}
 		});
 		return files;
+	}
+
+	public void setLastModifiedTime(Path file, FileTime time) throws IOException {
+		Files.setLastModifiedTime(file, time);
 	}
 }

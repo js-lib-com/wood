@@ -16,7 +16,7 @@ import picocli.CommandLine.Option;
 public class ProjectBuild extends Task {
 	@Option(names = { "-c", "--clean" }, description = "Clean build. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean clean;
-	@Option(names = { "-t", "--target" }, description = "Build directory relative to working directory.")
+	@Option(names = { "-t", "--target" }, description = "Build directory relative to project root.")
 	private String target;
 	@Option(names = { "-n", "--number" }, description = "Build number. Default: ${DEFAULT-VALUE}", defaultValue = "0", paramLabel = "number")
 	private int buildNumber;
@@ -31,27 +31,26 @@ public class ProjectBuild extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
-		Path projectDir = files.getProjectDir();
-		
-		if(target == null) {
+		if (target == null) {
 			target = config.get("build.target");
 		}
-		if(target == null) {
-			console.print("Missing build directory parameter.");
+		if (target == null) {
+			console.print("Missing build target parameter or build.target property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
-		
+
+		Path projectDir = files.getProjectDir();
 		Path buildDir = projectDir.resolve(target);
-		if(!files.exists(buildDir)) {
+		if (!files.exists(buildDir)) {
 			console.print("Missing build directory %s.", buildDir);
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
 
 		if (clean) {
-			console.print("Cleaning build files %s...", buildDir);
-			files.cleanDirectory(buildDir, verbose);
+			ProjectClean clean = new ProjectClean(this, target, verbose);
+			clean.exec();
 		}
 
 		builderConfig.setProjectDir(projectDir.toFile());
@@ -62,13 +61,8 @@ public class ProjectBuild extends Task {
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : files.getFileName(projectDir));
-		String contextName = config.get("runtime.context", files.getFileName(projectDir));
-		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
-
-		console.print("Deploying project %s...", projectDir);
-		files.copyFiles(buildDir, deployDir, verbose);
-		return ExitCode.SUCCESS;
+		ProjectDeploy deploy = new ProjectDeploy(this, target, runtime, verbose);
+		return deploy.exec();
 	}
 
 	// --------------------------------------------------------------------------------------------

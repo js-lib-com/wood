@@ -28,6 +28,12 @@ public abstract class Task implements Runnable {
 		this.files = new FilesUtil(FileSystems.getDefault(), this.console);
 	}
 
+	protected Task(Task parent) {
+		this.console = parent.console;
+		this.config = parent.config;
+		this.files = parent.files;
+	}
+
 	public void setConsole(Console console) {
 		this.console = console;
 	}

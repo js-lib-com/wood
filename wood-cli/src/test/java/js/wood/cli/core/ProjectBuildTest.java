@@ -46,11 +46,14 @@ public class ProjectBuildTest {
 	private Path buildDir;
 	@Mock
 	private Path deployDir;
+	@Mock
+	private Path webxmlFile;
 
 	private ProjectBuild task;
 
 	@Before
 	public void beforeTest() throws IOException {
+		when(files.getProjectDir()).thenReturn(projectDir);
 		when(projectDir.resolve("build")).thenReturn(buildDir);
 		when(builderConfig.createBuilder()).thenReturn(builder);
 
@@ -58,10 +61,10 @@ public class ProjectBuildTest {
 		when(config.get(eq("runtime.name"), anyString())).thenReturn("test");
 		when(config.get(eq("runtime.context"), anyString())).thenReturn("context");
 
-		when(files.getProjectDir()).thenReturn(projectDir);
 		when(files.getFileName(projectDir)).thenReturn("test");
 		when(files.exists(buildDir)).thenReturn(true);
 		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
+		when(deployDir.resolve("WEB-INF/web.xml")).thenReturn(webxmlFile);
 
 		task = new ProjectBuild();
 		task.setConsole(console);
@@ -120,6 +123,7 @@ public class ProjectBuildTest {
 		// given
 		when(config.get("runtime.name", "kids-cademy")).thenReturn("kids-cademy");
 		task.setRuntime("kids-cademy");
+		when(files.createDirectories("runtimes", "kids-cademy", "webapps", "context")).thenReturn(deployDir);
 		
 		// when
 		task.exec();
