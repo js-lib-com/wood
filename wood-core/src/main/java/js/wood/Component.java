@@ -18,7 +18,6 @@ import js.dom.w3c.DomException;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
-import js.wood.impl.ContentFragment;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.LayoutParameters;
@@ -338,7 +337,7 @@ public class Component {
 				operators.removeOperator(contentElement, Operator.PARAM);
 
 				templateDoc = loadLayoutDocument(templateLayoutPath, guardCounter);
-				editables = new Editables(templateDoc);
+				editables = new Editables(operators, templateDoc);
 			}
 
 			String editableName = contentFragment.getEditableName(contentElement);
@@ -352,7 +351,9 @@ public class Component {
 				editableElement = templateDoc.getRoot();
 			}
 
+			operators.removeOperator(editableElement, Operator.EDITABLE);
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
+			operators.removeOperator(contentElement, Operator.CONTENT);
 
 			// insert content element - and all its descendants into template document, before editable element
 			// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
@@ -588,9 +589,7 @@ public class Component {
 				}
 				String namespaceURI = attr.getNamespaceURI();
 				if (namespaceURI != null) {
-					if (!namespaceURI.equals(WOOD.NS)) {
-						element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
-					}
+					element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
 				} else {
 					String[] names = attr.getName().split(":");
 					element.setAttr(names[0], attr.getValue());
@@ -616,7 +615,8 @@ public class Component {
 	 * 
 	 * @author Iulian Rotaru
 	 */
-	private class Editables {
+	private static class Editables {
+		private final IOperatorsHandler operators;
 		/** Template document. */
 		private final Document template;
 
@@ -628,7 +628,8 @@ public class Component {
 		 * 
 		 * @param template template layout document.
 		 */
-		public Editables(Document template) {
+		public Editables(IOperatorsHandler operators, Document template) {
+			this.operators = operators;
 			this.template = template;
 		}
 
@@ -660,6 +661,79 @@ public class Component {
 			for (Element editable : editables.values()) {
 				editable.remove();
 			}
+		}
+	}
+
+	private static class ContentFragment {
+		private final IOperatorsHandler operators;
+		private final Element root;
+		/**
+		 * Template path as declared by {@link Operator#TEMPLATE} operator from root. It is the path to the template resolved by
+		 * this content fragment.
+		 */
+		private final String templatePath;
+		/**
+		 * Editable region name as declared by {@link Operator#TEMPLATE} operator from this content fragment root. This property
+		 * is optional with default to null. Anyway, if there is a single content element that do not have
+		 * {@link Operator#CONTENT} operator this value is mandatory.
+		 */
+		private final String templatePathEditableName;
+		private final List<Element> contentElements;
+
+		public ContentFragment(IOperatorsHandler operators, Element root) {
+			this.operators = operators;
+			this.root = root;
+
+			// a content fragment has one or more content elements identified by 'content' operator
+			// 'content' operator has the name for the editable area for which it provides content
+			// if there is a single content element is allowed to combine template path and editable name
+			// TEMPLATE_PATH # EDITABLE_NAME
+
+			String templatePath = operators.getOperand(root, Operator.TEMPLATE);
+			String templatePathEditableName = null;
+			int separatorPosition = templatePath.indexOf('#');
+			if (separatorPosition != -1) {
+				templatePathEditableName = templatePath.substring(separatorPosition + 1);
+				templatePath = templatePath.substring(0, separatorPosition);
+			}
+
+			this.templatePath = templatePath;
+			this.templatePathEditableName = templatePathEditableName;
+
+			// load all content elements from given content fragment
+			this.contentElements = new ArrayList<>();
+			for (Element contentElement : operators.findByOperator(root, Operator.CONTENT)) {
+				this.contentElements.add(contentElement);
+			}
+			if (this.contentElements.isEmpty()) {
+				this.contentElements.add(root);
+			}
+		}
+
+		public String getTemplatePath() {
+			return templatePath;
+		}
+
+		/**
+		 * 
+		 * @param contentElement content element from this content fragment.
+		 * @return
+		 */
+		public String getEditableName(Element contentElement) {
+			// load editable name from 'content' operator; if missing we should have editable name in the template operator
+			String editableName = operators.getOperand(contentElement, Operator.CONTENT);
+			if (editableName == null) {
+				editableName = templatePathEditableName;
+			}
+			return editableName;
+		}
+
+		public boolean isRoot() {
+			return root.getParent() == null;
+		}
+
+		public List<Element> getContentElements() {
+			return contentElements;
 		}
 	}
 

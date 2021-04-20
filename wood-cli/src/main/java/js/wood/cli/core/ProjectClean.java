@@ -17,6 +17,15 @@ public class ProjectClean extends Task {
 
 	@Override
 	protected ExitCode exec() throws IOException {
+		if(target == null) {
+			target = config.get("build.target");
+		}
+		if(target == null) {
+			console.print("Missing build directory parameter.");
+			console.print("Command abort.");
+			return ExitCode.ABORT;
+		}
+
 		Path projectDir = files.getProjectDir();
 		Path buildDir = projectDir.resolve(target);
 

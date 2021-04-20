@@ -10,7 +10,7 @@ import js.util.Params;
  * 
  * @author Iulian Rotaru
  */
-public class AttOperatorsHandler implements IOperatorsHandler {
+public class AttrOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");

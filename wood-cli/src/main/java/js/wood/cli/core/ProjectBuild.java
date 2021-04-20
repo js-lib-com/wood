@@ -36,6 +36,12 @@ public class ProjectBuild extends Task {
 		if(target == null) {
 			target = config.get("build.target");
 		}
+		if(target == null) {
+			console.print("Missing build directory parameter.");
+			console.print("Command abort.");
+			return ExitCode.ABORT;
+		}
+		
 		Path buildDir = projectDir.resolve(target);
 		if(!files.exists(buildDir)) {
 			console.print("Missing build directory %s.", buildDir);

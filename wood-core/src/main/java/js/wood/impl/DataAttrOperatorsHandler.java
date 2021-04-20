@@ -11,7 +11,7 @@ import js.util.Params;
  * 
  * @author Iulian Rotaru
  */
-public class DataAttrOperatorsHandler extends AttOperatorsHandler {
+public class DataAttrOperatorsHandler extends AttrOperatorsHandler {
 	/** Prefix for custom HTML attribute. */
 	private static final String DATA_PREFIX = "data-";
 

@@ -39,11 +39,12 @@ public class ProjectCleanTest {
 	@Before
 	public void beforeTest() {
 		when(files.getProjectDir()).thenReturn(projectDir);
-		when(projectDir.resolve((String) null)).thenReturn(buildDir);
+		when(projectDir.resolve("build")).thenReturn(buildDir);
 
 		task = new ProjectClean();
 		task.setConsole(console);
 		task.setFiles(files);
+		task.setTarget("build");
 	}
 
 	@Test

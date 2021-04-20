@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import js.util.Params;
 import js.util.Strings;
-import js.wood.impl.AttOperatorsHandler;
+import js.wood.impl.AttrOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
@@ -121,7 +121,7 @@ public class Project {
 			break;
 
 		case ATTR:
-			operatorsHandler = new AttOperatorsHandler();
+			operatorsHandler = new AttrOperatorsHandler();
 			break;
 
 		default:
