@@ -24,7 +24,19 @@
 	</fileSets>
 	<files>
 		<file>
+			<source>src/main/resources/LICENSE</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>src/main/resources/README.md</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
 			<source>../wood-cli/target/wood-cli-${project.version}.jar</source>
+			<outputDirectory>bin</outputDirectory>
+		</file>
+		<file>
+			<source>../wood-update/target/wood-update-${project.version}.jar</source>
 			<outputDirectory>bin</outputDirectory>
 		</file>
 	</files>

@@ -13,7 +13,7 @@ public class WoodSetup extends Task {
 	protected ExitCode exec() throws Exception {
 		console.print("WOOD setup.");
 
-		Path woodHome = files.getPath(getWoodHome());
+		Path woodHome = files.getPath(getHome());
 		Properties properties = config.getGlobalProperties();
 		properties.put("wood.home", woodHome.toString());
 		properties.put("repository.dir", woodHome.resolve("repository").toString());

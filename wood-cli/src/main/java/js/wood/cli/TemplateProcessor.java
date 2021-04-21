@@ -99,7 +99,7 @@ public class TemplateProcessor {
 	}
 
 	private static ZipInputStream template(TemplateType type, String name) throws FileNotFoundException {
-		File woodHomeDir = new File(Task.getWoodHome());
+		File woodHomeDir = new File(Task.getHome());
 		File templateFile = new File(woodHomeDir, Strings.concat("template", File.separatorChar, type, File.separatorChar, name, ".zip"));
 		return new ZipInputStream(new BufferedInputStream(new FileInputStream(templateFile)));
 	}

@@ -1,22 +1,13 @@
 package js.wood.cli.core;
 
-import static java.lang.String.format;
-
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import js.format.FileSize;
 import js.wood.cli.ExitCode;
@@ -31,13 +22,14 @@ public class WoodUpdate extends Task {
 	private static final URI DISTRIBUTION_URI = URI.create("http://maven.js-lib.com/com/js-lib/wood-assembly/");
 	private static final Pattern ARCHIVE_DIRECTORY_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d*(-[a-z0-9]+)?/$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern ARCHIVE_FILE_PATTERN = Pattern.compile("^wood-assembly.+\\.zip$");
+	private static final Pattern UPDATER_FILE_PATTERN = Pattern.compile("^wood-update.+\\.jar$");
 
 	@Option(names = { "-f", "--force" }, description = "Force update regardless release date.")
 	private boolean force;
+	@Option(names = { "-y", "--yes" }, description = "Auto-confirm update.")
+	private boolean yes;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about processed files.")
 	private boolean verbose;
-
-	private WebsUtil webs = new WebsUtil();
 
 	@Override
 	protected ExitCode exec() throws Exception {
@@ -59,9 +51,17 @@ public class WoodUpdate extends Task {
 			return ExitCode.ABORT;
 		}
 
-		Path woodHome = files.getPath(getWoodHome());
+		Path homeDir = files.getPath(getHome());
+		Path binariesDir = homeDir.resolve("bin");
+		Path updaterJar = files.getFileByNamePattern(binariesDir, UPDATER_FILE_PATTERN);
+		if (updaterJar == null) {
+			console.print("Corrupt WOOD install. Missing updater.");
+			console.print("Command abort.");
+			return ExitCode.ABORT;
+		}
+
 		// uses wood.properties file to detect last update time
-		Path propertiesFile = woodHome.resolve("bin/wood.properties");
+		Path propertiesFile = homeDir.resolve("bin/wood.properties");
 		if (files.exists(propertiesFile)) {
 			if (!force && !assemblyFile.getModificationTime().isAfter(files.getModificationTime(propertiesFile))) {
 				console.print("Current WOOD install is updated.");
@@ -71,67 +71,29 @@ public class WoodUpdate extends Task {
 		}
 
 		console.print("Updating WOOD install from %s...", assemblyFile.getName());
-		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
+		if (!yes && !console.confirm("Please confirm: yes | [no]", "yes")) {
 			console.print("User cancel.");
 			return ExitCode.CANCEL;
 		}
 
-		console.print("Current WOOD home: %s", woodHome);
+		console.print("Downloading WOOD assembly %s...", assemblyFile.getName());
+		Path downloadFile = homeDir.resolve(assemblyFile.getName());
+		webs.download(assemblyFile, downloadFile, verbose);
 
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-		try (CloseableHttpClient client = httpClientBuilder.build()) {
-			HttpGet httpGet = new HttpGet(assemblyFile.getURI());
-			try (CloseableHttpResponse response = client.execute(httpGet)) {
-				if (response.getStatusLine().getStatusCode() != 200) {
-					throw new IOException(format("Fail to download %s.", assemblyFile.getURI()));
-				}
-
-				try (ZipInputStream zipInputStream = new ZipInputStream(response.getEntity().getContent())) {
-					ZipEntry zipEntry;
-					while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-						String fileName = assemblyFile(zipEntry.getName());
-						if (fileName.isEmpty() || fileName.endsWith("/")) {
-							continue;
-						}
-
-						if (fileName.equals("bin/wood.properties")) {
-							mergeProperties(zipInputStream, propertiesFile);
-							continue;
-						}
-
-						copy(zipInputStream, woodHome.resolve(fileName));
-					}
-				}
-			}
+		console.print("Download complete. Start WOOD install update.");
+		List<String> command = new ArrayList<>();
+		command.add("java");
+		command.add("-cp");
+		command.add(updaterJar.toAbsolutePath().toString());
+		command.add("js.wood.update.Main");
+		if (verbose) {
+			command.add("--verbose");
 		}
+
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.directory(files.getWorkingDir().toFile()).inheritIO().start();
 
 		return ExitCode.SUCCESS;
-	}
-
-	private void mergeProperties(ZipInputStream zipInputStream, Path propertiesFile) throws IOException {
-		if (verbose) {
-			console.print("Download file %s", propertiesFile);
-			console.print("Merge global properties %s", propertiesFile);
-		}
-		Properties assemblyProperties = new Properties();
-		assemblyProperties.load(zipInputStream);
-		config.updateGlobalProperties(assemblyProperties);
-		config.getGlobalProperties().store(files.getOutputStream(propertiesFile), null);
-	}
-
-	private void copy(ZipInputStream zipInputStream, Path outputFile) throws IOException {
-		if (verbose) {
-			console.print("Download file %s", outputFile);
-		}
-		files.createDirectories(outputFile.getParent().toString());
-
-		byte[] buffer = new byte[2048];
-		try (BufferedOutputStream fileOutputStream = new BufferedOutputStream(files.getOutputStream(outputFile), buffer.length)) {
-			int len;
-			while ((len = zipInputStream.read(buffer)) > 0) {
-				fileOutputStream.write(buffer, 0, len);
-			}
-		}
 	}
 
 	private WebsUtil.File latestVersion(URI uri, Pattern filePattern) throws IOException, URISyntaxException {
@@ -152,10 +114,5 @@ public class WoodUpdate extends Task {
 			}
 		}
 		return mostRecentFile;
-	}
-
-	private String assemblyFile(String zipEntityName) {
-		int index = zipEntityName.indexOf('/') + 1;
-		return zipEntityName.substring(index);
 	}
 }

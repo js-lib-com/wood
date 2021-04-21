@@ -1,9 +1,15 @@
 package js.wood.cli;
 
+import static java.lang.String.format;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -13,6 +19,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import js.dom.Document;
@@ -21,8 +30,18 @@ import js.dom.Element;
 import js.util.Classes;
 
 public class WebsUtil {
+	private final Console console;
+
 	private HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 	private DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+
+	public WebsUtil() {
+		this.console = null;
+	}
+
+	public WebsUtil(Console console) {
+		this.console = console;
+	}
 
 	public Iterable<File> index(URI uri, Pattern fileNamePattern) throws IOException, URISyntaxException {
 		URL indexPageURL = uri.toURL();
@@ -49,6 +68,31 @@ public class WebsUtil {
 		}
 
 		return files;
+	}
+
+	public void download(WebsUtil.File remoteFile, Path localFile, boolean verbose) throws IOException {
+		try (CloseableHttpClient client = httpClientBuilder.build()) {
+			HttpGet httpGet = new HttpGet(remoteFile.getURI());
+			try (CloseableHttpResponse response = client.execute(httpGet)) {
+				if (response.getStatusLine().getStatusCode() != 200) {
+					throw new IOException(format("Fail to download %s.", remoteFile.getURI()));
+				}
+
+				byte[] buffer = new byte[65535];
+				try (BufferedInputStream inputStream = new BufferedInputStream(response.getEntity().getContent()); BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(localFile), buffer.length)) {
+					int len;
+					while ((len = inputStream.read(buffer)) > 0) {
+						outputStream.write(buffer, 0, len);
+						if (verbose) {
+							console.print('.');
+						}
+					}
+					if (verbose) {
+						console.crlf();
+					}
+				}
+			}
+		}
 	}
 
 	private static final Pattern FILE_SIZE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d+)?)(K|M|G|T)?$", Pattern.CASE_INSENSITIVE);

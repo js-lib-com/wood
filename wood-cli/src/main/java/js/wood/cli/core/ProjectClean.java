@@ -41,8 +41,6 @@ public class ProjectClean extends Task {
 
 		console.print("Cleaning build directory %s...", buildDir);
 		files.cleanDirectory(buildDir, verbose);
-		// files.cleanDirectory removes build directory; takes care to recreate it
-		files.createDirectory(buildDir);
 
 		return ExitCode.SUCCESS;
 	}

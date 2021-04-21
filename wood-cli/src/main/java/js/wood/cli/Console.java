@@ -10,6 +10,10 @@ public class Console {
 		System.out.println();
 	}
 
+	public void print(char c) {
+		System.out.print(c);
+	}
+
 	public void print(Object object) {
 		System.out.println(object.toString());
 	}

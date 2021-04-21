@@ -19,7 +19,10 @@ import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import js.lang.BugError;
 import js.util.Params;
@@ -118,11 +121,15 @@ public class FilesUtil {
 		return dir;
 	}
 
-	public void cleanDirectory(Path dir, boolean verbose) throws IOException {
+	public void cleanDirectory(Path rootDir, boolean verbose, Path... excludes) throws IOException {
+		List<Path> excludesList = Arrays.asList(excludes);
 		// walk file tree is depth-first so that the most inner files and directories are removed first
-		walkFileTree(dir, new SimpleFileVisitor<Path>() {
+		walkFileTree(rootDir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (excludesList.contains(file)) {
+					return FileVisitResult.CONTINUE;
+				}
 				if (verbose) {
 					console.print("Delete file %s.", file);
 				}
@@ -134,6 +141,9 @@ public class FilesUtil {
 			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 				if (exc != null) {
 					throw exc;
+				}
+				if (rootDir.equals(dir)) {
+					return FileVisitResult.CONTINUE;
 				}
 				if (verbose) {
 					console.print("Delete directory %s.", dir);
@@ -223,6 +233,27 @@ public class FilesUtil {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (hasExtension(file, extension)) {
+					foundFile.path = file;
+					return FileVisitResult.TERMINATE;
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return foundFile.path;
+	}
+
+	public Path getFileByNamePattern(Path dir, Pattern pattern) throws IOException {
+		class FoundFile {
+			Path path = null;
+		}
+		final FoundFile foundFile = new FoundFile();
+
+		walkFileTree(dir, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				String fileName = file.getFileName().toString();
+				Matcher matcher = pattern.matcher(fileName);
+				if (matcher.find()) {
 					foundFile.path = file;
 					return FileVisitResult.TERMINATE;
 				}

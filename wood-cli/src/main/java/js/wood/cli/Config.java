@@ -34,7 +34,7 @@ public class Config {
 		this.globalProperties = globalProperties;
 		this.projectProperties = projectProperties;
 
-		Path woodDir = Paths.get(Task.getWoodHome());
+		Path woodDir = Paths.get(Task.getHome());
 		Path propertiesFile = woodDir.resolve("bin/wood.properties");
 		if (Files.exists(propertiesFile)) {
 			try (Reader reader = Files.newBufferedReader(propertiesFile)) {

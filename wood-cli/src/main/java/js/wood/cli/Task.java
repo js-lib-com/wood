@@ -22,16 +22,19 @@ public abstract class Task implements Runnable {
 	protected Console console;
 	protected Config config;
 	protected FilesUtil files;
+	protected WebsUtil webs;
 
 	protected Task() {
 		this.console = new Console();
 		this.files = new FilesUtil(FileSystems.getDefault(), this.console);
+		this.webs = new WebsUtil(this.console);
 	}
 
 	protected Task(Task parent) {
 		this.console = parent.console;
 		this.config = parent.config;
 		this.files = parent.files;
+		this.webs = parent.webs;
 	}
 
 	public void setConsole(Console console) {
@@ -44,6 +47,10 @@ public abstract class Task implements Runnable {
 
 	public void setFiles(FilesUtil files) {
 		this.files = files;
+	}
+
+	public void setWebs(WebsUtil webs) {
+		this.webs = webs;
 	}
 
 	@Override
@@ -86,7 +93,7 @@ public abstract class Task implements Runnable {
 	// D:\java\wood-1.0\bin\wood-cli-1.0.4-SNAPSHOT.jar
 	private static final Pattern JAR_PATH_PATTERN = Pattern.compile("^(.+)[\\\\/]bin[\\\\/].+\\.jar$");
 
-	public static String getWoodHome() {
+	public static String getHome() {
 		File jarFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		Matcher matcher = JAR_PATH_PATTERN.matcher(jarFile.getAbsolutePath());
 		if (!matcher.find()) {

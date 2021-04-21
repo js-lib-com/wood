@@ -104,8 +104,7 @@ public class FilesUtilTreeWalkerTest {
 
 		// then
 		verify(provider, times(1)).delete(sourceFile);
-		verify(provider, times(1)).delete(sourceDir);
-		verify(console, times(1)).print(anyString(), eq(sourceDir));
+		verify(provider, times(0)).delete(sourceDir);
 		verify(console, times(1)).print(anyString(), eq(sourceFile));
 	}
 
@@ -117,9 +116,6 @@ public class FilesUtilTreeWalkerTest {
 		files.cleanDirectory(sourceDir, false);
 
 		// then
-		verify(provider, times(1)).delete(sourceFile);
-		verify(provider, times(1)).delete(sourceDir);
-		verify(console, times(0)).print(anyString(), eq(sourceDir));
 		verify(console, times(0)).print(anyString(), eq(sourceFile));
 	}
 
