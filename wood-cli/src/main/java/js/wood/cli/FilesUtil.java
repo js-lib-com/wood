@@ -1,10 +1,15 @@
 package js.wood.cli;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemException;
@@ -95,8 +100,10 @@ public class FilesUtil {
 	public Path createDirectories(String first, String... more) throws IOException {
 		Params.notNullOrEmpty(first, "First path component");
 		Params.notNull(more, "More path components");
+		return createDirectories(fileSystem.getPath(first, more));
+	}
 
-		Path dir = fileSystem.getPath(first, more);
+	public Path createDirectories(Path dir) throws IOException {
 		if (exists(dir)) {
 			return dir;
 		}
@@ -187,6 +194,10 @@ public class FilesUtil {
 		return new InputStreamReader(fileSystem.provider().newInputStream(file), "UTF-8");
 	}
 
+	public Writer getWriter(Path file) throws IOException {
+		return new OutputStreamWriter(fileSystem.provider().newOutputStream(file), "UTF-8");
+	}
+
 	public InputStream getInputStream(Path file) throws IOException {
 		return fileSystem.provider().newInputStream(file);
 	}
@@ -205,6 +216,38 @@ public class FilesUtil {
 
 	public void walkFileTree(Path start, FileVisitor<Path> visitor) throws IOException {
 		Files.walkFileTree(start, visitor);
+	}
+
+	public void copy(String source, Path targetFile) throws IOException {
+		createDirectories(targetFile.getParent());
+		try (Reader reader = new StringReader(source); Writer writer = getWriter(targetFile)) {
+			char[] buffer = new char[1024];
+			int length;
+			while ((length = reader.read(buffer, 0, buffer.length)) != -1) {
+				writer.write(buffer, 0, length);
+			}
+		}
+	}
+
+	public void copy(Reader reader, Writer writer) throws IOException {
+		try (BufferedReader bufferedReader = new BufferedReader(reader); BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+			char[] buffer = new char[1024];
+			int length;
+			while ((length = bufferedReader.read(buffer, 0, buffer.length)) != -1) {
+				bufferedWriter.write(buffer, 0, length);
+			}
+		}
+	}
+
+	public void copy(InputStream inputStream, Path targetFile) throws IOException {
+		createDirectories(targetFile.getParent());
+		try (OutputStream outputStream = getOutputStream(targetFile)) {
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
+				outputStream.write(buffer, 0, length);
+			}
+		}
 	}
 
 	public void copyFiles(Path sourceDir, Path targetDir, boolean verbose) throws IOException {

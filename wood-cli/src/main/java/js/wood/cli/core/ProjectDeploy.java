@@ -2,8 +2,11 @@ package js.wood.cli.core;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
+import java.util.HashMap;
+import java.util.Map;
 
+import js.io.VariablesWriter;
+import js.util.Classes;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
@@ -56,7 +59,14 @@ public class ProjectDeploy extends Task {
 		console.print("Deploying project %s...", projectDir);
 		files.copyFiles(buildDir, deployDir, verbose);
 
-		files.setLastModifiedTime(deployDir.resolve("WEB-INF/web.xml"), FileTime.fromMillis(System.currentTimeMillis()));
+		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
+		files.createDirectories(webxmlFile.getParent());
+
+		Map<String, String> variables = new HashMap<>();
+		variables.put("display-name", config.get("project.display", projectName));
+		variables.put("description", config.get("project.description", projectName));
+		files.copy(Classes.getResourceAsReader("WEB-INF/empty-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+
 		return ExitCode.SUCCESS;
 	}
 }
