@@ -25,6 +25,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -110,7 +111,7 @@ public class FileSystemWatcherTest {
 		when(dir.listFiles()).thenReturn(new File[] { childDir, childFile });
 
 		List<File> files = new ArrayList<>();
-		FileSystemWatcher.walkFileTree(dir, file -> files.add(file));
+		FileSystemWatcher.walkFileTree(dir, Collections.emptyList(), file -> files.add(file));
 
 		assertThat(files, hasSize(2));
 		assertThat(files, contains(dir, childDir));
@@ -143,7 +144,7 @@ public class FileSystemWatcherTest {
 
 		watcher.setRunning(true);
 		watcher.run();
-		
+
 		verify(eventsManager, times(1)).pushEvent(any(Event.class));
 	}
 
