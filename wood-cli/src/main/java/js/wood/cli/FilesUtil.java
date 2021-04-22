@@ -339,4 +339,19 @@ public class FilesUtil {
 	public void setLastModifiedTime(Path file, FileTime time) throws IOException {
 		Files.setLastModifiedTime(file, time);
 	}
+
+	public boolean isXML(Path file, String... roots) throws IOException {
+		try (BufferedReader reader = new BufferedReader(getReader(file))) {
+			String line = reader.readLine();
+			if (line.startsWith("<?")) {
+				line = reader.readLine();
+			}
+			for (String root : roots) {
+				if (line.startsWith(Strings.concat('<', root, '>'))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

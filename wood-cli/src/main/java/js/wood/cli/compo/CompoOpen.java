@@ -8,9 +8,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import js.dom.Document;
-import js.dom.DocumentBuilder;
-import js.util.Classes;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
@@ -31,7 +28,6 @@ public class CompoOpen extends Task {
 	@Parameters(index = "0", description = "Component name, path relative to project root. Ex: res/page/home", converter = CompoNameConverter.class)
 	private CompoName name;
 
-	private DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 	private Desktop desktop = Desktop.getDesktop();
 
 	@Override
@@ -50,25 +46,18 @@ public class CompoOpen extends Task {
 		String compoName = files.getFileName(compoDir);
 
 		// WOOD project naming convention: descriptor file basename is the same as component directory
-		Path descriptorFile = compoDir.resolve(files.getFileName(compoDir) + ".xml");
-		if (!files.exists(descriptorFile)) {
-			console.print("Missing component descriptor %s.", descriptorFile);
-			console.print("Command abort.");
-			return ExitCode.ABORT;
+		Path descriptorFile = compoDir.resolve(compoName + ".xml");
+		boolean page = files.exists(descriptorFile) && files.isXML(descriptorFile, "page");
+		if (preview || !page) {
+			CompoPreview preview = new CompoPreview(this, desktop, name);
+			return preview.exec();
 		}
-		Document descriptorDoc = documentBuilder.loadXML(descriptorFile.toFile());
 
 		console.print("Opening component %s...", name);
 		int port = config.get("runtime.port", int.class);
 		String context = config.get("runtime.context", files.getFileName(projectDir));
-		if (!preview && descriptorDoc.getRoot().getTag().equals("page")) {
-			// WOOD project naming convention: layout file basename is the same as component directory
-			name = new CompoName(compoName + ".htm");
-		} else {
-			context += "-preview";
-		}
-
-		desktop.browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
+		// WOOD project naming convention: layout file basename is the same as component directory
+		desktop.browse(new URI(format("http://localhost:%d/%s/%s.htm", port, context, compoName)));
 
 		return ExitCode.SUCCESS;
 	}
@@ -86,10 +75,6 @@ public class CompoOpen extends Task {
 
 	void setPreview(boolean preview) {
 		this.preview = preview;
-	}
-
-	void setDocumentBuilder(DocumentBuilder documentBuilder) {
-		this.documentBuilder = documentBuilder;
 	}
 
 	void setDesktop(Desktop desktop) {

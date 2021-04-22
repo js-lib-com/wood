@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
+import js.io.VariablesWriter;
+import js.util.Classes;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import picocli.CommandLine.Command;
@@ -26,6 +30,16 @@ public class CompoPreview extends Task {
 
 	private Desktop desktop = Desktop.getDesktop();
 
+	public CompoPreview() {
+		super();
+	}
+
+	public CompoPreview(Task parent, Desktop desktop, CompoName name) {
+		super(parent);
+		this.desktop = desktop;
+		this.name = name;
+	}
+
 	@Override
 	protected ExitCode exec() throws IOException, URISyntaxException {
 		if (!name.isValid()) {
@@ -40,10 +54,29 @@ public class CompoPreview extends Task {
 			return ExitCode.ABORT;
 		}
 
+		String projectName = files.getFileName(projectDir);
+		String runtimeName = config.get("runtime.name", projectName);
+		String contextName = config.get("runtime.context", projectName) + "-preview";
+		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
+
+		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
+		if (!files.exists(webxmlFile)) {
+			files.createDirectories(webxmlFile.getParent());
+
+			Map<String, String> variables = new HashMap<>();
+			variables.put("display-name", config.get("project.display", projectName));
+			variables.put("description", config.get("project.description", projectName));
+			variables.put("project-dir", projectDir.toAbsolutePath().toString());
+			files.copy(Classes.getResourceAsReader("WEB-INF/preview-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+
+			console.print("Created missing preview configuration.");
+			console.print("Please allow a moment for runtime to updates.");
+			return ExitCode.ABORT;
+		}
+
 		console.print("Opening component preview %s...", name);
 		int port = config.get("runtime.port", int.class);
-		String context = config.get("runtime.context", files.getFileName(projectDir)) + "-preview";
-		desktop.browse(new URI(format("http://localhost:%d/%s/%s", port, context, name)));
+		desktop.browse(new URI(format("http://localhost:%d/%s/%s", port, contextName, name)));
 
 		return ExitCode.SUCCESS;
 	}

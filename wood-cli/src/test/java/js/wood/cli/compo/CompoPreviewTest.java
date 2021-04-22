@@ -3,6 +3,7 @@ package js.wood.cli.compo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.when;
 
 import java.awt.Desktop;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -46,6 +49,11 @@ public class CompoPreviewTest {
 	@Mock
 	private Path compoDir;
 	@Mock
+	private Path deployDir;
+	@Mock
+	private Path webxmlFile;
+	
+	@Mock
 	private CompoName compoName;
 	@Mock
 	private Desktop desktop;
@@ -55,12 +63,21 @@ public class CompoPreviewTest {
 	@Before
 	public void beforeTest() throws IOException {
 		when(commandSpec.commandLine()).thenReturn(mock(CommandLine.class));
+		when(config.get("runtime.home")).thenReturn("runtimes");
 		when(config.get("runtime.port", int.class)).thenReturn(8080);
-		when(config.get("runtime.context", (String) null)).thenReturn("app");
+		when(config.get("runtime.name", "test")).thenReturn("test");
+		when(config.get("runtime.context", "test")).thenReturn("app");
 
 		when(files.getProjectDir()).thenReturn(projectDir);
+		when(files.getFileName(projectDir)).thenReturn("test");
+		when(projectDir.toAbsolutePath()).thenReturn(projectDir);
+		when(projectDir.toString()).thenReturn("project/dir");
 		when(projectDir.resolve(anyString())).thenReturn(compoDir);
 		when(files.exists(compoDir)).thenReturn(true);
+
+		when(files.createDirectories("runtimes", "test", "webapps", "app-preview")).thenReturn(deployDir);
+		when(deployDir.resolve("WEB-INF/web.xml")).thenReturn(webxmlFile);
+		when(files.exists(webxmlFile)).thenReturn(true);
 
 		when(compoName.isValid()).thenReturn(true);
 		when(compoName.path()).thenReturn("res/page/about");
@@ -112,5 +129,18 @@ public class CompoPreviewTest {
 		assertThat(exitCode, equalTo(ExitCode.ABORT));
 		verify(files, times(0)).cleanDirectory(compoDir, false);
 		verify(console, times(1)).print("Command abort.");
+	}
+
+	@Test
+	public void GivenMissingWebXml_ThenCreateItAndAbort() throws IOException, URISyntaxException {
+		// given
+		when(files.exists(webxmlFile)).thenReturn(false);
+
+		// when
+		ExitCode exitCode = task.exec();
+
+		// then
+		assertThat(exitCode, equalTo(ExitCode.ABORT));
+		verify(files, times(1)).copy(any(Reader.class), any(Writer.class));
 	}
 }
