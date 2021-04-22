@@ -10,16 +10,16 @@ import js.lang.Event;
  * @since 1.0
  */
 public class FileSystemEvent implements Event {
-	private final String file;
 	private final String action;
+	private final String file;
 
-	public FileSystemEvent(String file, String action) {
-		this.file = file;
+	public FileSystemEvent(String action, String file) {
 		this.action = action;
+		this.file = file;
 	}
 
 	@Override
 	public String toString() {
-		return "FileSystemEvent [file=" + file + ", action=" + action + "]";
+		return "FileSystemEvent [action=" + action + ", file=" + file + "]";
 	}
 }

@@ -4,9 +4,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,16 +15,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.ArrayList;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -44,6 +43,13 @@ import js.lang.Event;
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemWatcherTest {
 	@Mock
+	private FileSystem fileSystem;
+	@Mock
+	private FileSystemProvider provider;
+	@Mock
+	private BasicFileAttributes attributes;
+
+	@Mock
 	private WatchService watchService;
 	@Mock
 	private Thread thread;
@@ -54,6 +60,7 @@ public class FileSystemWatcherTest {
 
 	@Before
 	public void beforeTest() throws IOException {
+		when(fileSystem.provider()).thenReturn(provider);
 		watcher = new FileSystemWatcher(watchService, thread, eventsManager);
 	}
 
@@ -100,29 +107,16 @@ public class FileSystemWatcherTest {
 		watcher.contextDestroyed(mock(ServletContextEvent.class));
 	}
 
-	@Test
-	public void walkFileTree() {
-		File childDir = mock(File.class);
-		when(childDir.isDirectory()).thenReturn(true);
-		File childFile = mock(File.class);
-
-		File dir = mock(File.class);
-		when(dir.isDirectory()).thenReturn(true);
-		when(dir.listFiles()).thenReturn(new File[] { childDir, childFile });
-
-		List<File> files = new ArrayList<>();
-		FileSystemWatcher.walkFileTree(dir, Collections.emptyList(), file -> files.add(file));
-
-		assertThat(files, hasSize(2));
-		assertThat(files, contains(dir, childDir));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
-	public void run() throws InterruptedException {
+	public void run() throws InterruptedException, IOException {
 		WatchKey watchKey = mock(WatchKey.class);
 
 		Path dir = mock(Path.class);
+		Path path = mock(Path.class);
+		when(dir.resolve(dir)).thenReturn(path);
+		when(path.getFileSystem()).thenReturn(fileSystem);
+		when(provider.readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS)).thenReturn(attributes);
 		watcher.getKeyPaths().put(watchKey, dir);
 
 		// reset running flag after first take() to force running loop end

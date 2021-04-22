@@ -5,30 +5,31 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import js.lang.Callback;
 import js.log.Log;
 import js.log.LogFactory;
+import js.util.Strings;
 
 /**
  * File system watcher for changes on project files. All change events are included: creation, modifications and deletions. This
@@ -42,8 +43,8 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
 	/** Java serialization version. */
 	private static final Log log = LogFactory.getLog(FileSystemWatcher.class);
 
-	private static final String PROJECT_PROPERTIES_FILE = ".project.properties";
-	private static final String BUILD_DIR_PROPERTY = "build.target";
+	private static final String EXCLUDE_DIRS_PARAM = "EXCLUDE_DIRS";
+
 	private static final long TIMESTAMP_THRESHOLD = 500;
 
 	/** File system watch service. */
@@ -59,6 +60,8 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
 	/** Manager for client blocking events queues. Watch events are send to this manager for push to connected clients. */
 	private final EventsManager eventsManager;
 
+	private final List<Path> excludes = new ArrayList<>();
+
 	/** Construct file system watcher. */
 	public FileSystemWatcher() throws IOException {
 		log.trace("FileSystemWatcher()");
@@ -69,42 +72,39 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
 
 	/** Register all project directories and start watch service events loop. */
 	@Override
-	public void contextInitialized(ServletContextEvent sce) {
+	public void contextInitialized(ServletContextEvent contextEvent) {
 		log.trace("contextInitialized(ServletContextEvent)");
-		File projectRoot = new File(sce.getServletContext().getInitParameter(PreviewServlet.PROJECT_DIR_PARAM));
+		ServletContext servletContext = contextEvent.getServletContext();
 
-		List<File> excludes = new ArrayList<>();
-		File propertiesFile = new File(projectRoot, PROJECT_PROPERTIES_FILE);
-		if (propertiesFile.exists()) {
-			Properties properties = new Properties();
-			try (Reader reader = new FileReader(propertiesFile)) {
-				properties.load(reader);
-				excludes.add(new File(projectRoot, properties.getProperty(BUILD_DIR_PROPERTY)));
-			} catch (IOException e) {
-				log.error(e);
+		Path projectDir = Paths.get(servletContext.getInitParameter(PreviewServlet.PROJECT_DIR_PARAM));
+		String excludeDirsParam = servletContext.getInitParameter(EXCLUDE_DIRS_PARAM);
+		if (excludeDirsParam != null) {
+			for (String excludeDir : Strings.split(excludeDirsParam, ',')) {
+				excludes.add(projectDir.resolve(excludeDir));
 			}
 		}
 
-		walkFileTree(projectRoot, excludes, file -> register(file.toPath()));
+		try {
+			Files.walkFileTree(projectDir, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (isExcluded(dir)) {
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+					register(dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			log.error(e);
+		}
 
 		running.set(true);
 		thread.start();
 	}
 
-	static void walkFileTree(File dir, List<File> excludes, Callback<File> handler) {
-		if (!dir.isDirectory()) {
-			return;
-		}
-		handler.handle(dir);
-		File[] files = dir.listFiles();
-		if (files == null) {
-			return;
-		}
-		for (File file : files) {
-			if (file.isDirectory() && !excludes.contains(file)) {
-				walkFileTree(file, excludes, handler);
-			}
-		}
+	private boolean isExcluded(Path dir) {
+		return excludes.contains(dir) || dir.getFileName().toString().startsWith(".");
 	}
 
 	/** Stop watch service events loop and unregister directories. */
@@ -145,15 +145,20 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
 					Kind<?> kind = watchEvent.kind();
 					WatchEvent<Path> event = cast(watchEvent);
 
+					Path path = dir.resolve(event.context());
+					if (Files.isDirectory(path, NOFOLLOW_LINKS)) {
+						if (isExcluded(path)) {
+							continue;
+						}
+						if (kind == ENTRY_CREATE) {
+							register(path);
+						}
+					}
+
 					long currentTimestamp = System.currentTimeMillis();
 					if (currentTimestamp - lastEventTimestamp > TIMESTAMP_THRESHOLD) {
 						eventsManager.pushEvent(new FileSystemEvent(kind.name(), event.context().toString()));
 						lastEventTimestamp = currentTimestamp;
-					}
-
-					Path path = dir.resolve(event.context());
-					if (kind == ENTRY_CREATE && Files.isDirectory(path, NOFOLLOW_LINKS)) {
-						register(path);
 					}
 				}
 			}
