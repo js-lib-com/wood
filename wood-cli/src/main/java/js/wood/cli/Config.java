@@ -1,7 +1,5 @@
 package js.wood.cli;
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -28,11 +26,20 @@ public class Config {
 
 	private final Properties globalProperties;
 	private final Properties projectProperties;
+	private final File projectPropertiesFile;
 
 	public Config(Properties globalProperties, Properties projectProperties) throws IOException {
 		this.converter = ConverterRegistry.getConverter();
 		this.globalProperties = globalProperties;
 		this.projectProperties = projectProperties;
+
+		File workingDir = Paths.get("").toAbsolutePath().toFile();
+		this.projectPropertiesFile = new File(workingDir, PROJECT_PROPERTIES_FILE);
+		if (this.projectPropertiesFile.exists()) {
+			try (Reader reader = new FileReader(projectPropertiesFile)) {
+				projectProperties.load(reader);
+			}
+		}
 
 		Path woodDir = Paths.get(Task.getHome());
 		Path propertiesFile = woodDir.resolve("bin/wood.properties");
@@ -45,7 +52,7 @@ public class Config {
 
 	public SortedMap<String, String> getProperties(boolean includeGlobal) throws IOException {
 		SortedMap<String, String> properties = new TreeMap<>();
-		for (Map.Entry<Object, Object> entry : projectProperties().entrySet()) {
+		for (Map.Entry<Object, Object> entry : projectProperties.entrySet()) {
 			properties.put(entry.getKey().toString(), entry.getValue().toString());
 		}
 		if (includeGlobal) {
@@ -65,21 +72,27 @@ public class Config {
 	}
 
 	public void set(String key, Object value) throws IOException {
-		projectProperties().put(key, converter.asString(value));
-		try (Writer writer = new FileWriter(projectPropertiesFile())) {
-			projectProperties().store(writer, "project properties");
+		if (!projectPropertiesFile.exists()) {
+			throw new BugError("Attempt to alter proporties outside project.");
+		}
+		projectProperties.put(key, converter.asString(value));
+		try (Writer writer = new FileWriter(projectPropertiesFile)) {
+			projectProperties.store(writer, "project properties");
 		}
 	}
 
 	public void unset(String key) throws IOException {
-		projectProperties().remove(key);
-		try (Writer writer = new FileWriter(projectPropertiesFile())) {
-			projectProperties().store(writer, "project properties");
+		if (!projectPropertiesFile.exists()) {
+			throw new BugError("Attempt to alter proporties outside project.");
+		}
+		projectProperties.remove(key);
+		try (Writer writer = new FileWriter(projectPropertiesFile)) {
+			projectProperties.store(writer, "project properties");
 		}
 	}
 
 	public <T> T get(String key, Class<T> type, String... defaultValue) throws IOException {
-		Object value = projectProperties().get(key);
+		Object value = projectProperties.get(key);
 		if (value == null) {
 			value = globalProperties.get(key);
 			if (value == null) {
@@ -98,7 +111,7 @@ public class Config {
 	}
 
 	public boolean has(String key) throws IOException {
-		Object value = projectProperties().get(key);
+		Object value = projectProperties.get(key);
 		if (value == null) {
 			value = globalProperties.get(key);
 			if (value == null) {
@@ -106,27 +119,5 @@ public class Config {
 			}
 		}
 		return true;
-	}
-
-	private Properties projectProperties() throws IOException {
-		if (projectProperties.isEmpty()) {
-			synchronized (projectProperties) {
-				if (projectProperties.isEmpty()) {
-					try (Reader reader = new FileReader(projectPropertiesFile())) {
-						projectProperties.load(reader);
-					}
-				}
-			}
-		}
-		return projectProperties;
-	}
-
-	private static File projectPropertiesFile() throws IOException {
-		File workingDir = Paths.get("").toAbsolutePath().toFile();
-		File propertiesFile = new File(workingDir, PROJECT_PROPERTIES_FILE);
-		if (!propertiesFile.exists() && !propertiesFile.createNewFile()) {
-			throw new IOException(format("Cannot create project properties file |%s|.", propertiesFile));
-		}
-		return propertiesFile;
 	}
 }
