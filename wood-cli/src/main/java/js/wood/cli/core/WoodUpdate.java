@@ -1,15 +1,11 @@
 package js.wood.cli.core;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import js.format.FileSize;
 import js.wood.cli.ExitCode;
 import js.wood.cli.Task;
 import js.wood.cli.WebsUtil;
@@ -37,14 +33,14 @@ public class WoodUpdate extends Task {
 			console.print("Checking WOOD assemblies repository...");
 		}
 
-		WebsUtil.File assemblyDir = latestVersion(DISTRIBUTION_URI, ARCHIVE_DIRECTORY_PATTERN);
+		WebsUtil.File assemblyDir = webs.latestVersion(DISTRIBUTION_URI, ARCHIVE_DIRECTORY_PATTERN, verbose);
 		if (assemblyDir == null) {
 			console.print("Empty WOOD assemblies repository %s.", DISTRIBUTION_URI);
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
 
-		WebsUtil.File assemblyFile = latestVersion(assemblyDir.getURI(), ARCHIVE_FILE_PATTERN);
+		WebsUtil.File assemblyFile = webs.latestVersion(assemblyDir.getURI(), ARCHIVE_FILE_PATTERN, verbose);
 		if (assemblyFile == null) {
 			console.print("Invalid WOOD assembly version %s. No assembly found.", assemblyDir.getURI());
 			console.print("Command abort.");
@@ -94,25 +90,5 @@ public class WoodUpdate extends Task {
 		processBuilder.directory(files.getWorkingDir().toFile()).inheritIO().start();
 
 		return ExitCode.SUCCESS;
-	}
-
-	private WebsUtil.File latestVersion(URI uri, Pattern filePattern) throws IOException, URISyntaxException {
-		WebsUtil.File mostRecentFile = null;
-		FileSize fileSizeFormatter = new FileSize();
-		DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-		for (WebsUtil.File file : webs.index(uri, filePattern)) {
-			if (verbose) {
-				console.print("%s %s\t%s", modificationTimeFormatter.format(file.getModificationTime()), fileSizeFormatter.format(file.getSize()), file.getName());
-			}
-			if (mostRecentFile == null) {
-				mostRecentFile = file;
-				continue;
-			}
-			if (file.isAfter(mostRecentFile)) {
-				mostRecentFile = file;
-			}
-		}
-		return mostRecentFile;
 	}
 }

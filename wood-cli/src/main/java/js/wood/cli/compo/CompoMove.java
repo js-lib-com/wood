@@ -58,7 +58,7 @@ public class CompoMove extends Task {
 		}
 
 		Path targetCompoDir = targetDir.resolve(compoDir.getFileName());
-		files.createDirectoryIfNotExist(targetCompoDir);
+		files.createDirectoryIfNotExists(targetCompoDir);
 
 		console.print("Moving %s component to %s...", compoDir, targetDir);
 		for (Path compoFile : files.listFiles(compoDir)) {

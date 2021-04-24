@@ -7,7 +7,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -27,6 +26,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
+import js.format.FileSize;
 import js.util.Classes;
 
 public class WebsUtil {
@@ -44,8 +44,7 @@ public class WebsUtil {
 	}
 
 	public Iterable<File> index(URI uri, Pattern fileNamePattern) throws IOException, URISyntaxException {
-		URL indexPageURL = uri.toURL();
-		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
+		Document indexPageDoc = documentBuilder.loadHTML(uri.toURL());
 
 		DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -54,8 +53,6 @@ public class WebsUtil {
 			String fileName = linkElement.getAttr("href");
 			Matcher matcher = fileNamePattern.matcher(fileName);
 			if (matcher.find()) {
-				URI fileURI = new URL(indexPageURL, fileName).toURI();
-
 				Element linkParent = linkElement.getParent();
 				Element dateElement = linkParent.getNextSibling();
 				ZonedDateTime modificationTime = LocalDateTime.parse(dateElement.getText().trim(), modificationTimeFormatter).atZone(ZoneId.of("UTC"));
@@ -63,14 +60,34 @@ public class WebsUtil {
 				Element sizeElement = dateElement.getNextSibling();
 				long fileSize = fileSize(sizeElement.getText().trim());
 
-				files.add(new File(fileURI, fileName, modificationTime, fileSize));
+				files.add(new File(uri.resolve(fileName), fileName, modificationTime, fileSize));
 			}
 		}
 
 		return files;
 	}
 
-	public void download(WebsUtil.File remoteFile, Path localFile, boolean verbose) throws IOException {
+	public WebsUtil.File latestVersion(URI uri, Pattern filePattern, boolean verbose) throws IOException, URISyntaxException {
+		WebsUtil.File mostRecentFile = null;
+		FileSize fileSizeFormatter = new FileSize();
+		DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+		for (WebsUtil.File file : index(uri, filePattern)) {
+			if (verbose) {
+				console.print("%s %s\t%s", modificationTimeFormatter.format(file.getModificationTime()), fileSizeFormatter.format(file.getSize()), file.getName());
+			}
+			if (mostRecentFile == null) {
+				mostRecentFile = file;
+				continue;
+			}
+			if (file.isAfter(mostRecentFile)) {
+				mostRecentFile = file;
+			}
+		}
+		return mostRecentFile;
+	}
+
+	public Path download(WebsUtil.File remoteFile, Path localFile, boolean verbose) throws IOException {
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			HttpGet httpGet = new HttpGet(remoteFile.getURI());
 			try (CloseableHttpResponse response = client.execute(httpGet)) {
@@ -93,6 +110,8 @@ public class WebsUtil {
 				}
 			}
 		}
+
+		return localFile;
 	}
 
 	private static final Pattern FILE_SIZE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d+)?)(K|M|G|T)?$", Pattern.CASE_INSENSITIVE);

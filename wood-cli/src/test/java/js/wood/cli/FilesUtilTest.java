@@ -199,13 +199,13 @@ public class FilesUtilTest {
 	}
 
 	@Test
-	public void createDirectoryIfNotExist() throws IOException {
+	public void createDirectoryIfNotExists() throws IOException {
 		// given
 		Path dir = mock(Path.class);
 		doThrow(IOException.class).when(provider).checkAccess(dir);
 
 		// when
-		files.createDirectoryIfNotExist(dir);
+		files.createDirectoryIfNotExists(dir);
 
 		// then
 		verify(provider, times(1)).checkAccess(dir);
@@ -213,12 +213,12 @@ public class FilesUtilTest {
 	}
 
 	@Test
-	public void createDirectoryIfNotExist_GivenDirectoryExist_ThenDoNotCreate() throws IOException {
+	public void createDirectoryIfNotExists_GivenDirectoryExist_ThenDoNotCreate() throws IOException {
 		// given
 		Path dir = mock(Path.class);
 
 		// when
-		files.createDirectoryIfNotExist(dir);
+		files.createDirectoryIfNotExists(dir);
 
 		// then
 		verify(provider, times(1)).checkAccess(dir);

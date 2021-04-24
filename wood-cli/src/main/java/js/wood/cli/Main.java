@@ -30,6 +30,7 @@ import js.wood.cli.runtime.RuntimeDestroy;
 import js.wood.cli.runtime.RuntimeInit;
 import js.wood.cli.runtime.RuntimeStart;
 import js.wood.cli.runtime.RuntimeStop;
+import js.wood.cli.runtime.RuntimeUpdate;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -75,6 +76,7 @@ public class Main {
 		runtimeCommands.addSubcommand(task(RuntimeStart.class));
 		runtimeCommands.addSubcommand(task(RuntimeStop.class));
 		runtimeCommands.addSubcommand(task(RuntimeDestroy.class));
+		runtimeCommands.addSubcommand(task(RuntimeUpdate.class));
 
 		CommandLine configCommands = new CommandLine(new ConfigCommands());
 		configCommands.addSubcommand(task(ConfigList.class));

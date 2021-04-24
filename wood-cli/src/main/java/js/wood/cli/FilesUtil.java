@@ -90,7 +90,7 @@ public class FilesUtil {
 		fileSystem.provider().createDirectory(dir);
 	}
 
-	public void createDirectoryIfNotExist(Path dir) throws IOException {
+	public void createDirectoryIfNotExists(Path dir) throws IOException {
 		Params.notNull(dir, "Directory");
 		if (!exists(dir)) {
 			createDirectory(dir);
@@ -163,6 +163,12 @@ public class FilesUtil {
 
 	public void delete(Path path) throws IOException {
 		fileSystem.provider().delete(path);
+	}
+
+	public void deleteIfExists(Path path) throws IOException {
+		if (path != null && exists(path)) {
+			fileSystem.provider().delete(path);
+		}
 	}
 
 	public void move(Path source, Path target) throws IOException {
@@ -259,7 +265,7 @@ public class FilesUtil {
 					console.print("Copy file %s", relativeFile);
 				}
 				Path targetFile = targetDir.resolve(relativeFile);
-				createDirectoryIfNotExist(targetFile.getParent());
+				createDirectoryIfNotExists(targetFile.getParent());
 				fileSystem.provider().copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
 				return FileVisitResult.CONTINUE;
 			}
