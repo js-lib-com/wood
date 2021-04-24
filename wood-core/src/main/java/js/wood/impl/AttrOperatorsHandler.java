@@ -62,7 +62,7 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	 */
 	protected static String buildAttrXPath(String name, String... value) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("//*[@");
+		sb.append("descendant-or-self::node()[@");
 		sb.append(name);
 		if (value.length == 1) {
 			sb.append("='");

@@ -1,10 +1,12 @@
 package js.wood;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -248,13 +250,40 @@ public class ComponentInheritanceTest {
 
 		// then
 		Element layout = compo.getLayout();
-		assertThat(layout.getTag(), equalTo("article"));
 
 		EList headings = layout.findByTag("h1");
 		assertThat(headings.size(), equalTo(1));
 		assertThat(headings.item(0).getText(), equalTo("Content"));
 
 		assertThat(layout.getByTag("section"), notNullValue());
+	}
+
+	@Test
+	public void GivenEmptyTemplateAndAttributes_ThenMergeAttributes() {
+		// given
+		String templateHTML = "" + //
+				"<article name='base article' class='article'>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<article name='article' class='news' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</article>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("article"));
+		assertThat(layout.getAttr("class"), containsString("article"));
+		assertThat(layout.getAttr("class"), containsString("new"));
+		assertThat(layout.getAttr("name"), equalTo("article"));
 	}
 
 	@Test
@@ -287,14 +316,14 @@ public class ComponentInheritanceTest {
 	public void GivenEmptyListTemplate_ThenCopyItems() {
 		// given
 		String templateHTML = "" + //
-				"<ul class='menu'>" + //
+				"<ul>" + //
 				"</ul>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
 
 		String compoHTML = "" + //
-				"<ul id='main' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
-				"	<li class='selected'>Item <b>#1</b></li>" + //
-				"	<li class='divider'></li>" + //
+				"<ul w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<li>Item <b>#1</b></li>" + //
+				"	<li></li>" + //
 				"	<li>Item <b>#2</b></li>" + //
 				"</ul>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
@@ -306,12 +335,36 @@ public class ComponentInheritanceTest {
 		// then
 		Element layout = compo.getLayout();
 		assertThat(layout.getTag(), equalTo("ul"));
-		assertThat(layout.getAttr("class"), equalTo("menu"));
-		assertThat(layout.getAttr("id"), equalTo("main"));
 
 		EList items = layout.findByTag("li");
 		assertThat(items, notNullValue());
 		assertThat(items.size(), equalTo(3));
+	}
+
+	@Test
+	public void GivenEmptyListTemplateWithAttributes_ThenMergeAttributes() {
+		// given
+		String templateHTML = "" + //
+				"<ul class='menu'>" + //
+				"</ul>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<ul id='main' w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<li>Item <b>#1</b></li>" + //
+				"	<li></li>" + //
+				"	<li>Item <b>#2</b></li>" + //
+				"</ul>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertThat(layout.getAttr("class"), equalTo("menu"));
+		assertThat(layout.getAttr("id"), equalTo("main"));
 	}
 
 	@Test
@@ -438,7 +491,7 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
-		
+
 		// then
 		Element layout = compo.getLayout();
 		assertThat(layout.getTag(), equalTo("body"));
@@ -483,7 +536,7 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
-		
+
 		// then
 		Element layout = compo.getLayout();
 		assertTrue(layout.hasAttr("xmlns:w"));
@@ -708,6 +761,49 @@ public class ComponentInheritanceTest {
 	}
 
 	@Test
+	public void GivenTwoEditablesAndDataAttrOperators_ThenBothContentsMerged() {
+		// given
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
+
+		String templateHTML = "" + //
+				"<body>" + //
+				"	<h1>Template</h1>" + //
+				"	<section data-editable='section-1'></section>" + //
+				"	<section data-editable='section-2'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<embed type='text/html' data-template='res/template'>" + //
+				"	<section data-content='section-1'>" + //
+				"		<h1>Content One</h1>" + //
+				"	</section>" + //
+				"" + //
+				"	<section data-content='section-2'>" + //
+				"		<h1>Content Two</h1>" + //
+				"	</section>" + //
+				"</embed>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+		assertThat(layout.getByTag("embed"), nullValue());
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(3));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content One"));
+		assertThat(headings.item(2).getText(), equalTo("Content Two"));
+
+		assertThat(layout.findByTag("section").size(), equalTo(2));
+	}
+
+	@Test
 	public void GivenTwoEditables_ThenOperatorsRemoved() {
 		// given
 		String templateHTML = "" + //
@@ -760,7 +856,7 @@ public class ComponentInheritanceTest {
 		String templateHTML = "" + //
 				"<chapter xmlns:w='js-lib.com/wood'>" + //
 				"	<h1>Chapter</h1>" + //
-				"	<section class='chapter' name='chapter-1' w:editable='section'></section>" + //
+				"	<section class='chapter' name='chapter-1' title='chapter one' w:editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
 		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
@@ -769,7 +865,7 @@ public class ComponentInheritanceTest {
 				"<embed type='text/html' w:template='res/template/page' xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:content='section-1'>" + //
 				"		<h1>Content One</h1>" + //
-				"		<section id='section-1' class='one' w:template='res/template/chapter#section'>" + //
+				"		<section id='section-1' class='one' title='section one' w:template='res/template/chapter#section'>" + //
 				"			<h1>Section</h1>" + //
 				"		</section>" + //
 				"	</section>" + //
@@ -782,7 +878,7 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
-		
+
 		// then
 		Element layout = compo.getLayout();
 		assertThat(layout.getTag(), equalTo("body"));
@@ -805,6 +901,72 @@ public class ComponentInheritanceTest {
 		assertThat(sections.item(1).getAttr("class"), equalTo("chapter one"));
 		assertThat(sections.item(1).getAttr("id"), equalTo("section-1"));
 		assertThat(sections.item(1).getAttr("name"), equalTo("chapter-1"));
+		assertThat(sections.item(1).getAttr("title"), equalTo("section one"));
+	}
+
+	@Test
+	public void GivenTwoEditablesAndOneInlineTemplateAndDataAttrOperators_ThenAllThreeContentsMerged() {
+		// given
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
+
+		String pageHTML = "" + //
+				"<body>" + //
+				"	<h1>Template</h1>" + //
+				"	<section data-editable='section-1'></section>" + //
+				"	<section data-editable='section-2'></section>" + //
+				"</body>";
+		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
+		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+
+		String templateHTML = "" + //
+				"<chapter>" + //
+				"	<h1>Chapter</h1>" + //
+				"	<section class='chapter' name='chapter-1' title='chapter one' data-editable='section'></section>" + //
+				"</chapter>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+
+		String compoHTML = "" + //
+				"<embed type='text/html' data-template='res/template/page'>" + //
+				"	<section data-content='section-1'>" + //
+				"		<h1>Content One</h1>" + //
+				"		<section id='section-1' class='one' title='section one' data-template='res/template/chapter#section'>" + //
+				"			<h1>Section</h1>" + //
+				"		</section>" + //
+				"	</section>" + //
+				"" + //
+				"	<section data-content='section-2'>" + //
+				"		<h1>Content Two</h1>" + //
+				"	</section>" + //
+				"</embed>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+		assertThat(layout.getByTag("embed"), nullValue());
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(5));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content One"));
+		assertThat(headings.item(2).getText(), equalTo("Chapter"));
+		assertThat(headings.item(3).getText(), equalTo("Section"));
+		assertThat(headings.item(4).getText(), equalTo("Content Two"));
+
+		EList sections = layout.findByTag("section");
+		assertThat(sections.size(), equalTo(3));
+
+		Element chapter = sections.item(1).getParent();
+		assertThat(chapter.getTag(), equalTo("chapter"));
+
+		assertThat(sections.item(1).getAttr("class"), equalTo("chapter one"));
+		assertThat(sections.item(1).getAttr("id"), equalTo("section-1"));
+		assertThat(sections.item(1).getAttr("name"), equalTo("chapter-1"));
+		assertThat(sections.item(1).getAttr("title"), equalTo("section one"));
 	}
 
 	@Test
@@ -844,7 +1006,7 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
-		
+
 		// then
 		Element layout = compo.getLayout();
 		assertTrue(layout.hasAttr("xmlns:w"));

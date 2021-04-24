@@ -229,7 +229,7 @@ public class Component {
 
 			// update widget path element attributes with values from the widget layout root
 			// widget path element has precedence over widget layout attributes so that parent can control widget attributes
-			mergeAttrs(widgetPathElement, widgetLayout.getAttrs());
+			addAttrs(widgetPathElement, widgetLayout.getAttrs());
 
 			// remove all children from widget path element and insert the actual widget layout elements
 			widgetPathElement.removeChildren();
@@ -328,6 +328,7 @@ public class Component {
 
 		Document templateDoc = null;
 		Editables editables = null;
+		boolean cleanupEditables = false;
 		for (Element contentElement : contentFragment.getContentElements()) {
 			if (templateDoc == null) {
 				// prepare layout parameters, possible empty, before loading template from source file
@@ -355,20 +356,23 @@ public class Component {
 			operators.removeOperator(contentElement, Operator.TEMPLATE);
 			operators.removeOperator(contentElement, Operator.CONTENT);
 
-			// insert content element - and all its descendants into template document, before editable element
-			// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
 			if (editableElement.getParent() != null) {
+				// insert content element - and all its descendants into template document, before editable element
+				// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
 				editableElement.insertBefore(contentElement);
-				mergeAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+				addAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+				cleanupEditables = true;
 			} else {
 				for (Element child : contentElement.getChildren()) {
 					editableElement.addChild(child);
 				}
-				mergeAttrs(editableElement, contentElement.getAttrs());
+				addAttrs(editableElement, contentElement.getAttrs(), true);
 			}
 		}
 
-		editables.remove();
+		if (cleanupEditables) {
+			editables.remove();
+		}
 		return templateDoc;
 	}
 
@@ -563,17 +567,18 @@ public class Component {
 	}
 
 	/**
-	 * Add attributes to element but do not overwrite existing ones. If attribute to add is CSS class add newly class values but
-	 * also takes care to not overwrite existing ones.
+	 * Add attributes to element but do not overwrite existing ones. Anyway, if optional <code>overrides</code> flag is provided
+	 * and is true, element existing attributes values are overridden. In any case <code>class</code> attributes are merged but
+	 * there is no particular order guaranteed.
 	 * 
-	 * @param element document element,
-	 * @param attrs attributes list to add.
+	 * @param element target document element, whose attributes are updated,
+	 * @param attrs list of attributes to add,
+	 * @param overrides optional flag, true if given attributes should override element attributes.
 	 */
-	private static void mergeAttrs(Element element, Iterable<Attr> attrs) {
+	private static void addAttrs(Element element, Iterable<Attr> attrs, boolean... overrides) {
 		for (Attr attr : attrs) {
 			switch (attr.getName()) {
 			case "class":
-				// merge attributes and element CSS classes but do not overwrite element classes
 				Set<String> classes = new HashSet<>();
 				classes.addAll(Strings.split(attr.getValue(), ' '));
 				String elementClass = element.getAttr("class");
@@ -584,15 +589,17 @@ public class Component {
 				break;
 
 			default:
-				if (element.hasAttr(attr.getName())) {
-					break;
-				}
+				boolean override = overrides.length == 1 ? overrides[0] : false;
 				String namespaceURI = attr.getNamespaceURI();
 				if (namespaceURI != null) {
-					element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
+					if (override || !element.hasAttrNS(namespaceURI, attr.getName())) {
+						element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
+					}
 				} else {
-					String[] names = attr.getName().split(":");
-					element.setAttr(names[0], attr.getValue());
+					if (override || !element.hasAttr(attr.getName())) {
+						String[] names = attr.getName().split(":");
+						element.setAttr(names[0], attr.getValue());
+					}
 				}
 			}
 		}
