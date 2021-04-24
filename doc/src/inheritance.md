@@ -51,6 +51,69 @@ In `standalone templating` content fragments are injected into the template docu
 
 Inline templating design define a relationship between one component and a number - possible more than a single one, of templates. All components and templates can have chrome. Component can contain any number of content fragments and is legal to have many content fragments extending the same template.
 
+#### Standalone
+
+Template layout file.
+
+`res/template/template.htm`
+
+```html
+<template>
+    <chrome></chrome>
+    <div w:editable="EDITABLE A"></div>
+    <div w:editable="EDITABLE B"></div>
+</template>
+```
+
+Content layout file.
+
+`res/content-fragment/content-fragment.htm`
+
+```html
+<content-fragment w:template="res/template">
+	<div w:content="EDITABLE A">
+    	...
+	</div>
+	<div w:content="EDITABLE B">
+    	...
+	</div>
+</content-fragment>
+```
+
+#### Inline
+
+`res/template-a/template-a.htm`
+
+```html
+<template>
+    <chrome></chrome>
+    <div w:editable="EDITABLE A"></div>
+</template>
+```
+
+`res/template-b/template-b.htm`
+
+```html
+<template>
+    <chrome></chrome>
+    <div w:editable="EDITABLE B"></div>
+</template>
+```
+
+`res/component/component.htm`
+
+```html
+<component>
+    <chrome></chrome>
+	<content-fragment w:template="res/template-a">
+		<div w:content="EDITABLE A">...</div>
+    </content-fragment>
+	<content-fragment w:template="res/template-b">
+		<div w:content="EDITABLE B">...</div>
+    </content-fragment>
+</component>
+```
+
 
 
 ### Relationship Description
