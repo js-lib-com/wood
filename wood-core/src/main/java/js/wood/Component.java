@@ -14,7 +14,6 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
-import js.dom.w3c.DomException;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.impl.ComponentDescriptor;
@@ -271,7 +270,7 @@ public class Component {
 		Document layoutDoc;
 		try {
 			layoutDoc = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
-		} catch (DomException e) {
+		} catch (Exception e) {
 			throw new WoodException("Invalid layout document |%s|.", layoutPath);
 		}
 

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Test;
 
 import js.dom.Document;
@@ -97,7 +99,11 @@ public class BuilderIntegrationTest {
 		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
 			@Override
 			public void writePage(Component page, Document document) throws IOException {
-				assertPageDocument(document);
+				try {
+					assertPageDocument(document);
+				} catch (XPathExpressionException e) {
+					fail();
+				}
 			}
 		};
 
@@ -110,7 +116,7 @@ public class BuilderIntegrationTest {
 		builder.buildPage(new Component(indexPage, builder));
 	}
 
-	private static void assertPageDocument(Document doc) {
+	private static void assertPageDocument(Document doc) throws XPathExpressionException {
 		assertThat(doc.getByTag("title").getText(), equalTo("Test Project / Index"));
 
 		EList metas = doc.findByTag("meta");

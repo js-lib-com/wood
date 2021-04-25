@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -30,7 +31,7 @@ public class PageDocumentTest {
 	private PageDocument page;
 
 	@Before
-	public void beforeTest() throws IOException {
+	public void beforeTest() throws IOException, SAXException {
 		when(project.getFactory()).thenReturn(factory);
 
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);

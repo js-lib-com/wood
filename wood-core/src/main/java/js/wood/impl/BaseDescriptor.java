@@ -1,9 +1,11 @@
 package js.wood.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -37,9 +39,15 @@ abstract class BaseDescriptor {
 	private final IScriptDescriptor scriptDefaults;
 
 	protected BaseDescriptor(FilePath descriptorFile) {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		this.doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
+		Document doc;
+		try {
+			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+			doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
+		} catch (IOException | SAXException e) {
+			doc = EMPTY_DOC;
+		}
 
+		this.doc = doc;
 		this.descriptorFile = descriptorFile.value();
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
@@ -50,12 +58,12 @@ abstract class BaseDescriptor {
 		try {
 			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 			doc = builder.loadXML(descriptorFile);
-		} catch (FileNotFoundException e) {
+		} catch (IOException | SAXException e) {
 			doc = EMPTY_DOC;
 		}
 
-		this.descriptorFile = descriptorFile.getPath();
 		this.doc = doc;
+		this.descriptorFile = descriptorFile.getPath();
 		this.linkDefaults = new LinkDefaults(doc);
 		this.scriptDefaults = new ScriptDefaults(doc);
 	}

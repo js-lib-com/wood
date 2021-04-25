@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -43,7 +44,7 @@ public class PreviewTest {
 	}
 
 	@Test
-	public void serialize() throws IOException {
+	public void serialize() throws IOException, SAXException {
 		// project fixture
 
 		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);

@@ -4,8 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -24,7 +27,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_OnDocument() {
+	public void findByAttr_OnDocument() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -35,7 +38,7 @@ public class XPathTest {
 		Document doc = builder.parseXMLNS(xml);
 
 		EList elist = doc.findByXPathNS(namespaceContext, "//*[@wood:editable]");
-		
+
 		assertThat(elist, notNullValue());
 		assertThat(elist.size(), equalTo(2));
 		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-1"));
@@ -43,7 +46,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_OnRootElement() {
+	public void findByAttr_OnRootElement() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -54,7 +57,7 @@ public class XPathTest {
 		Document doc = builder.parseXMLNS(xml);
 
 		EList elist = doc.getRoot().findByXPathNS(namespaceContext, "//*[@wood:editable]");
-		
+
 		assertThat(elist, notNullValue());
 		assertThat(elist.size(), equalTo(2));
 		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-1"));
@@ -62,7 +65,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_OnNonRootElement() {
+	public void findByAttr_OnNonRootElement() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -82,7 +85,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_Descendant_OnDocument() {
+	public void findByAttr_Descendant_OnDocument() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -101,7 +104,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_Descendant_OnElement() {
+	public void findByAttr_Descendant_OnElement() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -120,7 +123,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_DescendantOrSelf_OnDocument() {
+	public void findByAttr_DescendantOrSelf_OnDocument() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -139,7 +142,7 @@ public class XPathTest {
 	}
 
 	@Test
-	public void findByAttr_DescendantOrSelf_OnElement() {
+	public void findByAttr_DescendantOrSelf_OnElement() throws SAXException, XPathExpressionException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //

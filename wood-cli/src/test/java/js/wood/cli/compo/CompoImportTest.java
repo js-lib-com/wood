@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -21,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -64,7 +67,7 @@ public class CompoImportTest {
 	private CompoImport task;
 
 	@Before
-	public void beforeTest() throws IOException {
+	public void beforeTest() throws IOException, SAXException {
 		when(config.get("repository.dir")).thenReturn("/home/user/repository");
 		when(config.get("repository.url")).thenReturn("http://server.com");
 
@@ -102,7 +105,7 @@ public class CompoImportTest {
 		task.setHttpClientBuilder(httpClientBuilder);
 	}
 
-	private static Document parseHTML(String document) {
+	private static Document parseHTML(String document) throws SAXException {
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		return builder.parseHTML(document);
 	}
@@ -123,7 +126,7 @@ public class CompoImportTest {
 	}
 
 	@Test
-	public void GivenProjectCompoDirExist_ThenDoNotCreateIt() throws IOException {
+	public void GivenProjectCompoDirExist_ThenDoNotCreateIt() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(projectCompoDir)).thenReturn(true);
 
@@ -161,7 +164,7 @@ public class CompoImportTest {
 	}
 
 	@Test
-	public void GivenNotReloadAndRepositoryCompoNotExist_ThenCreateDirectoryAndDownload() throws IOException {
+	public void GivenNotReloadAndRepositoryCompoNotExist_ThenCreateDirectoryAndDownload() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(repositoryCompoDir)).thenReturn(false);
 		task.setReload(false);
@@ -175,7 +178,7 @@ public class CompoImportTest {
 	}
 
 	@Test
-	public void GivenNotReloadAndRepositoryCompoExist_ThenDoNotDownload() throws IOException {
+	public void GivenNotReloadAndRepositoryCompoExist_ThenDoNotDownload() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(repositoryCompoDir)).thenReturn(true);
 		task.setReload(false);

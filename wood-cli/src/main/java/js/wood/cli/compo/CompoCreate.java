@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPathExpressionException;
+
+import org.xml.sax.SAXException;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
@@ -50,7 +54,7 @@ public class CompoCreate extends Task {
 	private TemplateProcessor templateProcessor = new TemplateProcessor();
 
 	@Override
-	protected ExitCode exec() throws IOException {
+	protected ExitCode exec() throws IOException, SAXException, XPathExpressionException {
 		Path projectDir = files.getProjectDir();
 		Path compoDir = projectDir.resolve(name);
 		if (files.exists(compoDir)) {

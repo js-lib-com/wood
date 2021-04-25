@@ -1,8 +1,11 @@
 package js.wood.impl;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import js.dom.Document;
 import js.dom.EList;
 import js.dom.Element;
+import js.lang.BugError;
 import js.util.Params;
 
 /**
@@ -14,25 +17,45 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
-		return document.findByXPath(buildAttrXPath(operator.value()));
+		try {
+			return document.findByXPath(buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public EList findByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		return element.findByXPath(buildAttrXPath(operator.value()));
+		try {
+			return element.findByXPath(buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public Element getByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
-		return document.getByXPath(buildAttrXPath(operator.value()));
+		try {
+			return document.getByXPath(buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public Element getByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		return element.getByXPath(buildAttrXPath(operator.value()));
+		try {
+			return element.getByXPath(buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
@@ -44,7 +67,12 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public Element getByOperator(Document document, Operator operator, String operand) {
 		Params.notNull(document, "Layout document");
-		return document.getByXPath(buildAttrXPath(operator.value(), operand));
+		try {
+			return document.getByXPath(buildAttrXPath(operator.value(), operand));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override

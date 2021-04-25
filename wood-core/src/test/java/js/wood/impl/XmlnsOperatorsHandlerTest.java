@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -28,7 +29,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_Document() {
+	public void findByOperator_Document() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -44,7 +45,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_Element() {
+	public void findByOperator_Element() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -61,7 +62,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_NotRootElement() {
+	public void findByOperator_NotRootElement() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -79,7 +80,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void getByOperator_Document() {
+	public void getByOperator_Document() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -93,7 +94,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void getByOperator_Element() {
+	public void getByOperator_Element() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -108,7 +109,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void getOperand_Editable() {
+	public void getOperand_Editable() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section'></section>" + //
@@ -123,7 +124,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void getOperand_Compo() {
+	public void getOperand_Compo() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<div w:compo='res/dialog'></div>" + //
@@ -138,7 +139,7 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void removeOperator() {
+	public void removeOperator() throws SAXException {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<div w:compo='res/dialog'></div>" + //

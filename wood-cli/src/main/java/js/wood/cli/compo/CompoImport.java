@@ -8,10 +8,13 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -36,7 +39,7 @@ public final class CompoImport extends Task {
 	private String path;
 
 	@Override
-	protected ExitCode exec() throws IOException {
+	protected ExitCode exec() throws IOException, XPathExpressionException, SAXException {
 		console.print("Import component %s into %s", coordinates, path);
 
 		Path repositoryDir = files.getPath(config.get("repository.dir"));
@@ -84,8 +87,10 @@ public final class CompoImport extends Task {
 	 * 
 	 * @param targetDir target directory.
 	 * @throws IOException if download fails for whatever reason.
+	 * @throws SAXException 
+	 * @throws XPathExpressionException 
 	 */
-	private void downloadCompoment(Path targetDir) throws IOException {
+	private void downloadCompoment(Path targetDir) throws IOException, SAXException, XPathExpressionException {
 		URL indexPageURL = new URL(format("%s/%s/", config.get("repository.url"), coordinates.toPath()));
 		Document indexPageDoc = documentBuilder.loadHTML(indexPageURL);
 

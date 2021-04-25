@@ -1,9 +1,12 @@
 package js.wood.impl;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import js.dom.Document;
 import js.dom.EList;
 import js.dom.Element;
 import js.dom.NamespaceContext;
+import js.lang.BugError;
 import js.util.Params;
 import js.wood.WOOD;
 
@@ -26,31 +29,56 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
-		return document.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		try {
+			return document.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public EList findByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		return element.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		try {
+			return element.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public Element getByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
-		return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		try {
+			return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public Element getByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		return element.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		try {
+			return element.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override
 	public Element getByOperator(Document document, Operator operator, String operand) {
 		Params.notNull(document, "Layout document");
-		return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value(), operand));
+		try {
+			return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value(), operand));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
 	}
 
 	@Override

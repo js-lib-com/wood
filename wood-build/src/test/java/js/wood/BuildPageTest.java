@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -64,7 +65,7 @@ public class BuildPageTest {
 	}
 
 	@Test
-	public void buildPage() throws IOException {
+	public void buildPage() throws IOException, SAXException {
 		// project fixture
 		
 		when(favicon.exists()).thenReturn(true);

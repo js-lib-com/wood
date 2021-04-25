@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -39,7 +40,7 @@ public class CompoExport extends Task {
 	private HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
 	@Override
-	protected ExitCode exec() throws IOException {
+	protected ExitCode exec() throws IOException, SAXException {
 		if (!name.isValid()) {
 			throw new ParameterException(commandSpec.commandLine(), format("Component %s not found.", name.value()));
 		}
@@ -116,7 +117,7 @@ public class CompoExport extends Task {
 		}
 	}
 
-	private CompoCoordinates compoCoordinates(Path descriptorFile) throws IOException {
+	private CompoCoordinates compoCoordinates(Path descriptorFile) throws IOException, SAXException {
 		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 		Document descriptorDoc = documentBuilder.loadXML(files.getReader(descriptorFile));
 		String groupId = text(descriptorDoc, "groupId");

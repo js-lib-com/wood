@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +56,7 @@ public class BuilderTest {
 	}
 
 	@Test
-	public void build() throws IOException {
+	public void build() throws IOException, XPathExpressionException {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));

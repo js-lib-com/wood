@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -121,7 +122,7 @@ public class BuilderIntegration {
 	};
 
 	@Test
-	public void buildIntegration() throws IOException {
+	public void buildIntegration() throws IOException, SAXException {
 		BuilderConfig config = new BuilderConfig();
 		config.setProjectDir(new File("src/test/resources/project"));
 		Builder builder = new Builder(config);

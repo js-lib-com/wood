@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,7 +99,7 @@ public class ComponentAggregationTest {
 
 	/** {@link Operator#COMPO} and {@link Operator#PARAM} should be erased from layout. */
 	@Test
-	public void operatorsErasure() {
+	public void operatorsErasure() throws XPathExpressionException {
 		FilePath childLayoutPath = Mockito.mock(FilePath.class);
 		when(childLayoutPath.exists()).thenReturn(true);
 		when(childLayoutPath.isLayout()).thenReturn(true);

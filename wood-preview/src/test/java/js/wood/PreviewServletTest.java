@@ -38,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -131,7 +132,7 @@ public class PreviewServletTest {
 	}
 
 	@Test
-	public void service_Component() throws ServletException, IOException {
+	public void service_Component() throws ServletException, IOException, SAXException {
 		when(httpRequest.getServletContext()).thenReturn(servletContext);
 		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo");
 

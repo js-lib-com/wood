@@ -18,10 +18,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -43,7 +46,7 @@ public class WebsUtil {
 		this.console = console;
 	}
 
-	public Iterable<File> index(URI uri, Pattern fileNamePattern) throws IOException, URISyntaxException {
+	public Iterable<File> index(URI uri, Pattern fileNamePattern) throws IOException, URISyntaxException, SAXException, XPathExpressionException {
 		Document indexPageDoc = documentBuilder.loadHTML(uri.toURL());
 
 		DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -67,7 +70,7 @@ public class WebsUtil {
 		return files;
 	}
 
-	public WebsUtil.File latestVersion(URI uri, Pattern filePattern, boolean verbose) throws IOException, URISyntaxException {
+	public WebsUtil.File latestVersion(URI uri, Pattern filePattern, boolean verbose) throws IOException, URISyntaxException, XPathExpressionException, SAXException {
 		WebsUtil.File mostRecentFile = null;
 		FileSize fileSizeFormatter = new FileSize();
 		DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

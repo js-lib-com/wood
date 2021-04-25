@@ -15,12 +15,15 @@ import java.io.StringReader;
 import java.nio.file.Path;
 import java.util.Map;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.lang.BugError;
 import js.wood.cli.Console;
@@ -66,7 +69,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenDefaultOptions_ThenJustCreateCompoDir() throws IOException {
+	public void GivenDefaultOptions_ThenJustCreateCompoDir() throws IOException, XPathExpressionException, SAXException {
 		// given
 
 		// when
@@ -79,7 +82,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenCompoDirExists_ThenAbort() throws IOException {
+	public void GivenCompoDirExists_ThenAbort() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(compoDir)).thenReturn(true);
 
@@ -93,7 +96,7 @@ public class CompoCreateTest {
 	}
 
 	@Test(expected = IOException.class)
-	public void GivenCompoDirCreationFail_ThenIOException() throws IOException {
+	public void GivenCompoDirCreationFail_ThenIOException() throws IOException, XPathExpressionException, SAXException {
 		// given
 		doThrow(IOException.class).when(files).createDirectory(compoDir);
 
@@ -104,7 +107,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenTemplateOption_ThenCreateCompo() throws IOException {
+	public void GivenTemplateOption_ThenCreateCompo() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.getFileName(compoDir)).thenReturn("about");
 		when(files.exists(compoTemplateDir)).thenReturn(true);
@@ -144,7 +147,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenTemplateOptionAndLayoutParameters_ThenConsoleInput() throws IOException {
+	public void GivenTemplateOptionAndLayoutParameters_ThenConsoleInput() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
@@ -164,7 +167,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenTemplateOptionAndMissingTemplateDir_ThenAbort() throws IOException {
+	public void GivenTemplateOptionAndMissingTemplateDir_ThenAbort() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(false);
 		task.setCompoTemplate(compoTemplate);
@@ -179,7 +182,7 @@ public class CompoCreateTest {
 	}
 
 	@Test
-	public void GivenTemplateOptionAndMissingTemplateLayout_ThenAbort() throws IOException {
+	public void GivenTemplateOptionAndMissingTemplateLayout_ThenAbort() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(null);
@@ -195,7 +198,7 @@ public class CompoCreateTest {
 	}
 
 	@Test(expected = BugError.class)
-	public void GivenTemplateOptionAndMissingEditable_ThenBugError() throws IOException {
+	public void GivenTemplateOptionAndMissingEditable_ThenBugError() throws IOException, XPathExpressionException, SAXException {
 		// given
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);

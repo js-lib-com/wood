@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.xml.sax.SAXException;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -63,7 +64,7 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePage() throws IOException {
+	public void writePage() throws IOException, SAXException {
 		Component compo = compo();
 		PageDocument page = new PageDocument(compo);
 
@@ -72,7 +73,7 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePage_Twice() throws IOException {
+	public void writePage_Twice() throws IOException, SAXException {
 		Component compo = compo();
 		PageDocument page = new PageDocument(compo);
 
@@ -86,7 +87,7 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePage_Locale() throws IOException {
+	public void writePage_Locale() throws IOException, SAXException {
 		Component compo = compo();
 		PageDocument page = new PageDocument(compo);
 
@@ -96,7 +97,7 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePage_BuildNumber() throws IOException {
+	public void writePage_BuildNumber() throws IOException, SAXException {
 		Component compo = compo();
 		PageDocument page = new PageDocument(compo);
 
@@ -317,7 +318,7 @@ public class BuildFsTest {
 		return new File(buildDir, path);
 	}
 
-	private Component compo() {
+	private Component compo() throws SAXException {
 		Document doc = documentBuilder.parseXML("<body></body>");
 		when(compo.getLayout()).thenReturn(doc.getRoot());
 		when(compo.getLayoutFileName()).thenReturn("index.htm");

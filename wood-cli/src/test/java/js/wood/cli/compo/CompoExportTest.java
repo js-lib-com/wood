@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import js.wood.cli.Config;
 import js.wood.cli.Console;
@@ -122,7 +123,7 @@ public class CompoExportTest {
 	}
 
 	@Test
-	public void GivenMissingCompoDir_ThenAbort() throws IOException {
+	public void GivenMissingCompoDir_ThenAbort() throws IOException, SAXException {
 		// given
 		when(files.exists(compoDir)).thenReturn(false);
 
@@ -136,7 +137,7 @@ public class CompoExportTest {
 	}
 
 	@Test
-	public void GivenMissingCompoDescriptor_ThenAbort() throws IOException {
+	public void GivenMissingCompoDescriptor_ThenAbort() throws IOException, SAXException {
 		// given
 		when(files.exists(descriptorFile)).thenReturn(false);
 
@@ -150,7 +151,7 @@ public class CompoExportTest {
 	}
 
 	@Test
-	public void GivenMissingCompoCoordinates_ThenAbort() throws IOException {
+	public void GivenMissingCompoCoordinates_ThenAbort() throws IOException, SAXException {
 		// given
 		when(files.getReader(descriptorFile)).thenReturn(new StringReader("<compo></compo>"));
 
@@ -164,7 +165,7 @@ public class CompoExportTest {
 	}
 
 	@Test(expected = ParameterException.class)
-	public void GivenInvalidCompoName_ThenParameterException() throws IOException {
+	public void GivenInvalidCompoName_ThenParameterException() throws IOException, SAXException {
 		// given
 		when(compoName.isValid()).thenReturn(false);
 
