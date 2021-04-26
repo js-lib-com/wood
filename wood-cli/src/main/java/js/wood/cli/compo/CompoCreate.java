@@ -27,7 +27,6 @@ import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
 import js.wood.WOOD;
-import js.wood.cli.TemplateType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -122,7 +121,7 @@ public class CompoCreate extends Task {
 
 			templateProcessor.setTargetDir(compoDir.toFile());
 			templateProcessor.setVerbose(verbose);
-			templateProcessor.exec(TemplateType.compo.name(), "page", variables);
+			templateProcessor.exec("compo", "page", variables);
 
 		}
 

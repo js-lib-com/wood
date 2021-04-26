@@ -31,7 +31,6 @@ import com.jslib.commons.cli.FilesUtil;
 import com.jslib.commons.cli.TemplateProcessor;
 
 import js.lang.BugError;
-import js.wood.cli.TemplateType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompoCreateTest {
@@ -79,7 +78,7 @@ public class CompoCreateTest {
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 		verify(files, times(1)).createDirectory(compoDir);
-		verify(templateProcessor, times(0)).exec(eq(TemplateType.compo.name()), eq(null), any());
+		verify(templateProcessor, times(0)).exec(eq("compo"), eq(null), any());
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class CompoCreateTest {
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Map<String, String>> variablesArgument = ArgumentCaptor.forClass(Map.class);
-		verify(templateProcessor, times(1)).exec(eq(TemplateType.compo.name()), eq("page"), variablesArgument.capture());
+		verify(templateProcessor, times(1)).exec(eq("compo"), eq("page"), variablesArgument.capture());
 
 		Map<String, String> variables = variablesArgument.getValue();
 		assertThat(variables.get("page"), equalTo("about"));
