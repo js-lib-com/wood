@@ -30,8 +30,6 @@ import js.wood.cli.core.ProjectList;
 import js.wood.cli.core.WoodSetup;
 import js.wood.cli.core.WoodUpdate;
 import js.wood.cli.runtime.RuntimeCommands;
-import js.wood.cli.runtime.RuntimeCreate;
-import js.wood.cli.runtime.RuntimeDestroy;
 import js.wood.cli.runtime.RuntimeInit;
 import js.wood.cli.runtime.RuntimeStart;
 import js.wood.cli.runtime.RuntimeStop;
@@ -77,11 +75,9 @@ public class Main {
 		compoCommands.addSubcommand(task(CompoUsedBy.class));
 
 		CommandLine runtimeCommands = new CommandLine(new RuntimeCommands());
-		runtimeCommands.addSubcommand(task(RuntimeCreate.class));
 		runtimeCommands.addSubcommand(task(RuntimeInit.class));
 		runtimeCommands.addSubcommand(task(RuntimeStart.class));
 		runtimeCommands.addSubcommand(task(RuntimeStop.class));
-		runtimeCommands.addSubcommand(task(RuntimeDestroy.class));
 		runtimeCommands.addSubcommand(task(RuntimeUpdate.class));
 
 		CommandLine configCommands = new CommandLine(new ConfigCommands());
