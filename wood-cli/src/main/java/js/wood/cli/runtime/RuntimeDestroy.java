@@ -5,9 +5,10 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.util.Files;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
+import js.util.Files;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;

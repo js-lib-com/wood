@@ -5,10 +5,11 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import js.wood.Builder;
 import js.wood.BuilderConfig;
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

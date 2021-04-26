@@ -6,9 +6,10 @@ import static js.util.Strings.concat;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.cli.TextReplace;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.TextReplace;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;

@@ -8,8 +8,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;

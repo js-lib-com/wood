@@ -18,13 +18,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.jslib.commons.cli.Config;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
+
 import js.wood.Builder;
 import js.wood.BuilderConfig;
-import js.wood.cli.Config;
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
-import js.wood.cli.core.ProjectBuild;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectBuildTest {

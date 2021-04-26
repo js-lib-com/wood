@@ -25,13 +25,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.SAXException;
 
+import com.jslib.commons.cli.Config;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.util.Classes;
-import js.wood.cli.Config;
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompoImportTest {

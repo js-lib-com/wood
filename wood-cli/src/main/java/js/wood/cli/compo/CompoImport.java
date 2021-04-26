@@ -16,12 +16,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.xml.sax.SAXException;
 
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;

@@ -19,9 +19,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>info.picocli</groupId>
-			<artifactId>picocli</artifactId>
-			<version>4.6.1</version>
+			<groupId>com.js-lib</groupId>
+			<artifactId>js-commons-cli</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.js-lib</groupId>

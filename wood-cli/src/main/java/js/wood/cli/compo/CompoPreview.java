@@ -10,10 +10,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import js.io.VariablesWriter;
 import js.util.Classes;
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;

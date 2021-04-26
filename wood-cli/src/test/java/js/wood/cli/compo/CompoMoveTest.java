@@ -19,10 +19,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
-import js.wood.cli.TextReplace;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
+import com.jslib.commons.cli.TextReplace;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;

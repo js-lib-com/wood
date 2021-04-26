@@ -20,9 +20,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.cli.Console;
-import js.wood.cli.FilesUtil;
-import js.wood.cli.core.ProjectList;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.FilesUtil;
+
 import js.wood.cli.core.ProjectList.ListFileVisitor;
 import js.wood.cli.core.ProjectList.PageFileVisitor;
 import js.wood.cli.core.ProjectList.TemplateFileVisitor;

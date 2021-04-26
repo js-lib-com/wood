@@ -6,9 +6,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.cli.TemplateProcessor;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.TemplateProcessor;
+
 import js.wood.cli.TemplateType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -52,7 +53,7 @@ public class RuntimeCreate extends Task {
 
 		template.setTargetDir(runtimeDir);
 		template.setVerbose(verbose);
-		template.exec(TemplateType.runtime, type, variables);
+		template.exec(TemplateType.runtime.name(), type, variables);
 
 		config.set("runtime.name", name);
 		config.set("runtime.port", port);

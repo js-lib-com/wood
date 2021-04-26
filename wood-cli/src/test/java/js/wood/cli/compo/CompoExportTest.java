@@ -27,10 +27,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.SAXException;
 
-import js.wood.cli.Config;
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
+import com.jslib.commons.cli.Config;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;

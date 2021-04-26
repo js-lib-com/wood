@@ -5,13 +5,14 @@ import static java.lang.String.format;
 import java.nio.file.Path;
 import java.util.List;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "used", description = "List components using a given component.")
 public class CompoUsedBy extends Task {

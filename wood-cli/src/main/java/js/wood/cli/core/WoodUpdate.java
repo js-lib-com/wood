@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.cli.WebsUtil;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Home;
+import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.WebsUtil;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -47,7 +49,7 @@ public class WoodUpdate extends Task {
 			return ExitCode.ABORT;
 		}
 
-		Path homeDir = files.getPath(getHome());
+		Path homeDir = files.getPath(Home.getPath());
 		Path binariesDir = homeDir.resolve("bin");
 		Path updaterJar = files.getFileByNamePattern(binariesDir, UPDATER_FILE_PATTERN);
 		if (updaterJar == null) {

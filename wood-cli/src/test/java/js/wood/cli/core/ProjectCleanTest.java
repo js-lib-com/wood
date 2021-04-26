@@ -18,10 +18,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
-import js.wood.cli.core.ProjectClean;
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectCleanTest {

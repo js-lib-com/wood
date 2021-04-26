@@ -25,11 +25,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.SAXException;
 
+import com.jslib.commons.cli.Console;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.FilesUtil;
+import com.jslib.commons.cli.TemplateProcessor;
+
 import js.lang.BugError;
-import js.wood.cli.Console;
-import js.wood.cli.ExitCode;
-import js.wood.cli.FilesUtil;
-import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,7 +79,7 @@ public class CompoCreateTest {
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 		verify(files, times(1)).createDirectory(compoDir);
-		verify(templateProcessor, times(0)).exec(eq(TemplateType.compo), eq(null), any());
+		verify(templateProcessor, times(0)).exec(eq(TemplateType.compo.name()), eq(null), any());
 	}
 
 	@Test
@@ -128,7 +129,7 @@ public class CompoCreateTest {
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Map<String, String>> variablesArgument = ArgumentCaptor.forClass(Map.class);
-		verify(templateProcessor, times(1)).exec(eq(TemplateType.compo), eq("page"), variablesArgument.capture());
+		verify(templateProcessor, times(1)).exec(eq(TemplateType.compo.name()), eq("page"), variablesArgument.capture());
 
 		Map<String, String> variables = variablesArgument.getValue();
 		assertThat(variables.get("page"), equalTo("about"));

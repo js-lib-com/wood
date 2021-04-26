@@ -4,9 +4,10 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.cli.WebsUtil;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.WebsUtil;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

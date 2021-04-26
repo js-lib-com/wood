@@ -15,6 +15,10 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.xml.sax.SAXException;
 
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.TemplateProcessor;
+
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
@@ -23,9 +27,6 @@ import js.util.Classes;
 import js.util.Files;
 import js.util.Strings;
 import js.wood.WOOD;
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
-import js.wood.cli.TemplateProcessor;
 import js.wood.cli.TemplateType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -121,7 +122,7 @@ public class CompoCreate extends Task {
 
 			templateProcessor.setTargetDir(compoDir.toFile());
 			templateProcessor.setVerbose(verbose);
-			templateProcessor.exec(TemplateType.compo, "page", variables);
+			templateProcessor.exec(TemplateType.compo.name(), "page", variables);
 
 		}
 

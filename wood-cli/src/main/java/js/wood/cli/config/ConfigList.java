@@ -4,8 +4,9 @@ import static java.lang.String.format;
 
 import java.util.Map;
 
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

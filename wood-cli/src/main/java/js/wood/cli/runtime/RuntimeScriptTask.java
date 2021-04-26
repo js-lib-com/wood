@@ -9,9 +9,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.Task;
+
 import js.lang.BugError;
-import js.wood.cli.ExitCode;
-import js.wood.cli.Task;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
