@@ -2,9 +2,11 @@
 
 WOOD stands for Web Object Oriented Development and is a command line build tool for web user interfaces, based on W3C technologies - HTML and CSS, and plain ECMA Script. Its main goals are fighting complexity via decomposition and improved code reusability.
 
-It is based on HTML components, linked in structures of  arbitrary complexity by only 5 operators. Operators are declared using well known HTML attributes syntax. There is no programing language mixed in the HTML components using some fancy syntax - just pure HTML. Final HTML pages are created by build tool at development phase, not on runtime.
+It is based on HTML components, linked in structures of  arbitrary complexity by only 5 operators. Operators are declared using well known HTML attributes syntax. There is no programing language mixed in the HTML components using some fancy syntax - just pure HTML. Final HTML pages are created by build tool at development phase, __not on runtime__.
 
 Since WOOD is a build tool it does not relies on any particular library or applications framework. Generated HTML pages are static but any application framework using HTML code  can be used to add dynamic content support, e.g. JSP, AngularJS or j(s)-lib. Server side technologies like JSP can also benefit from WOOD decomposition.
+
+WOOD is not particularly efficient for single page applications... recommend using multiple pages organized on specific tasks or activities. 
 
 WOOD promotes an object oriented development paradigm using decomposition of complex user interfaces into user interface components - for short, components. Component is the base unit for code reusability that keeps all its files together, in the component directory. A component can inherit from a component with editable elements - named template, and can aggregate child components. A child component can be reused between multiple parent components. A page is just a component that has the `<body>` element.
 

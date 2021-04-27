@@ -44,6 +44,8 @@ public class CompoCreateTest {
 	@Mock
 	private Path projectDir;
 	@Mock
+	private Path projectDescriptorFile;
+	@Mock
 	private Path compoDir;
 	@Mock
 	private CompoName compoTemplate;
@@ -55,10 +57,14 @@ public class CompoCreateTest {
 	private CompoCreate task;
 
 	@Before
-	public void beforeTest() {
+	public void beforeTest() throws IOException {
 		when(files.getProjectDir()).thenReturn(projectDir);
 		when(projectDir.resolve((String) null)).thenReturn(compoDir);
 
+		when(projectDir.resolve("project.xml")).thenReturn(projectDescriptorFile);
+		String projectDescriptorDoc = "<project></project>";
+		when(files.getReader(projectDescriptorFile)).thenReturn(new StringReader(projectDescriptorDoc));
+		
 		when(compoTemplate.path()).thenReturn("template/page");
 		when(projectDir.resolve("template/page")).thenReturn(compoTemplateDir);
 
@@ -134,10 +140,55 @@ public class CompoCreateTest {
 		assertThat(variables.get("page"), equalTo("about"));
 		assertThat(variables.get("tag"), equalTo("section"));
 		assertThat(variables.get("class"), equalTo("about"));
-		assertThat(variables.get("template"), equalTo("template/page"));
-		assertThat(variables.get("editable"), equalTo("section"));
+		assertThat(variables.get("template-attr"), equalTo("w:template"));
+		assertThat(variables.get("template-path"), equalTo("template/page"));
 		assertThat(variables.get("template-params"), equalTo("w:param=\"\""));
-		assertThat(variables.get("xmlns"), equalTo("js-lib.com/wood"));
+		assertThat(variables.get("editable"), equalTo("section"));
+		assertThat(variables.get("xmlns"), equalTo("xmlns:w=\"js-lib.com/wood\""));
+		assertThat(variables.get("root"), equalTo("component"));
+		assertThat(variables.get("groupId"), equalTo("com.js-lib"));
+		assertThat(variables.get("artifactId"), equalTo("page"));
+		assertThat(variables.get("version"), equalTo("1.0"));
+		assertThat(variables.get("title"), equalTo("About Component"));
+		assertThat(variables.get("description"), equalTo("About component description."));
+	}
+
+	@Test
+	public void GivenTemplateOptionAndDataAttrNaming_ThenCreateCompo() throws IOException, XPathExpressionException, SAXException {
+		// given
+		when(files.getFileName(compoDir)).thenReturn("about");
+		when(files.exists(compoTemplateDir)).thenReturn(true);
+		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
+
+		String projectDescriptorDoc = "<project><naming>DATA_ATTR</naming></project>";
+		when(files.getReader(projectDescriptorFile)).thenReturn(new StringReader(projectDescriptorDoc));
+
+		String templateLayoutDoc = "<body><section data-editable='section'></section></body>";
+		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(templateLayoutDoc)).thenReturn(new StringReader(templateLayoutDoc));
+
+		task.setCompoTemplate(compoTemplate);
+
+		// when
+		ExitCode exitCode = task.exec();
+
+		// then
+		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
+		verify(templateProcessor, times(1)).setTargetDir(null);
+		verify(templateProcessor, times(1)).setVerbose(false);
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Map<String, String>> variablesArgument = ArgumentCaptor.forClass(Map.class);
+		verify(templateProcessor, times(1)).exec(eq("compo"), eq("page"), variablesArgument.capture());
+
+		Map<String, String> variables = variablesArgument.getValue();
+		assertThat(variables.get("page"), equalTo("about"));
+		assertThat(variables.get("tag"), equalTo("section"));
+		assertThat(variables.get("class"), equalTo("about"));
+		assertThat(variables.get("template-attr"), equalTo("data-template"));
+		assertThat(variables.get("template-path"), equalTo("template/page"));
+		assertThat(variables.get("template-params"), equalTo("data-param=\"\""));
+		assertThat(variables.get("editable"), equalTo("section"));
+		assertThat(variables.get("xmlns"), equalTo(""));
 		assertThat(variables.get("root"), equalTo("component"));
 		assertThat(variables.get("groupId"), equalTo("com.js-lib"));
 		assertThat(variables.get("artifactId"), equalTo("page"));

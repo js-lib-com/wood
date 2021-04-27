@@ -3,6 +3,7 @@ package js.wood.cli.compo;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,10 +83,8 @@ public class CompoCreate extends Task {
 				return ExitCode.ABORT;
 			}
 
-			DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
-			Document templateDoc = documentBuilder.loadXMLNS(files.getReader(templateLayoutFile));
-			Element editableElement = templateDoc.getByXPathNS(WOOD.NS, "//*[@wood:editable]");
-			if (editableElement == null) {
+			TemplateDocument templateDoc = createTemplateDocument(getNamingStrategy(projectDir.resolve("project.xml")), files.getReader(templateLayoutFile));
+			if (!templateDoc.hasEditable()) {
 				throw new BugError("Bad template component %s. Missing editable element.", compoTemplateDir);
 			}
 
@@ -105,12 +104,13 @@ public class CompoCreate extends Task {
 			Map<String, String> variables = new HashMap<>();
 			variables.put("page", compoName);
 
-			variables.put("tag", editableElement.getTag());
+			variables.put("tag", templateDoc.getEditableTag());
 			variables.put("class", compoName);
-			variables.put("template", compoTemplate.path());
-			variables.put("editable", editableElement.getAttrNS(WOOD.NS, "editable"));
-			variables.put("template-params", format("w:param=\"%s\"", Strings.join(params, ';')));
-			variables.put("xmlns", WOOD.NS);
+			variables.put("template-attr", templateDoc.getTemplateAttrName());
+			variables.put("template-path", compoTemplate.path());
+			variables.put("template-params", templateDoc.getParamAttr(Strings.join(params, ';')));
+			variables.put("editable", templateDoc.getEditableOperand());
+			variables.put("xmlns", templateDoc.getXmlnsAttr());
 
 			variables.put("root", page ? "page" : "component");
 			variables.put("groupId", "com.js-lib");
@@ -126,6 +126,153 @@ public class CompoCreate extends Task {
 		}
 
 		return ExitCode.SUCCESS;
+	}
+
+	private String getNamingStrategy(Path projectDescriptorFile) throws IOException, SAXException {
+		DocumentBuilder docBuilder = Classes.loadService(DocumentBuilder.class);
+		Document doc = docBuilder.loadXMLNS(files.getReader(projectDescriptorFile));
+		Element namingElement = doc.getByTag("naming");
+		return namingElement != null ? namingElement.getText() : "XMLNS";
+	}
+
+	private static TemplateDocument createTemplateDocument(String namingStrategy, Reader reader) throws IOException, SAXException {
+		switch (namingStrategy) {
+		case "XMLNS":
+			return new XmlnsTemplateDoc(reader);
+		case "DATA_ATTR":
+			return new DataAttrTemplateDoc(reader);
+		case "ATTR":
+			return new AttrTemplateDoc(reader);
+		default:
+			throw new BugError("Invalid naming strategy %s.", namingStrategy);
+		}
+	}
+
+	private static abstract class TemplateDocument {
+		private final DocumentBuilder docBuilder = Classes.loadService(DocumentBuilder.class);
+		protected final Document doc;
+		protected final Element editable;
+
+		protected TemplateDocument(Reader reader) throws IOException, SAXException {
+			this.doc = docBuilder.loadXMLNS(reader);
+			this.editable = getEditable();
+		}
+
+		public boolean hasEditable() {
+			return editable != null;
+		}
+
+		public String getEditableTag() {
+			return editable.getTag();
+		}
+
+		protected abstract Element getEditable();
+
+		public abstract String getEditableOperand();
+
+		public abstract String getTemplateAttrName();
+
+		public abstract String getParamAttr(String value);
+
+		public abstract String getXmlnsAttr();
+	}
+
+	private static class XmlnsTemplateDoc extends TemplateDocument {
+		protected XmlnsTemplateDoc(Reader reader) throws IOException, SAXException {
+			super(reader);
+		}
+
+		@Override
+		protected Element getEditable() {
+			try {
+				return doc.getByXPathNS(WOOD.NS, "//*[@wood:editable]");
+			} catch (XPathExpressionException e) {
+				// hard coded XPath expression is invalid
+				throw new BugError(e);
+			}
+		}
+
+		@Override
+		public String getEditableOperand() {
+			return editable.getAttrNS(WOOD.NS, "editable");
+		}
+
+		@Override
+		public String getTemplateAttrName() {
+			return "w:template";
+		}
+
+		@Override
+		public String getParamAttr(String value) {
+			return format("w:param=\"%s\"", value);
+		}
+
+		@Override
+		public String getXmlnsAttr() {
+			return format("xmlns:w=\"%s\"", WOOD.NS);
+		}
+	}
+
+	private static class DataAttrTemplateDoc extends TemplateDocument {
+		protected DataAttrTemplateDoc(Reader reader) throws IOException, SAXException {
+			super(reader);
+		}
+
+		@Override
+		protected Element getEditable() {
+			return doc.getByAttr("data-editable");
+		}
+
+		@Override
+		public String getEditableOperand() {
+			return editable.getAttr("data-editable");
+		}
+
+		@Override
+		public String getTemplateAttrName() {
+			return "data-template";
+		}
+
+		@Override
+		public String getParamAttr(String value) {
+			return format("data-param=\"%s\"", value);
+		}
+
+		@Override
+		public String getXmlnsAttr() {
+			return "";
+		}
+	}
+
+	private static class AttrTemplateDoc extends TemplateDocument {
+		protected AttrTemplateDoc(Reader reader) throws IOException, SAXException {
+			super(reader);
+		}
+
+		@Override
+		protected Element getEditable() {
+			return doc.getByAttr("editable");
+		}
+
+		@Override
+		public String getEditableOperand() {
+			return editable.getAttr("editable");
+		}
+
+		@Override
+		public String getTemplateAttrName() {
+			return "template";
+		}
+
+		@Override
+		public String getParamAttr(String value) {
+			return format("param=\"%s\"", value);
+		}
+
+		@Override
+		public String getXmlnsAttr() {
+			return "";
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
