@@ -83,20 +83,18 @@ public class MatchersTest {
 	}
 
 	@Test
-	public void emptyPatterns() {
-		assertTrue(matchers.match("anything"));
-		assertTrue(matchers.match(""));
-		assertTrue(matchers.match(null));
+	public void GivenEmptyPattern_ThenRejectAll() {
+		assertFalse(matchers.match("anything"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void nullString() {
+	public void GivenNullParameter_ThenIllegalArgument() {
 		matchers.addPattern("abc");
 		matchers.match(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void emptyString() {
+	public void GivenEmptyStringParameter_ThenIllegalArgument() {
 		matchers.addPattern("abc");
 		matchers.match("");
 	}

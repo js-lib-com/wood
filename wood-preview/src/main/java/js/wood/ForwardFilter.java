@@ -94,10 +94,10 @@ public class ForwardFilter implements Filter {
 	private String buildContextName;
 
 	/**
-	 * Project instance initialized from Servlet context parameter on this filter initialization - see
+	 * Project root directory initialized from Servlet context parameter on this filter initialization - see
 	 * {@link #init(FilterConfig)}.
 	 */
-	private Project project;
+	private File projectRoot;
 
 	/**
 	 * Optional matcher for request paths accepted by this filter. Patterns are loaded from filter initialization parameter, see
@@ -124,12 +124,7 @@ public class ForwardFilter implements Filter {
 		// by convention preview context has suffix -preview
 		int suffixSeparatorPosition = previewContextPath.lastIndexOf('-');
 		buildContextName = previewContextPath.substring(0, suffixSeparatorPosition);
-
-		project = (Project) servletContext.getAttribute(Project.class.getName());
-		if (project == null) {
-			project = new Project(new File(servletContext.getInitParameter(PreviewServlet.PROJECT_DIR_PARAM)));
-			servletContext.setAttribute(Project.class.getName(), project);
-		}
+		projectRoot = new File(servletContext.getInitParameter(PreviewServlet.PROJECT_DIR_PARAM));
 
 		String urlPatterns = config.getInitParameter(URL_PATTERNS);
 		if (urlPatterns != null) {
@@ -157,7 +152,7 @@ public class ForwardFilter implements Filter {
 			throw new WoodException("Build context |%s| is not deployed or preview context is not configured with crossContext='true'", buildContextName);
 		}
 
-		RequestDispatcher dispatcher = buildContext.getRequestDispatcher(forwardPath(project, requestPath));
+		RequestDispatcher dispatcher = buildContext.getRequestDispatcher(forwardPath(projectRoot, requestPath));
 		dispatcher.forward(request, response);
 	}
 
@@ -169,11 +164,11 @@ public class ForwardFilter implements Filter {
 	/**
 	 * Heuristic to determine forward request path used to invoke server services from build context.
 	 * 
-	 * @param project WOOD project context,
+	 * @param projectRoot project root directory,
 	 * @param requestPath preview request path.
 	 * @return forward path.
 	 */
-	static String forwardPath(Project project, String requestPath) {
+	static String forwardPath(File projectRoot, String requestPath) {
 		// assume we are into preview for component '/res/compos/dialogs/alert'
 		// current loaded content is the last part of the path, i.e. 'alert'
 		// from a component script there is a RMI request for sixqs.site.controller.MainController#getCategoriesSelect
@@ -191,7 +186,7 @@ public class ForwardFilter implements Filter {
 		// [ res, compos, dialogs, sixqs, site, controller, MainController, getCategoriesSelect.rmi]
 
 		// remove path parts that are directories into project resources
-		File resourcesPath = project.getProjectRoot();
+		File resourcesPath = projectRoot;
 		for (;;) {
 			resourcesPath = new File(resourcesPath, pathParts.get(0));
 			if (!resourcesPath.isDirectory()) {
@@ -213,10 +208,10 @@ public class ForwardFilter implements Filter {
 	// --------------------------------------------------------------------------------------------
 	// Test support
 
-	ForwardFilter(ServletContext servletContext, String previewContextPath, Project project) {
+	ForwardFilter(ServletContext servletContext, String previewContextPath, File projectRoot) {
 		this.servletContext = servletContext;
 		this.previewContextPath = previewContextPath;
-		this.project = project;
+		this.projectRoot = projectRoot;
 	}
 
 	ServletContext getServletContext() {
@@ -231,8 +226,8 @@ public class ForwardFilter implements Filter {
 		return buildContextName;
 	}
 
-	Project getProject() {
-		return project;
+	File getProjectRoot() {
+		return projectRoot;
 	}
 
 	Matchers getRequestPathMatcher() {

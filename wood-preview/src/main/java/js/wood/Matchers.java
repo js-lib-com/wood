@@ -57,9 +57,6 @@ class Matchers {
 	 * @return true if string value match a pattern.
 	 */
 	public boolean match(String string) {
-		if (matchers.isEmpty()) {
-			return true;
-		}
 		Params.notNullOrEmpty(string, "String to match");
 		for (IMatcher matcher : matchers) {
 			if (matcher.match(string)) {
