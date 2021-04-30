@@ -59,6 +59,7 @@ public class BuilderTest {
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
+		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getThemeStyles()).thenReturn(Mockito.mock(ThemeStyles.class));
 

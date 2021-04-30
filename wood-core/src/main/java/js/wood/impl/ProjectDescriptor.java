@@ -213,6 +213,26 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
+	 * Get favicon path, relative to project root, as defined by <code>favicon</code> element. Return default value
+	 * <code>favicon.ico</code> if element is not defined on project descriptor.
+	 * 
+	 * @return favicon path.
+	 */
+	public String getFavicon() {
+		return text("favicon", "favicon.ico");
+	}
+
+	/**
+	 * Get manifest path, relative to project root, as defined by <code>manifest</code> element. Return default value
+	 * <code>manifest.json</code> if element is not defined on project descriptor.
+	 * 
+	 * @return manifest path.
+	 */
+	public String getManifest() {
+		return text("manifest", "manifest.json");
+	}
+
+	/**
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
 	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
 	 * <p>

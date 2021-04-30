@@ -196,12 +196,21 @@ public class Project {
 	}
 
 	/**
-	 * Get project favicon.
+	 * Get favicon file path as defined on project descriptor. See {@link ProjectDescriptor#getFavicon()}.
 	 * 
-	 * @return project favicon.
+	 * @return favicon file path.
 	 */
 	public FilePath getFavicon() {
-		return assetsDir.getFilePath(CT.FAVICON);
+		return projectDir.getFilePath(descriptor.getFavicon());
+	}
+
+	/**
+	 * Get manifest file path as defined on project descriptor. See {@link ProjectDescriptor#getManifest()}.
+	 * 
+	 * @return manifest file path.
+	 */
+	public FilePath getManifest() {
+		return projectDir.getFilePath(descriptor.getManifest());
 	}
 
 	/**
@@ -298,9 +307,7 @@ public class Project {
 		}
 
 		DirPath sourceDir = sourceFile.getParentDirPath();
-		boolean isComponentSource = sourceDir.isComponent();
-		// search media in source directory only if directory is a component
-		FilePath mediaFile = isComponentSource ? findMediaFile(sourceDir, reference, locale) : null;
+		FilePath mediaFile = findMediaFile(sourceDir, reference, locale);
 		if (mediaFile != null) {
 			return mediaFile;
 		}

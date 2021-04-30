@@ -140,6 +140,12 @@ class PageDocument {
 		head.addText("\r\n");
 	}
 
+	public void addManifest(String path) {
+		Params.notNullOrEmpty(path, "Manifest path");
+		head.addChild(doc.createElement("link", "href", path, "rel", "manifest"));
+		head.addText("\r\n");
+	}
+
 	/**
 	 * Add meta element to this page head. Create <code>meta</code> element and set all attributes provided by meta reference
 	 * parameter. There is no validation on meta reference; attributes are set exactly as provided.

@@ -94,6 +94,11 @@ class DefaultBuildFS extends BuildFS {
 		return createDirectory("media");
 	}
 
+	@Override
+	protected File getManifestDir() {
+		return buildDir;
+	}
+
 	/**
 	 * Returns original page name, unchanged.
 	 * 

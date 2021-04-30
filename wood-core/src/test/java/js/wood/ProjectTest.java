@@ -56,12 +56,13 @@ public class ProjectTest {
 		project = new Project(projectRoot);
 
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
-		assertThat(project.getProjectDir().value(), equalTo("."));
+		assertThat(project.getProjectDir().value(), equalTo(""));
 		assertThat(project.getDescriptor(), notNullValue());
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
 		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
-		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
+		assertThat(project.getManifest().toString(), equalTo("manifest.json"));
+		assertThat(project.getFavicon().toString(), equalTo("favicon.ico"));
 
 		assertThat(project.getAuthor(), nullValue());
 		assertThat(project.getDisplay(), equalTo("Project"));
@@ -82,17 +83,20 @@ public class ProjectTest {
 		when(descriptor.getDescription(anyString())).thenReturn("Project description.");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		when(descriptor.getExcludes()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
+		when(descriptor.getManifest()).thenReturn("manifest.json");
+		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 
 		projectRoot = new Directory("root/path/project");
 		project = new Project(projectRoot, descriptor);
 
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
-		assertThat(project.getProjectDir().value(), equalTo("."));
+		assertThat(project.getProjectDir().value(), equalTo(""));
 		assertThat(project.getDescriptor(), equalTo(descriptor));
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
 		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
-		assertThat(project.getFavicon().toString(), equalTo("res/asset/favicon.ico"));
+		assertThat(project.getManifest().toString(), equalTo("manifest.json"));
+		assertThat(project.getFavicon().toString(), equalTo("favicon.ico"));
 
 		assertThat(project.getAuthor(), equalTo("Iulian Rotaru"));
 		assertThat(project.getDisplay(), equalTo("Project Display"));
@@ -189,7 +193,6 @@ public class ProjectTest {
 		FilePath mediaFile = Mockito.mock(FilePath.class);
 
 		DirPath sourceDir = Mockito.mock(DirPath.class);
-		when(sourceDir.isComponent()).thenReturn(true);
 		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
 
 		FilePath sourceFile = Mockito.mock(FilePath.class);
@@ -206,8 +209,6 @@ public class ProjectTest {
 		project = new Project(projectRoot, descriptor);
 
 		DirPath sourceDir = Mockito.mock(DirPath.class);
-		when(sourceDir.isComponent()).thenReturn(false);
-
 		FilePath sourceFile = Mockito.mock(FilePath.class);
 		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
 
@@ -224,7 +225,6 @@ public class ProjectTest {
 		FilePath mediaFile = Mockito.mock(FilePath.class);
 
 		DirPath sourceDir = Mockito.mock(DirPath.class);
-		when(sourceDir.isComponent()).thenReturn(true);
 		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
 
 		FilePath sourceFile = Mockito.mock(FilePath.class);

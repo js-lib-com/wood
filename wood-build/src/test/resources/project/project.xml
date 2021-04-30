@@ -5,6 +5,8 @@
 	<display>Test Project</display>
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en, de, fr, ro</locale>
+	<manifest>manifest.json</manifest>
+	<favicon>res/asset/favicon.ico</favicon>
 	
 	<metas>
 		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />

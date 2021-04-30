@@ -1,0 +1,16 @@
+{
+	"name": "@string/page-title",
+	"short_name": "Hello",
+	"icons": [
+		{
+			"src": "@image/app-icon",
+			"sizes": "128x128",
+			"type": "image/jpeg"
+		}
+	],
+	"lang": "en-US",
+	"start_url": "/apps/angular/home.htm",
+	"display": "standalone",
+	"background_color": "white",
+	"theme_color": "white"
+}

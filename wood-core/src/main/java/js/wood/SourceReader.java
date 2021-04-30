@@ -79,7 +79,7 @@ import js.wood.impl.ResourceType;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public final class SourceReader extends Reader {
+public class SourceReader extends Reader {
 	/** Source file define the scope of resource references. */
 	private final FilePath sourceFile;
 
@@ -178,6 +178,10 @@ public final class SourceReader extends Reader {
 	private static Reader reader(FilePath sourceFile) {
 		Params.notNull(sourceFile, "Source file");
 		return sourceFile.getReader();
+	}
+
+	public FilePath getSourceFile() {
+		return sourceFile;
 	}
 
 	/**

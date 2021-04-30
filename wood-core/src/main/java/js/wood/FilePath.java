@@ -277,6 +277,10 @@ public class FilePath extends Path {
 		}
 	}
 
+	public boolean isManifest() {
+		return project.getManifest().equals(this);
+	}
+	
 	/**
 	 * Clone this file path but forces the type to style. Returned file differs only by its type.
 	 * 

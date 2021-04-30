@@ -41,11 +41,15 @@ public class ProjectDescriptorTest {
 				"	<locale>en</locale>" + //
 				"	<author>j(s)-lib</author>" + //
 				"	<naming-strategy>XMLNS</naming-strategy>" + //
+				"	<manifest>res/app-manifest.json</manifest>" + //
+				"	<favicon>res/app-icon.png</favicon>" + //
 				"</project>";
 		descriptor = descriptor(xml);
 
 		assertThat(descriptor.getAuthor(), equalTo("j(s)-lib"));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
+		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
+		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
 	}
 
 	@Test
@@ -88,6 +92,8 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getAuthor(), nullValue());
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getExcludes(), emptyIterable());
+		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
+		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 	}
 
 	private ProjectDescriptor descriptor(String xml) {

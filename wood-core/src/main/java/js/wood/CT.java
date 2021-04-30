@@ -10,9 +10,6 @@ public final class CT {
 	/** Project configuration file. */
 	public static final String PROJECT_CONFIG = "project.xml";
 
-	/** Favicon file name stored into project assets directory. */
-	public static final String FAVICON = "favicon.ico";
-
 	// ------------------------------------------------------
 	// Files types recognized by this build tool
 

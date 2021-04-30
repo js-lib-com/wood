@@ -1,9 +1,12 @@
 package js.wood;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +37,7 @@ public abstract class BuildFS {
 	public static final String DEF_BUILD_DIR = "build/site";
 
 	/** Project reference. */
-	private final File buildDir;
+	protected final File buildDir;
 
 	/**
 	 * Build number or 0 if not set. Specialized write methods take care to append build number to target file name.
@@ -106,11 +109,27 @@ public abstract class BuildFS {
 	 */
 	public String writeFavicon(Component page, FilePath favicon) throws IOException {
 		File targetFile = new File(getMediaDir(), favicon.getName());
-		if (favicon.exists() && !processedFiles.contains(targetFile)) {
+		if (!processedFiles.contains(targetFile)) {
 			favicon.copyTo(new FileOutputStream(targetFile));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
+	}
+
+	public String writeManifest(Component page, SourceReader manifestReader) throws IOException {
+		FilePath manifestFile = manifestReader.getSourceFile();
+		File targetFile = new File(getManifestDir(), manifestFile.getName());
+		if (!processedFiles.contains(targetFile)) {
+			char[] buffer = new char[1024];
+			try (Writer writer = new BufferedWriter(new FileWriter(targetFile))) {
+				int length;
+				while ((length = manifestReader.read(buffer, 0, 1024)) != -1) {
+					writer.write(buffer, 0, length);
+				}
+			}
+			processedFiles.add(targetFile);
+		}
+		return Files.getRelativePath(getManifestDir(), targetFile, true);
 	}
 
 	/**
@@ -126,12 +145,7 @@ public abstract class BuildFS {
 	 * @throws IOException if media file write fails.
 	 */
 	public String writePageMedia(Component page, FilePath mediaFile) throws IOException {
-		File targetFile = new File(getMediaDir(), insertBuildNumber(formatMediaName(mediaFile)));
-		if (!processedFiles.contains(targetFile)) {
-			mediaFile.copyTo(new FileOutputStream(targetFile));
-			processedFiles.add(targetFile);
-		}
-		return Files.getRelativePath(getPageDir(page), targetFile, true);
+		return writeMedia(getPageDir(page), mediaFile);
 	}
 
 	/**
@@ -147,12 +161,20 @@ public abstract class BuildFS {
 	 * @throws IOException if media file write fails.
 	 */
 	public String writeStyleMedia(FilePath mediaFile) throws IOException {
+		return writeMedia(getStyleDir(), mediaFile);
+	}
+
+	public String writeManifestMedia(FilePath mediaFile) throws IOException {
+		return writeMedia(getManifestDir(), mediaFile);
+	}
+
+	private String writeMedia(File sourceDir, FilePath mediaFile) throws IOException {
 		File targetFile = new File(getMediaDir(), insertBuildNumber(formatMediaName(mediaFile)));
 		if (!processedFiles.contains(targetFile)) {
 			mediaFile.copyTo(new FileOutputStream(targetFile));
 			processedFiles.add(targetFile);
 		}
-		return Files.getRelativePath(getStyleDir(), targetFile, true);
+		return Files.getRelativePath(sourceDir, targetFile, true);
 	}
 
 	/**
@@ -255,6 +277,8 @@ public abstract class BuildFS {
 	 * @return media files directory.
 	 */
 	protected abstract File getMediaDir();
+
+	protected abstract File getManifestDir();
 
 	/**
 	 * Format the page file name. Implementation is free to pre-process page name in every way, including returning original

@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,8 @@ public class BuildPageTest {
 	private BuildFS buildFS;
 
 	@Mock
+	private FilePath manifest;
+	@Mock
 	private FilePath favicon;
 	@Mock
 	private ThemeStyles theme;
@@ -54,6 +57,7 @@ public class BuildPageTest {
 	public void beforeTest() throws IOException {
 		when(project.getFactory()).thenReturn(factory);
 		when(project.getAuthor()).thenReturn("Iulian Rotaru");
+		when(project.getManifest()).thenReturn(manifest);
 		when(project.getFavicon()).thenReturn(favicon);
 		when(project.getThemeStyles()).thenReturn(theme);
 
@@ -67,6 +71,11 @@ public class BuildPageTest {
 	@Test
 	public void buildPage() throws IOException, SAXException {
 		// project fixture
+		
+		when(manifest.exists()).thenReturn(true);
+		SourceReader reader = mock(SourceReader.class);
+		when(manifest.getReader()).thenReturn(reader);
+		when(buildFS.writeManifest(any(Component.class), any(SourceReader.class))).thenReturn("manifest.json");
 		
 		when(favicon.exists()).thenReturn(true);
 		when(buildFS.writeFavicon(any(Component.class), eq(favicon))).thenReturn("favicon.ico");
@@ -144,6 +153,7 @@ public class BuildPageTest {
 		assertHead(heads.item(index++), "meta", "name", "Description", "content", "Test page description.");
 		assertHead(heads.item(index++), "meta", "property", "og:url", "content", "http://kids-cademy.com");
 		assertHead(heads.item(index++), "meta", "property", "og:title", "content", "Test Page");
+		assertHead(heads.item(index++), "link", "rel", "manifest", "href", "manifest.json");
 		assertHead(heads.item(index++), "link", "rel", "shortcut icon", "href", "favicon.ico", "type", "image/x-icon");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "http://fonts.googleapis.com/css?family=Lato", "type", "text/css");

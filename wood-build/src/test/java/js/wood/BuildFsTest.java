@@ -5,7 +5,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -107,22 +109,23 @@ public class BuildFsTest {
 	}
 
 	@Test
+	public void writeManifest() throws IOException {
+		FilePath manifest = file("manifest.json");
+
+		SourceReader reader = mock(SourceReader.class);
+		when(reader.getSourceFile()).thenReturn(manifest);
+		when(reader.read(any(char[].class), eq(0), eq(1024))).thenReturn(-1);
+
+		assertThat(buildFS.writeManifest(null, reader), equalTo("manifest.json"));
+	}
+
+	@Test
 	public void writeFavicon() throws IOException {
 		FilePath favicon = file("favicon.ico");
 
 		assertFalse(buildFile("favicon.ico").exists());
 		assertThat(buildFS.writeFavicon(null, favicon), equalTo("../img/favicon.ico"));
 		assertTrue(buildFile("img/favicon.ico").exists());
-	}
-
-	@Test
-	public void writeFavicon_NotExisting() throws IOException {
-		FilePath favicon = file("favicon.ico");
-		when(favicon.exists()).thenReturn(false);
-
-		assertFalse(buildFile("favicon.ico").exists());
-		assertThat(buildFS.writeFavicon(null, favicon), equalTo("../img/favicon.ico"));
-		assertFalse(buildFile("img/favicon.ico").exists());
 	}
 
 	@Test
@@ -381,6 +384,11 @@ public class BuildFsTest {
 		@Override
 		protected File getMediaDir() {
 			return createDirectory("img");
+		}
+
+		@Override
+		protected File getManifestDir() {
+			return buildDir;
 		}
 
 		@Override

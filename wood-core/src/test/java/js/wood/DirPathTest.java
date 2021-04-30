@@ -62,9 +62,9 @@ public class DirPathTest {
 	@Test
 	public void constructor_RootDirectory() {
 		DirPath dirPath = new DirPath(project);
-		assertThat(dirPath.value(), equalTo("."));
-		assertThat(dirPath.toString(), equalTo("."));
-		assertThat(dirPath.getName(), equalTo("."));
+		assertThat(dirPath.value(), equalTo(""));
+		assertThat(dirPath.toString(), equalTo(""));
+		assertThat(dirPath.getName(), equalTo(""));
 		assertTrue(dirPath.isRoot());
 		assertFalse(dirPath.isComponent());
 	}

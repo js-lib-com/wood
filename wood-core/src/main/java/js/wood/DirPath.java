@@ -110,7 +110,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return this directory name.
 	 */
 	public String getName() {
-		return file.getName();
+		return value.isEmpty() ? "" : file.getName();
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class DirPath extends Path implements Iterable<FilePath> {
 	 * @return true if this directory path is the project root.
 	 */
 	public boolean isRoot() {
-		return value.equals(".");
+		return value.isEmpty();
 	}
 
 	/**

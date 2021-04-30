@@ -1,5 +1,6 @@
 package js.wood;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -131,6 +132,11 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addMeta(meta);
 		}
 
+		if (project.getManifest().exists()) {
+			FilePath manifestFile = project.getManifest();
+			BufferedReader reader = new BufferedReader(manifestFile.getReader());
+			pageDocument.addManifest(buildFS.writeManifest(pageComponent, new SourceReader(reader, manifestFile, this)));
+		}
 		if (project.getFavicon().exists()) {
 			pageDocument.addFavicon(buildFS.writeFavicon(pageComponent, project.getFavicon()));
 		}
@@ -210,6 +216,9 @@ public class Builder implements IReferenceHandler {
 		if (mediaFile == null) {
 			throw new WoodException("Missing media file for reference |%s:%s|.", source, reference);
 		}
+		if (source.isManifest()) {
+			return buildFS.writeManifestMedia(mediaFile);
+		}
 
 		switch (source.getType()) {
 		case LAYOUT:
@@ -220,7 +229,7 @@ public class Builder implements IReferenceHandler {
 
 		case SCRIPT:
 			throw new WoodException("Media files not supported on scripts for reference |%s:%s|.", source, reference);
-
+			
 		default:
 		}
 		return null;

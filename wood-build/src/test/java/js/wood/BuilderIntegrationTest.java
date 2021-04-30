@@ -134,9 +134,10 @@ public class BuilderIntegrationTest {
 		assertThat(metas.item(4).getAttr("name"), equalTo("viewport"));
 
 		EList styles = doc.findByTag("link");
-		assertThat(styles.size(), equalTo(13));
+		assertThat(styles.size(), equalTo(14));
 
 		int index = 0;
+		assertStyle("manifest.json", styles, index++);
 		assertStyle("media/favicon.ico", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Roboto", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", styles, index++);

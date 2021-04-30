@@ -48,11 +48,11 @@ public class PathTest {
 	@Test
 	public void constructor_RootPath() {
 		Path path = new TestPath(project);
-		assertThat(path.value(), equalTo("."));
+		assertThat(path.value(), equalTo(""));
 		assertTrue(path.exists());
 		assertTrue(path.getProject() == project);
 		assertThat(path.hashCode(), not(equalTo(0)));
-		assertThat(path.toString(), equalTo("."));
+		assertThat(path.toString(), equalTo(""));
 	}
 
 	@Test

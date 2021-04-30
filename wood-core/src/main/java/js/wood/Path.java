@@ -55,7 +55,7 @@ public abstract class Path {
 		Params.notNull(project, "Project");
 		this.project = project;
 		this.factory = project.getFactory();
-		this.value = ".";
+		this.value = "";
 		this.file = project.getProjectRoot();
 	}
 
