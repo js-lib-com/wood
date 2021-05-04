@@ -326,6 +326,11 @@ abstract class BaseDescriptor {
 			return Boolean.parseBoolean(text("embedded"));
 		}
 
+		@Override
+		public boolean isDynamic() {
+			return Boolean.parseBoolean(text("dynamic"));
+		}
+
 		private String text(String attribute, String... defaults) {
 			Element element = doc.getByTag("script-" + attribute);
 			return element != null ? element.getTextContent() : defaults.length == 1 ? defaults[0] : null;

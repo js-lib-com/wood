@@ -116,7 +116,7 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
-	public String writeManifest(Component page, SourceReader manifestReader) throws IOException {
+	public String writeManifest(SourceReader manifestReader) throws IOException {
 		FilePath manifestFile = manifestReader.getSourceFile();
 		File targetFile = new File(getManifestDir(), manifestFile.getName());
 		if (!processedFiles.contains(targetFile)) {
@@ -130,6 +130,14 @@ public abstract class BuildFS {
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getManifestDir(), targetFile, true);
+	}
+
+	public void writeServiceWorker(FilePath serviceWorker) throws IOException {
+		File targetFile = new File(buildDir, serviceWorker.getName());
+		if (!processedFiles.contains(targetFile)) {
+			serviceWorker.copyTo(new FileOutputStream(targetFile));
+			processedFiles.add(targetFile);
+		}
 	}
 
 	/**
@@ -162,6 +170,10 @@ public abstract class BuildFS {
 	 */
 	public String writeStyleMedia(FilePath mediaFile) throws IOException {
 		return writeMedia(getStyleDir(), mediaFile);
+	}
+
+	public String writeScriptMedia(FilePath mediaFile) throws IOException {
+		return writeMedia(getScriptDir(), mediaFile);
 	}
 
 	public String writeManifestMedia(FilePath mediaFile) throws IOException {

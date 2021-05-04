@@ -232,6 +232,10 @@ public class ProjectDescriptor extends BaseDescriptor {
 		return text("manifest", "manifest.json");
 	}
 
+	public String getServiceWorker() {
+		return text("service-worker", "ServiceWorker.js");
+	}
+	
 	/**
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
 	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.

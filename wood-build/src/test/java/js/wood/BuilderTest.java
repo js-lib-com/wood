@@ -60,6 +60,7 @@ public class BuilderTest {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
+		when(project.getServiceWorker()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getThemeStyles()).thenReturn(Mockito.mock(ThemeStyles.class));
 
@@ -174,15 +175,19 @@ public class BuilderTest {
 		assertThat(builder.onResourceReference(reference, source), nullValue());
 	}
 
-	@Test(expected = WoodException.class)
+	@Test
 	public void onResourceReference_ScriptMedia() throws IOException {
 		Reference reference = new Reference(ResourceType.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
-
 		when(source.getType()).thenReturn(FileType.SCRIPT);
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(Mockito.mock(FilePath.class));
 
-		builder.onResourceReference(reference, source);
+		FilePath mediaFile = Mockito.mock(FilePath.class);
+		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(buildFS.writeScriptMedia(mediaFile)).thenReturn("../media/icon.png");
+
+		String value = builder.onResourceReference(reference, source);
+		assertThat(value, notNullValue());
+		assertThat(value, equalTo("../media/icon.png"));
 	}
 
 	@Test(expected = WoodException.class)

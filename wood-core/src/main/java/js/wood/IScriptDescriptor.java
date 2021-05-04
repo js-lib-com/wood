@@ -20,4 +20,6 @@ public interface IScriptDescriptor {
 	String getCrossOrigin();
 	
 	boolean isEmbedded();
+	
+	boolean isDynamic();
 }

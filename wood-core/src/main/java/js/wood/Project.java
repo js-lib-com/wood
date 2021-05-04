@@ -213,6 +213,10 @@ public class Project {
 		return projectDir.getFilePath(descriptor.getManifest());
 	}
 
+	public FilePath getServiceWorker() {
+		return projectDir.getFilePath(descriptor.getServiceWorker());
+	}
+
 	/**
 	 * Get project supported locale settings as configured by project descriptor. Returned list is immutable.
 	 * 

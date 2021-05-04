@@ -241,11 +241,18 @@ class PageDocument {
 
 		final BuilderProject project = (BuilderProject) component.getProject();
 		String src = script.getSource();
-		Element scriptElement = doc.createElement("script");
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
 				src = handler.handle(project.getFactory().createFilePath(src));
 			}
+			// dynamic scripts are not declared on page head; they are loaded by custom script loaders, e.g. ServiceLoader
+			if (script.isDynamic()) {
+				return;
+			}
+		}
+
+		Element scriptElement = doc.createElement("script");
+		if (!script.isEmbedded()) {
 			scriptElement.setAttr("src", src);
 		}
 

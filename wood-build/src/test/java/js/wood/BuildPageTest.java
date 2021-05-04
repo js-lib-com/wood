@@ -44,6 +44,8 @@ public class BuildPageTest {
 	@Mock
 	private FilePath manifest;
 	@Mock
+	private FilePath serviceWorker;
+	@Mock
 	private FilePath favicon;
 	@Mock
 	private ThemeStyles theme;
@@ -75,7 +77,7 @@ public class BuildPageTest {
 		when(manifest.exists()).thenReturn(true);
 		SourceReader reader = mock(SourceReader.class);
 		when(manifest.getReader()).thenReturn(reader);
-		when(buildFS.writeManifest(any(Component.class), any(SourceReader.class))).thenReturn("manifest.json");
+		when(buildFS.writeManifest(any(SourceReader.class))).thenReturn("manifest.json");
 		
 		when(favicon.exists()).thenReturn(true);
 		when(buildFS.writeFavicon(any(Component.class), eq(favicon))).thenReturn("favicon.ico");

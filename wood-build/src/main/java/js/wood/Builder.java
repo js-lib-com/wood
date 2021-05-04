@@ -78,6 +78,10 @@ public class Builder implements IReferenceHandler {
 	 * @throws IOException for error related to underlying file system operations.
 	 */
 	public void build() throws IOException {
+		if (project.getServiceWorker().exists()) {
+			buildFS.writeServiceWorker(project.getServiceWorker());
+		}
+
 		for (Locale locale : project.getLocales()) {
 			this.locale = locale;
 			if (project.isMultiLocale()) {
@@ -135,7 +139,7 @@ public class Builder implements IReferenceHandler {
 		if (project.getManifest().exists()) {
 			FilePath manifestFile = project.getManifest();
 			BufferedReader reader = new BufferedReader(manifestFile.getReader());
-			pageDocument.addManifest(buildFS.writeManifest(pageComponent, new SourceReader(reader, manifestFile, this)));
+			pageDocument.addManifest(buildFS.writeManifest(new SourceReader(reader, manifestFile, this)));
 		}
 		if (project.getFavicon().exists()) {
 			pageDocument.addFavicon(buildFS.writeFavicon(pageComponent, project.getFavicon()));
@@ -228,7 +232,7 @@ public class Builder implements IReferenceHandler {
 			return buildFS.writeStyleMedia(mediaFile);
 
 		case SCRIPT:
-			throw new WoodException("Media files not supported on scripts for reference |%s:%s|.", source, reference);
+			return buildFS.writeScriptMedia(mediaFile);
 			
 		default:
 		}

@@ -23,6 +23,7 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	private String integrity;
 	private String crossOrigin;
 	private boolean embedded;
+	private boolean dynamic;
 
 	public ScriptDescriptor(String source) {
 		this.source = source;
@@ -114,6 +115,15 @@ public class ScriptDescriptor implements IScriptDescriptor {
 		return embedded;
 	}
 
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
+	}
+
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -158,6 +168,7 @@ public class ScriptDescriptor implements IScriptDescriptor {
 		script.setIntegrity(value(scriptElement.getAttr("integrity"), defaults.getIntegrity()));
 		script.setCrossOrigin(value(scriptElement.getAttr("crossorigin"), defaults.getCrossOrigin()));
 		script.setEmbedded(Boolean.parseBoolean(scriptElement.getAttr("embedded")));
+		script.setDynamic(Boolean.parseBoolean(scriptElement.getAttr("dynamic")));
 
 		return script;
 	}

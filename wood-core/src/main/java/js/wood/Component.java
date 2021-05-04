@@ -1,5 +1,6 @@
 package js.wood;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.xml.sax.SAXException;
 
 import js.dom.Attr;
 import js.dom.Document;
@@ -270,8 +273,8 @@ public class Component {
 		Document layoutDoc;
 		try {
 			layoutDoc = project.hasNamespace() ? documentBuilder.loadXMLNS(reader) : documentBuilder.loadXML(reader);
-		} catch (Exception e) {
-			throw new WoodException("Invalid layout document |%s|.", layoutPath);
+		} catch (IOException | SAXException e) {
+			throw new WoodException("Invalid layout document |%s|. Root cause: %s", layoutPath, e);
 		}
 
 		// component layout may have related style file; collect if into this base component used styles list
