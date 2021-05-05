@@ -3,11 +3,15 @@ package js.wood.cli.core;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
 
+import js.io.VariablesWriter;
+import js.util.Classes;
 import js.wood.Builder;
 import js.wood.BuilderConfig;
 import picocli.CommandLine.Command;
@@ -62,8 +66,23 @@ public class ProjectBuild extends Task {
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		ProjectDeploy deploy = new ProjectDeploy(this, target, runtime, verbose);
-		return deploy.exec();
+		String projectName = files.getFileName(projectDir);
+		String runtimeName = config.get("runtime.name", runtime != null ? runtime : projectName);
+		String contextName = config.get("runtime.context", projectName);
+		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
+
+		console.print("Deploying project %s...", projectDir);
+		files.copyFiles(buildDir, deployDir, verbose);
+
+		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
+		files.createDirectories(webxmlFile.getParent());
+
+		Map<String, String> variables = new HashMap<>();
+		variables.put("display-name", config.get("project.display", projectName));
+		variables.put("description", config.get("project.description", projectName));
+		files.copy(Classes.getResourceAsReader("WEB-INF/empty-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+		
+		return ExitCode.SUCCESS;
 	}
 
 	// --------------------------------------------------------------------------------------------
