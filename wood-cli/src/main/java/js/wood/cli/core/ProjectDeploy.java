@@ -1,5 +1,6 @@
 package js.wood.cli.core;
 
+import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -48,12 +49,13 @@ public class ProjectDeploy extends Task {
 			return ExitCode.ABORT;
 		}
 
-		String devServer = config.get("dev.server");
-		if (devServer == null) {
+		String server = config.get("dev.server");
+		if (server == null) {
 			console.print("Missing dev.server property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
+		server = format("http://%s/server", server);
 
 		Path projectDir = files.getProjectDir();
 		Path buildPath = projectDir.resolve(target);
@@ -77,8 +79,8 @@ public class ProjectDeploy extends Task {
 			sourceFiles.put(Files.path2unix(file), Files.getFileDigest(new File(buildDir, file)));
 		}
 
-		console.print("Get dirty files list from server %s", devServer);
-		HttpRmiClient rmi = new HttpRmiClient(devServer, APPS_MANAGER_CLASS);
+		console.print("Get dirty files list from server %s", server);
+		HttpRmiClient rmi = new HttpRmiClient(server, APPS_MANAGER_CLASS);
 		rmi.setReturnType(new GType(List.class, String.class));
 		rmi.setExceptions(IOException.class);
 
@@ -88,11 +90,11 @@ public class ProjectDeploy extends Task {
 			return ExitCode.SUCCESS;
 		}
 		if (verbose) {
-			dirtyFiles.forEach(dirtyFile -> console.print(dirtyFile));
+			dirtyFiles.forEach(dirtyFile -> console.print("- %s", dirtyFile));
 		}
 
-		console.print("Synchronize dirty files on server %s", devServer);
-		rmi = new HttpRmiClient(devServer, APPS_MANAGER_CLASS);
+		console.print("Synchronize dirty files on server %s", server);
+		rmi = new HttpRmiClient(server, APPS_MANAGER_CLASS);
 		rmi.setExceptions(IOException.class);
 
 		rmi.invoke("synchronize", projectName, new StreamHandler<FilesOutputStream>(FilesOutputStream.class) {
