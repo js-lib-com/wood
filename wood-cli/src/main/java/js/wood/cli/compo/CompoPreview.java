@@ -7,14 +7,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.Velocity;
 
-import js.io.VariablesWriter;
-import js.util.Classes;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -56,19 +53,20 @@ public class CompoPreview extends Task {
 		}
 
 		String projectName = files.getFileName(projectDir);
-		String runtimeName = config.get("runtime.name", projectName);
-		String contextName = config.get("runtime.context", projectName) + "-preview";
+		String runtimeName = config.getex("runtime.name", projectName);
+		String contextName = config.getex("runtime.context", projectName) + "-preview";
 		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
 
 		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
 		if (!files.exists(webxmlFile)) {
 			files.createDirectories(webxmlFile.getParent());
 
-			Map<String, String> variables = new HashMap<>();
-			variables.put("display-name", config.get("project.display", projectName));
-			variables.put("description", config.get("project.description", projectName));
-			variables.put("project-dir", projectDir.toAbsolutePath().toString());
-			files.copy(Classes.getResourceAsReader("WEB-INF/preview-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+			Velocity template = new Velocity("WEB-INF/preview-web.vtl");
+			template.put("display", config.get("project.display", projectName));
+			template.put("description", config.get("project.description", projectName));
+			template.put("projectDir", projectDir.toAbsolutePath().toString());
+			template.put("buildDir", config.get("build.target"));
+			template.writeTo(files.getWriter(webxmlFile));
 
 			console.print("Created missing preview configuration.");
 			console.print("Please allow a moment for runtime to updates.");
@@ -76,7 +74,7 @@ public class CompoPreview extends Task {
 		}
 
 		console.print("Opening component preview %s...", name);
-		int port = config.get("runtime.port", int.class);
+		int port = config.getex("runtime.port", int.class);
 		desktop.browse(new URI(format("http://localhost:%d/%s/%s", port, contextName, name)));
 
 		return ExitCode.SUCCESS;
