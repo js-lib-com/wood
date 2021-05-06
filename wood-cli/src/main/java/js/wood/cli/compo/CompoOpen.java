@@ -73,8 +73,8 @@ public class CompoOpen extends Task {
 			}
 			pageURI = format("https://%s/apps/%s/%s.htm", server, projectName, compoName);
 		} else {
-			int port = config.get("runtime.port", int.class);
-			String context = config.get("runtime.context", projectName);
+			int port = config.getex("runtime.port", int.class);
+			String context = config.getex("runtime.context", projectName);
 			// WOOD project naming convention: layout file basename is the same as component directory
 			pageURI = format("http://localhost:%d/%s/%s.htm", port, context, compoName);
 		}

@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
-import com.jslib.commons.cli.Velocity;
 
 import js.wood.Builder;
 import js.wood.BuilderConfig;
@@ -70,14 +69,6 @@ public class ProjectBuild extends Task {
 
 		console.print("Deploying project %s...", projectDir);
 		files.copyFiles(buildDir, deployDir, verbose);
-
-		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
-		files.createDirectories(webxmlFile.getParent());
-
-		Velocity template = new Velocity("WEB-INF/empty-web.vtl");
-		template.put("display", config.get("project.display", projectName));
-		template.put("description", config.get("project.description", projectName));
-		template.writeTo(files.getWriter(webxmlFile));
 		
 		return ExitCode.SUCCESS;
 	}

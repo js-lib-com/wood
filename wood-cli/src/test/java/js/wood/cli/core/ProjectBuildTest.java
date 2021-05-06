@@ -64,7 +64,6 @@ public class ProjectBuildTest {
 		when(files.getFileName(projectDir)).thenReturn("test");
 		when(files.exists(buildDir)).thenReturn(true);
 		when(files.createDirectories("runtimes", "test", "webapps", "context")).thenReturn(deployDir);
-		when(deployDir.resolve("WEB-INF/web.xml")).thenReturn(webxmlFile);
 
 		task = new ProjectBuild();
 		task.setConsole(console);

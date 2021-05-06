@@ -2,8 +2,7 @@ package js.wood.cli.compo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -12,11 +11,12 @@ import static org.mockito.Mockito.when;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+
+import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +24,17 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xml.sax.SAXException;
 
 import com.jslib.commons.cli.Config;
 import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.FilesUtil;
 
+import js.dom.Document;
+import js.dom.DocumentBuilder;
+import js.dom.Element;
+import js.util.Classes;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -53,7 +58,7 @@ public class CompoPreviewTest {
 	private Path deployDir;
 	@Mock
 	private Path webxmlFile;
-	
+
 	@Mock
 	private CompoName compoName;
 	@Mock
@@ -65,9 +70,9 @@ public class CompoPreviewTest {
 	public void beforeTest() throws IOException {
 		when(commandSpec.commandLine()).thenReturn(mock(CommandLine.class));
 		when(config.get("runtime.home")).thenReturn("runtimes");
-		when(config.get("runtime.port", int.class)).thenReturn(8080);
-		when(config.get("runtime.name", "test")).thenReturn("test");
-		when(config.get("runtime.context", "test")).thenReturn("app");
+		when(config.getex("runtime.port", int.class)).thenReturn(8080);
+		when(config.getex("runtime.name", "test")).thenReturn("test");
+		when(config.getex("runtime.context", "test")).thenReturn("app");
 
 		when(files.getProjectDir()).thenReturn(projectDir);
 		when(files.getFileName(projectDir)).thenReturn("test");
@@ -133,15 +138,33 @@ public class CompoPreviewTest {
 	}
 
 	@Test
-	public void GivenMissingWebXml_ThenCreateItAndAbort() throws IOException, URISyntaxException {
+	public void GivenMissingWebXml_ThenCreateItAndAbort() throws IOException, URISyntaxException, SAXException, XPathExpressionException {
 		// given
+		when(config.get("project.display", "test")).thenReturn("display");
+		when(config.get("project.description", "test")).thenReturn("description");
+		when(config.get("build.target")).thenReturn("build");
+
+		StringWriter webxmlWriter = new StringWriter();
 		when(files.exists(webxmlFile)).thenReturn(false);
+		when(files.getWriter(webxmlFile)).thenReturn(webxmlWriter);
 
 		// when
 		ExitCode exitCode = task.exec();
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.ABORT));
-		verify(files, times(1)).copy(any(Reader.class), any(Writer.class));
+
+		DocumentBuilder docBuilder = Classes.loadService(DocumentBuilder.class);
+		Document doc = docBuilder.parseXML(webxmlWriter.toString());
+		assertThat(doc.getByTag("display-name").getText(), equalTo("display"));
+		assertThat(doc.getByTag("description").getText(), equalTo("description"));
+
+		Element projectDirElement = doc.getByXPath("//param-name[text()='PROJECT_DIR']");
+		assertThat(projectDirElement, notNullValue());
+		assertThat(projectDirElement.getNextSibling().getText(), equalTo("project/dir"));
+
+		Element excludeDirsElement = doc.getByXPath("//param-name[text()='EXCLUDE_DIRS']");
+		assertThat(excludeDirsElement, notNullValue());
+		assertThat(excludeDirsElement.getNextSibling().getText(), equalTo("build"));
 	}
 }
