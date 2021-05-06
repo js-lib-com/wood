@@ -52,14 +52,14 @@ public class RuntimeInit extends Task {
 		
 		try {
 			int port = Integer.parseInt(connectorPort);
-			config.set("runtime.port", port);
+			config.put("runtime.port", port);
 		} catch (NumberFormatException e) {
 			console.print("Invalid runtime %s. Not numeric port attribute on server.xml file.", name);
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
 
-		config.set("runtime.name", name);
+		config.put("runtime.name", name);
 		return ExitCode.SUCCESS;
 	}
 }
