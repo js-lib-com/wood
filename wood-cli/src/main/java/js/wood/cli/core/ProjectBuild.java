@@ -3,15 +3,12 @@ package js.wood.cli.core;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.Velocity;
 
-import js.io.VariablesWriter;
-import js.util.Classes;
 import js.wood.Builder;
 import js.wood.BuilderConfig;
 import picocli.CommandLine.Command;
@@ -77,10 +74,10 @@ public class ProjectBuild extends Task {
 		Path webxmlFile = deployDir.resolve("WEB-INF/web.xml");
 		files.createDirectories(webxmlFile.getParent());
 
-		Map<String, String> variables = new HashMap<>();
-		variables.put("display-name", config.get("project.display", projectName));
-		variables.put("description", config.get("project.description", projectName));
-		files.copy(Classes.getResourceAsReader("WEB-INF/empty-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+		Velocity template = new Velocity("WEB-INF/empty-web.vtl");
+		template.put("display", config.get("project.display", projectName));
+		template.put("description", config.get("project.description", projectName));
+		template.writeTo(files.getWriter(webxmlFile));
 		
 		return ExitCode.SUCCESS;
 	}

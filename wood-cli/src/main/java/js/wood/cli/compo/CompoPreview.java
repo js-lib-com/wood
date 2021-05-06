@@ -7,14 +7,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
+import com.jslib.commons.cli.Velocity;
 
-import js.io.VariablesWriter;
-import js.util.Classes;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -64,11 +61,12 @@ public class CompoPreview extends Task {
 		if (!files.exists(webxmlFile)) {
 			files.createDirectories(webxmlFile.getParent());
 
-			Map<String, String> variables = new HashMap<>();
-			variables.put("display-name", config.get("project.display", projectName));
-			variables.put("description", config.get("project.description", projectName));
-			variables.put("project-dir", projectDir.toAbsolutePath().toString());
-			files.copy(Classes.getResourceAsReader("WEB-INF/preview-web.xml"), new VariablesWriter(files.getWriter(webxmlFile), variables));
+			Velocity template = new Velocity("WEB-INF/preview-web.vtl");
+			template.put("display", config.get("project.display", projectName));
+			template.put("description", config.get("project.description", projectName));
+			template.put("projectDir", projectDir.toAbsolutePath().toString());
+			template.put("buildDir", config.get("build.target"));
+			template.writeTo(files.getWriter(webxmlFile));
 
 			console.print("Created missing preview configuration.");
 			console.print("Please allow a moment for runtime to updates.");

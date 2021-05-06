@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
-	<display-name>${display-name}</display-name>
-	<description>${description}</description>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
+#if($display)
+	<display-name>$display</display-name>
+#end
+#if($description)	
+	<description>$description</description>
+#end	
 
 	<context-param>
 		<param-name>PROJECT_DIR</param-name>
-		<param-value>${project-dir}</param-value>
+		<param-value>$projectDir</param-value>
 	</context-param>
 
 	<listener>
 		<listener-class>js.wood.FileSystemWatcher</listener-class> 
 	</listener>
+#if($buildDir)	
+	<context-param>
+		<!-- comma separated project directories to exclude from file system watching -->
+		<param-name>EXCLUDE_DIRS</param-name>
+		<param-value>$buildDir</param-value>
+	</context-param>
+#end
 
 	<filter>
 		<filter-name>rmi-forward</filter-name>
