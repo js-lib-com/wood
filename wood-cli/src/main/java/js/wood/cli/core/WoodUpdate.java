@@ -62,7 +62,7 @@ public class WoodUpdate extends Task {
 		Path propertiesFile = homeDir.resolve("bin/wood.properties");
 		if (files.exists(propertiesFile)) {
 			if (!force && !assemblyFile.getModificationTime().isAfter(files.getModificationTime(propertiesFile))) {
-				console.print("Current WOOD install is updated.");
+				console.print("WOOD has no updates available.");
 				console.print("Command abort.");
 				return ExitCode.ABORT;
 			}

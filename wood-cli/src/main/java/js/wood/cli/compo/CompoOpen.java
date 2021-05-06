@@ -23,6 +23,8 @@ public class CompoOpen extends Task {
 	@Spec
 	private CommandSpec commandSpec;
 
+	@Option(names = { "-s", "--server" }, description = "Open on remote development server.")
+	private boolean server;
 	@Option(names = { "-p", "--preview" }, description = "Force preview mode.")
 	private boolean preview;
 
@@ -38,6 +40,7 @@ public class CompoOpen extends Task {
 		}
 
 		Path projectDir = files.getProjectDir();
+		String projectName = files.getFileName(projectDir);
 		Path compoDir = projectDir.resolve(name.path());
 		if (!files.exists(compoDir)) {
 			console.print("Missing component directory %s.", compoDir);
@@ -50,16 +53,32 @@ public class CompoOpen extends Task {
 		Path descriptorFile = compoDir.resolve(compoName + ".xml");
 		boolean page = files.exists(descriptorFile) && files.isXML(descriptorFile, "page");
 		if (preview || !page) {
+			if (server) {
+				console.print("Preview on remote development server not supported.");
+				console.print("Command abort.");
+				return ExitCode.ABORT;
+			}
 			CompoPreview preview = new CompoPreview(this, desktop, name);
 			return preview.exec();
 		}
 
 		console.print("Opening component %s...", name);
-		int port = config.get("runtime.port", int.class);
-		String context = config.get("runtime.context", files.getFileName(projectDir));
-		// WOOD project naming convention: layout file basename is the same as component directory
-		desktop.browse(new URI(format("http://localhost:%d/%s/%s.htm", port, context, compoName)));
-
+		String pageURI = null;
+		if (server) {
+			String server = config.get("dev.server");
+			if (server == null) {
+				console.print("Missing dev.server property.");
+				console.print("Command abort.");
+				return ExitCode.ABORT;
+			}
+			pageURI = format("https://%s/apps/%s/%s.htm", server, projectName, compoName);
+		} else {
+			int port = config.get("runtime.port", int.class);
+			String context = config.get("runtime.context", projectName);
+			// WOOD project naming convention: layout file basename is the same as component directory
+			pageURI = format("http://localhost:%d/%s/%s.htm", port, context, compoName);
+		}
+		desktop.browse(URI.create(pageURI));
 		return ExitCode.SUCCESS;
 	}
 
