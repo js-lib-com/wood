@@ -24,8 +24,6 @@ import picocli.CommandLine.Option;
 public class ProjectDeploy extends Task {
 	private static final String APPS_MANAGER_CLASS = "com.jslib.wood.apps.AppsManager";
 
-	@Option(names = { "-t", "--target" }, description = "Build directory relative to project root.")
-	private String target;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
 	private boolean verbose;
 
@@ -38,13 +36,20 @@ public class ProjectDeploy extends Task {
 	@Option(names = "--remove-stale-files", description = "Remove of all stale files from target directory.")
 	private boolean removeStaleFiles;
 
+	public ProjectDeploy() {
+		super();
+	}
+
+	public ProjectDeploy(Task parent, boolean verbose) {
+		super(parent);
+		this.verbose = verbose;
+	}
+
 	@Override
 	protected ExitCode exec() throws Exception {
+		String target = config.get("build.target");
 		if (target == null) {
-			target = config.get("build.target");
-		}
-		if (target == null) {
-			console.print("Missing build target parameter or build.target property.");
+			console.print("Missing build.target property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}

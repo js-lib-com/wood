@@ -57,9 +57,10 @@ public class ProjectBuildTest {
 		when(projectDir.resolve("build")).thenReturn(buildDir);
 		when(builderConfig.createBuilder()).thenReturn(builder);
 
-		when(config.get(eq("runtime.home"))).thenReturn("runtimes");
-		when(config.get(eq("runtime.name"), anyString())).thenReturn("test");
-		when(config.get(eq("runtime.context"), anyString())).thenReturn("context");
+		when(config.get("build.target")).thenReturn("build");
+		when(config.getex("runtime.home")).thenReturn("runtimes");
+		when(config.getex(eq("runtime.name"), anyString())).thenReturn("test");
+		when(config.getex(eq("runtime.context"), anyString())).thenReturn("context");
 
 		when(files.getFileName(projectDir)).thenReturn("test");
 		when(files.exists(buildDir)).thenReturn(true);
@@ -70,11 +71,10 @@ public class ProjectBuildTest {
 		task.setConfig(config);
 		task.setFiles(files);
 		task.setBuilderConfig(builderConfig);
-		task.setTarget("build");
 	}
 
 	@Test
-	public void GivenDefaultOptions_ThenBuildAndDeploy() throws IOException {
+	public void GivenDefaultOptions_ThenBuildAndDeploy() throws Exception {
 		// given
 
 		// when
@@ -82,7 +82,7 @@ public class ProjectBuildTest {
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
-		
+
 		verify(builderConfig, times(1)).setProjectDir(any());
 		verify(builderConfig, times(1)).setBuildDir(any());
 		verify(builderConfig, times(1)).setBuildNumber(0);
@@ -94,7 +94,7 @@ public class ProjectBuildTest {
 	}
 
 	@Test
-	public void GivenCleanOptionSet_ThenBuildClean() throws IOException {
+	public void GivenCleanOptionSet_ThenBuildClean() throws Exception {
 		// given
 		task.setClean(true);
 
@@ -106,7 +106,7 @@ public class ProjectBuildTest {
 	}
 
 	@Test
-	public void GivenBuildNumberOptionSet_ThenSetBuilderConfig() throws IOException {
+	public void GivenBuildNumberOptionSet_ThenSetBuilderConfig() throws Exception {
 		// given
 		task.setBuildNumber(1964);
 
@@ -116,23 +116,9 @@ public class ProjectBuildTest {
 		// then
 		verify(builderConfig, times(1)).setBuildNumber(1964);
 	}
-	
+
 	@Test
-	public void GivenRuntimeOptionSet_ThenSetDeployDirPath() throws IOException {
-		// given
-		when(config.get("runtime.name", "kids-cademy")).thenReturn("kids-cademy");
-		task.setRuntime("kids-cademy");
-		when(files.createDirectories("runtimes", "kids-cademy", "webapps", "context")).thenReturn(deployDir);
-		
-		// when
-		task.exec();
-		
-		// then
-		verify(files, times(1)).createDirectories("runtimes", "kids-cademy", "webapps", "context");
-	}
-	
-	@Test
-	public void GivenMissingBuildDir_ThenAbort() throws IOException {
+	public void GivenMissingBuildDir_ThenAbort() throws Exception {
 		// given
 		when(files.exists(buildDir)).thenReturn(false);
 

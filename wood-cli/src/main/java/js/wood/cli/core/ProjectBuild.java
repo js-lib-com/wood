@@ -1,6 +1,5 @@
 package js.wood.cli.core;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -17,26 +16,22 @@ import picocli.CommandLine.Option;
 public class ProjectBuild extends Task {
 	@Option(names = { "-c", "--clean" }, description = "Clean build. Default: ${DEFAULT-VALUE}.", defaultValue = "false")
 	private boolean clean;
-	@Option(names = { "-t", "--target" }, description = "Build directory relative to project root.")
-	private String target;
 	@Option(names = { "-n", "--number" }, description = "Build number. Default: ${DEFAULT-VALUE}", defaultValue = "0", paramLabel = "number")
 	private int buildNumber;
-	@Option(names = { "-r", "--runtime" }, description = "Runtime server name. Default: project name.")
-	private String runtime;
 	@Option(names = { "-e", "--excludes" }, description = "Comma separated list of directories to exclude.", split = ",")
 	private List<String> excludes = Collections.emptyList();
+	@Option(names = { "-s", "--server" }, description = "Deploy on remote development server.")
+	private boolean server;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about deployed files.")
 	private boolean verbose;
 
 	private BuilderConfig builderConfig = new BuilderConfig();
 
 	@Override
-	protected ExitCode exec() throws IOException {
+	protected ExitCode exec() throws Exception {
+		String target = config.get("build.target");
 		if (target == null) {
-			target = config.get("build.target");
-		}
-		if (target == null) {
-			console.print("Missing build target parameter or build.target property.");
+			console.print("Missing build.target property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
@@ -58,18 +53,22 @@ public class ProjectBuild extends Task {
 		builderConfig.setBuildDir(buildDir.toFile());
 		builderConfig.setBuildNumber(buildNumber);
 
-		console.print("Building project %s...", projectDir);
+		String projectName = files.getFileName(projectDir);
+		console.print("Building project %s...", projectName);
 		Builder builder = builderConfig.createBuilder();
 		builder.build();
 
-		String projectName = files.getFileName(projectDir);
-		String runtimeName = config.get("runtime.name", runtime != null ? runtime : projectName);
-		String contextName = config.get("runtime.context", projectName);
-		Path deployDir = files.createDirectories(config.get("runtime.home"), runtimeName, "webapps", contextName);
+		String runtimeName = config.getex("runtime.name", projectName);
+		String contextName = config.getex("runtime.context", projectName);
+		Path deployDir = files.createDirectories(config.getex("runtime.home"), runtimeName, "webapps", contextName);
 
-		console.print("Deploying project %s...", projectDir);
+		console.print("Deploying project %s...", projectName);
+		if (server) {
+			ProjectDeploy deploy = new ProjectDeploy(this, verbose);
+			return deploy.exec();
+		}
+
 		files.copyFiles(buildDir, deployDir, verbose);
-		
 		return ExitCode.SUCCESS;
 	}
 
@@ -86,13 +85,5 @@ public class ProjectBuild extends Task {
 
 	void setBuildNumber(int buildNumber) {
 		this.buildNumber = buildNumber;
-	}
-
-	void setRuntime(String runtime) {
-		this.runtime = runtime;
-	}
-
-	void setTarget(String target) {
-		this.target = target;
 	}
 }
