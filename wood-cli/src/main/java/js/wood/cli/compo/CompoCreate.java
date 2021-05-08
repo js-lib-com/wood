@@ -45,7 +45,6 @@ public class CompoCreate extends Task {
 	private boolean noScript;
 	@Option(names = { "-p", "--page" }, description = "Component to create is a page.")
 	private boolean page;
-
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
 	private boolean verbose;
 

@@ -9,6 +9,7 @@ import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.Home;
 import com.jslib.commons.cli.Task;
 
+import js.io.IConsole;
 import js.lang.BugError;
 import js.wood.cli.compo.CompoCommands;
 import js.wood.cli.compo.CompoCreate;
@@ -29,6 +30,7 @@ import js.wood.cli.core.ProjectDeploy;
 import js.wood.cli.core.ProjectList;
 import js.wood.cli.core.WoodSetup;
 import js.wood.cli.core.WoodUpdate;
+import js.wood.cli.icons.CreateIcons;
 import js.wood.cli.runtime.RuntimeCommands;
 import js.wood.cli.runtime.RuntimeInit;
 import js.wood.cli.runtime.RuntimeStart;
@@ -54,7 +56,7 @@ public class Main {
 	}
 
 	private final Config config;
-	private final Console console;
+	private final IConsole console;
 
 	public Main(Config config) {
 		this.config = config;
@@ -62,6 +64,9 @@ public class Main {
 	}
 
 	private void run(String... args) {
+		CommandLine createCommands = new CommandLine(new CreateCommands());
+		createCommands.addSubcommand(task(CreateIcons.class));
+
 		CommandLine compoCommands = new CommandLine(new CompoCommands());
 		compoCommands.addSubcommand(task(CompoCreate.class));
 		compoCommands.addSubcommand(task(CompoDelete.class));
@@ -84,6 +89,7 @@ public class Main {
 		configCommands.addSubcommand(task(ConfigList.class));
 
 		CommandLine commandLine = new CommandLine(this);
+		commandLine.addSubcommand(createCommands);
 		commandLine.addSubcommand(compoCommands);
 		commandLine.addSubcommand(runtimeCommands);
 		commandLine.addSubcommand(configCommands);
