@@ -3,10 +3,11 @@
 
 @set "bin=%home%\bin\*"
 @set "lib=%home%\lib\*"
+@set "logs=%home%\logs\"
 
 @set "lock=%home%.lock"
 @copy /y NUL %lock% >NUL
 
-@java -cp "%bin%;%lib%" js.wood.cli.Main %*
+@java -cp "%bin%;%lib%" -DLOGS_DIR=%logs% js.wood.cli.Main %*
 
 @del %lock%
