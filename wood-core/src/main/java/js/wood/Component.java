@@ -376,6 +376,10 @@ public class Component {
 		if (cleanupEditables) {
 			editables.remove();
 		}
+		if (!contentFragment.isRoot()) {
+			addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+			operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
+		}
 		return templateDoc;
 	}
 
@@ -731,6 +735,10 @@ public class Component {
 			if (this.contentElements.isEmpty()) {
 				this.contentElements.add(root);
 			}
+		}
+
+		public Element getRoot() {
+			return root;
 		}
 
 		public String getTemplatePath() {
