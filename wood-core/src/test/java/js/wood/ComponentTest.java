@@ -38,6 +38,8 @@ public class ComponentTest {
 	@Mock
 	private FilePath stylePath;
 	@Mock
+	private FilePath scriptPath;
+	@Mock
 	private FilePath descriptorPath;
 	@Mock
 	private IReferenceHandler referenceHandler;
@@ -63,6 +65,8 @@ public class ComponentTest {
 		when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorPath);
 		when(layoutPath.cloneTo(FileType.STYLE)).thenReturn(stylePath);
 
+		when(descriptorPath.cloneTo(FileType.SCRIPT)).thenReturn(scriptPath);
+		
 		when(compoDir.getFilePath(any())).thenReturn(Mockito.mock(FilePath.class));
 	}
 

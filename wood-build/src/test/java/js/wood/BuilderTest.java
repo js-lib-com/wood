@@ -68,8 +68,11 @@ public class BuilderTest {
 		when(layoutPath.exists()).thenReturn(true);
 		when(layoutPath.isLayout()).thenReturn(true);
 		when(layoutPath.getProject()).thenReturn(project);
-		when(layoutPath.cloneTo(FileType.XML)).thenReturn(Mockito.mock(FilePath.class));
+
+		FilePath descriptorPath = Mockito.mock(FilePath.class);
+		when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorPath);
 		when(layoutPath.cloneTo(FileType.STYLE)).thenReturn(Mockito.mock(FilePath.class));
+		when(descriptorPath.cloneTo(FileType.SCRIPT)).thenReturn(Mockito.mock(FilePath.class));
 		when(layoutPath.getReader()).thenReturn(new StringReader("<body><h1>Test Page</h1></body>"));
 
 		CompoPath compoPath = Mockito.mock(CompoPath.class);

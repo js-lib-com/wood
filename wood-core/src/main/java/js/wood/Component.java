@@ -90,6 +90,10 @@ public class Component {
 	 * Descriptors for page meta elements, declared on this component descriptor. Meta descriptors order is preserved.
 	 * <p>
 	 * This field is optional with default to empty list.
+	 * <p>
+	 * Implementation note: use list instead of linked hash set to simplify the interface of this class, even if this means to
+	 * add some extra internal checks, when insert values. The same is true for {@link #linkDescriptors} and
+	 * {@link #scriptDescriptors}.
 	 */
 	private final List<IMetaDescriptor> metaDescriptors = new ArrayList<>();
 
@@ -157,10 +161,7 @@ public class Component {
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
-
-		addAll(metaDescriptors, descriptor.getMetaDescriptors());
-		addAll(linkDescriptors, descriptor.getLinkDescriptors());
-		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
+		mergeDescriptor(descriptor);
 	}
 
 	public void clean() {
@@ -563,9 +564,22 @@ public class Component {
 	private void mergeDescriptor(FilePath layoutPath) {
 		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
 		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		mergeDescriptor(descriptor);
+	}
+
+	private void mergeDescriptor(ComponentDescriptor descriptor) {
 		addAll(metaDescriptors, descriptor.getMetaDescriptors());
 		addAll(linkDescriptors, descriptor.getLinkDescriptors());
 		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
+
+		// by convention, component path and, descriptor and script files have the same name
+		FilePath scriptFile = descriptor.getFilePath().cloneTo(FileType.SCRIPT);
+		if (scriptFile.exists()) {
+			IScriptDescriptor script = ScriptDescriptor.create(scriptFile);
+			if (!scriptDescriptors.contains(script)) {
+				scriptDescriptors.add(script);
+			}
+		}
 	}
 
 	/**

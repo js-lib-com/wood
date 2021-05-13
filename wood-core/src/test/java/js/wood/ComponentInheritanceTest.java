@@ -1,6 +1,5 @@
 package js.wood;
 
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -48,6 +47,8 @@ public class ComponentInheritanceTest {
 	@Mock
 	private FilePath pageStyle; // style file for page template
 	@Mock
+	private FilePath pageScript; // script file for page template
+	@Mock
 	private CompoPath pageCompo; // path to page editable element, declared on template
 
 	@Mock
@@ -56,6 +57,8 @@ public class ComponentInheritanceTest {
 	private FilePath templateDescriptor;
 	@Mock
 	private FilePath templateStyle; // style file for template component
+	@Mock
+	private FilePath templateScript; // script file for template component
 	@Mock
 	private CompoPath templateCompo; // path to template editable element, declared on component
 	@Mock
@@ -69,6 +72,8 @@ public class ComponentInheritanceTest {
 	private FilePath compoDescriptor;
 	@Mock
 	private FilePath compoStyle; // style file for component
+	@Mock
+	private FilePath compoScript; // script file for component
 
 	@Mock
 	private IReferenceHandler referenceHandler;
@@ -84,12 +89,14 @@ public class ComponentInheritanceTest {
 		when(pageLayout.isLayout()).thenReturn(true);
 		when(pageLayout.cloneTo(FileType.XML)).thenReturn(pageDescriptor);
 		when(pageLayout.cloneTo(FileType.STYLE)).thenReturn(pageStyle);
+		when(pageDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(pageScript);
 		when(pageCompo.getLayoutPath()).thenReturn(pageLayout);
 
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 		when(templateLayout.cloneTo(FileType.XML)).thenReturn(templateDescriptor);
 		when(templateLayout.cloneTo(FileType.STYLE)).thenReturn(templateStyle);
+		when(templateDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(templateScript);
 		when(templateCompo.getLayoutPath()).thenReturn(templateLayout);
 
 		when(compoPath.getLayoutPathEx()).thenReturn(compoLayout);
@@ -99,6 +106,7 @@ public class ComponentInheritanceTest {
 		when(compoLayout.isLayout()).thenReturn(true);
 		when(compoLayout.cloneTo(FileType.XML)).thenReturn(compoDescriptor);
 		when(compoLayout.cloneTo(FileType.STYLE)).thenReturn(compoStyle);
+		when(compoDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(compoScript);
 	}
 
 	@Test
@@ -426,6 +434,36 @@ public class ComponentInheritanceTest {
 
 		assertThat(layout.getByTag("article"), notNullValue());
 		assertThat(layout.getByTag("section"), notNullValue());
+	}
+
+	@Test
+	public void GivenSingleInlineTemplate_ThenMergeAttributes() {
+		// given
+		String templateHTML = "" + //
+				"<article xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section class='template' w:editable='section'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<section data-list='list' class='compo' w:template='res/template#section'>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		Element section = layout.getByTag("section");
+		assertThat(section.getAttr("data-list"), equalTo("list"));
+		assertThat(section.hasCssClass("template"), equalTo(true));
+		assertThat(section.hasCssClass("compo"), equalTo(true));
 	}
 
 	@Test
@@ -839,6 +877,83 @@ public class ComponentInheritanceTest {
 			assertFalse(sections.item(i).hasAttrNS(WOOD.NS, "editable"));
 			assertFalse(sections.item(i).hasAttrNS(WOOD.NS, "content"));
 		}
+	}
+
+	@Test
+	public void GivenTwoEditablesInlineTemplate_ThenBothContentsMerged() {
+		// given
+		String templateHTML = "" + //
+				"<article xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section w:editable='section-1'></section>" + //
+				"	<section w:editable='section-2'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<article type='text/html' w:template='res/template'>" + //
+				"		<section w:content='section-1'>" + //
+				"			<h1>Content One</h1>" + //
+				"		</section>" + //
+				"" + //
+				"		<section w:content='section-2'>" + //
+				"			<h1>Content Two</h1>" + //
+				"		</section>" + //
+				"	</article>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertThat(layout.getTag(), equalTo("body"));
+		assertThat(layout.getByTag("embed"), nullValue());
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(3));
+		assertThat(headings.item(0).getText(), equalTo("Template"));
+		assertThat(headings.item(1).getText(), equalTo("Content One"));
+		assertThat(headings.item(2).getText(), equalTo("Content Two"));
+
+		assertThat(layout.findByTag("section").size(), equalTo(2));
+	}
+
+	@Test
+	public void GivenTwoEditablesInlineTemplate_ThenAttributesMerged() {
+		// given
+		String templateHTML = "" + //
+				"<article name='template' class='template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section w:editable='section-1'></section>" + //
+				"	<section w:editable='section-2'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<article name='compo' id='top' class='compo' data-cfg='select:true' w:template='res/template'>" + //
+				"		<section w:content='section-1'></section>" + //
+				"		<section w:content='section-2'></section>" + //
+				"	</article>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+		compo.getLayout().getDocument().dump();
+
+		// then
+		Element layout = compo.getLayout();
+		Element article = layout.getByTag("article");
+		assertThat(article.getAttr("name"), equalTo("compo"));
+		assertThat(article.getAttr("id"), equalTo("top"));
+		assertThat(article.getAttr("data-cfg"), equalTo("select:true"));
+		assertThat(article.hasCssClass("template"), equalTo(true));
+		assertThat(article.hasCssClass("compo"), equalTo(true));
 	}
 
 	@Test

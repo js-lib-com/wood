@@ -119,6 +119,10 @@ public class ComponentDescriptor extends BaseDescriptor {
 		this.referenceResolver = new ReferencesResolver();
 	}
 
+	public FilePath getFilePath() {
+		return filePath;
+	}
+
 	/**
 	 * Get component version or null if missing or not set. This property is loaded from <code>version</code> element. Note that
 	 * version property is especially useful for library components.

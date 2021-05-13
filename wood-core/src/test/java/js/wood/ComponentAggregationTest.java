@@ -38,6 +38,8 @@ public class ComponentAggregationTest {
 	private FilePath compoDescriptor;
 	@Mock
 	private FilePath compoStyle; // style file for component
+	@Mock
+	private FilePath compoScript; // script file for component
 
 	@Mock
 	private IReferenceHandler referenceHandler;
@@ -60,6 +62,8 @@ public class ComponentAggregationTest {
 		when(compoLayout.isLayout()).thenReturn(true);
 		when(compoLayout.cloneTo(FileType.XML)).thenReturn(compoDescriptor);
 		when(compoLayout.cloneTo(FileType.STYLE)).thenReturn(compoStyle);
+		
+		when(compoDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(compoScript);
 	}
 
 	/** Component without template but with child component. */
@@ -68,9 +72,12 @@ public class ComponentAggregationTest {
 		FilePath childLayoutPath = Mockito.mock(FilePath.class);
 		when(childLayoutPath.exists()).thenReturn(true);
 		when(childLayoutPath.isLayout()).thenReturn(true);
-		when(childLayoutPath.cloneTo(FileType.XML)).thenReturn(Mockito.mock(FilePath.class));
+		
+		FilePath childDescriptor = Mockito.mock(FilePath.class);
+		when(childLayoutPath.cloneTo(FileType.XML)).thenReturn(childDescriptor);
 		when(childLayoutPath.cloneTo(FileType.STYLE)).thenReturn(Mockito.mock(FilePath.class));
-
+		when(childDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(Mockito.mock(FilePath.class));
+		
 		String childHTML = "" + //
 				"<div>" + //
 				"	<h1>Child</h1>" + //
@@ -103,8 +110,11 @@ public class ComponentAggregationTest {
 		FilePath childLayoutPath = Mockito.mock(FilePath.class);
 		when(childLayoutPath.exists()).thenReturn(true);
 		when(childLayoutPath.isLayout()).thenReturn(true);
-		when(childLayoutPath.cloneTo(FileType.XML)).thenReturn(Mockito.mock(FilePath.class));
+		
+		FilePath childDescriptor = Mockito.mock(FilePath.class);
+		when(childLayoutPath.cloneTo(FileType.XML)).thenReturn(childDescriptor);
 		when(childLayoutPath.cloneTo(FileType.STYLE)).thenReturn(Mockito.mock(FilePath.class));
+		when(childDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(Mockito.mock(FilePath.class));
 
 		String childHTML = "" + //
 				"<div>" + //
