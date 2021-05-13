@@ -167,14 +167,26 @@ In above snippet we have three component layout files: child, parent and grand-p
 
 Child <div> and its descendants replaces parent <div>. Parent <section> and its descendants - that now include already inserted child <div>, replaces grand-parent <section>.
 
+### Attributes Processing
+
+As a general rule, content element attributes are mixed with editable element attributes, but content attributes take precedence - meaning that content will override template. This allows for template customization at attributes level, specifically CSS class that allow for template styles customization.
+
+
+
+![](D:\docs\workspaces\js-lib\tools\wood\wood\doc\src\template-attributes-processing.png)
+
+
+
+For empty templates all attributes are merged on template component root.
+
 
 
 ### Template Parameters
 
 Beside editable regions a template may contain parameter references for template customization - see `@param/title` . For example, a template for a dialog box may have a title and every dialog, based on this dialog template, can have its own title value.
 
-```
-    template/dialog/dialog.htm
+`template/dialog/dialog.htm`
+```html
     <div class="dialog">
         <h2 class="title">@param/title</h2>
         <div class="box-close"></div>
@@ -183,8 +195,9 @@ Beside editable regions a template may contain parameter references for template
         ...
     </div>
 ```
-```
-    dialog/user/user.htm
+
+`dialog/user/user.htm`
+```html
     <div wood:template="template/dialog#body" wood:param="title:Edit User">
         <form>
         ...
@@ -194,7 +207,7 @@ Beside editable regions a template may contain parameter references for template
 
 Generated user dialog layout will look like below sample code. Body editable is replaces by provided `form` and title updated from parameter.
 
-```
+```html
     <div class="dialog">
         <h2 class="title">Edit User</h2>
         <div class="box-close"></div>

@@ -361,9 +361,10 @@ public class Component {
 
 			if (editableElement.getParent() != null) {
 				// insert content element - and all its descendants into template document, before editable element
+				// ensure that newly imported content element has the same tag as editable element
 				// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
 				editableElement.insertBefore(contentElement);
-				addAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+				addAttrs(editableElement.getPreviousSibling().renameElement(editableElement.getTag()), editableElement.getAttrs());
 				cleanupEditables = true;
 			} else {
 				for (Element child : contentElement.getChildren()) {
@@ -376,10 +377,8 @@ public class Component {
 		if (cleanupEditables) {
 			editables.remove();
 		}
-		if (!contentFragment.isRoot()) {
-			addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
-			operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
-		}
+		addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+		operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
 		return templateDoc;
 	}
 

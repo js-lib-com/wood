@@ -467,6 +467,73 @@ public class ComponentInheritanceTest {
 	}
 
 	@Test
+	public void GivenSingleInlineTemplateWithFormalNotation_ThenMergeAttributes() {
+		// given
+		String templateHTML = "" + //
+				"<article xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section class='template' w:editable='section'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<embed w:template='res/template'>"+//
+				"		<section data-list='list' class='compo' w:content='section'>" + //
+				"			<h1>Content</h1>" + //
+				"		</section>" + //
+				"	</embed>"+//
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		Element section = layout.getByTag("section");
+		assertThat(section.getAttr("data-list"), equalTo("list"));
+		assertThat(section.hasCssClass("template"), equalTo(true));
+		assertThat(section.hasCssClass("compo"), equalTo(true));
+	}
+
+	@Test
+	public void GivenSingleInlineTemplateWithFormalNotationAndRootAttributes_ThenMergeAttributes() {
+		// given
+		String templateHTML = "" + //
+				"<article name='article' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section class='template' w:editable='section'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<embed name='embed' w:template='res/template'>"+//
+				"		<section data-list='list' class='compo' w:content='section'>" + //
+				"			<h1>Content</h1>" + //
+				"		</section>" + //
+				"	</embed>"+//
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+
+		// then
+		Element article = layout.getByTag("article");
+		assertThat(article.getAttr("name"), equalTo("embed"));
+		
+		Element section = layout.getByTag("section");
+		assertThat(section.getAttr("data-list"), equalTo("list"));
+		assertThat(section.hasCssClass("template"), equalTo(true));
+		assertThat(section.hasCssClass("compo"), equalTo(true));
+	}
+
+	@Test
 	public void GivenSingleInlineTemplate_ThenOperatorsRemoved() {
 		// given
 		String templateHTML = "" + //
@@ -944,10 +1011,9 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
-		compo.getLayout().getDocument().dump();
+		Element layout = compo.getLayout();
 
 		// then
-		Element layout = compo.getLayout();
 		Element article = layout.getByTag("article");
 		assertThat(article.getAttr("name"), equalTo("compo"));
 		assertThat(article.getAttr("id"), equalTo("top"));
@@ -993,9 +1059,9 @@ public class ComponentInheritanceTest {
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
 
 		// then
-		Element layout = compo.getLayout();
 		assertThat(layout.getTag(), equalTo("body"));
 		assertThat(layout.getByTag("embed"), nullValue());
 
