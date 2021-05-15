@@ -2,6 +2,8 @@ package js.wood;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -261,6 +263,8 @@ class Preview {
 		head.addText("\r\n");
 	}
 
+	private final List<String> processedScripts = new ArrayList<>();
+
 	/**
 	 * Add script element to HTML document head. If script is embedded its source file is loaded into script element text
 	 * content.
@@ -270,6 +274,15 @@ class Preview {
 	 * @throws IOException if script source loading fails.
 	 */
 	private void addScript(Document doc, IScriptDescriptor script) throws IOException {
+		if (processedScripts.contains(script.getSource())) {
+			return;
+		}
+		processedScripts.add(script.getSource());
+
+		for (IScriptDescriptor dependency : script.getDependencies()) {
+			addScript(doc, dependency);
+		}
+
 		String src = script.getSource();
 		assert src != null;
 		Element head = doc.getByTag("head");

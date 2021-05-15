@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +44,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void setters() throws IOException {
+	public void setters() throws IOException, XPathExpressionException {
 		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
 		when(meta.getHttpEquiv()).thenReturn("X-UA-Compatible");
 		when(meta.getContent()).thenReturn("IE=9; IE=8; IE=7; IE=EDGE");
@@ -131,7 +133,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_Defer() throws IOException {
+	public void addScript_Defer() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		when(script.getDefer()).thenReturn("true");
@@ -145,7 +147,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_Embedded() throws IOException {
+	public void addScript_Embedded() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.isEmbedded()).thenReturn(true).thenReturn(true);
 		when(script.getSource()).thenReturn("lib/sdk/analytics.js");
@@ -158,7 +160,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_External() throws IOException {
+	public void addScript_External() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("http://js-lib.com/sdk/analytics.js");
 
@@ -168,7 +170,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_UrlAbsolutePath() throws IOException {
+	public void addScript_UrlAbsolutePath() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		
@@ -181,18 +183,18 @@ public class PageDocumentTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void addScript_NullScriptReference() throws IOException {
+	public void addScript_NullScriptReference() throws IOException, XPathExpressionException {
 		page.addScript(null, filePath -> null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void addScript_MissingSource() throws IOException {
+	public void addScript_MissingSource() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		page.addScript(script, filePath -> null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void addScript_NullHandler() throws IOException {
+	public void addScript_NullHandler() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		page.addScript(script, null);

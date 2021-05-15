@@ -22,5 +22,5 @@
 		<script src="lib/js-lib/js-lib.js" type="text/javascript"></script>
 	</scripts>
 	
-	<excludes>res/page/about/</excludes>
+	<excludes>build/,res/page/about/</excludes>
 </project>

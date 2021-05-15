@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +46,7 @@ public class PreviewTest {
 	}
 
 	@Test
-	public void serialize() throws IOException, SAXException {
+	public void serialize() throws IOException, SAXException, XPathExpressionException {
 		// project fixture
 
 		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);

@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +73,7 @@ public class BuildPageTest {
 	}
 
 	@Test
-	public void buildPage() throws IOException, SAXException {
+	public void buildPage() throws IOException, SAXException, XPathExpressionException {
 		// project fixture
 		
 		when(manifest.exists()).thenReturn(true);

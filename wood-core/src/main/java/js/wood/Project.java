@@ -1,6 +1,7 @@
 package js.wood;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
+import js.wood.impl.ScriptsDependencies;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -127,6 +129,8 @@ public class Project {
 		default:
 			operatorsHandler = null;
 		}
+
+		ScriptsDependencies.instance().scan(this);
 	}
 
 	public Factory getFactory() {
@@ -171,6 +175,10 @@ public class Project {
 	 */
 	public DirPath getProjectDir() {
 		return projectDir;
+	}
+
+	public List<DirPath> getExcludes() {
+		return excludes;
 	}
 
 	/**
@@ -370,9 +378,5 @@ public class Project {
 
 	ProjectDescriptor getDescriptor() {
 		return descriptor;
-	}
-
-	List<DirPath> getExcludes() {
-		return excludes;
 	}
 }

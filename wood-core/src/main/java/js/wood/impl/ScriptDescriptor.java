@@ -1,6 +1,9 @@
 package js.wood.impl;
 
+import java.util.List;
+
 import js.dom.Element;
+import js.util.Params;
 import js.wood.FilePath;
 import js.wood.IScriptDescriptor;
 
@@ -12,7 +15,7 @@ import js.wood.IScriptDescriptor;
  * @since 1.0
  */
 public class ScriptDescriptor implements IScriptDescriptor {
-	/** Script source is the URL from where third script is to be loaded. */
+	/** Script source is local file path or the URL from where third script is to be loaded. */
 	private final String source;
 
 	private String type;
@@ -26,13 +29,19 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	private boolean embedded;
 	private boolean dynamic;
 
-	public ScriptDescriptor(String source) {
+	private ScriptDescriptor(String source) {
+		Params.notNull(source, "Script source");
 		this.source = source;
 	}
 
 	@Override
 	public String getSource() {
 		return source;
+	}
+
+	@Override
+	public List<IScriptDescriptor> getDependencies() {
+		return ScriptsDependencies.instance().getScriptDependencies(source);
 	}
 
 	public void setType(String type) {

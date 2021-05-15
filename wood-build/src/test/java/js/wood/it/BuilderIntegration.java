@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -122,7 +124,7 @@ public class BuilderIntegration {
 	};
 
 	@Test
-	public void buildIntegration() throws IOException, SAXException {
+	public void buildIntegration() throws IOException, SAXException, XPathExpressionException {
 		BuilderConfig config = new BuilderConfig();
 		config.setProjectDir(new File("src/test/resources/project"));
 		Builder builder = new Builder(config);

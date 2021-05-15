@@ -495,7 +495,7 @@ public class Component {
 	 */
 	public IScriptDescriptor getScriptDescriptor(String fileName) {
 		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(fileName);
-		return file.exists() ? new ScriptDescriptor(file.value()) : null;
+		return file.exists() ? ScriptDescriptor.create(file) : null;
 	}
 
 	/**

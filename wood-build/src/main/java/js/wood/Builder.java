@@ -176,13 +176,20 @@ public class Builder implements IReferenceHandler {
 		}
 
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
-			pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
+			addScript(pageComponent, pageDocument, script);
 		}
 		for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
-			pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
+			addScript(pageComponent, pageDocument, script);
 		}
 
 		buildFS.writePage(pageComponent, pageDocument.getDocument());
+	}
+
+	private void addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
+		for (IScriptDescriptor dependency : script.getDependencies()) {
+			addScript(pageComponent, pageDocument, dependency);
+		}
+		pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
 	}
 
 	/**
@@ -233,7 +240,7 @@ public class Builder implements IReferenceHandler {
 
 		case SCRIPT:
 			return buildFS.writeScriptMedia(mediaFile);
-			
+
 		default:
 		}
 		return null;

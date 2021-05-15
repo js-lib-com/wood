@@ -54,7 +54,7 @@ public class BuilderIntegrationTest {
 	}
 
 	@Test
-	public void build() throws IOException {
+	public void build() throws IOException, XPathExpressionException {
 		BuilderProject project = project("project");
 
 		// initialize probes
@@ -117,7 +117,6 @@ public class BuilderIntegrationTest {
 	}
 
 	private static void assertPageDocument(Document doc) throws XPathExpressionException {
-		doc.dump();
 		assertThat(doc.getByTag("title").getText(), equalTo("Test Project / Index"));
 
 		EList metas = doc.findByTag("meta");

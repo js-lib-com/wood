@@ -1,6 +1,8 @@
 package js.wood;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
@@ -216,6 +218,8 @@ class PageDocument {
 		head.addText("\r\n");
 	}
 
+	private final List<String> processedScripts = new ArrayList<>();
+
 	/**
 	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script reference
 	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See
@@ -238,6 +242,11 @@ class PageDocument {
 		Params.notNull(script, "Script reference");
 		Params.notNull(script.getSource(), "The source of script");
 		Params.notNull(handler, "File handler");
+
+		if (processedScripts.contains(script.getSource())) {
+			return;
+		}
+		processedScripts.add(script.getSource());
 
 		final BuilderProject project = (BuilderProject) component.getProject();
 		String src = script.getSource();

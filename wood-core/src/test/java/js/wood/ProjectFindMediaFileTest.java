@@ -34,8 +34,9 @@ public class ProjectFindMediaFileTest {
 	private FilePath sourceFile;
 	@Mock
 	private Reference reference;
-
+	
 	private Directory projectRoot;
+	
 	private Project project;
 	private DirPath sourceDirPath;
 
@@ -54,7 +55,8 @@ public class ProjectFindMediaFileTest {
 				new XFile("logo_ja.png") });
 
 		// findMediaFile is always used with verified reference and does not perform its own check
-		// therefore resource type can be anything, including null; therefore next Mockito line is not necessary
+		// therefore resource type can be anything, including null
+		// as a consequence next Mockito line is not necessary and is commented out
 		// when(reference.getResourceType()).thenReturn(ResourceType.IMAGE);
 
 		when(reference.getName()).thenReturn("logo");
