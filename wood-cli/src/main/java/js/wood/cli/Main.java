@@ -11,6 +11,7 @@ import com.jslib.commons.cli.Task;
 
 import js.io.IConsole;
 import js.lang.BugError;
+import js.wood.cli.atref.RenameVariable;
 import js.wood.cli.compo.CompoCommands;
 import js.wood.cli.compo.CompoCreate;
 import js.wood.cli.compo.CompoDelete;
@@ -67,6 +68,10 @@ public class Main {
 		CommandLine createCommands = new CommandLine(new CreateCommands());
 		createCommands.addSubcommand(task(CreateIcons.class));
 
+		CommandLine renameCommands = new CommandLine(new RenameCommands());
+		renameCommands.addSubcommand(task(CompoRename.class));
+		renameCommands.addSubcommand(task(RenameVariable.class));
+
 		CommandLine compoCommands = new CommandLine(new CompoCommands());
 		compoCommands.addSubcommand(task(CompoCreate.class));
 		compoCommands.addSubcommand(task(CompoDelete.class));
@@ -90,6 +95,8 @@ public class Main {
 
 		CommandLine commandLine = new CommandLine(this);
 		commandLine.addSubcommand(createCommands);
+		commandLine.addSubcommand(renameCommands);
+		
 		commandLine.addSubcommand(compoCommands);
 		commandLine.addSubcommand(runtimeCommands);
 		commandLine.addSubcommand(configCommands);
