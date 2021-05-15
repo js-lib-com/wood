@@ -15,7 +15,6 @@ import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.ScriptsDependencies;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -129,8 +128,6 @@ public class Project {
 		default:
 			operatorsHandler = null;
 		}
-
-		ScriptsDependencies.instance().scan(this);
 	}
 
 	public Factory getFactory() {

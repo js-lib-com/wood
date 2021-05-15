@@ -1,11 +1,7 @@
 package js.wood;
 
-import java.util.List;
-
 public interface IScriptDescriptor {
 	String getSource();
-
-	List<IScriptDescriptor> getDependencies();
 
 	String getType();
 

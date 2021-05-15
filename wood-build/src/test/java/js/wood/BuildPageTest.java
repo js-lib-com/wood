@@ -31,6 +31,7 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
+import js.wood.impl.ScriptsDependencies;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildPageTest {
@@ -42,6 +43,8 @@ public class BuildPageTest {
 	private Component page;
 	@Mock
 	private BuildFS buildFS;
+	@Mock
+	private ScriptsDependencies scriptsDependencies;
 
 	@Mock
 	private FilePath manifest;
@@ -69,7 +72,7 @@ public class BuildPageTest {
 		when(page.getDisplay()).thenReturn("Test Page");
 		when(page.getDescription()).thenReturn("Test page description.");
 
-		builder = new Builder(project, buildFS);
+		builder = new Builder(project, buildFS, scriptsDependencies);
 	}
 
 	@Test

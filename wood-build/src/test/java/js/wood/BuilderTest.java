@@ -29,6 +29,7 @@ import js.dom.Document;
 import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.ResourceType;
+import js.wood.impl.ScriptsDependencies;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,6 +38,8 @@ public class BuilderTest {
 	private BuilderProject project;
 	@Mock
 	private BuildFS buildFS;
+	@Mock
+	private ScriptsDependencies scriptsDependencies;
 	@Mock
 	private Variables dirVariables;
 	@Mock
@@ -51,7 +54,7 @@ public class BuilderTest {
 		when(project.getVariables()).thenReturn(variables);
 		when(project.getAssetVariables()).thenReturn(assetVariables);
 
-		builder = new Builder(project, buildFS);
+		builder = new Builder(project, buildFS,scriptsDependencies);
 		builder.setLocale(Locale.ENGLISH);
 	}
 

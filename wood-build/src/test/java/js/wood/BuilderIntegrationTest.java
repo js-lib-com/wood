@@ -24,6 +24,7 @@ import org.junit.Test;
 import js.dom.Document;
 import js.dom.EList;
 import js.util.Files;
+import js.wood.impl.ScriptsDependencies;
 
 public class BuilderIntegrationTest {
 	private File buildDir;
@@ -73,7 +74,7 @@ public class BuilderIntegrationTest {
 				pageFileNames.add(page.getLayoutFileName());
 			}
 		};
-		Builder builder = new Builder(project, buildFS);
+		Builder builder = new Builder(project, buildFS, new ScriptsDependencies());
 		builder.build();
 
 		assertThat(locales, hasSize(4));
@@ -107,7 +108,7 @@ public class BuilderIntegrationTest {
 			}
 		};
 
-		Builder builder = new Builder(project, buildFS);
+		Builder builder = new Builder(project, buildFS, new ScriptsDependencies());
 		Locale locale = new Locale("en");
 		builder.setLocale(locale);
 		buildFS.setLocale(locale);

@@ -21,6 +21,7 @@ import js.log.LogFactory;
 import js.rmi.BusinessException;
 import js.util.Classes;
 import js.util.Files;
+import js.wood.impl.ScriptsDependencies;
 
 /**
  * Preview Servlet allows access from browser to project components and resource files. This allows to use browser for
@@ -195,10 +196,11 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			// update variables cache every time a component is requested
 			variables.update();
 
+			ScriptsDependencies scriptsDependencies = new ScriptsDependencies();
 			// create component with support for preview script
 			Component compo = factory.createComponent(layoutPath, this);
-			boolean controlScript = httpRequest.getServletContext().getAttribute(EventsServlet.class.getName()) != null; 
-			Preview preview = new Preview(project, compo, contextPath, controlScript);
+			boolean controlScript = httpRequest.getServletContext().getAttribute(EventsServlet.class.getName()) != null;
+			Preview preview = new Preview(project, scriptsDependencies, compo, contextPath, controlScript);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}

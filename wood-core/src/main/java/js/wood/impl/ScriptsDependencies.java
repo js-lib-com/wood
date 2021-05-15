@@ -21,30 +21,12 @@ import js.wood.IScriptDescriptor;
 import js.wood.Project;
 
 public class ScriptsDependencies {
-	private static ScriptsDependencies instance;
-	private static final Object mutex = new Object();
-
-	public static ScriptsDependencies instance() {
-		if (instance == null) {
-			synchronized (mutex) {
-				if (instance == null) {
-					instance = new ScriptsDependencies();
-				}
-			}
-		}
-		return instance;
-	}
-
 	private final Map<String, List<IScriptDescriptor>> dependencies = new HashMap<>();
 
-	private ScriptsDependencies() {
+	public ScriptsDependencies() {
 	}
 
 	public void scan(Project project) {
-		// TODO: hack - disable scan on testing
-		if(project.getProjectRoot().getPath().equals(".")) {
-			return;
-		}
 		scan(project.getProjectDir(), project.getExcludes());
 	}
 

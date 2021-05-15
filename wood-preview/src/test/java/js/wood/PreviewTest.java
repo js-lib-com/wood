@@ -28,11 +28,14 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
+import js.wood.impl.ScriptsDependencies;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewTest {
 	@Mock
 	private Project project;
+	@Mock
+	private ScriptsDependencies scriptsDependencies;
 	@Mock
 	private Component compo;
 	@Mock
@@ -42,7 +45,7 @@ public class PreviewTest {
 
 	@Before
 	public void beforeTest() {
-		preview = new Preview(project, compo, "test", true);
+		preview = new Preview(project, scriptsDependencies, compo, "test", true);
 	}
 
 	@Test
@@ -52,7 +55,7 @@ public class PreviewTest {
 		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
 		when(project.getAuthor()).thenReturn("Iulian Rotaru");
 		when(project.getThemeStyles()).thenReturn(theme);
-		
+
 		List<IMetaDescriptor> projectMetas = metas("og:url", "http://kids-cademy.com");
 		when(project.getMetaDescriptors()).thenReturn(projectMetas);
 
@@ -135,7 +138,7 @@ public class PreviewTest {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	
+
 	private static void assertHead(Element element, String tag, String textContent) {
 		assertThat(element, notNullValue());
 		assertThat(element.getTag(), equalTo(tag));

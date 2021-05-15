@@ -1,7 +1,5 @@
 package js.wood.impl;
 
-import java.util.List;
-
 import js.dom.Element;
 import js.util.Params;
 import js.wood.FilePath;
@@ -37,11 +35,6 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	@Override
 	public String getSource() {
 		return source;
-	}
-
-	@Override
-	public List<IScriptDescriptor> getDependencies() {
-		return ScriptsDependencies.instance().getScriptDependencies(source);
 	}
 
 	public void setType(String type) {
