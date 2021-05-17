@@ -249,8 +249,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
-		builder.append(Path.SEPARATOR_CHAR);
-		builder.append(mediaFile.getParentDirPath().value());
+		builder.append(FilePath.SEPARATOR_CHAR);
+		builder.append(mediaFile.getParentDir().value());
 		builder.append(mediaFile.getName());
 		return builder.toString();
 	}

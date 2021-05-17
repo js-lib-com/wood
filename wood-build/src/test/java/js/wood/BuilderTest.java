@@ -49,7 +49,7 @@ public class BuilderTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		Map<DirPath, Variables> variables = new HashMap<>();
+		Map<FilePath, Variables> variables = new HashMap<>();
 		variables.put(null, dirVariables);
 		when(project.getVariables()).thenReturn(variables);
 		when(project.getAssetVariables()).thenReturn(assetVariables);

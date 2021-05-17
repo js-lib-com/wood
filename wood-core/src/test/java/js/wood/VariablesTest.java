@@ -50,7 +50,7 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
-		DirPath dir = Mockito.mock(DirPath.class);
+		FilePath dir = Mockito.mock(FilePath.class);
 		when(dir.getProject()).thenReturn(project);
 		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
 		
@@ -190,7 +190,7 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
-		DirPath dir = Mockito.mock(DirPath.class);
+		FilePath dir = Mockito.mock(FilePath.class);
 		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
 
 		Variables variables = new Variables(project);
@@ -248,7 +248,7 @@ public class VariablesTest {
 				"</string>";
 		when(files[1].getReader()).thenReturn(new StringReader(xml2));
 
-		DirPath dir = Mockito.mock(DirPath.class);
+		FilePath dir = Mockito.mock(FilePath.class);
 		when(dir.getProject()).thenReturn(project);
 		when(dir.iterator()).thenReturn(Arrays.asList(files).iterator());
 

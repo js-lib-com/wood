@@ -80,7 +80,7 @@ import js.util.Params;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public class CompoPath extends DirPath {
+public class CompoPath extends FilePath {
 	/** Component path pattern. */
 	protected static final Pattern PATTERN = Pattern.compile("^(" + //
 			"(?:[a-z0-9-]+/)*" + // path segments
@@ -114,7 +114,7 @@ public class CompoPath extends DirPath {
 		if (!matcher.find()) {
 			throw new WoodException("Invalid component path |%s|.", compoPath);
 		}
-		return matcher.group(1) + Path.SEPARATOR_CHAR;
+		return matcher.group(1) + FilePath.SEPARATOR_CHAR;
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class CompoPath extends DirPath {
 		if (file.isDirectory()) {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
-		return factory.createFilePath(value.substring(0, value.length() - 1) + CT.DOT_LAYOUT_EXT);
+		return factory.createFilePath(value().substring(0, value().length() - 1) + CT.DOT_LAYOUT_EXT);
 	}
 
 	/**

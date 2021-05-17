@@ -15,7 +15,6 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
-import js.wood.DirPath;
 import js.wood.FilePath;
 import js.wood.IScriptDescriptor;
 import js.wood.Project;
@@ -30,10 +29,10 @@ public class ScriptsDependencies {
 		scan(project.getProjectDir(), project.getExcludes());
 	}
 
-	private void scan(DirPath dir, List<DirPath> excludes) {
+	private void scan(FilePath dir, List<FilePath> excludes) {
 		dir.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) {
+			public void onDirectory(FilePath dir) {
 				if (!excludes.contains(dir)) {
 					scan(dir, excludes);
 				}

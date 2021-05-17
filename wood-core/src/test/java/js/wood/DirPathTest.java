@@ -5,14 +5,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class DirPathTest {
 	}
 
 	@Test
-	public void constructor() {
+	public void GivenValidPath_WhenConstructor_ThenInternalStateInit() {
 		assertDirPath("res/", "res/", "res");
 		assertDirPath("res/path/compo/", "res/path/compo/", "compo");
 		assertDirPath("res/compo/video-player/", "res/compo/video-player/", "video-player");
@@ -51,99 +50,112 @@ public class DirPathTest {
 	}
 
 	private void assertDirPath(String pathValue, String value, String name) {
-		DirPath dirPath = new DirPath(project, pathValue);
+		FilePath dirPath = new FilePath(project, pathValue);
 		assertThat(dirPath.value(), equalTo(value));
 		assertThat(dirPath.toString(), equalTo(value));
 		assertThat(dirPath.getName(), equalTo(name));
-		assertFalse(dirPath.isRoot());
+		assertFalse(dirPath.isProjectRoot());
 		assertFalse(dirPath.isComponent());
 	}
 
 	@Test
-	public void constructor_RootDirectory() {
-		DirPath dirPath = new DirPath(project);
-		assertThat(dirPath.value(), equalTo(""));
-		assertThat(dirPath.toString(), equalTo(""));
-		assertThat(dirPath.getName(), equalTo(""));
-		assertTrue(dirPath.isRoot());
+	public void GivenValidDotPath_WhenConstructor_ThenInitAsProjectRoot() {
+		FilePath dirPath = new FilePath(project, ".");
+		assertThat(dirPath.value(), equalTo("."));
+		assertThat(dirPath.toString(), equalTo("."));
+		assertThat(dirPath.getName(), equalTo("."));
+		assertTrue(dirPath.isProjectRoot());
 		assertFalse(dirPath.isComponent());
 	}
 
-	@Test
-	public void constructor_InvalidValue() {
-		for (String path : new String[] { "invalid-source-dir", "/res/absolute/path", "res/invalid_name/" }) {
-			try {
-				new DirPath(project, path);
-				fail("Invlaid directory path should rise exception.");
-			} catch (Exception e) {
-				assertThat(e, instanceOf(WoodException.class));
-			}
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void GivenValidEmptyPath_WhenConstructor_ThenException() {
+		new FilePath(project, "");
+	}
+
+	@Test(expected = WoodException.class)
+	public void GivenPathWithUnderscore_WhenConstruct_ThenException() {
+		new FilePath(project, "res/page_en");
 	}
 
 	@Test
-	public void getFilePath() {
-		FilePath filePath = Mockito.mock(FilePath.class);
-		when(filePath.value()).thenReturn("res/page/strings.xml");
-		when(factory.createFilePath("res/page/strings.xml")).thenReturn(filePath);
+	public void GivenDirPathWithoutTrailingSeparator_WhenGetFilePath_ThenNotNullValue() {
+		// given
+		when(factory.createFilePath("res/page/strings.xml")).thenReturn(mock(FilePath.class));
+		FilePath dirPath = new FilePath(project, "res/page");
 
-		DirPath dirPath = new DirPath(project, "res/page/");
-		filePath = dirPath.getFilePath("strings.xml");
+		// when
+		FilePath filePath = dirPath.getFilePath("strings.xml");
+
+		// then
 		assertThat(filePath, notNullValue());
-		assertThat(filePath.value(), equalTo("res/page/strings.xml"));
 	}
 
 	@Test
-	public void getSubdirPath() {
-		DirPath subdirPath = Mockito.mock(DirPath.class);
-		when(subdirPath.value()).thenReturn("res/page/media/");
-		when(factory.createDirPath("res/page/media")).thenReturn(subdirPath);
-
-		DirPath dirPath = new DirPath(project, "res/page/");
-		subdirPath = dirPath.getSubdirPath("media");
+	public void GivenDirPathWithoutTrailingSeparator_WhenGetSubdirPath_ThenNotNullValue() {
+		// given
+		when(factory.createFilePath("res/page/media/")).thenReturn(mock(FilePath.class));
+		FilePath dirPath = new FilePath(project, "res/page");
+		
+		// when
+		FilePath subdirPath = dirPath.getSubdirPath("media");
+		
+		// then
 		assertThat(subdirPath, notNullValue());
-		assertThat(subdirPath.value(), equalTo("res/page/media/"));
 	}
 
 	@Test
 	public void getSubdirPath_WithTrailingSeparator() {
-		DirPath subdirPath = Mockito.mock(DirPath.class);
+		FilePath subdirPath = Mockito.mock(FilePath.class);
 		when(subdirPath.value()).thenReturn("res/page/media/");
-		when(factory.createDirPath("res/page/media/")).thenReturn(subdirPath);
+		when(factory.createFilePath("res/page/media/")).thenReturn(subdirPath);
 
-		DirPath dirPath = new DirPath(project, "res/page/");
+		FilePath dirPath = new FilePath(project, "res/page/");
 		subdirPath = dirPath.getSubdirPath("media/");
 		assertThat(subdirPath, notNullValue());
 		assertThat(subdirPath.value(), equalTo("res/page/media/"));
 	}
 
 	@Test
-	public void segments() {
-		DirPath dir = new DirPath(project, "script/js/tools/wood/tests/");
-		assertThat(dir.getPathSegments(), notNullValue());
-		assertThat(dir.getPathSegments(), hasSize(5));
-		assertThat(dir.getPathSegments(), hasItems("script", "js", "tools", "wood", "tests"));
+	public void GivenLongPath_WhenGetPathSegments_ThenNotEmptyStringsList() {
+		// given
+		FilePath dir = new FilePath(project, "script/js/tools/wood/tests/");
+		
+		// when
+		List<String> segments = dir.getPathSegments();
+		
+		assertThat(segments, notNullValue());
+		assertThat(segments, hasSize(5));
+		assertThat(segments, hasItems("script", "js", "tools", "wood", "tests"));
 	}
 
 	@Test
-	public void segments_SourceDirectoryOnly() {
-		DirPath dir = new DirPath(project, "script/");
-		assertThat(dir.getPathSegments(), notNullValue());
-		assertThat(dir.getPathSegments(), hasSize(1));
-		assertThat(dir.getPathSegments(), hasItems("script"));
+	public void GivenSingleSegmentPath_WhenGetPathSegments_ThenListWithOneItem() {
+		// given
+		FilePath dir = new FilePath(project, "script/");
+		
+		// when
+		List<String> segments = dir.getPathSegments();
+		
+		assertThat(segments, notNullValue());
+		assertThat(segments, hasSize(1));
+		assertThat(segments, hasItems("script"));
 	}
 
 	@Test
-	public void iterable() {
+	public void GivenDirWithFiles_WhenLoopForEach_ThenCollectAllFiles() {
+		// given
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 
+		// when
 		List<String> files = new ArrayList<String>();
 		for (FilePath file : dirPath) {
 			files.add(file.value());
 		}
 
+		// then
 		assertThat(files, hasSize(2));
 		assertThat(files, hasItems("compo.htm", "compo.css"));
 	}
@@ -151,7 +163,7 @@ public class DirPathTest {
 	@Test
 	public void iterable_Subdirectories() {
 		File[] sources = new File[] { new SourceDirectory("res/compo") };
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 
 		final List<String> files = new ArrayList<>();
 		for (FilePath file : dirPath) {
@@ -167,7 +179,7 @@ public class DirPathTest {
 		when(dir.getPath()).thenReturn("res/compo");
 		when(dir.exists()).thenReturn(false);
 
-		DirPath dirPath = new DirPath(project, dir);
+		FilePath dirPath = new FilePath(project, dir);
 
 		List<String> files = new ArrayList<String>();
 		for (FilePath file : dirPath) {
@@ -179,7 +191,7 @@ public class DirPathTest {
 
 	@Test
 	public void iterable_NullListFiles() {
-		DirPath dirPath = new DirPath(project, directory(null));
+		FilePath dirPath = new FilePath(project, directory(null));
 
 		List<String> files = new ArrayList<String>();
 		for (FilePath file : dirPath) {
@@ -191,7 +203,7 @@ public class DirPathTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void iterable_Remove() {
-		DirPath dirPath = new DirPath(project, directory(new File[0]));
+		FilePath dirPath = new FilePath(project, directory(new File[0]));
 		dirPath.iterator().remove();
 	}
 
@@ -199,7 +211,7 @@ public class DirPathTest {
 	public void filter() {
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		List<FilePath> files = dirPath.filter(filePath -> filePath.isStyle());
 
 		assertThat(files, hasSize(1));
@@ -210,7 +222,7 @@ public class DirPathTest {
 	public void findFirst() {
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 
 		FilePath file = dirPath.findFirst(filePath -> filePath.isStyle());
 		assertThat(file, notNullValue());
@@ -221,16 +233,16 @@ public class DirPathTest {
 	public void findFirst_NotFound() {
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		assertThat(dirPath.findFirst(filePath -> filePath.isScript()), nullValue());
 	}
 
 	@Test
 	public void files() {
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
-		Path[] paths = initSources(sources);
+		FilePath[] paths = initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			private int index = 0;
 
@@ -244,9 +256,9 @@ public class DirPathTest {
 	@Test
 	public void files_RootDirectory() {
 		File[] sources = new File[] { new SourceFile("project.xml") };
-		Path[] paths = initSources(sources);
+		FilePath[] paths = initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			private int index = 0;
 
@@ -262,7 +274,7 @@ public class DirPathTest {
 		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		final List<String> files = new ArrayList<String>();
 		dirPath.files(new FilesHandler() {
 			@Override
@@ -283,15 +295,15 @@ public class DirPathTest {
 	@Test
 	public void files_HiddenFile() {
 		File[] sources = new File[] { new SourceFile(".gitignore"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
-		Path[] paths = initSources(sources);
+		FilePath[] paths = initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
-			private int index = 0;
+			private int index = 1;
 
 			@Override
 			public void onFile(FilePath filePath) {
-				assertThat(index, lessThan(2));
+				assertThat(index, lessThan(3));
 				assertThat(filePath, equalTo(paths[index++]));
 			}
 		});
@@ -301,13 +313,13 @@ public class DirPathTest {
 	public void files_Subdir() {
 		File[] sources = new File[] { new SourceDirectory("media") };
 
-		DirPath subdir = new DirPath(project, "media/");
-		when(factory.createDirPath(sources[0])).thenReturn(subdir);
+		FilePath subdir = new FilePath(project, "media/");
+		when(factory.createFilePath(sources[0])).thenReturn(subdir);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) {
+			public void onDirectory(FilePath dir) {
 				assertThat(dir, equalTo(subdir));
 			}
 		});
@@ -316,12 +328,12 @@ public class DirPathTest {
 	@Test
 	public void files_Subdir_TrailingSeparator() {
 		File[] sources = new File[] { new SourceDirectory("media/") };
-		Path[] paths = initSources(sources);
+		FilePath[] paths = initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) {
+			public void onDirectory(FilePath dir) {
 				assertThat(dir, equalTo(paths[0]));
 			}
 		});
@@ -332,12 +344,12 @@ public class DirPathTest {
 		File[] sources = new File[] { new SourceDirectory("media"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
 		initSources(sources);
 
-		DirPath dirPath = new DirPath(project, directory(sources));
+		FilePath dirPath = new FilePath(project, directory(sources));
 
 		final List<String> result = new ArrayList<String>();
 		dirPath.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) {
+			public void onDirectory(FilePath dir) {
 				assertThat(dir.value(), equalTo("media/"));
 			}
 
@@ -357,26 +369,23 @@ public class DirPathTest {
 		when(dir.getPath()).thenReturn("res/compo");
 		when(dir.exists()).thenReturn(false);
 
-		DirPath dirPath = new DirPath(project, dir);
+		FilePath dirPath = new FilePath(project, dir);
 		dirPath.files(null);
 	}
 
 	@Test(expected = WoodException.class)
 	public void files_NulllistFiles() {
-		DirPath dirPath = new DirPath(project, directory(null));
+		FilePath dirPath = new FilePath(project, directory(null));
 		dirPath.files(null);
 	}
 
 	@Test
-	public void accept() {
-		assertTrue(DirPath.accept("lib/video-player/"));
-		assertTrue(DirPath.accept("script/js/wood/test/"));
-		assertTrue(DirPath.accept("gen/js/wood/controller/"));
-		assertTrue(DirPath.accept("java/js/wood/test/"));
-
-		assertFalse(DirPath.accept("lib/video-player"));
-		assertFalse(DirPath.accept("lib/video-player/video-player.htm"));
-		assertFalse(DirPath.accept("lib/video-player#body"));
+	public void GivenDirPath_WhenAccept_ThenAlwaysFalse() {
+		assertFalse(FilePath.accept("res/"));
+		assertFalse(FilePath.accept("res"));
+		assertFalse(FilePath.accept("res/template/page/"));
+		assertFalse(FilePath.accept("res/template/page"));
+		assertFalse(FilePath.accept("res_de"));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -415,15 +424,12 @@ public class DirPathTest {
 		return dir;
 	}
 
-	private Path[] initSources(File[] files) {
-		List<Path> paths = new ArrayList<>();
+	private FilePath[] initSources(File[] files) {
+		List<FilePath> paths = new ArrayList<>();
 		for (int i = 0; i < files.length; ++i) {
-			if (files[i].getName().charAt(0) == '.') {
-				continue;
-			}
 			if (files[i] instanceof SourceDirectory) {
-				DirPath path = new DirPath(project, files[i]);
-				when(factory.createDirPath(files[i])).thenReturn(path);
+				FilePath path = new FilePath(project, files[i]);
+				when(factory.createFilePath(files[i])).thenReturn(path);
 				paths.add(path);
 			} else if (files[i] instanceof SourceFile) {
 				FilePath path = new FilePath(project, files[i]);
@@ -431,6 +437,6 @@ public class DirPathTest {
 				paths.add(path);
 			}
 		}
-		return paths.toArray(new Path[0]);
+		return paths.toArray(new FilePath[0]);
 	}
 }

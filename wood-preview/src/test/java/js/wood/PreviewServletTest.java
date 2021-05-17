@@ -168,7 +168,7 @@ public class PreviewServletTest {
 		when(stylePath.isStyle()).thenReturn(true);
 		when(stylePath.getMimeType()).thenReturn("text/css;charset=UTF-8");
 		when(stylePath.getReader()).thenReturn(new StringReader("body { width: 1200px; }"));
-		when(stylePath.getParentDirPath()).thenReturn(mock(DirPath.class));
+		when(stylePath.getParentDir()).thenReturn(mock(FilePath.class));
 
 		servlet.service(httpRequest, httpResponse);
 		assertThat(responseWriter.toString(), equalTo("body { width: 1200px; }"));
@@ -290,11 +290,11 @@ public class PreviewServletTest {
 		Reference reference = new Reference(ResourceType.IMAGE, "res/asset/logo.png");
 		FilePath source = mock(FilePath.class);
 
-		DirPath mediaDir = mock(DirPath.class);
+		FilePath mediaDir = mock(FilePath.class);
 		when(mediaDir.value()).thenReturn("res/asset/");
 
 		FilePath media = mock(FilePath.class);
-		when(media.getParentDirPath()).thenReturn(mediaDir);
+		when(media.getParentDir()).thenReturn(mediaDir);
 		when(media.getName()).thenReturn("logo.png");
 		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(media);
 

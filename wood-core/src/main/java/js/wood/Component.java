@@ -153,7 +153,7 @@ public class Component {
 		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 
 		this.baseLayoutPath = layoutPath;
-		this.name = layoutPath.getBaseName();
+		this.name = layoutPath.getBasename();
 		this.display = descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", Strings.toTitleCase(name)));
 		this.description = descriptor.getDescription(this.display);
 		this.securityRole = descriptor.getSecurityRole();
@@ -494,7 +494,7 @@ public class Component {
 	 * @return script descriptor or null if not defined.
 	 */
 	public IScriptDescriptor getScriptDescriptor(String fileName) {
-		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(fileName);
+		FilePath file = baseLayoutPath.getParentDir().getFilePath(fileName);
 		return file.exists() ? ScriptDescriptor.create(file) : null;
 	}
 

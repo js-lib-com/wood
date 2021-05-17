@@ -46,11 +46,11 @@ public class BuilderIntegrationTest {
 		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
 
-		Map<DirPath, Variables> variables = builder.getProject().getVariables();
+		Map<FilePath, Variables> variables = builder.getProject().getVariables();
 		assertNotNull(variables);
 		assertFalse(variables.isEmpty());
 
-		DirPath themeDir = new DirPath(project, "res/theme/");
+		FilePath themeDir = new FilePath(project, "res/theme/");
 		assertNotNull(variables.get(themeDir));
 	}
 

@@ -214,11 +214,11 @@ public class BuildFsTest {
 
 	@Test
 	public void writeStyle() throws IOException {
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
 
 		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDirPath()).thenReturn(sourceDir);
+		when(styleFile.getParentDir()).thenReturn(sourceDir);
 
 		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style.css"));
 		assertTrue(buildFile("css/style.css").exists());
@@ -226,11 +226,11 @@ public class BuildFsTest {
 
 	@Test
 	public void writeStyle_Locale() throws IOException {
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
 
 		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDirPath()).thenReturn(sourceDir);
+		when(styleFile.getParentDir()).thenReturn(sourceDir);
 
 		buildFS.setLocale(new Locale("ro"));
 
@@ -240,11 +240,11 @@ public class BuildFsTest {
 
 	@Test
 	public void writeStyle_BuildNumber() throws IOException {
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
 
 		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDirPath()).thenReturn(sourceDir);
+		when(styleFile.getParentDir()).thenReturn(sourceDir);
 
 		BuildFS buildFS = new TestBuildFS(buildDir, 4);
 		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style-004.css"));
@@ -253,11 +253,11 @@ public class BuildFsTest {
 
 	@Test(expected = IOException.class)
 	public void writeStyle_IOException() throws IOException {
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
 
 		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDirPath()).thenReturn(sourceDir);
+		when(styleFile.getParentDir()).thenReturn(sourceDir);
 		when(styleFile.getReader()).thenReturn(new ExceptionalReader());
 
 		buildFS.writeStyle(null, styleFile, referenceHandler);

@@ -213,7 +213,7 @@ public class Builder implements IReferenceHandler {
 		}
 		if (reference.isVariable()) {
 			String value = null;
-			Variables dirVariables = project.getVariables().get(source.getParentDirPath());
+			Variables dirVariables = project.getVariables().get(source.getParentDir());
 			if (dirVariables != null) {
 				value = dirVariables.get(locale, reference, source, this);
 			}

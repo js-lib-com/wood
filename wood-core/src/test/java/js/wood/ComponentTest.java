@@ -30,7 +30,7 @@ public class ComponentTest {
 	@Mock
 	private Project project;
 	@Mock
-	private DirPath compoDir;
+	private FilePath compoDir;
 	@Mock
 	private CompoPath compoPath;
 	@Mock
@@ -57,9 +57,9 @@ public class ComponentTest {
 		when(compoPath.getLayoutPathEx()).thenReturn(layoutPath);
 
 		when(layoutPath.getName()).thenReturn("layout.htm");
-		when(layoutPath.getBaseName()).thenReturn("layout");
+		when(layoutPath.getBasename()).thenReturn("layout");
 		when(layoutPath.getProject()).thenReturn(project);
-		when(layoutPath.getParentDirPath()).thenReturn(compoDir);
+		when(layoutPath.getParentDir()).thenReturn(compoDir);
 		when(layoutPath.exists()).thenReturn(true);
 		when(layoutPath.isLayout()).thenReturn(true);
 		when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorPath);

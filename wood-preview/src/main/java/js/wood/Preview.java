@@ -327,7 +327,7 @@ class Preview {
 	private String urlAbsolutePath(FilePath filePath) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
-		builder.append(Path.SEPARATOR_CHAR);
+		builder.append(FilePath.SEPARATOR_CHAR);
 		builder.append(filePath.value());
 		return builder.toString();
 	}

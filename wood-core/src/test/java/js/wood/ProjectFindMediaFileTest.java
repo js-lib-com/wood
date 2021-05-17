@@ -38,7 +38,7 @@ public class ProjectFindMediaFileTest {
 	private Directory projectRoot;
 	
 	private Project project;
-	private DirPath sourceDirPath;
+	private FilePath sourceDirPath;
 
 	@Before
 	public void beforeTest() throws Exception {
@@ -63,7 +63,7 @@ public class ProjectFindMediaFileTest {
 
 		projectRoot = new Directory(".");
 		project = new Project(projectRoot, descriptor);
-		sourceDirPath = new DirPath(project, sourceDir);
+		sourceDirPath = new FilePath(project, sourceDir);
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ProjectFindMediaFileTest {
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, Locale.JAPANESE);
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo_ja.png"));
-		assertThat(mediaFile.getBaseName(), equalTo("logo"));
+		assertThat(mediaFile.getBasename(), equalTo("logo"));
 		assertThat(mediaFile.getVariants().getLocale(), equalTo(Locale.JAPANESE));
 	}
 
@@ -80,7 +80,7 @@ public class ProjectFindMediaFileTest {
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
-		assertThat(mediaFile.getBaseName(), equalTo("logo"));
+		assertThat(mediaFile.getBasename(), equalTo("logo"));
 	}
 
 	/** The same as {@link #nullLocale()} but ensure that default locale media file is last in directory files list. */
@@ -92,12 +92,12 @@ public class ProjectFindMediaFileTest {
 				new XFile("logo_w800.png"), //
 				new XFile("logo_ja.png"), //
 				new XFile("logo.png") });
-		sourceDirPath = new DirPath(project, sourceDir);
+		sourceDirPath = new FilePath(project, sourceDir);
 
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
-		assertThat(mediaFile.getBaseName(), equalTo("logo"));
+		assertThat(mediaFile.getBasename(), equalTo("logo"));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class ProjectFindMediaFileTest {
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, Locale.GERMANY);
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
-		assertThat(mediaFile.getBaseName(), equalTo("logo"));
+		assertThat(mediaFile.getBasename(), equalTo("logo"));
 		assertThat(mediaFile.getVariants().getLocale(), nullValue());
 	}
 
@@ -117,12 +117,12 @@ public class ProjectFindMediaFileTest {
 				new XFile("logo_w800.png"), //
 				new XFile("logo_ja.png"), //
 				new XFile("logo.png") });
-		sourceDirPath = new DirPath(project, sourceDir);
+		sourceDirPath = new FilePath(project, sourceDir);
 
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, Locale.GERMANY);
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
-		assertThat(mediaFile.getBaseName(), equalTo("logo"));
+		assertThat(mediaFile.getBasename(), equalTo("logo"));
 		assertThat(mediaFile.getVariants().getLocale(), nullValue());
 	}
 
@@ -134,16 +134,16 @@ public class ProjectFindMediaFileTest {
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
 		when(mediaFile.value()).thenReturn("logo.png");
-		when(mediaFile.getBaseName()).thenReturn("logo");
+		when(mediaFile.getBasename()).thenReturn("logo");
 
-		DirPath mediaDirPath = Mockito.mock(DirPath.class);
-		when(mediaDirPath.getSubdirPath("icon")).thenReturn(mediaDirPath);
-		when(mediaDirPath.findFirst(any())).thenReturn(mediaFile);
+		FilePath mediaDir = Mockito.mock(FilePath.class);
+		when(mediaDir.getSubdirPath("icon")).thenReturn(mediaDir);
+		when(mediaDir.findFirst(any())).thenReturn(mediaFile);
 
-		FilePath foundMediaFile = Project.findMediaFile(mediaDirPath, reference, null);
+		FilePath foundMediaFile = Project.findMediaFile(mediaDir, reference, null);
 		assertThat(foundMediaFile, notNullValue());
 		assertThat(foundMediaFile.value(), equalTo("logo.png"));
-		assertThat(foundMediaFile.getBaseName(), equalTo("logo"));
+		assertThat(foundMediaFile.getBasename(), equalTo("logo"));
 	}
 
 	// --------------------------------------------------------------------------------------------

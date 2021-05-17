@@ -22,11 +22,11 @@ public class VariablesCacheTest {
 	@Mock
 	private Factory factory;
 	@Mock
-	private DirPath assetDir;
+	private FilePath assetDir;
 	@Mock
 	private Variables assetVariables;
 	@Mock
-	private DirPath sourceDir;
+	private FilePath sourceDir;
 	@Mock
 	private Variables sourceVariables;
 
@@ -57,7 +57,7 @@ public class VariablesCacheTest {
 	public void get() {
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
-		when(source.getParentDirPath()).thenReturn(sourceDir);
+		when(source.getParentDir()).thenReturn(sourceDir);
 		when(sourceVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Compo Title");
 
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
@@ -70,7 +70,7 @@ public class VariablesCacheTest {
 	public void get_Asset() {
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
-		when(source.getParentDirPath()).thenReturn(sourceDir);
+		when(source.getParentDir()).thenReturn(sourceDir);
 		when(assetVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Asset Title");
 
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
@@ -83,7 +83,7 @@ public class VariablesCacheTest {
 	public void get_NotFound() {
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
-		when(source.getParentDirPath()).thenReturn(sourceDir);
+		when(source.getParentDir()).thenReturn(sourceDir);
 
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
 		assertThat(value, nullValue());

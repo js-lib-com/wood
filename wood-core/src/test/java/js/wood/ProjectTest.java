@@ -56,7 +56,7 @@ public class ProjectTest {
 		project = new Project(projectRoot);
 
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
-		assertThat(project.getProjectDir().value(), equalTo(""));
+		assertThat(project.getProjectDir().value(), equalTo("."));
 		assertThat(project.getDescriptor(), notNullValue());
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
@@ -90,7 +90,7 @@ public class ProjectTest {
 		project = new Project(projectRoot, descriptor);
 
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
-		assertThat(project.getProjectDir().value(), equalTo(""));
+		assertThat(project.getProjectDir().value(), equalTo("."));
 		assertThat(project.getDescriptor(), equalTo(descriptor));
 
 		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
@@ -107,7 +107,7 @@ public class ProjectTest {
 		assertThat(project.getDefaultLocale(), equalTo(Locale.FRANCE));
 
 		assertThat(project.getExcludes(), hasSize(2));
-		assertThat(project.getExcludes(), contains(new DirPath(project, "res/page/trivia/"), new DirPath(project, "res/page/experiment/")));
+		assertThat(project.getExcludes(), contains(new FilePath(project, "res/page/trivia/"), new FilePath(project, "res/page/experiment/")));
 		assertThat(project.getOperatorsHandler(), instanceOf(XmlnsOperatorsHandler.class));
 	}
 
@@ -192,11 +192,11 @@ public class ProjectTest {
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
 
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
 
 		FilePath sourceFile = Mockito.mock(FilePath.class);
-		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+		when(sourceFile.getParentDir()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
 		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
@@ -208,9 +208,9 @@ public class ProjectTest {
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		project = new Project(projectRoot, descriptor);
 
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		FilePath sourceFile = Mockito.mock(FilePath.class);
-		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+		when(sourceFile.getParentDir()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
 		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
@@ -224,11 +224,11 @@ public class ProjectTest {
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
 
-		DirPath sourceDir = Mockito.mock(DirPath.class);
+		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
 
 		FilePath sourceFile = Mockito.mock(FilePath.class);
-		when(sourceFile.getParentDirPath()).thenReturn(sourceDir);
+		when(sourceFile.getParentDir()).thenReturn(sourceDir);
 
 		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
 		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);

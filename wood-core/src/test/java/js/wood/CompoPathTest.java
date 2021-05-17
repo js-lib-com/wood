@@ -35,7 +35,7 @@ public class CompoPathTest {
 		when(path.getPath()).thenReturn("res/page");
 
 		CompoPath compoPath = new CompoPath(project, path);
-		assertThat(compoPath.value(), equalTo("res/page"));
+		assertThat(compoPath.value(), equalTo("res/page/"));
 	}
 
 	@Test(expected = WoodException.class)
@@ -58,7 +58,6 @@ public class CompoPathTest {
 		File path = Mockito.mock(File.class);
 		when(path.isDirectory()).thenReturn(true);
 		when(path.getPath()).thenReturn("res/page");
-		when(path.getName()).thenReturn("page");
 
 		CompoPath compo = new CompoPath(project, path);
 		assertThat(compo.getLayoutPathEx().value(), equalTo("res/page/page.htm"));
@@ -83,8 +82,8 @@ public class CompoPathTest {
 	@Test
 	public void equals() {
 		final String path = "res/compo/video-player/";
-		Path dirPath = new DirPath(project, path);
-		Path compoPath = new CompoPath(project, path);
+		FilePath dirPath = new FilePath(project, path);
+		FilePath compoPath = new CompoPath(project, path);
 		assertTrue(dirPath.equals(compoPath));
 	}
 

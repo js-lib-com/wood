@@ -19,17 +19,6 @@ public class Factory {
 		return new FilePath(project, path);
 	}
 
-	public DirPath createDirPath(File file) {
-		return createDirPath(Files.getRelativePath(project.getProjectRoot(), file, true));
-	}
-
-	public DirPath createDirPath(String path) {
-		if (!path.endsWith(Path.SEPARATOR)) {
-			path += Path.SEPARATOR_CHAR;
-		}
-		return new DirPath(project, path);
-	}
-
 	public CompoPath createCompoPath(String path) {
 		return new CompoPath(project, path);
 	}
@@ -38,7 +27,7 @@ public class Factory {
 		return new Component(layoutPath, referenceHandler);
 	}
 
-	public Variables createVariables(DirPath dir) {
+	public Variables createVariables(FilePath dir) {
 		return new Variables(dir);
 	}
 }

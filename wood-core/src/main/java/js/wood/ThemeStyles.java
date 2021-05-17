@@ -8,7 +8,7 @@ public class ThemeStyles {
 	private final FilePath fx;
 	private final List<FilePath> styles = new ArrayList<>();
 
-	public ThemeStyles(DirPath themeDir) {
+	public ThemeStyles(FilePath themeDir) {
 		FilePath reset = null;
 		FilePath fx = null;
 		

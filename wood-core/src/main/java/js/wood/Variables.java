@@ -91,9 +91,9 @@ public class Variables {
 	 * @throws WoodException if SAXA parser initialization fails.
 	 * @see #load(DirPath)
 	 */
-	public Variables(DirPath dirPath) {
+	public Variables(FilePath dirPath) {
 		this(dirPath.getProject());
-		load(dirPath);
+		loadDir(dirPath);
 	}
 
 	/**
@@ -106,9 +106,9 @@ public class Variables {
 	 * @param dirPath directory to scan for variables definition files.
 	 * @see #load(DirPath)
 	 */
-	public void reload(DirPath dirPath) {
+	public void reload(FilePath dirPath) {
 		localeValues.clear();
-		load(dirPath);
+		loadDir(dirPath);
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class Variables {
 	 * @param dirPath directory path.
 	 * @throws WoodException if file reading or parsing fails.
 	 */
-	private void load(DirPath dirPath) {
+	private void loadDir(FilePath dirPath) {
 		for (FilePath filePath : dirPath) {
 			if (filePath.isVariables()) {
 				try {

@@ -37,7 +37,7 @@ public class BuilderProjectTest {
 	}
 
 	@Test
-	public void constructor() {
+	public void GivenTestSetup_ThenProjectInternalState() {
 		assertThat(project.getThemeStyles(), notNullValue());
 		assertThat(project.getAssetVariables(), notNullValue());
 		assertThat(project.getVariables(), notNullValue());
@@ -46,52 +46,56 @@ public class BuilderProjectTest {
 	}
 
 	@Test(expected = WoodException.class)
-	public void loadFile() throws IOException {
+	public void GivenNotExistingFile_WhenLoadFile_ThenException() throws IOException {
 		project.loadFile("scripts/sdk.js");
 	}
 
 	@Test
-	public void scan() {
-		Path[] paths = new Path[3];
+	public void GivenDirWithOneXmlFile_WhenScan_ThenListWithOneItem() {
+		// given
+		FilePath[] paths = new FilePath[3];
 
-		DirPath dir = Mockito.mock(DirPath.class);
+		FilePath dir = Mockito.mock(FilePath.class);
+		when(dir.isDirectory()).thenReturn(true);
 		when(dir.value()).thenReturn("res/page");
 		when(dir.getName()).thenReturn("page");
 		paths[0] = dir;
 
 		FilePath file = Mockito.mock(FilePath.class);
-		when(file.getParentDirPath()).thenReturn((DirPath) paths[0]);
+		when(file.getParentDir()).thenReturn((FilePath) paths[0]);
 		when(file.hasBaseName("page")).thenReturn(true);
 		when(file.isXML("page")).thenReturn(true);
 		paths[1] = file;
 
 		file = Mockito.mock(FilePath.class);
-		when(file.getParentDirPath()).thenReturn((DirPath) paths[0]);
+		when(file.getParentDir()).thenReturn((FilePath) paths[0]);
 		when(file.isXML(ResourceType.variables())).thenReturn(true);
 		when(file.getVariants()).thenReturn(Mockito.mock(Variants.class));
 		when(file.getReader()).thenReturn(new StringReader("<string></string>"));
 		paths[2] = file;
 
+		// when
 		project.scan(new TestDirPath(project, paths));
 
+		// then
 		List<CompoPath> pages = project.getPages();
 		assertThat(pages, hasSize(1));
 		assertThat(pages.get(0).value(), equalTo("res/page/"));
 	}
 
-	private static class TestDirPath extends DirPath {
-		private final Path[] paths;
+	private static class TestDirPath extends FilePath {
+		private final FilePath[] paths;
 
-		public TestDirPath(Project project, Path[] paths) {
-			super(project);
+		public TestDirPath(Project project, FilePath[] paths) {
+			super(project, ".");
 			this.paths = paths;
 		}
 
 		@Override
 		public void files(FilesHandler handler) {
-			for (Path path : paths) {
-				if (path instanceof DirPath) {
-					handler.onDirectory((DirPath) path);
+			for (FilePath path : paths) {
+				if (path.isDirectory()) {
+					handler.onDirectory((FilePath) path);
 				} else {
 					handler.onFile((FilePath) path);
 				}

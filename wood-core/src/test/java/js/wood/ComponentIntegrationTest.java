@@ -34,7 +34,7 @@ public class ComponentIntegrationTest {
 		referenceHandler = new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
-				Variables variables = new Variables(sourcePath.getParentDirPath());
+				Variables variables = new Variables(sourcePath.getParentDir());
 				if (project.getAssetsDir().exists()) {
 					try {
 						Classes.invoke(variables, "load", project.getAssetsDir());

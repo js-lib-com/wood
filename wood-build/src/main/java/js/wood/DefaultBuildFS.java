@@ -136,9 +136,9 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatStyleName(FilePath styleFile) {
-		DirPath dir = styleFile.getParentDirPath();
+		FilePath dir = styleFile.getParentDir();
 		List<String> segments = new ArrayList<String>(dir.getPathSegments());
-		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(styleFile.getBaseName())) {
+		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(styleFile.getBasename())) {
 			segments.remove(segments.size() - 1);
 		}
 		// see #formatMediaName(FilePath) comment
@@ -175,9 +175,9 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatScriptName(FilePath scriptFile) {
-		DirPath dir = scriptFile.getParentDirPath();
+		FilePath dir = scriptFile.getParentDir();
 		List<String> segments = new ArrayList<String>(dir.getPathSegments());
-		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(scriptFile.getBaseName())) {
+		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(scriptFile.getBasename())) {
 			segments.remove(segments.size() - 1);
 		}
 		segments.add(scriptFile.getName());
@@ -215,7 +215,7 @@ class DefaultBuildFS extends BuildFS {
 	 */
 	@Override
 	protected String formatMediaName(FilePath mediaFile) {
-		DirPath dir = mediaFile.getParentDirPath();
+		FilePath dir = mediaFile.getParentDir();
 		List<String> segments = dir.getPathSegments();
 		// uses underscore to separated directories path from file name in order to avoid name collision on sub-directories:
 		// res/template/page/icon-logo.png -> res/template-page_icon-logo.png

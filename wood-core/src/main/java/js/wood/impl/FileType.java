@@ -15,6 +15,8 @@ import js.wood.CT;
  * @since 1.0
  */
 public enum FileType {
+	NONE, 
+	
 	/** Layout is HTM file that describe UI structure. */
 	LAYOUT,
 
@@ -72,7 +74,7 @@ public enum FileType {
 	 */
 	public static FileType forExtension(String extension) {
 		Params.notNull(extension, "File extension");
-		switch (extension) {
+		switch (extension.toLowerCase()) {
 		case CT.LAYOUT_EXT:
 			return FileType.LAYOUT;
 

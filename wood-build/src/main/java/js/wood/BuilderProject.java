@@ -33,7 +33,7 @@ class BuilderProject extends Project {
 	 * Cache for resource variables. Parse variables declared on a source file directory and store in a dictionary with
 	 * directory as key.
 	 */
-	private final Map<DirPath, Variables> variables;
+	private final Map<FilePath, Variables> variables;
 
 	/** Project page components. */
 	private final List<CompoPath> pages;
@@ -47,7 +47,7 @@ class BuilderProject extends Project {
 	public BuilderProject(File projectDir, File buildDir) {
 		super(projectDir);
 
-		this.excludes.add(factory.createDirPath(buildDir));
+		this.excludes.add(factory.createFilePath(buildDir));
 		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetsDir());
 		this.variables = new HashMap<>();
@@ -83,7 +83,7 @@ class BuilderProject extends Project {
 	 * @return project variables.
 	 * @see #variables
 	 */
-	public Map<DirPath, Variables> getVariables() {
+	public Map<FilePath, Variables> getVariables() {
 		return Collections.unmodifiableMap(variables);
 	}
 
@@ -124,10 +124,10 @@ class BuilderProject extends Project {
 	 * 
 	 * @param dir current directory.
 	 */
-	void scan(DirPath dir) {
+	void scan(FilePath dir) {
 		dir.files(new FilesHandler() {
 			@Override
-			public void onDirectory(DirPath dir) {
+			public void onDirectory(FilePath dir) {
 				if (!excludes.contains(dir)) {
 					scan(dir);
 				}
@@ -135,7 +135,7 @@ class BuilderProject extends Project {
 
 			@Override
 			public void onFile(FilePath file) {
-				final DirPath parentDir = file.getParentDirPath();
+				final FilePath parentDir = file.getParentDir();
 				assert parentDir != null;
 
 				// variables definition files are XML files with root element one of defined resource type variables

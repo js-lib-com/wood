@@ -19,7 +19,7 @@ class VariablesCache {
 	private final Variables assetVariables;
 
 	/** Components variables. */
-	private final Map<DirPath, Variables> variablesMap = new HashMap<>();
+	private final Map<FilePath, Variables> variablesMap = new HashMap<>();
 
 	public VariablesCache(Project project) {
 		this.project = project;
@@ -45,12 +45,12 @@ class VariablesCache {
 	 * @return component variables.
 	 */
 	public String get(Locale locale, Reference reference, FilePath sourcePath, IReferenceHandler handler) {
-		Variables sourceVariables = variablesMap.get(sourcePath.getParentDirPath());
+		Variables sourceVariables = variablesMap.get(sourcePath.getParentDir());
 		if (sourceVariables == null) {
 			synchronized (this) {
 				if (sourceVariables == null) {
-					sourceVariables = factory.createVariables(sourcePath.getParentDirPath());
-					variablesMap.put(sourcePath.getParentDirPath(), sourceVariables);
+					sourceVariables = factory.createVariables(sourcePath.getParentDir());
+					variablesMap.put(sourcePath.getParentDir(), sourceVariables);
 				}
 			}
 		}
@@ -65,7 +65,7 @@ class VariablesCache {
 	// --------------------------------------------------------------------------------------------
 	// Test support
 	
-	Map<DirPath, Variables> getVariablesMap() {
+	Map<FilePath, Variables> getVariablesMap() {
 		return variablesMap;
 	}
 }

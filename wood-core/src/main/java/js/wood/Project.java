@@ -42,7 +42,7 @@ public class Project {
 	private final File projectRoot;
 
 	/** Directory path instance used as root. */
-	private final DirPath projectDir;
+	private final FilePath projectDir;
 
 	/**
 	 * Project configuration loaded from <code>project.xml</code> file. It is allowed for project descriptor to be missing in
@@ -66,13 +66,13 @@ public class Project {
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
 	 */
-	private final DirPath assetsDir;
+	private final FilePath assetsDir;
 
 	/**
 	 * Contains site styles for UI primitive elements and theme variables. This directory content describe overall site design -
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
-	private final DirPath themeDir;
+	private final FilePath themeDir;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
@@ -81,7 +81,7 @@ public class Project {
 	private final IOperatorsHandler operatorsHandler;
 
 	/** Directories excluded from build processing. */
-	protected final List<DirPath> excludes;
+	protected final List<FilePath> excludes;
 
 	/**
 	 * Construct and initialize project instance. Created instance is immutable.
@@ -102,12 +102,12 @@ public class Project {
 	Project(File projectRoot, ProjectDescriptor descriptor, Factory... factory) {
 		this.factory = factory.length == 1 ? factory[0] : new Factory(this);
 		this.projectRoot = projectRoot;
-		this.projectDir = new DirPath(this);
+		this.projectDir = new FilePath(this, ".");
 		this.descriptor = descriptor;
-		this.excludes = descriptor.getExcludes().stream().map(exclude -> new DirPath(this, exclude)).collect(Collectors.toList());
+		this.excludes = descriptor.getExcludes().stream().map(exclude -> new FilePath(this, exclude)).collect(Collectors.toList());
 
-		this.assetsDir = this.factory.createDirPath(CT.ASSETS_DIR);
-		this.themeDir = this.factory.createDirPath(CT.THEME_DIR);
+		this.assetsDir = this.factory.createFilePath(CT.ASSETS_DIR);
+		this.themeDir = this.factory.createFilePath(CT.THEME_DIR);
 
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
@@ -170,11 +170,11 @@ public class Project {
 	 * @return project root directory path.
 	 * @see #projectDir
 	 */
-	public DirPath getProjectDir() {
+	public FilePath getProjectDir() {
 		return projectDir;
 	}
 
-	public List<DirPath> getExcludes() {
+	public List<FilePath> getExcludes() {
 		return excludes;
 	}
 
@@ -185,7 +185,7 @@ public class Project {
 	 * @return project assets directory.
 	 * @see #assetsDir
 	 */
-	public DirPath getAssetsDir() {
+	public FilePath getAssetsDir() {
 		return assetsDir;
 	}
 
@@ -196,7 +196,7 @@ public class Project {
 	 * @return site theme directory.
 	 * @see #themeDir
 	 */
-	public DirPath getThemeDir() {
+	public FilePath getThemeDir() {
 		return themeDir;
 	}
 
@@ -315,7 +315,7 @@ public class Project {
 			locale = null;
 		}
 
-		DirPath sourceDir = sourceFile.getParentDirPath();
+		FilePath sourceDir = sourceFile.getParentDir();
 		FilePath mediaFile = findMediaFile(sourceDir, reference, locale);
 		if (mediaFile != null) {
 			return mediaFile;
@@ -334,7 +334,7 @@ public class Project {
 	 * @param locale locale variant, null for project default locale.
 	 * @return media file or null.
 	 */
-	static FilePath findMediaFile(DirPath sourceDir, Reference reference, Locale locale) {
+	static FilePath findMediaFile(FilePath sourceDir, Reference reference, Locale locale) {
 		if (reference.hasPath()) {
 			sourceDir = sourceDir.getSubdirPath(reference.getPath());
 		}
