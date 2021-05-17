@@ -141,14 +141,6 @@ public class CompoPath extends FilePath {
 	 * 
 	 * @return component layout.
 	 */
-	public FilePath getLayoutPathEx() {
-		FilePath layoutPath = getLayoutPath();
-		if (!layoutPath.exists()) {
-			throw new WoodException("Missing component layout |%s|.", layoutPath);
-		}
-		return layoutPath;
-	}
-
 	public FilePath getLayoutPath() {
 		if (file.isDirectory()) {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);

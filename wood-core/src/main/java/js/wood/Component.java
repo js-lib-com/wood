@@ -126,7 +126,7 @@ public class Component {
 	 * @param referenceHandler resource references handler.
 	 */
 	public Component(CompoPath compoPath, IReferenceHandler referenceHandler) {
-		this(compoPath.getLayoutPathEx(), referenceHandler);
+		this(compoPath.getLayoutPath(), referenceHandler);
 	}
 
 	/**
@@ -141,6 +141,9 @@ public class Component {
 	 * @param referenceHandler resource references handler,
 	 */
 	public Component(FilePath layoutPath, IReferenceHandler referenceHandler) {
+		if (!layoutPath.exists()) {
+			throw new WoodException("Missing component layout |%s|.", layoutPath);
+		}
 		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		this.project = layoutPath.getProject();

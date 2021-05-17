@@ -136,12 +136,13 @@ public class PreviewServletTest {
 		when(httpRequest.getServletContext()).thenReturn(servletContext);
 		when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo");
 
-		FilePath layoutPreview = mock(FilePath.class);
-		when(layoutPreview.exists()).thenReturn(true);
+		FilePath layoutPath = mock(FilePath.class);
+		when(layoutPath.exists()).thenReturn(true);
 
 		CompoPath compoPath = mock(CompoPath.class);
 		when(factory.createCompoPath("res/compo")).thenReturn(compoPath);
-		when(compoPath.getFilePath("preview.htm")).thenReturn(layoutPreview);
+		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
+		when(compoPath.getFilePath("preview.htm")).thenReturn(layoutPath);
 
 		Component compo = mock(Component.class);
 		when(factory.createComponent(any(FilePath.class), any(IReferenceHandler.class))).thenReturn(compo);
