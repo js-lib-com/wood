@@ -69,7 +69,7 @@ public class Component {
 
 	private final String description;
 
-	private final String securityRole;
+	private final String resourcesGroup;
 
 	/** This component base layout file path. */
 	private final FilePath baseLayoutPath;
@@ -159,7 +159,7 @@ public class Component {
 		this.name = layoutPath.getBasename();
 		this.display = descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", Strings.toTitleCase(name)));
 		this.description = descriptor.getDescription(this.display);
-		this.securityRole = descriptor.getSecurityRole();
+		this.resourcesGroup = descriptor.getResourcesGroup();
 
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
@@ -396,15 +396,16 @@ public class Component {
 	}
 
 	/**
-	 * Return page security role or null if security role is not defined. This property has meaning only on page components.
+	 * Return resources group this component belongs or null if component is in global space. This property has meaning only on
+	 * page components.
 	 * <p>
-	 * Security role is declared on page components and is used by site builder to create specific sub-directories where to
-	 * store role related files.
+	 * Resources group is declared on page components and is used by site builder to create specific sub-directories where to
+	 * store group related resources.
 	 * 
-	 * @return page security role or null if not defined.
+	 * @return resources group or null if component is in global space.
 	 */
-	public String getSecurityRole() {
-		return securityRole;
+	public String getResourcesGroup() {
+		return resourcesGroup;
 	}
 
 	/**

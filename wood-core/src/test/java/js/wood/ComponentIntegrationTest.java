@@ -159,7 +159,7 @@ public class ComponentIntegrationTest {
 				assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 				assertThat(compo.getLinkDescriptors(), empty());
 				assertThat(compo.getMetaDescriptors(), empty());
-				assertThat(compo.getSecurityRole(), nullValue());
+				assertThat(compo.getResourcesGroup(), nullValue());
 				return true;
 			}
 		};

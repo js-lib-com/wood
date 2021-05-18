@@ -40,9 +40,9 @@ public class DefaultBuildFsTest {
 	}
 
 	@Test
-	public void getPageDir_SecurityRole() {
+	public void getPageDir_getResourcesGroup() {
 		Component page = Mockito.mock(Component.class);
-		when(page.getSecurityRole()).thenReturn("admin");
+		when(page.getResourcesGroup()).thenReturn("admin");
 		assertThat(buildFS.getPageDir(page), equalTo(new File(buildDir, "admin")));
 	}
 

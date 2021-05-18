@@ -89,7 +89,7 @@ public class ComponentTest {
 		assertThat(compo.getScriptDescriptors(), empty());
 		assertThat(compo.getLinkDescriptors(), empty());
 		assertThat(compo.getMetaDescriptors(), empty());
-		assertThat(compo.getSecurityRole(), nullValue());
+		assertThat(compo.getResourcesGroup(), nullValue());
 		assertTrue(compo.getStyleFiles().isEmpty());
 	}
 
@@ -98,7 +98,7 @@ public class ComponentTest {
 		String descriptor = "<compo>" + //
 				"<display>Page Compo</display>" + //
 				"<description>Page description.</description>" + //
-				"<security-role>admin</security-role>"+//
+				"<group>admin</group>"+//
 				"<scripts>" + //
 				"	<script src='lib/js-lib.js'></script>" + //
 				"	<script src='script/js/wood/Compo.js'></script>" + //
@@ -123,7 +123,7 @@ public class ComponentTest {
 		assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 		assertThat(compo.getLinkDescriptors(), empty());
 		assertThat(compo.getMetaDescriptors(), empty());
-		assertThat(compo.getSecurityRole(), equalTo("admin"));
+		assertThat(compo.getResourcesGroup(), equalTo("admin"));
 		assertTrue(compo.getStyleFiles().isEmpty());
 		
 		assertThat(compo.getScriptDescriptors(), hasSize(2));

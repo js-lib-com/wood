@@ -55,8 +55,8 @@ class DefaultBuildFS extends BuildFS {
 	@Override
 	protected File getPageDir(Component page) {
 		if (page != null) {
-			// uses security role declared on page component to create specific sub-directory, where to store layout files
-			String directory = page.getSecurityRole();
+			// uses resources group declared on page component to create specific sub-directory, where to store layout files
+			String directory = page.getResourcesGroup();
 			if (directory != null) {
 				if (!directory.startsWith("/")) {
 					directory = "/" + directory;

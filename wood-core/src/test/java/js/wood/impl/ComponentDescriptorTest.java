@@ -35,12 +35,12 @@ public class ComponentDescriptorTest {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"	<version>1.0</version>" + //
-				"	<security-role>admin</security-role>" + //
+				"	<group>admin</group>" + //
 				"</component>";
 		descriptor = descriptor(xml);
 
 		assertThat(descriptor.getVersion(), equalTo("1.0"));
-		assertThat(descriptor.getSecurityRole(), equalTo("admin"));
+		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class ComponentDescriptorTest {
 		descriptor = descriptor(xml);
 
 		assertThat(descriptor.getVersion(), nullValue());
-		assertThat(descriptor.getSecurityRole(), nullValue());
+		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class ComponentDescriptorTest {
 		descriptor = descriptor(xml);
 
 		assertThat(descriptor.getVersion(), nullValue());
-		assertThat(descriptor.getSecurityRole(), nullValue());
+		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
 	private ComponentDescriptor descriptor(String xml) {

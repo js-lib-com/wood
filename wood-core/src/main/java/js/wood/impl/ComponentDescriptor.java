@@ -134,14 +134,16 @@ public class ComponentDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get directory path to store page layout file or supplied default value if path is missing. This property is loaded from
-	 * <code>path</code> element.
+	 * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
+	 * in descriptor using <code>group</code> element.
+	 * <p>
+	 * Components can be declared on named resources groups. Build tool uses this group name as context path. For example, login
+	 * page can be declared on <code>WEB-INF</code> group so that it becomes private.
 	 * 
-	 * @param defaultValue default path value.
-	 * @return page layout directory path or supplied default value.
+	 * @return resources group or null if component is in global space.
 	 */
-	public String getSecurityRole() {
-		return text("security-role", null);
+	public String getResourcesGroup() {
+		return text("group", null);
 	}
 
 	/**
