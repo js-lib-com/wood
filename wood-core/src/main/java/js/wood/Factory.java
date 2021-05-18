@@ -26,8 +26,4 @@ public class Factory {
 	public Component createComponent(FilePath layoutPath, IReferenceHandler referenceHandler) {
 		return new Component(layoutPath, referenceHandler);
 	}
-
-	public Variables createVariables(FilePath dir) {
-		return new Variables(dir);
-	}
 }

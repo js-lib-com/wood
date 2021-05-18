@@ -294,6 +294,26 @@ public class Project {
 	}
 
 	/**
+	 * Get operator handler as configured by selected naming strategy.
+	 * 
+	 * @return operator handler for project naming convention.
+	 */
+	public IOperatorsHandler getOperatorsHandler() {
+		return operatorsHandler;
+	}
+
+	/**
+	 * Determine if project uses a naming convention that requires XML name space.
+	 * 
+	 * @return true if project naming convention requires XML name space.
+	 */
+	public boolean hasNamespace() {
+		return operatorsHandler instanceof XmlnsOperatorsHandler;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	
+	/**
 	 * Get project media file referenced from given source file. This method tries to locate media file into source parent and
 	 * assets directories, in this order. When search for media file only base name and language variant is considered, that is,
 	 * no extension.
@@ -348,22 +368,8 @@ public class Project {
 		return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 	}
 
-	/**
-	 * Get operator handler as configured by selected naming strategy.
-	 * 
-	 * @return operator handler for project naming convention.
-	 */
-	public IOperatorsHandler getOperatorsHandler() {
-		return operatorsHandler;
-	}
-
-	/**
-	 * Determine if project uses a naming convention that requires XML name space.
-	 * 
-	 * @return true if project naming convention requires XML name space.
-	 */
-	public boolean hasNamespace() {
-		return operatorsHandler instanceof XmlnsOperatorsHandler;
+	public Variables createVariables(FilePath dir) {
+		return new Variables(dir);
 	}
 
 	// --------------------------------------------------------------------------------------------

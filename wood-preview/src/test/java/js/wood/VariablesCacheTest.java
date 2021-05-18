@@ -20,8 +20,6 @@ public class VariablesCacheTest {
 	@Mock
 	private Project project;
 	@Mock
-	private Factory factory;
-	@Mock
 	private FilePath assetDir;
 	@Mock
 	private Variables assetVariables;
@@ -37,55 +35,70 @@ public class VariablesCacheTest {
 
 	@Before
 	public void beforeTest() {
-		when(project.getFactory()).thenReturn(factory);
 		when(project.getAssetsDir()).thenReturn(assetDir);
-
-		when(factory.createVariables(assetDir)).thenReturn(assetVariables);
-		when(factory.createVariables(sourceDir)).thenReturn(sourceVariables);
+		when(project.createVariables(assetDir)).thenReturn(assetVariables);
+		when(project.createVariables(sourceDir)).thenReturn(sourceVariables);
 
 		variablesCache = new VariablesCache(project);
 	}
 
 	@Test
-	public void update() {
+	public void GivenVariablesCache_WhenUpdate_ThenReloadAssetAndClearMap() {
+		// given
+		
+		// when
 		variablesCache.update();
+		
+		// then
 		verify(assetVariables, times(1)).reload(assetDir);
-		assertThat(variablesCache.getVariablesMap().size(), equalTo(0));
+		assertThat(variablesCache.getSourceVariablesMap().size(), equalTo(0));
 	}
 
 	@Test
-	public void get() {
+	public void GivenVariableFoundOnSource_WhenGet_ThenAssetNotInvoked() {
+		// given
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(sourceVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Compo Title");
 
+		// when
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		
+		// then
 		assertThat(value, equalTo("Compo Title"));
 		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
 		verify(assetVariables, times(0)).get(Locale.ENGLISH, reference, source, referenceHandler);
 	}
 
 	@Test
-	public void get_Asset() {
+	public void GivenVariableNotFoundOnSource_WhenGet_ThenAssetInvoked() {
+		// given
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(assetVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Asset Title");
 
+		// when
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		
+		// then
 		assertThat(value, equalTo("Asset Title"));
 		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
 		verify(assetVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
 	}
 
 	@Test
-	public void get_NotFound() {
+	public void GivenVariableNotFoundOnSourceOrAsset_WhenGet_ThenNull() {
+		// given
 		Reference reference = new Reference(ResourceType.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 
+		// when
 		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		
+		// then
 		assertThat(value, nullValue());
 		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
 		verify(assetVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);

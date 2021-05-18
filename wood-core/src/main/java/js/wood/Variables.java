@@ -87,13 +87,13 @@ public class Variables {
 	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this
 	 * constructor does not load values and resulting variables instance is empty.
 	 * 
-	 * @param dirPath directory to scan for variables definition files.
+	 * @param dir directory to scan for variables definition files.
 	 * @throws WoodException if SAXA parser initialization fails.
-	 * @see #load(DirPath)
+	 * @see #loadDir(FilePath)
 	 */
-	public Variables(FilePath dirPath) {
-		this(dirPath.getProject());
-		loadDir(dirPath);
+	public Variables(FilePath dir) {
+		this(dir.getProject());
+		loadDir(dir);
 	}
 
 	/**
@@ -103,12 +103,12 @@ public class Variables {
 	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this method
 	 * just clean-up this variables instance values.
 	 * 
-	 * @param dirPath directory to scan for variables definition files.
-	 * @see #load(DirPath)
+	 * @param dir directory to scan for variables definition files.
+	 * @see #loadDir(FilePath)
 	 */
-	public void reload(FilePath dirPath) {
+	public void reload(FilePath dir) {
 		localeValues.clear();
-		loadDir(dirPath);
+		loadDir(dir);
 	}
 
 	/**
@@ -118,14 +118,14 @@ public class Variables {
 	 * <p>
 	 * Note that only direct child files are parsed. Also, if given directory does not exist this method does nothing.
 	 * 
-	 * @param dirPath directory path.
+	 * @param dir directory path.
 	 * @throws WoodException if file reading or parsing fails.
 	 */
-	private void loadDir(FilePath dirPath) {
-		for (FilePath filePath : dirPath) {
-			if (filePath.isVariables()) {
+	private void loadDir(FilePath dir) {
+		for (FilePath file : dir) {
+			if (file.isVariables()) {
 				try {
-					_load(filePath);
+					_load(file);
 				} catch (IOException | SAXException e) {
 					throw new WoodException(e);
 				}
@@ -185,7 +185,7 @@ public class Variables {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Variable value retrieving with circular dependencies detection on references resolver
+	// Variable value retrieving with circular dependencies detection
 
 	/**
 	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when locale variant is not used.

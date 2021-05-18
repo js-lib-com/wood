@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Variable caches used to speed up preview process. Cache life span last for a component preview session.
+ * Variable caches used to speed up preview process. Cache life spans for a component preview session.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -13,18 +13,18 @@ import java.util.Map;
 class VariablesCache {
 	private final Project project;
 
-	private final Factory factory;
-
-	/** Project asset variables. */
+	/** Project asset variables. Asset variables are used when requested variable name miss from source variables. */
 	private final Variables assetVariables;
 
-	/** Components variables. */
-	private final Map<FilePath, Variables> variablesMap = new HashMap<>();
+	/**
+	 * Source variables instances mapped by source directory where variables files are defined. Asset variables are not
+	 * included.
+	 */
+	private final Map<FilePath, Variables> sourceVariablesMap = new HashMap<>();
 
 	public VariablesCache(Project project) {
 		this.project = project;
-		this.factory = project.getFactory();
-		this.assetVariables = this.factory.createVariables(project.getAssetsDir());
+		this.assetVariables = this.project.createVariables(project.getAssetsDir());
 	}
 
 	/**
@@ -34,38 +34,45 @@ class VariablesCache {
 	 */
 	public synchronized void update() {
 		assetVariables.reload(project.getAssetsDir());
-		variablesMap.clear();
+		sourceVariablesMap.clear();
 	}
 
 	/**
-	 * Return cached component variables. If variables are not already on hash create new instance and store before return it.
-	 * Component to return variables for is identified by given source file.
+	 * Return cached variable value for requested variable reference. First attempt to retrieve variable value from source
+	 * variables and if not found attempt retrieving it from asset. If variables are not already on source variables map create
+	 * new instance and store before return it.
+	 * <p>
+	 * Return null if variable not found or if is empty.
 	 * 
-	 * @param sourcePath component source file.
-	 * @return component variables.
+	 * @param local current locale,
+	 * @param reference variable reference to resolve,
+	 * @param sourceFile source file containing the variable reference,
+	 * @param handler variable reference handler for specific processing.
+	 * @return variable value or null if variable not defined or if is empty.
 	 */
-	public String get(Locale locale, Reference reference, FilePath sourcePath, IReferenceHandler handler) {
-		Variables sourceVariables = variablesMap.get(sourcePath.getParentDir());
+	public String get(Locale locale, Reference reference, FilePath sourceFile, IReferenceHandler handler) {
+		FilePath sourceDir = sourceFile.getParentDir();
+		Variables sourceVariables = sourceVariablesMap.get(sourceDir);
 		if (sourceVariables == null) {
 			synchronized (this) {
 				if (sourceVariables == null) {
-					sourceVariables = factory.createVariables(sourcePath.getParentDir());
-					variablesMap.put(sourcePath.getParentDir(), sourceVariables);
+					sourceVariables = project.createVariables(sourceDir);
+					sourceVariablesMap.put(sourceDir, sourceVariables);
 				}
 			}
 		}
 
-		String value = sourceVariables.get(locale, reference, sourcePath, handler);
+		String value = sourceVariables.get(locale, reference, sourceFile, handler);
 		if (value == null) {
-			value = assetVariables.get(locale, reference, sourcePath, handler);
+			value = assetVariables.get(locale, reference, sourceFile, handler);
 		}
 		return value;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Test support
-	
-	Map<FilePath, Variables> getVariablesMap() {
-		return variablesMap;
+
+	Map<FilePath, Variables> getSourceVariablesMap() {
+		return sourceVariablesMap;
 	}
 }

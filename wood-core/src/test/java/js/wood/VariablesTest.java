@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -42,7 +42,8 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void constructor() {
+	public void GivenDirWithVariablesFile_WhenConstructor_ThenInitState() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title>Title</title>" + //
@@ -53,9 +54,11 @@ public class VariablesTest {
 		FilePath dir = Mockito.mock(FilePath.class);
 		when(dir.getProject()).thenReturn(project);
 		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
-		
+
+		// when
 		Variables variables = new Variables(dir);
 
+		// then
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
 		assertThat(localeValues, notNullValue());
 		assertThat(localeValues, aMapWithSize(1));
@@ -68,7 +71,8 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void loadFilePath_String() {
+	public void GivenVariablesFile_WhenLoad_ThenInitState() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title>Title</title>" + //
@@ -76,9 +80,11 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
+		// when
 		Variables variables = new Variables(project);
 		variables.load(file);
 
+		// then
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
 		assertThat(localeValues, notNullValue());
 		assertThat(localeValues, aMapWithSize(1));
@@ -91,7 +97,8 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void loadFilePath_StringLocale() {
+	public void GivenVariablesFileWithLocale_WhenLoad_ThenGetLocalizedValue() {
+		// given
 		when(project.getDefaultLocale()).thenReturn(Locale.US);
 		when(variants.getLocale()).thenReturn(Locale.US);
 
@@ -102,17 +109,20 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
+		// given
 		Variables variables = new Variables(project);
 		variables.load(file);
 
-		IReferenceHandler handler = Mockito.mock(IReferenceHandler.class);
+		// then
+		IReferenceHandler handler = mock(IReferenceHandler.class);
 		String value = variables.get(Locale.GERMAN, new Reference(ResourceType.STRING, "title"), file, handler);
 		assertThat(value, notNullValue());
 		assertThat(value, equalTo("Title"));
 	}
 
 	@Test
-	public void loadFilePath_StringEmpty() {
+	public void GivenEmptyValue_WhenGet_ThenNull() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title></title>" + //
@@ -123,13 +133,17 @@ public class VariablesTest {
 		Variables variables = new Variables(project);
 		variables.load(file);
 
-		IReferenceHandler handler = Mockito.mock(IReferenceHandler.class);
+		// when
+		IReferenceHandler handler = mock(IReferenceHandler.class);
 		String value = variables.get(new Reference(ResourceType.STRING, "title"), file, handler);
+
+		// then
 		assertThat(value, nullValue());
 	}
 
 	@Test
-	public void loadFilePath_Text() {
+	public void GivenTextVariablesFile_WhenLoad_ThyenInitState() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<text>" + //
 				"	<title><b>Big</b> Title</title>" + //
@@ -137,9 +151,11 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
+		// when
 		Variables variables = new Variables(project);
 		variables.load(file);
 
+		// then
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
 		assertThat(localeValues, notNullValue());
 		assertThat(localeValues, aMapWithSize(1));
@@ -152,7 +168,8 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void loadFilePath_NoVariablesDefinitionFile() {
+	public void GivenVariablesFileWithUnknownRoot_WhenLoad_ThenEmpty() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<no-variables-definition>" + //
 				"	<title>content ignored</title>" + //
@@ -160,16 +177,18 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
+		// when
 		Variables variables = new Variables(project);
 		variables.load(file);
 
+		// then
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
 		assertThat(localeValues, notNullValue());
 		assertThat(localeValues, aMapWithSize(0));
 	}
 
 	@Test(expected = WoodException.class)
-	public void loadFilePath_StringWithFormat() {
+	public void GivenStringVariablesFileWithRichText_WhenLoad_ThenException() {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title><b>Big</b> Title</title>" + //
@@ -182,7 +201,7 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void reload() {
+	public void GivenDirWithVariablesFile_WhenReload_ThenVaribleFound() {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title>Title</title>" + //
@@ -208,7 +227,8 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void get() {
+	public void GivenStringVariblesFile_WhenGetVariable_ThenExpectedValue() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
 				"	<title>Title</title>" + //
@@ -220,21 +240,19 @@ public class VariablesTest {
 		variables.load(file);
 
 		IReferenceHandler handler = Mockito.mock(IReferenceHandler.class);
+
+		// when
 		String value = variables.get(new Reference(ResourceType.STRING, "title"), file, handler);
+
+		// then
 		assertThat(value, notNullValue());
 		assertThat(value, equalTo("Title"));
 	}
 
-	@Test
-	public void circularDependecy() throws WoodException, IllegalArgumentException, IOException {
-		FilePath[] files = new FilePath[2];
-		files[0] = Mockito.mock(FilePath.class);
-		when(files[0].isVariables()).thenReturn(true);
-		when(files[0].getVariants()).thenReturn(variants);
-
-		files[1] = Mockito.mock(FilePath.class);
-		when(files[1].isVariables()).thenReturn(true);
-		when(files[1].getVariants()).thenReturn(variants);
+	@Test(expected = WoodException.class)
+	public void GivenTwoVariablesFilesWithCircularDependecy_WhenGetVariable_ThenException() {
+		// given
+		FilePath[] files = new FilePath[] { file(), file() };
 
 		String xml1 = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
@@ -260,14 +278,14 @@ public class VariablesTest {
 			}
 		};
 
-		try {
-			variables.get(new Reference(ResourceType.STRING, "app"), file, handler);
-			fail();
-		} catch (WoodException e) {
-			String message = "Circular variable references. Trace stack follows:\n" + //
-					"\t- file:@string/app\n" + //
-					"\t- file:@string/name\n";
-			assertThat(e.getMessage(), equalTo(message));
-		}
+		// when
+		variables.get(new Reference(ResourceType.STRING, "app"), file, handler);
+	}
+
+	private FilePath file() {
+		FilePath file = Mockito.mock(FilePath.class);
+		when(file.isVariables()).thenReturn(true);
+		when(file.getVariants()).thenReturn(variants);
+		return file;
 	}
 }
