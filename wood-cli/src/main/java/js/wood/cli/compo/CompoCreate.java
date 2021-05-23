@@ -84,7 +84,7 @@ public class CompoCreate extends Task {
 
 			TemplateDocument templateDoc = createTemplateDocument(getNamingStrategy(projectDir.resolve("project.xml")), files.getReader(templateLayoutFile));
 			if (!templateDoc.hasEditable()) {
-				throw new BugError("Bad template component %s. Missing editable element.", compoTemplateDir);
+				// throw new BugError("Bad template component %s. Missing editable element.", compoTemplateDir);
 			}
 
 			List<String> params = new ArrayList<>();
@@ -103,13 +103,21 @@ public class CompoCreate extends Task {
 			Map<String, String> variables = new HashMap<>();
 			variables.put("page", compoName);
 
-			variables.put("tag", templateDoc.getEditableTag());
+			variables.put("author", config.get("user.name"));
+			variables.put("package", config.get("project.package"));
 			variables.put("class", compoName);
-			variables.put("template-attr", templateDoc.getTemplateAttrName());
-			variables.put("template-path", compoTemplate.path());
-			variables.put("template-params", templateDoc.getParamAttr(Strings.join(params, ';')));
-			variables.put("editable", templateDoc.getEditableOperand());
+			variables.put("className", Strings.toTitleCase(compoName));
+			variables.put("templateAttr", templateDoc.getTemplateAttrName());
+			variables.put("templatePath", compoTemplate.path());
+			variables.put("templateParams", templateDoc.getParamAttr(Strings.join(params, ';')));
 			variables.put("xmlns", templateDoc.getXmlnsAttr());
+
+			if (templateDoc.hasEditable()) {
+				variables.put("tag", templateDoc.getEditableTag());
+				variables.put("editable", templateDoc.getEditableOperand());
+			} else {
+				variables.put("tag", templateDoc.getRootTag());
+			}
 
 			variables.put("root", page ? "page" : "component");
 			variables.put("groupId", "com.js-lib");
@@ -155,6 +163,10 @@ public class CompoCreate extends Task {
 		protected TemplateDocument(Reader reader) throws IOException, SAXException {
 			this.doc = docBuilder.loadXMLNS(reader);
 			this.editable = getEditable();
+		}
+
+		public String getRootTag() {
+			return doc.getRoot().getTag();
 		}
 
 		public boolean hasEditable() {

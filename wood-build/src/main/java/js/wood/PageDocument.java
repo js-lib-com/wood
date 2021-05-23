@@ -44,6 +44,7 @@ class PageDocument {
 
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		this.doc = builder.createHTML();
+		
 		this.html = this.doc.getRoot();
 		this.html.addText("\r\n");
 
@@ -267,7 +268,9 @@ class PageDocument {
 
 		setAttr(scriptElement, "type", script.getType(), "text/javascript");
 		setAttr(scriptElement, "async", script.getAsync());
-		setAttr(scriptElement, "defer", script.getDefer());
+		if (!script.isEmbedded()) {
+			setAttr(scriptElement, "defer", script.getDefer());
+		}
 		setAttr(scriptElement, "nomodule", script.getNoModule());
 		setAttr(scriptElement, "nonce", script.getNonce());
 		setAttr(scriptElement, "referrerpolicy", script.getReferrerPolicy());

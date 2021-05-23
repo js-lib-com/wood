@@ -71,7 +71,10 @@ public class CompoOpen extends Task {
 				console.print("Command abort.");
 				return ExitCode.ABORT;
 			}
-			pageURI = format("https://%s/apps/%s/%s.htm", server, projectName, compoName);
+			if (!server.endsWith("/")) {
+				server += '/';
+			}
+			pageURI = format("https://%s%s/%s.htm", server, projectName, compoName);
 		} else {
 			int port = config.getex("runtime.port", int.class);
 			String context = config.getex("runtime.context", projectName);

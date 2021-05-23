@@ -1,0 +1,27 @@
+#[[$package]]#("${package}");
+
+/**
+ * Add description for ${className} page class.
+ * 
+ * @author ${author}
+ * @since 1.0
+ * 
+ * @constructor Construct an instance of ${className} page class.
+ */
+${package}.${className} = function() {
+	#[[this.$super();]]#
+};
+
+${package}.${className}.prototype = {
+	/**
+	 * Class string representation.
+	 * 
+	 * @return {string} this class string representation.
+	 */
+	toString : function() {
+		return "${package}.${className}";
+	}
+};
+#[[$extends]]#(${package}.${className}, ${package}.Page);
+
+WinMain.createPage(${package}.${className});
