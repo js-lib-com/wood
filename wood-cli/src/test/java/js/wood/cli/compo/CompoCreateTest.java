@@ -72,6 +72,8 @@ public class CompoCreateTest {
 		when(compoTemplate.path()).thenReturn("template/page");
 		when(projectDir.resolve("template/page")).thenReturn(compoTemplateDir);
 
+		when(config.getex("project.package")).thenReturn("app");
+		
 		task = new CompoCreate();
 		task.setConsole(console);
 		task.setConfig(config);

@@ -66,6 +66,7 @@ public class CompoCreate extends Task {
 		console.print("Create component %s.", compoDir);
 		files.createDirectory(compoDir);
 		String compoName = files.getFileName(compoDir);
+		String className = Strings.toTitleCase(compoName);
 
 		if (compoTemplate != null) {
 			Path compoTemplateDir = projectDir.resolve(compoTemplate.path());
@@ -106,11 +107,19 @@ public class CompoCreate extends Task {
 			variables.put("author", config.get("user.name"));
 			variables.put("package", config.get("project.package"));
 			variables.put("class", compoName);
-			variables.put("className", Strings.toTitleCase(compoName));
+			variables.put("className", className);
 			variables.put("templateAttr", templateDoc.getTemplateAttrName());
 			variables.put("templatePath", compoTemplate.path());
 			variables.put("templateParams", templateDoc.getParamAttr(Strings.join(params, ';')));
 			variables.put("xmlns", templateDoc.getXmlnsAttr());
+
+			String scriptPath = Strings.concat(config.getex("script.dir"), '/', config.getex("project.package").replace('.', '/'), '/', className, ".js");
+			if ("true".equalsIgnoreCase(config.get("compo.script"))) {
+				variables.put("compo-script", "true");
+			}
+			else {
+				variables.put("scriptPath", scriptPath);
+			}
 
 			if (templateDoc.hasEditable()) {
 				variables.put("tag", templateDoc.getEditableTag());
@@ -130,6 +139,11 @@ public class CompoCreate extends Task {
 			templateProcessor.setVerbose(verbose);
 			templateProcessor.exec("compo", "page", variables);
 
+			Reader reader = templateProcessor.getExcludedFileReader(compoName + ".js");
+			if (reader != null) {
+				Path scriptFile = projectDir.resolve(scriptPath);
+				files.copy(reader, files.getWriter(scriptFile));
+			}
 		}
 
 		return ExitCode.SUCCESS;

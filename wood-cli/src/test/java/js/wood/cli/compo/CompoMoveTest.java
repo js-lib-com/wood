@@ -99,7 +99,7 @@ public class CompoMoveTest {
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
-		verify(files, times(1)).createDirectoryIfNotExists(targetCompoDir);
+		verify(files, times(1)).createDirectory(targetCompoDir);
 		verify(files, times(1)).move(compoFile, targetCompoFile);
 		verify(files, times(1)).delete(compoDir);
 		verify(console, times(1)).print(anyString(), eq(compoFile), eq(targetCompoFile));
