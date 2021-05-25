@@ -24,6 +24,8 @@ import picocli.CommandLine.Option;
 public class CreateIcons extends Task {
 	private static int[] ICON_VARIANTS = new int[] { 128, 144, 152, 192, 256 };
 
+	@Option(names = { "-d", "--defaults" }, description = "Accept all default values.")
+	private boolean defaults;
 	@Option(names = { "-o", "--overwrite" }, description = "Force overwrite existing icons.")
 	private boolean overwrite;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
@@ -51,13 +53,14 @@ public class CreateIcons extends Task {
 
 		Path icon512 = assetDir.resolve("app-icon-512.png");
 		if (overwrite || !files.exists(icon512)) {
-			String backgroundColor = console.input("background color", randomColor());
+			String backgroundColor = defaults ? randomColor() : console.input("background color", randomColor());
 			Path backgroundFile = projectDir.resolve("background.png");
 			imagick("-size 512x512 xc:none -fill ${color} -draw \"circle 256,256 256,1\" ${file}", backgroundColor, backgroundFile);
 			BrightnessResult brightness = imagick(BrightnessResult.class, "${file} -colorspace Gray -format \"%[mean]\" info:", backgroundFile);
 
-			String textColor = console.input("text color", brightness.isLightColor() ? "black" : "white");
-			boolean sphereEffect = console.input("sphere effect: yes | no", "no").equalsIgnoreCase("yes");
+			String suggestedTextColor = brightness.isLightColor() ? "black" : "white";
+			String textColor = defaults ? suggestedTextColor : console.input("text color", suggestedTextColor);
+			boolean sphereEffect = defaults ? false : console.input("sphere effect: yes | no", "no").equalsIgnoreCase("yes");
 
 			if (sphereEffect) {
 				Path lightEffectFile = projectDir.resolve("light-effect.png");
