@@ -14,6 +14,7 @@ import java.nio.file.Path;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -63,6 +64,8 @@ public class CompoImportTest {
 	@Mock
 	private CloseableHttpResponse httpResponse;
 	@Mock
+	private HttpEntity httpEntity;
+	@Mock
 	private StatusLine statusLine;
 
 	private CompoImport task;
@@ -95,6 +98,7 @@ public class CompoImportTest {
 		when(httpClient.execute(any())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(statusLine);
 		when(statusLine.getStatusCode()).thenReturn(200);
+		when(httpResponse.getEntity()).thenReturn(httpEntity);
 
 		task = new CompoImport();
 		task.setConfig(config);
@@ -154,7 +158,6 @@ public class CompoImportTest {
 	@Test
 	public void GivenReloadOptionAndRepositoryCompoDirExist_ThenDoNotCreateDirectory() throws Exception {
 		// given
-		when(files.exists(repositoryCompoDir)).thenReturn(true);
 		task.setReload(true);
 
 		// when
@@ -174,7 +177,7 @@ public class CompoImportTest {
 		task.exec();
 
 		// then
-		verify(files, times(1)).createDirectory(repositoryCompoDir);
+		verify(files, times(1)).createDirectories(repositoryCompoDir);
 		verify(documentBuilder, times(1)).loadHTML(new URL("http://server.com/com/js-lib/web/dialog/1.0/"));
 	}
 

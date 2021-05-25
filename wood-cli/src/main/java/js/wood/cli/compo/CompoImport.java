@@ -23,6 +23,7 @@ import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
+import js.util.Strings;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -31,6 +32,8 @@ import picocli.CommandLine.Parameters;
 public final class CompoImport extends Task {
 	@Option(names = { "-r", "--reload" }, description = "Force reload from repository. Local component files are deleted.")
 	private boolean reload;
+	@Option(names = { "-y", "--yes" }, description = "Auto-confirm import.")
+	private boolean yes;
 	@Option(names = { "-v", "--verbose" }, description = "Verbose printouts about created files.")
 	private boolean verbose;
 
@@ -46,14 +49,12 @@ public final class CompoImport extends Task {
 		Path repositoryDir = files.getPath(config.get("repository.dir"));
 		Path repositoryCompoDir = repositoryDir.resolve(coordinates.toFile());
 		if (reload) {
-			if (!files.exists(repositoryCompoDir)) {
-				files.createDirectory(repositoryCompoDir);
-			}
+			files.createDirectories(repositoryCompoDir);
 			files.cleanDirectory(repositoryCompoDir, verbose);
 			downloadCompoment(repositoryCompoDir);
 		} else {
 			if (!files.exists(repositoryCompoDir)) {
-				files.createDirectory(repositoryCompoDir);
+				files.createDirectories(repositoryCompoDir);
 				downloadCompoment(repositoryCompoDir);
 			}
 		}
@@ -65,10 +66,12 @@ public final class CompoImport extends Task {
 			files.createDirectory(projectCompoDir);
 		}
 
-		console.warning("All component '%s' files will be permanently removed and replaced.", path);
-		if (!console.confirm("Please confirm: yes | [no]", "yes")) {
-			console.print("User cancel.");
-			return ExitCode.CANCEL;
+		if (!yes) {
+			console.warning("All component '%s' files will be permanently removed and replaced.", path);
+			if (!console.confirm("Please confirm: yes | [no]", "yes")) {
+				console.print("User cancel.");
+				return ExitCode.CANCEL;
+			}
 		}
 
 		files.cleanDirectory(projectCompoDir, verbose);
@@ -88,8 +91,8 @@ public final class CompoImport extends Task {
 	 * 
 	 * @param targetDir target directory.
 	 * @throws IOException if download fails for whatever reason.
-	 * @throws SAXException 
-	 * @throws XPathExpressionException 
+	 * @throws SAXException
+	 * @throws XPathExpressionException
 	 */
 	private void downloadCompoment(Path targetDir) throws IOException, SAXException, XPathExpressionException {
 		URL indexPageURL = new URL(format("%s/%s/", config.get("repository.url"), coordinates.toPath()));
@@ -103,13 +106,18 @@ public final class CompoImport extends Task {
 				if (verbose) {
 					console.print("Download file %s.", linkURL);
 				}
-				
+
 				try (CloseableHttpClient client = httpClientBuilder.build()) {
 					HttpGet httpGet = new HttpGet(linkURL.toExternalForm());
 					try (CloseableHttpResponse response = client.execute(httpGet)) {
 						if (response.getStatusLine().getStatusCode() != 200) {
 							throw new IOException(format("Fail to cleanup component %s", coordinates));
 						}
+						Path file = targetDir.resolve(Strings.last(link, '/'));
+						if (verbose) {
+							console.print("Copy file %s.", file);
+						}
+						files.copy(response.getEntity().getContent(), file);
 					}
 				}
 			}
