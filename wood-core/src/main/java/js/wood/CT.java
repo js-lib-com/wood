@@ -36,11 +36,17 @@ public final class CT {
 	// ------------------------------------------------------
 	// Project directories relative to project root
 
-	/** Project assets directory stores global variables and media files. */
-	public static final String ASSETS_DIR = "res/asset/";
+	/**
+	 * Project assets directory stores global variables and media files. This field stores the default value; it can be
+	 * overwritten by <code>asset.dir</code> property from project properties file.
+	 */
+	public static final String DEF_ASSET_DIR = "res/asset/";
 
-	/** Site theme directory for styles related to UI primitive elements design and theme variables. */
-	public static final String THEME_DIR = "res/theme/";
+	/**
+	 * Project theme directory for styles related to UI primitive elements design and theme variables. This field sores the
+	 * default value; it can be overwritten by <code>theme.dir</code> property from project properties file.
+	 */
+	public static final String DEF_THEME_DIR = "res/theme/";
 
 	// ------------------------------------------------------
 	// Dynamic generated files

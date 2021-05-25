@@ -59,8 +59,8 @@ public class ProjectTest {
 		assertThat(project.getProjectDir().value(), equalTo("."));
 		assertThat(project.getDescriptor(), notNullValue());
 
-		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
-		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
+		assertThat(project.getAssetDir().toString(), equalTo(CT.DEF_ASSET_DIR));
+		assertThat(project.getThemeDir().toString(), equalTo(CT.DEF_THEME_DIR));
 		assertThat(project.getManifest().toString(), equalTo("manifest.json"));
 		assertThat(project.getFavicon().toString(), equalTo("favicon.ico"));
 
@@ -93,8 +93,8 @@ public class ProjectTest {
 		assertThat(project.getProjectDir().value(), equalTo("."));
 		assertThat(project.getDescriptor(), equalTo(descriptor));
 
-		assertThat(project.getAssetsDir().toString(), equalTo(CT.ASSETS_DIR));
-		assertThat(project.getThemeDir().toString(), equalTo(CT.THEME_DIR));
+		assertThat(project.getAssetDir().toString(), equalTo(CT.DEF_ASSET_DIR));
+		assertThat(project.getThemeDir().toString(), equalTo(CT.DEF_THEME_DIR));
 		assertThat(project.getManifest().toString(), equalTo("manifest.json"));
 		assertThat(project.getFavicon().toString(), equalTo("favicon.ico"));
 

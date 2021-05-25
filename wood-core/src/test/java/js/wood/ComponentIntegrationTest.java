@@ -35,9 +35,9 @@ public class ComponentIntegrationTest {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
 				Variables variables = new Variables(sourcePath.getParentDir());
-				if (project.getAssetsDir().exists()) {
+				if (project.getAssetDir().exists()) {
 					try {
-						Classes.invoke(variables, "load", project.getAssetsDir());
+						Classes.invoke(variables, "load", project.getAssetDir());
 					} catch (Exception e) {
 						throw new IllegalStateException(e);
 					}

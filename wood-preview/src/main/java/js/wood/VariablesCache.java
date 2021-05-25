@@ -24,7 +24,7 @@ class VariablesCache {
 
 	public VariablesCache(Project project) {
 		this.project = project;
-		this.assetVariables = this.project.createVariables(project.getAssetsDir());
+		this.assetVariables = this.project.createVariables(project.getAssetDir());
 	}
 
 	/**
@@ -33,7 +33,7 @@ class VariablesCache {
 	 * @param project parent project.
 	 */
 	public synchronized void update() {
-		assetVariables.reload(project.getAssetsDir());
+		assetVariables.reload(project.getAssetDir());
 		sourceVariablesMap.clear();
 	}
 

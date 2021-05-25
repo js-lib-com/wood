@@ -49,7 +49,7 @@ class BuilderProject extends Project {
 
 		this.excludes.add(factory.createFilePath(buildDir));
 		this.themeStyles = new ThemeStyles(getThemeDir());
-		this.assetVariables = new Variables(getAssetsDir());
+		this.assetVariables = new Variables(getAssetDir());
 		this.variables = new HashMap<>();
 		this.pages = new ArrayList<>();
 

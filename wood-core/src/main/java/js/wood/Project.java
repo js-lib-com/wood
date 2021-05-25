@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import js.util.Params;
@@ -66,7 +67,7 @@ public class Project {
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
 	 */
-	private final FilePath assetsDir;
+	private final FilePath assetDir;
 
 	/**
 	 * Contains site styles for UI primitive elements and theme variables. This directory content describe overall site design -
@@ -106,8 +107,20 @@ public class Project {
 		this.descriptor = descriptor;
 		this.excludes = descriptor.getExcludes().stream().map(exclude -> new FilePath(this, exclude)).collect(Collectors.toList());
 
-		this.assetsDir = this.factory.createFilePath(CT.ASSETS_DIR);
-		this.themeDir = this.factory.createFilePath(CT.THEME_DIR);
+		String assetDir = CT.DEF_ASSET_DIR;
+		String themeDir = CT.DEF_THEME_DIR;
+		FilePath propertiesFile = this.projectDir.getFilePath(".project.properties");
+		if (propertiesFile.exists()) {
+			Properties properties = propertiesFile.properties();
+			if (properties.containsKey("asset.dir")) {
+				assetDir = (String) properties.get("asset.dir");
+			}
+			if (properties.containsKey("theme.dir")) {
+				themeDir = (String) properties.get("theme.dir");
+			}
+		}
+		this.assetDir = this.factory.createFilePath(assetDir);
+		this.themeDir = this.factory.createFilePath(themeDir);
 
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
@@ -183,10 +196,10 @@ public class Project {
 	 * is optional and is caller responsibility to ensure it exists before using it.
 	 * 
 	 * @return project assets directory.
-	 * @see #assetsDir
+	 * @see #assetDir
 	 */
-	public FilePath getAssetsDir() {
-		return assetsDir;
+	public FilePath getAssetDir() {
+		return assetDir;
 	}
 
 	/**
@@ -312,7 +325,7 @@ public class Project {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	
+
 	/**
 	 * Get project media file referenced from given source file. This method tries to locate media file into source parent and
 	 * assets directories, in this order. When search for media file only base name and language variant is considered, that is,
@@ -341,7 +354,7 @@ public class Project {
 			return mediaFile;
 		}
 
-		return findMediaFile(assetsDir, reference, locale);
+		return findMediaFile(assetDir, reference, locale);
 	}
 
 	/**

@@ -35,7 +35,7 @@ public class VariablesCacheTest {
 
 	@Before
 	public void beforeTest() {
-		when(project.getAssetsDir()).thenReturn(assetDir);
+		when(project.getAssetDir()).thenReturn(assetDir);
 		when(project.createVariables(assetDir)).thenReturn(assetVariables);
 		when(project.createVariables(sourceDir)).thenReturn(sourceVariables);
 

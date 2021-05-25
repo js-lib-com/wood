@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -570,6 +571,16 @@ public class FilePath implements Iterable<FilePath> {
 
 	public String load() throws IOException {
 		return Strings.load(getReader());
+	}
+
+	public Properties properties() {
+		Properties properties = new Properties();
+		try (Reader reader = getReader()) {
+			properties.load(reader);
+		} catch (IOException e) {
+			throw new WoodException(e);
+		}
+		return properties;
 	}
 
 	/**
