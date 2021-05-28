@@ -169,6 +169,10 @@ public class Project {
 		this.filePathVisitors.add(scanHandler);
 	}
 
+	public String getAuthor() {
+		return descriptor.getAuthor();
+	}
+
 	/**
 	 * Return project name usable on user interfaces.
 	 * 
@@ -447,7 +451,7 @@ public class Project {
 		}
 	}
 
-	protected interface IFilePathVisitor {
+	public interface IFilePathVisitor {
 		void visitFile(FilePath file) throws Exception;
 	}
 
@@ -490,10 +494,6 @@ public class Project {
 
 	// --------------------------------------------------------------------------------------------
 	// Test support
-
-	String getAuthor() {
-		return descriptor.getAuthor();
-	}
 
 	ProjectDescriptor getDescriptor() {
 		return descriptor;

@@ -7,8 +7,8 @@ import java.util.List;
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
 
-import js.wood.Builder;
-import js.wood.BuilderConfig;
+import js.wood.build.Builder;
+import js.wood.build.BuilderConfig;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

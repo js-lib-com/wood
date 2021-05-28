@@ -12,6 +12,10 @@ import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Task;
 import com.jslib.commons.cli.Velocity;
 
+import js.wood.preview.EventsServlet;
+import js.wood.preview.FileSystemWatcher;
+import js.wood.preview.ForwardFilter;
+import js.wood.preview.PreviewServlet;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -62,6 +66,10 @@ public class CompoPreview extends Task {
 			files.createDirectories(webxmlFile.getParent());
 
 			Velocity template = new Velocity("WEB-INF/preview-web.vtl");
+			template.put("FileSystemWatcher", FileSystemWatcher.class.getCanonicalName());
+			template.put("ForwardFilter", ForwardFilter.class.getCanonicalName());
+			template.put("PreviewServlet", PreviewServlet.class.getCanonicalName());
+			template.put("EventsServlet", EventsServlet.class.getCanonicalName());
 			template.put("display", config.get("project.display", projectName));
 			template.put("description", config.get("project.description", projectName));
 			template.put("projectDir", projectDir.toAbsolutePath().toString());

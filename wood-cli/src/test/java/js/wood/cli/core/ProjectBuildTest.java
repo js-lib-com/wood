@@ -23,8 +23,8 @@ import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.FilesUtil;
 
-import js.wood.Builder;
-import js.wood.BuilderConfig;
+import js.wood.build.Builder;
+import js.wood.build.BuilderConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectBuildTest {

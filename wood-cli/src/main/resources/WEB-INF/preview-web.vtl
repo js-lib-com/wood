@@ -13,7 +13,7 @@
 	</context-param>
 
 	<listener>
-		<listener-class>js.wood.FileSystemWatcher</listener-class>
+		<listener-class>${FileSystemWatcher}</listener-class>
 	</listener>
 #if($buildDir)	
 	<context-param>
@@ -25,7 +25,7 @@
 
 	<filter>
 		<filter-name>forward-filter</filter-name>
-		<filter-class>js.wood.ForwardFilter</filter-class>
+		<filter-class>${ForwardFilter}</filter-class>
 		<init-param>
 			<param-name>URL_PATTERNS</param-name>
 			<param-value>*.rmi,*.xsp,*/captcha/image*,*/rest/*</param-value>
@@ -38,7 +38,7 @@
 
 	<servlet>
 		<servlet-name>preview-servlet</servlet-name>
-		<servlet-class>js.wood.PreviewServlet</servlet-class>
+		<servlet-class>${PreviewServlet}</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
@@ -48,7 +48,7 @@
 
 	<servlet>
 		<servlet-name>events</servlet-name>
-		<servlet-class>js.wood.EventsServlet</servlet-class>
+		<servlet-class>${EventsServlet}</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<servlet-mapping>

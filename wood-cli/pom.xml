@@ -20,6 +20,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.js-lib</groupId>
+			<artifactId>wood-preview</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.js-lib</groupId>
 			<artifactId>js-commons-cli</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
