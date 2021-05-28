@@ -1,5 +1,7 @@
 package js.wood.impl;
 
+import java.util.Map;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import js.dom.Document;
@@ -14,11 +16,17 @@ import js.util.Params;
  * @author Iulian Rotaru
  */
 public class AttrOperatorsHandler implements IOperatorsHandler {
+	private final Map<String, String> tagCompos;
+
+	public AttrOperatorsHandler(Map<String, String> tagCompos) {
+		this.tagCompos = tagCompos;
+	}
+
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
 		try {
-			return document.findByXPath(buildAttrXPath(operator.value()));
+			return document.findByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -29,7 +37,7 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	public EList findByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
 		try {
-			return element.findByXPath(buildAttrXPath(operator.value()));
+			return element.findByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -40,7 +48,7 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	public Element getByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
 		try {
-			return document.getByXPath(buildAttrXPath(operator.value()));
+			return document.getByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -51,7 +59,18 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	public Element getByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
 		try {
-			return element.getByXPath(buildAttrXPath(operator.value()));
+			return element.getByXPath(buildXPath(operator));
+		} catch (XPathExpressionException e) {
+			// XPath expression is hard coded
+			throw new BugError(e);
+		}
+	}
+
+	@Override
+	public Element getByOperator(Document document, Operator operator, String operand) {
+		Params.notNull(document, "Layout document");
+		try {
+			return document.getByXPath(buildXPath(operator, operand));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -61,17 +80,15 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public String getOperand(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		return element.getAttr(operator.value());
-	}
+		switch (operator) {
+		case COMPO:
+			if (!element.hasAttr(operator.value())) {
+				return tagCompos.get(element.getTag());
+			}
+			// fall through next case
 
-	@Override
-	public Element getByOperator(Document document, Operator operator, String operand) {
-		Params.notNull(document, "Layout document");
-		try {
-			return document.getByXPath(buildAttrXPath(operator.value(), operand));
-		} catch (XPathExpressionException e) {
-			// XPath expression is hard coded
-			throw new BugError(e);
+		default:
+			return element.getAttr(operator.value());
 		}
 	}
 
@@ -81,23 +98,27 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 		element.removeAttr(operator.value());
 	}
 
-	/**
-	 * Create XPath expression for selecting element by attribute name and optional value.
-	 * 
-	 * @param name attribute name,
-	 * @param value attribute value.
-	 * @return XPath expression.
-	 */
-	protected static String buildAttrXPath(String name, String... value) {
+	private String buildXPath(Operator operator, String... operand) {
+		// descendant::tag1 | descendant::tag2 | descendant-or-self::node()[@compo='res/compo/dialog']
+
 		StringBuilder sb = new StringBuilder();
+		if (operator == Operator.COMPO) {
+			for (String tag : tagCompos.keySet()) {
+				sb.append("descendant::");
+				sb.append(tag);
+				sb.append(" | ");
+			}
+		}
+
 		sb.append("descendant-or-self::node()[@");
-		sb.append(name);
-		if (value.length == 1) {
+		sb.append(operator.value());
+		if (operand.length == 1) {
 			sb.append("='");
-			sb.append(value[0]);
+			sb.append(operand[0]);
 			sb.append("'");
 		}
 		sb.append("]");
+
 		return sb.toString();
 	}
 }

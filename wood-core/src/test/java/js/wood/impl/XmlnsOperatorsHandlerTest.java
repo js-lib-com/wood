@@ -7,6 +7,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -20,12 +23,14 @@ import js.wood.WOOD;
 
 public class XmlnsOperatorsHandlerTest {
 	private DocumentBuilder builder;
+	private Map<String, String> tagCompos;
 	private IOperatorsHandler operators;
 
 	@Before
 	public void beforeTest() {
 		builder = Classes.loadService(DocumentBuilder.class);
-		operators = new XmlnsOperatorsHandler();
+		tagCompos = new HashMap<>();
+		operators = new XmlnsOperatorsHandler(tagCompos);
 	}
 
 	@Test
