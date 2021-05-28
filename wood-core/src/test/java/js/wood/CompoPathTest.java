@@ -21,13 +21,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class CompoPathTest {
 	@Mock
 	private Project project;
-	@Mock
-	private Factory factory;
 
 	@Before
 	public void beforeTest() {
 		when(project.getProjectRoot()).thenReturn(new File("."));
-		when(project.getFactory()).thenReturn(factory);
 	}
 
 	@Test
@@ -58,7 +55,7 @@ public class CompoPathTest {
 		// given
 		FilePath layoutPath = mock(FilePath.class);
 		when(layoutPath.value()).thenReturn("res/page/page.htm");
-		when(factory.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
+		when(project.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
 
 		File path = mock(File.class);
 		when(path.isDirectory()).thenReturn(true);
@@ -81,7 +78,7 @@ public class CompoPathTest {
 	public void GivenInlineCompoWithMissingLayout_WhenGetLayoutPath_ThenReturnLayout() {
 		// given
 		FilePath layoutPath = mock(FilePath.class);
-		when(factory.createFilePath("res/page.htm")).thenReturn(layoutPath);
+		when(project.createFilePath("res/page.htm")).thenReturn(layoutPath);
 
 		File path = mock(File.class);
 		when(path.getPath()).thenReturn("res/page/");

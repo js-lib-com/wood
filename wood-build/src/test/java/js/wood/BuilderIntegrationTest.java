@@ -24,7 +24,6 @@ import org.junit.Test;
 import js.dom.Document;
 import js.dom.EList;
 import js.util.Files;
-import js.wood.impl.ScriptsDependencies;
 
 public class BuilderIntegrationTest {
 	private File buildDir;
@@ -74,7 +73,7 @@ public class BuilderIntegrationTest {
 				pageFileNames.add(page.getLayoutFileName());
 			}
 		};
-		Builder builder = new Builder(project, buildFS, new ScriptsDependencies());
+		Builder builder = new Builder(project, buildFS);
 		builder.build();
 
 		assertThat(locales, hasSize(4));
@@ -108,7 +107,7 @@ public class BuilderIntegrationTest {
 			}
 		};
 
-		Builder builder = new Builder(project, buildFS, new ScriptsDependencies());
+		Builder builder = new Builder(project, buildFS);
 		Locale locale = new Locale("en");
 		builder.setLocale(locale);
 		buildFS.setLocale(locale);
@@ -215,7 +214,7 @@ public class BuilderIntegrationTest {
 		try {
 			File projectRoot = new File("src/test/resources/" + projectName);
 			buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
-			BuilderProject project = new BuilderProject(projectRoot, buildDir);
+			BuilderProject project = BuilderProject.create(projectRoot);
 			if (buildDir.exists()) {
 				Files.removeFilesHierarchy(buildDir);
 			}

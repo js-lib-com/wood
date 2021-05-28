@@ -30,13 +30,10 @@ import js.wood.impl.FilesHandler;
 public class DirPathTest {
 	@Mock
 	private Project project;
-	@Mock
-	private Factory factory;
 
 	@Before
 	public void beforeTest() {
 		when(project.getProjectRoot()).thenReturn(new File("."));
-		when(project.getFactory()).thenReturn(factory);
 	}
 
 	@Test
@@ -81,7 +78,7 @@ public class DirPathTest {
 	@Test
 	public void GivenDirPathWithoutTrailingSeparator_WhenGetFilePath_ThenNotNullValue() {
 		// given
-		when(factory.createFilePath("res/page/strings.xml")).thenReturn(mock(FilePath.class));
+		when(project.createFilePath("res/page/strings.xml")).thenReturn(mock(FilePath.class));
 		FilePath dirPath = new FilePath(project, "res/page");
 
 		// when
@@ -94,7 +91,7 @@ public class DirPathTest {
 	@Test
 	public void GivenDirPathWithoutTrailingSeparator_WhenGetSubdirPath_ThenNotNullValue() {
 		// given
-		when(factory.createFilePath("res/page/media/")).thenReturn(mock(FilePath.class));
+		when(project.createFilePath("res/page/media/")).thenReturn(mock(FilePath.class));
 		FilePath dirPath = new FilePath(project, "res/page");
 		
 		// when
@@ -108,7 +105,7 @@ public class DirPathTest {
 	public void getSubdirPath_WithTrailingSeparator() {
 		FilePath subdirPath = Mockito.mock(FilePath.class);
 		when(subdirPath.value()).thenReturn("res/page/media/");
-		when(factory.createFilePath("res/page/media/")).thenReturn(subdirPath);
+		when(project.createFilePath("res/page/media/")).thenReturn(subdirPath);
 
 		FilePath dirPath = new FilePath(project, "res/page/");
 		subdirPath = dirPath.getSubdirPath("media/");
@@ -314,7 +311,7 @@ public class DirPathTest {
 		File[] sources = new File[] { new SourceDirectory("media") };
 
 		FilePath subdir = new FilePath(project, "media/");
-		when(factory.createFilePath(sources[0])).thenReturn(subdir);
+		when(project.createFilePath(sources[0])).thenReturn(subdir);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
 		dirPath.files(new FilesHandler() {
@@ -429,11 +426,11 @@ public class DirPathTest {
 		for (int i = 0; i < files.length; ++i) {
 			if (files[i] instanceof SourceDirectory) {
 				FilePath path = new FilePath(project, files[i]);
-				when(factory.createFilePath(files[i])).thenReturn(path);
+				when(project.createFilePath(files[i])).thenReturn(path);
 				paths.add(path);
 			} else if (files[i] instanceof SourceFile) {
 				FilePath path = new FilePath(project, files[i]);
-				when(factory.createFilePath(files[i])).thenReturn(path);
+				when(project.createFilePath(files[i])).thenReturn(path);
 				paths.add(path);
 			}
 		}

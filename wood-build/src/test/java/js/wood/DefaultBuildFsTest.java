@@ -29,7 +29,7 @@ public class DefaultBuildFsTest {
 			}
 		}
 
-		project = new BuilderProject(projectRoot, buildDir);
+		project = BuilderProject.create(projectRoot);
 		buildFS = new DefaultBuildFS(buildDir, 0);
 	}
 

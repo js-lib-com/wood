@@ -10,7 +10,6 @@ import js.dom.DocumentBuilder;
 import js.dom.Element;
 import js.util.Classes;
 import js.util.Strings;
-import js.wood.impl.ScriptsDependencies;
 
 /**
  * Preview wraps a component in standard HTML document and serialize it to given writer. This component preview class is
@@ -40,8 +39,6 @@ class Preview {
 	/** Enable control script injection only if events stream servlet is declared on preview web.xml */
 	private final boolean controlScript;
 
-	private final ScriptsDependencies scriptsDependencies;
-
 	/**
 	 * Create component preview instance.
 	 * 
@@ -50,9 +47,8 @@ class Preview {
 	 * @param contextPath runtime context path,
 	 * @param controlScript enable control script injection.
 	 */
-	public Preview(Project project, ScriptsDependencies scriptsDependencies, Component compo, String contextPath, boolean controlScript) {
+	public Preview(Project project, Component compo, String contextPath, boolean controlScript) {
 		this.project = project;
-		this.scriptsDependencies = scriptsDependencies;
 		this.compo = compo;
 		this.contextPath = contextPath;
 		this.controlScript = controlScript;
@@ -283,7 +279,7 @@ class Preview {
 		}
 		processedScripts.add(script.getSource());
 
-		for (IScriptDescriptor dependency : scriptsDependencies.getScriptDependencies(script.getSource())) {
+		for (IScriptDescriptor dependency : project.getScriptDependencies(script.getSource())) {
 			addScript(doc, dependency);
 		}
 

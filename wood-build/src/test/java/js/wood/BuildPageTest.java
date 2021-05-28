@@ -31,20 +31,15 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
-import js.wood.impl.ScriptsDependencies;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildPageTest {
 	@Mock
 	private BuilderProject project;
 	@Mock
-	private Factory factory;
-	@Mock
 	private Component page;
 	@Mock
 	private BuildFS buildFS;
-	@Mock
-	private ScriptsDependencies scriptsDependencies;
 
 	@Mock
 	private FilePath manifest;
@@ -62,7 +57,6 @@ public class BuildPageTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(project.getFactory()).thenReturn(factory);
 		when(project.getAuthor()).thenReturn("Iulian Rotaru");
 		when(project.getManifest()).thenReturn(manifest);
 		when(project.getFavicon()).thenReturn(favicon);
@@ -72,18 +66,18 @@ public class BuildPageTest {
 		when(page.getDisplay()).thenReturn("Test Page");
 		when(page.getDescription()).thenReturn("Test page description.");
 
-		builder = new Builder(project, buildFS, scriptsDependencies);
+		builder = new Builder(project, buildFS);
 	}
 
 	@Test
 	public void buildPage() throws IOException, SAXException, XPathExpressionException {
 		// project fixture
-		
+
 		when(manifest.exists()).thenReturn(true);
 		SourceReader reader = mock(SourceReader.class);
 		when(manifest.getReader()).thenReturn(reader);
 		when(buildFS.writeManifest(any(SourceReader.class))).thenReturn("manifest.json");
-		
+
 		when(favicon.exists()).thenReturn(true);
 		when(buildFS.writeFavicon(any(Component.class), eq(favicon))).thenReturn("favicon.ico");
 
@@ -107,7 +101,7 @@ public class BuildPageTest {
 		FilePath themeStyle = Mockito.mock(FilePath.class);
 		when(theme.getStyles()).thenReturn(Arrays.asList(themeStyle));
 		when(buildFS.writeStyle(any(Component.class), eq(themeStyle), any(IReferenceHandler.class))).thenReturn("styles/form.css");
-		
+
 		// page fixture
 
 		List<IMetaDescriptor> pageMetas = metas("og:title", "Test Page");
@@ -131,12 +125,12 @@ public class BuildPageTest {
 		when(page.getLayout()).thenReturn(documentBuilder.parseHTML(layout).getRoot());
 
 		// exercise
-		
+
 		builder.setLocale(Locale.ENGLISH);
 		builder.buildPage(page);
 
 		// assert results
-		
+
 		ArgumentCaptor<Component> componentArgument = ArgumentCaptor.forClass(Component.class);
 		ArgumentCaptor<Document> documentArgument = ArgumentCaptor.forClass(Document.class);
 		verify(buildFS).writePage(componentArgument.capture(), documentArgument.capture());
@@ -177,7 +171,7 @@ public class BuildPageTest {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	
+
 	private List<IScriptDescriptor> scripts(String... sources) throws IOException {
 		List<IScriptDescriptor> scripts = new ArrayList<>();
 		for (String source : sources) {
@@ -185,7 +179,7 @@ public class BuildPageTest {
 			when(script.getSource()).thenReturn(source);
 			if (FilePath.accept(source)) {
 				FilePath path = new FilePath(project, source);
-				when(factory.createFilePath(source)).thenReturn(path);
+				when(project.createFilePath(source)).thenReturn(path);
 				when(buildFS.writeScript(any(Component.class), eq(path), any(IReferenceHandler.class))).thenReturn("scripts/" + path.getName());
 			}
 			scripts.add(script);

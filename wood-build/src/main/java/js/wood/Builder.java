@@ -8,7 +8,6 @@ import js.lang.BugError;
 import js.lang.Handler;
 import js.log.Log;
 import js.log.LogFactory;
-import js.wood.impl.ScriptsDependencies;
 
 /**
  * Builder generates site files from project components. It reads component source and resource files from project, consolidates
@@ -46,8 +45,6 @@ public class Builder implements IReferenceHandler {
 	/** Build file system is there all pages and resources are created. */
 	private final BuildFS buildFS;
 
-	private final ScriptsDependencies scriptsDependencies;
-
 	/** Current processing locale variant. */
 	private Locale locale;
 
@@ -58,7 +55,7 @@ public class Builder implements IReferenceHandler {
 	 * @param config builder configuration.
 	 */
 	public Builder(BuilderConfig config) {
-		this(new BuilderProject(config.getProjectDir(), config.getBuildDir()), new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber()), new ScriptsDependencies());
+		this(BuilderProject.create(config.getProjectDir()), new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber()));
 	}
 
 	/**
@@ -67,11 +64,9 @@ public class Builder implements IReferenceHandler {
 	 * @param project builder project,
 	 * @param buildFS build file system.
 	 */
-	Builder(BuilderProject project, BuildFS buildFS, ScriptsDependencies scriptsDependencies) {
+	Builder(BuilderProject project, BuildFS buildFS) {
 		this.project = project;
 		this.buildFS = buildFS;
-		this.scriptsDependencies = scriptsDependencies;
-		this.scriptsDependencies.scan(this.project);
 	}
 
 	/**
@@ -189,7 +184,7 @@ public class Builder implements IReferenceHandler {
 	}
 
 	private void addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
-		for (IScriptDescriptor dependency : scriptsDependencies.getScriptDependencies(script.getSource())) {
+		for (IScriptDescriptor dependency : project.getScriptDependencies(script.getSource())) {
 			addScript(pageComponent, pageDocument, dependency);
 		}
 		pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
@@ -214,6 +209,7 @@ public class Builder implements IReferenceHandler {
 		if (reference.isVariable()) {
 			String value = null;
 			Variables dirVariables = project.getVariables().get(source.getParentDir());
+			// source parent directory can be null in which case dirVariables also null
 			if (dirVariables != null) {
 				value = dirVariables.get(locale, reference, source, this);
 			}

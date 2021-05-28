@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -29,7 +30,6 @@ import js.dom.Document;
 import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.ResourceType;
-import js.wood.impl.ScriptsDependencies;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,8 +38,6 @@ public class BuilderTest {
 	private BuilderProject project;
 	@Mock
 	private BuildFS buildFS;
-	@Mock
-	private ScriptsDependencies scriptsDependencies;
 	@Mock
 	private Variables dirVariables;
 	@Mock
@@ -54,14 +52,14 @@ public class BuilderTest {
 		when(project.getVariables()).thenReturn(variables);
 		when(project.getAssetVariables()).thenReturn(assetVariables);
 
-		builder = new Builder(project, buildFS,scriptsDependencies);
+		builder = new Builder(project, buildFS);
 		builder.setLocale(Locale.ENGLISH);
 	}
 
 	@Test
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(Collections.emptyMap()));
 		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getServiceWorker()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));

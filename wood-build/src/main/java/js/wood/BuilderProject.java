@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import js.wood.impl.FilesHandler;
 import js.wood.impl.ResourceType;
 
 /**
@@ -18,11 +17,11 @@ import js.wood.impl.ResourceType;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	/**
-	 * Style files from theme source directory. Theme styles are global per project and are loaded for all pages. Rules declared
-	 * on theme styles are related to general aspect rather than size and position.
-	 */
-	private final ThemeStyles themeStyles;
+	public static BuilderProject create(File projectDir) {
+		BuilderProject project = new BuilderProject(projectDir);
+		project.postCreate();
+		return project;
+	}
 
 	/**
 	 * Variables declared on assets directory. Asset variables are used when source directory variables miss a certain value.
@@ -41,30 +40,16 @@ class BuilderProject extends Project {
 	/**
 	 * Construct builder project and scan project file system for theme styles, variables and page components.
 	 * 
-	 * @param projectDir project root directory,
-	 * @param buildDir build directory.
+	 * @param projectDir project root directory.
 	 */
-	public BuilderProject(File projectDir, File buildDir) {
+	private BuilderProject(File projectDir) {
 		super(projectDir);
 
-		this.excludes.add(factory.createFilePath(buildDir));
-		this.themeStyles = new ThemeStyles(getThemeDir());
 		this.assetVariables = new Variables(getAssetDir());
 		this.variables = new HashMap<>();
 		this.pages = new ArrayList<>();
 
-		scan(getProjectDir());
-	}
-
-	/**
-	 * Get project theme styles.
-	 * 
-	 * @return project theme styles.
-	 * @see #themeStyles
-	 */
-	@Override
-	public ThemeStyles getThemeStyles() {
-		return themeStyles;
+		registerScanHandler(new FilePathVisitor(this, variables, pages));
 	}
 
 	/**
@@ -115,46 +100,46 @@ class BuilderProject extends Project {
 	 * @throws IOException if file reading fails.
 	 */
 	public String loadFile(String path) throws IOException {
-		return new FilePath(this, path).load();
+		return createFilePath(path).load();
 	}
 
-	/**
-	 * Scan project directories to discover page components and variable definition files. This method is executed recursively
-	 * in depth-first order.
-	 * 
-	 * @param dir current directory.
-	 */
-	void scan(FilePath dir) {
-		dir.files(new FilesHandler() {
-			@Override
-			public void onDirectory(FilePath dir) {
-				if (!excludes.contains(dir)) {
-					scan(dir);
-				}
+	// --------------------------------------------------------------------------------------------
+	// support for scanning project file system
+
+	static class FilePathVisitor implements IFilePathVisitor {
+		private final Project project;
+		private final Map<FilePath, Variables> variables;
+		private final List<CompoPath> pages;
+
+		public FilePathVisitor(Project project, Map<FilePath, Variables> variables, List<CompoPath> pages) {
+			this.project = project;
+			this.variables = variables;
+			this.pages = pages;
+		}
+
+		@Override
+		public void visitFile(FilePath file) throws Exception {
+			final FilePath parentDir = file.getParentDir();
+			if (parentDir == null) {
+				return;
 			}
 
-			@Override
-			public void onFile(FilePath file) {
-				final FilePath parentDir = file.getParentDir();
-				assert parentDir != null;
-
-				// variables definition files are XML files with root element one of defined resource type variables
-				if (file.isXML(ResourceType.variables())) {
-					Variables parentDirVariables = variables.get(parentDir);
-					if (parentDirVariables == null) {
-						parentDirVariables = new Variables(BuilderProject.this);
-						variables.put(dir, parentDirVariables);
-					}
-					parentDirVariables.load(file);
-					return;
+			// variables definition files are XML files with root element one of defined resource type variables
+			if (file.isXML(ResourceType.variables())) {
+				Variables parentDirVariables = variables.get(parentDir);
+				if (parentDirVariables == null) {
+					parentDirVariables = new Variables(project);
+					variables.put(parentDir, parentDirVariables);
 				}
-
-				// XML component descriptor for pages has root 'page'
-				if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
-					pages.add(factory.createCompoPath(parentDir.value()));
-					return;
-				}
+				parentDirVariables.load(file);
+				return;
 			}
-		});
+
+			// XML component descriptor for pages has root 'page'
+			if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
+				pages.add(project.createCompoPath(parentDir.value()));
+				return;
+			}
+		}
 	}
 }

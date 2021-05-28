@@ -2,12 +2,21 @@ package js.wood;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import js.dom.Document;
+import js.dom.DocumentBuilder;
+import js.dom.Element;
+import js.util.Classes;
+import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttrOperatorsHandler;
@@ -16,6 +25,8 @@ import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
+import js.wood.impl.ProjectProperties;
+import js.wood.impl.ScriptDescriptor;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -37,52 +48,59 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @since 1.0
  */
 public class Project {
-	protected Factory factory;
+	public static Project create(File projectRoot) {
+		Project project = new Project(projectRoot);
+		project.postCreate();
+		return project;
+	}
+
+	private final Map<String, String> compoPaths = new HashMap<>();
+
+	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
+
+	private final List<IFilePathVisitor> filePathVisitors = new ArrayList<>();
+
+	/** Directories excluded from build processing. */
+	private final Set<File> excludes = new HashSet<>();
 
 	/** Project root directory. All project file are included here, no external references allowed. */
-	private final File projectRoot;
-
-	/** Directory path instance used as root. */
-	private final FilePath projectDir;
+	private File projectRoot;
 
 	/**
 	 * Project configuration loaded from <code>project.xml</code> file. It is allowed for project descriptor to be missing in
 	 * which case there are sensible default values.
 	 */
-	private final ProjectDescriptor descriptor;
+	private ProjectDescriptor descriptor;
 
 	/**
 	 * Project name for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
 	 * project name converted to title case.
 	 */
-	private final String display;
+	private String display;
 
 	/**
 	 * Project description. Uses project display if this value is not provided by
 	 * {@link ProjectDescriptor#getDescription(String)}.
 	 */
-	private final String description;
+	private String description;
 
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
 	 */
-	private final FilePath assetDir;
+	private FilePath assetDir;
 
 	/**
 	 * Contains site styles for UI primitive elements and theme variables. This directory content describe overall site design -
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
-	private final FilePath themeDir;
+	private FilePath themeDir;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
 	 * {@link NamingStrategy#XMLNS}.
 	 */
-	private final IOperatorsHandler operatorsHandler;
-
-	/** Directories excluded from build processing. */
-	protected final List<FilePath> excludes;
+	private IOperatorsHandler operatorsHandler;
 
 	/**
 	 * Construct and initialize project instance. Created instance is immutable.
@@ -90,8 +108,14 @@ public class Project {
 	 * @param projectRoot path to existing project root directory.
 	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
-	public Project(File projectRoot) throws IllegalArgumentException {
-		this(projectRoot, new ProjectDescriptor(new File(projectRoot, CT.PROJECT_CONFIG)));
+	protected Project(File projectRoot) throws IllegalArgumentException {
+		this.projectRoot = projectRoot;
+
+		ProjectDescriptor descriptor = new ProjectDescriptor(new File(projectRoot, CT.PROJECT_CONFIG));
+		ProjectProperties properties = new ProjectProperties(this);
+		IFilePathVisitor scanHandler = new FilePathVisitor(compoPaths, scriptDependencies);
+
+		init(descriptor, properties, scanHandler);
 	}
 
 	/**
@@ -100,51 +124,49 @@ public class Project {
 	 * @param projectRoot path to existing project root directory,
 	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
 	 */
-	Project(File projectRoot, ProjectDescriptor descriptor, Factory... factory) {
-		this.factory = factory.length == 1 ? factory[0] : new Factory(this);
+	Project(File projectRoot, ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor scanHandler) {
 		this.projectRoot = projectRoot;
-		this.projectDir = new FilePath(this, ".");
-		this.descriptor = descriptor;
-		this.excludes = descriptor.getExcludes().stream().map(exclude -> new FilePath(this, exclude)).collect(Collectors.toList());
+		init(descriptor, properties, scanHandler);
+	}
 
-		String assetDir = CT.DEF_ASSET_DIR;
-		String themeDir = CT.DEF_THEME_DIR;
-		FilePath propertiesFile = this.projectDir.getFilePath(".project.properties");
-		if (propertiesFile.exists()) {
-			Properties properties = propertiesFile.properties();
-			if (properties.containsKey("asset.dir")) {
-				assetDir = (String) properties.get("asset.dir");
-			}
-			if (properties.containsKey("theme.dir")) {
-				themeDir = (String) properties.get("theme.dir");
-			}
-		}
-		this.assetDir = this.factory.createFilePath(assetDir);
-		this.themeDir = this.factory.createFilePath(themeDir);
+	void init(ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor scanHandler) {
+		this.descriptor = descriptor;
+
+		this.excludes.addAll(descriptor.getExcludes().stream().map(exclude -> new File(this.projectRoot, exclude)).collect(Collectors.toList()));
+		this.excludes.add(new File(this.projectRoot, properties.getBuildDir()));
+
+		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
+		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
 
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
 
+		this.filePathVisitors.add(scanHandler);
+	}
+
+	protected void postCreate() {
+		walkFileTree(this, projectRoot, filePathVisitors);
+
 		switch (this.descriptor.getNamingStrategy()) {
 		case XMLNS:
-			operatorsHandler = new XmlnsOperatorsHandler();
+			this.operatorsHandler = new XmlnsOperatorsHandler(this.compoPaths);
 			break;
 
 		case DATA_ATTR:
-			operatorsHandler = new DataAttrOperatorsHandler();
+			this.operatorsHandler = new DataAttrOperatorsHandler(this.compoPaths);
 			break;
 
 		case ATTR:
-			operatorsHandler = new AttrOperatorsHandler();
+			this.operatorsHandler = new AttrOperatorsHandler(this.compoPaths);
 			break;
 
 		default:
-			operatorsHandler = null;
+			this.operatorsHandler = null;
 		}
 	}
 
-	public Factory getFactory() {
-		return factory;
+	protected void registerScanHandler(IFilePathVisitor scanHandler) {
+		this.filePathVisitors.add(scanHandler);
 	}
 
 	/**
@@ -178,20 +200,6 @@ public class Project {
 	}
 
 	/**
-	 * Get directory path instance used as project root.
-	 * 
-	 * @return project root directory path.
-	 * @see #projectDir
-	 */
-	public FilePath getProjectDir() {
-		return projectDir;
-	}
-
-	public List<FilePath> getExcludes() {
-		return excludes;
-	}
-
-	/**
 	 * Get project assets directory that contains variables and media files used in common by all components. Returned directory
 	 * is optional and is caller responsibility to ensure it exists before using it.
 	 * 
@@ -219,7 +227,7 @@ public class Project {
 	 * @return favicon file path.
 	 */
 	public FilePath getFavicon() {
-		return projectDir.getFilePath(descriptor.getFavicon());
+		return createFilePath(descriptor.getFavicon());
 	}
 
 	/**
@@ -228,11 +236,11 @@ public class Project {
 	 * @return manifest file path.
 	 */
 	public FilePath getManifest() {
-		return projectDir.getFilePath(descriptor.getManifest());
+		return createFilePath(descriptor.getManifest());
 	}
 
 	public FilePath getServiceWorker() {
-		return projectDir.getFilePath(descriptor.getServiceWorker());
+		return createFilePath(descriptor.getServiceWorker());
 	}
 
 	/**
@@ -297,6 +305,11 @@ public class Project {
 		return Collections.unmodifiableList(descriptor.getScriptDescriptors());
 	}
 
+	public List<IScriptDescriptor> getScriptDependencies(String source) {
+		List<IScriptDescriptor> dependencies = scriptDependencies.get(source);
+		return Collections.unmodifiableList(dependencies != null ? dependencies : Collections.emptyList());
+	}
+
 	/**
 	 * Get style files declared into project theme directory. Returned instance is immutable.
 	 * 
@@ -325,6 +338,7 @@ public class Project {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// media files
 
 	/**
 	 * Get project media file referenced from given source file. This method tries to locate media file into source parent and
@@ -348,13 +362,16 @@ public class Project {
 			locale = null;
 		}
 
-		FilePath sourceDir = sourceFile.getParentDir();
-		FilePath mediaFile = findMediaFile(sourceDir, reference, locale);
-		if (mediaFile != null) {
-			return mediaFile;
-		}
+		// search media files on source and asset directories, in this order
+		// if source file is in project root, e.g. manifest.json, parent directory null
+		// if this is the case search for media files only on asset directory
 
-		return findMediaFile(assetDir, reference, locale);
+		FilePath sourceDir = sourceFile.getParentDir();
+		FilePath mediaFile = null;
+		if (sourceDir != null) {
+			mediaFile = findMediaFile(sourceDir, reference, locale);
+		}
+		return mediaFile != null ? mediaFile : findMediaFile(assetDir, reference, locale);
 	}
 
 	/**
@@ -381,8 +398,94 @@ public class Project {
 		return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// factory methods
+
+	public FilePath createFilePath(String path) {
+		return new FilePath(this, path);
+	}
+
+	public FilePath createFilePath(File file) {
+		return new FilePath(this, Files.getRelativePath(projectRoot, file, true));
+	}
+
+	public CompoPath createCompoPath(String path) {
+		return new CompoPath(this, path);
+	}
+
+	public Component createComponent(FilePath layoutPath, IReferenceHandler referenceHandler) {
+		return new Component(layoutPath, referenceHandler);
+	}
+
 	public Variables createVariables(FilePath dir) {
 		return new Variables(dir);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// scanner for project file system
+
+	static void walkFileTree(Project project, File dir, List<IFilePathVisitor> visitors) {
+		File[] files = dir.listFiles();
+		if (files == null) {
+			return;
+		}
+		for (File file : files) {
+			if (file.isDirectory()) {
+				if (file.getName().startsWith(".") || project.excludes.contains(file)) {
+					continue;
+				}
+				walkFileTree(project, file, visitors);
+			}
+
+			try {
+				for (IFilePathVisitor visitor : visitors) {
+					visitor.visitFile(project.createFilePath(file));
+				}
+			} catch (Throwable t) {
+				throw new WoodException("Scan processing fail on file %s: %s: %s", file, t.getClass(), t.getMessage());
+			}
+		}
+	}
+
+	protected interface IFilePathVisitor {
+		void visitFile(FilePath file) throws Exception;
+	}
+
+	static class FilePathVisitor implements IFilePathVisitor {
+		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+
+		private final Map<String, String> compoPaths;
+		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
+
+		public FilePathVisitor(Map<String, String> compoPaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
+			this.compoPaths = compoPaths;
+			this.scriptDependencies = scriptDependencies;
+		}
+
+		@Override
+		public void visitFile(FilePath file) throws Exception {
+			if (!file.isComponentDescriptor()) {
+				return;
+			}
+
+			Document document = documentBuilder.loadXML(file.getReader());
+
+			for (Element scriptElement : document.findByXPath("//script")) {
+				for (Element dependencyElement : scriptElement.getChildren()) {
+					String scriptSource = scriptElement.getAttr("src");
+					List<IScriptDescriptor> dependencies = scriptDependencies.get(scriptSource);
+					if (dependencies == null) {
+						dependencies = new ArrayList<>();
+						scriptDependencies.put(scriptSource, dependencies);
+					}
+					dependencies.add(ScriptDescriptor.create(dependencyElement));
+				}
+			}
+
+			if (document.getRoot().getTag().equals("compo") && file.getParentDir() != null) {
+				compoPaths.put(file.getBasename(), file.getParentDir().value());
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -394,5 +497,9 @@ public class Project {
 
 	ProjectDescriptor getDescriptor() {
 		return descriptor;
+	}
+
+	Set<File> getExcludes() {
+		return excludes;
 	}
 }

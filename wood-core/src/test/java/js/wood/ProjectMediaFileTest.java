@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -19,13 +20,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.impl.MediaQueryDefinition;
-import js.wood.impl.NamingStrategy;
 import js.wood.impl.ProjectDescriptor;
+import js.wood.impl.ProjectProperties;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProjectFindMediaFileTest {
+public class ProjectMediaFileTest {
 	@Mock
 	private ProjectDescriptor descriptor;
+	@Mock
+	private ProjectProperties properties;
+	@Mock
+	private Project.IFilePathVisitor visitor;
+	
 	@Mock
 	private IReferenceHandler referenceHandler;
 	@Mock
@@ -34,16 +40,19 @@ public class ProjectFindMediaFileTest {
 	private FilePath sourceFile;
 	@Mock
 	private Reference reference;
-	
+
 	private Directory projectRoot;
-	
+
 	private Project project;
 	private FilePath sourceDirPath;
 
 	@Before
 	public void beforeTest() throws Exception {
 		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
-		when(descriptor.getNamingStrategy()).thenReturn(NamingStrategy.XMLNS);
+
+		when(properties.getBuildDir()).thenReturn("build");
+		when(properties.getAssetDir(anyString())).thenReturn("res/asset");
+		when(properties.getThemeDir(anyString())).thenReturn("res/theme");
 
 		when(sourceDir.getPath()).thenReturn("res/page/");
 		when(sourceDir.exists()).thenReturn(true);
@@ -62,13 +71,18 @@ public class ProjectFindMediaFileTest {
 		when(reference.getName()).thenReturn("logo");
 
 		projectRoot = new Directory(".");
-		project = new Project(projectRoot, descriptor);
+		project = new Project(projectRoot, descriptor, properties, visitor);
 		sourceDirPath = new FilePath(project, sourceDir);
 	}
 
 	@Test
-	public void findMediaFile() {
+	public void Given_WhenFindMediaFile_ThenFound() {
+		// given
+
+		// when
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, Locale.JAPANESE);
+
+		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo_ja.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -76,8 +90,14 @@ public class ProjectFindMediaFileTest {
 	}
 
 	@Test
-	public void nullLocale() {
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
+	public void GivenNullLocale_WhenFindMediaFile_ThenFoundDefault() {
+		// given
+		Locale locale = null;
+
+		// when
+		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, locale);
+
+		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -85,7 +105,8 @@ public class ProjectFindMediaFileTest {
 
 	/** The same as {@link #nullLocale()} but ensure that default locale media file is last in directory files list. */
 	@Test
-	public void nullLocale_FilesOrder() {
+	public void GivenNullLocaleAndDefaultLast_WhenFindMediaFile_ThenFoundDefault() {
+		// given
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
 				new XFile("page.htm"), //
 				new XFile("icon.png"), //
@@ -94,7 +115,10 @@ public class ProjectFindMediaFileTest {
 				new XFile("logo.png") });
 		sourceDirPath = new FilePath(project, sourceDir);
 
+		// when
 		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
+
+		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));

@@ -21,7 +21,6 @@ import js.log.LogFactory;
 import js.rmi.BusinessException;
 import js.util.Classes;
 import js.util.Files;
-import js.wood.impl.ScriptsDependencies;
 
 /**
  * Preview Servlet allows access from browser to project components and resource files. This allows to use browser for
@@ -97,9 +96,6 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	private Project project;
 
-	/** Project factory singleton. */
-	private Factory factory;
-
 	/** Variables cache initialized before every component preview processing. */
 	private VariablesCache variables;
 
@@ -126,10 +122,9 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		project = (Project) servletContext.getAttribute(Project.class.getName());
 		if (project == null) {
-			project = new Project(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
+			project = Project.create(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
 			servletContext.setAttribute(Project.class.getName(), project);
 		}
-		factory = project.getFactory();
 		variables = new VariablesCache(project);
 	}
 
@@ -182,7 +177,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		log.debug("Request |%s| on context |%s|.", requestPath, contextPath);
 
 		if (CompoPath.accept(requestPath)) {
-			CompoPath compoPath = factory.createCompoPath(requestPath);
+			CompoPath compoPath = project.createCompoPath(requestPath);
 			FilePath layoutPath = compoPath.getLayoutPath();
 			if (!layoutPath.exists()) {
 				throw new WoodException("Missing component layout |%s|.", layoutPath);
@@ -199,16 +194,15 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			// update variables cache every time a component is requested
 			variables.update();
 
-			ScriptsDependencies scriptsDependencies = new ScriptsDependencies();
 			// create component with support for preview script
-			Component compo = factory.createComponent(layoutPath, this);
+			Component compo = project.createComponent(layoutPath, this);
 			boolean controlScript = httpRequest.getServletContext().getAttribute(EventsServlet.class.getName()) != null;
-			Preview preview = new Preview(project, scriptsDependencies, compo, contextPath, controlScript);
+			Preview preview = new Preview(project, compo, contextPath, controlScript);
 			preview.serialize(httpResponse.getWriter());
 			return;
 		}
 
-		FilePath filePath = factory.createFilePath(requestPath);
+		FilePath filePath = project.createFilePath(requestPath);
 		httpResponse.setContentType(filePath.getMimeType());
 
 		if (filePath.isStyle()) {
@@ -253,7 +247,9 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
 		builder.append(FilePath.SEPARATOR_CHAR);
-		builder.append(mediaFile.getParentDir().value());
+		if (mediaFile.getParentDir() != null) {
+			builder.append(mediaFile.getParentDir().value());
+		}
 		builder.append(mediaFile.getName());
 		return builder.toString();
 	}
@@ -296,16 +292,11 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		this.contextPath = servletContext.getContextPath();
 
 		this.project = project;
-		this.factory = project.getFactory();
 		this.variables = variables;
 	}
 
 	Project getProject() {
 		return project;
-	}
-
-	Factory getFactory() {
-		return factory;
 	}
 
 	VariablesCache getVariables() {

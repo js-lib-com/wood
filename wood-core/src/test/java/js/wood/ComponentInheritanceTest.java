@@ -1,17 +1,19 @@
 package js.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +39,6 @@ import js.wood.impl.XmlnsOperatorsHandler;
 public class ComponentInheritanceTest {
 	@Mock
 	private Project project;
-	@Mock
-	private Factory factory;
 
 	@Mock
 	private FilePath pageLayout; // layout file for page template
@@ -78,12 +78,13 @@ public class ComponentInheritanceTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
+	private Map<String, String> tagCompos = new HashMap<>();
+
 	@Before
 	public void beforeTest() {
-		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(tagCompos));
 
 		when(pageLayout.exists()).thenReturn(true);
 		when(pageLayout.isLayout()).thenReturn(true);
@@ -124,7 +125,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -156,7 +157,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -188,7 +189,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -222,7 +223,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -251,7 +252,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</article>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -281,7 +282,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</article>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -309,7 +310,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</article>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -335,7 +336,7 @@ public class ComponentInheritanceTest {
 				"	<li>Item <b>#2</b></li>" + //
 				"</ul>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -364,7 +365,7 @@ public class ComponentInheritanceTest {
 				"	<li>Item <b>#2</b></li>" + //
 				"</ul>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -390,7 +391,7 @@ public class ComponentInheritanceTest {
 				"	<li>Item <b>#2</b></li>" + //
 				"</ul>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -418,7 +419,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -453,7 +454,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -478,14 +479,14 @@ public class ComponentInheritanceTest {
 
 		String compoHTML = "" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
-				"	<embed w:template='res/template'>"+//
+				"	<embed w:template='res/template'>" + //
 				"		<section data-list='list' class='compo' w:content='section'>" + //
 				"			<h1>Content</h1>" + //
 				"		</section>" + //
-				"	</embed>"+//
+				"	</embed>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -510,14 +511,14 @@ public class ComponentInheritanceTest {
 
 		String compoHTML = "" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
-				"	<embed name='embed' w:template='res/template'>"+//
+				"	<embed name='embed' w:template='res/template'>" + //
 				"		<section data-list='list' class='compo' w:content='section'>" + //
 				"			<h1>Content</h1>" + //
 				"		</section>" + //
-				"	</embed>"+//
+				"	</embed>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -526,7 +527,7 @@ public class ComponentInheritanceTest {
 		// then
 		Element article = layout.getByTag("article");
 		assertThat(article.getAttr("name"), equalTo("embed"));
-		
+
 		Element section = layout.getByTag("section");
 		assertThat(section.getAttr("data-list"), equalTo("list"));
 		assertThat(section.hasCssClass("template"), equalTo(true));
@@ -550,7 +551,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -576,7 +577,7 @@ public class ComponentInheritanceTest {
 				"	<article w:editable='article'></article>" + //
 				"</body>";
 		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
-		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template/page")).thenReturn(pageCompo);
 
 		String templateHTML = "" + //
 				"<chapter xmlns:w='js-lib.com/wood'>" + //
@@ -584,7 +585,7 @@ public class ComponentInheritanceTest {
 				"	<section w:editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
-		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
 
 		String compoHTML = "" + //
 				"<article w:template='res/template/page#article' xmlns:w='js-lib.com/wood'>" + //
@@ -621,7 +622,7 @@ public class ComponentInheritanceTest {
 				"	<article w:editable='article'></article>" + //
 				"</body>";
 		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
-		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template/page")).thenReturn(pageCompo);
 
 		String templateHTML = "" + //
 				"<chapter xmlns:w='js-lib.com/wood'>" + //
@@ -629,7 +630,7 @@ public class ComponentInheritanceTest {
 				"	<section w:editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
-		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
 
 		String compoHTML = "" + //
 				"<article w:template='res/template/page#article' xmlns:w='js-lib.com/wood'>" + //
@@ -674,7 +675,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -702,7 +703,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -729,7 +730,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		new Component(compoPath, referenceHandler);
@@ -763,7 +764,7 @@ public class ComponentInheritanceTest {
 				"	</fieldset>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -807,7 +808,7 @@ public class ComponentInheritanceTest {
 				"	</fieldset>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -846,7 +847,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -868,7 +869,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndDataAttrOperators_ThenBothContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
 
 		String templateHTML = "" + //
 				"<body>" + //
@@ -889,7 +890,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -930,7 +931,7 @@ public class ComponentInheritanceTest {
 				"	</section>" + //
 				"</embed>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -970,7 +971,7 @@ public class ComponentInheritanceTest {
 				"	</article>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1007,7 +1008,7 @@ public class ComponentInheritanceTest {
 				"	</article>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1032,7 +1033,7 @@ public class ComponentInheritanceTest {
 				"	<section w:editable='section-2'></section>" + //
 				"</body>";
 		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
-		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template/page")).thenReturn(pageCompo);
 
 		String templateHTML = "" + //
 				"<chapter xmlns:w='js-lib.com/wood'>" + //
@@ -1040,7 +1041,7 @@ public class ComponentInheritanceTest {
 				"	<section class='chapter' name='chapter-1' title='chapter one' w:editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
-		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
 
 		String compoHTML = "" + //
 				"<embed type='text/html' w:template='res/template/page' xmlns:w='js-lib.com/wood'>" + //
@@ -1088,7 +1089,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndOneInlineTemplateAndDataAttrOperators_ThenAllThreeContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1097,7 +1098,7 @@ public class ComponentInheritanceTest {
 				"	<section data-editable='section-2'></section>" + //
 				"</body>";
 		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
-		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template/page")).thenReturn(pageCompo);
 
 		String templateHTML = "" + //
 				"<chapter>" + //
@@ -1105,7 +1106,7 @@ public class ComponentInheritanceTest {
 				"	<section class='chapter' name='chapter-1' title='chapter one' data-editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
-		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
 
 		String compoHTML = "" + //
 				"<embed type='text/html' data-template='res/template/page'>" + //
@@ -1160,7 +1161,7 @@ public class ComponentInheritanceTest {
 				"	<section w:editable='section-2'></section>" + //
 				"</body>";
 		when(pageLayout.getReader()).thenReturn(new StringReader(pageHTML));
-		when(factory.createCompoPath("res/template/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template/page")).thenReturn(pageCompo);
 
 		String templateHTML = "" + //
 				"<chapter xmlns:w='js-lib.com/wood'>" + //
@@ -1168,7 +1169,7 @@ public class ComponentInheritanceTest {
 				"	<section class='chapter' name='chapter-1' w:editable='section'></section>" + //
 				"</chapter>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
-		when(factory.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template/chapter")).thenReturn(templateCompo);
 
 		String compoHTML = "" + //
 				"<embed type='text/html' w:template='res/template/page' xmlns:w='js-lib.com/wood'>" + //
@@ -1227,8 +1228,8 @@ public class ComponentInheritanceTest {
 				"	<h1>Component</h1>" + //
 				"</div>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/page")).thenReturn(pageCompo);
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1269,8 +1270,8 @@ public class ComponentInheritanceTest {
 				"	<h1>Component</h1>" + //
 				"</div>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/page")).thenReturn(pageCompo);
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1293,7 +1294,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndDataAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1314,8 +1315,8 @@ public class ComponentInheritanceTest {
 				"	<h1>Component</h1>" + //
 				"</div>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/page")).thenReturn(pageCompo);
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1323,6 +1324,7 @@ public class ComponentInheritanceTest {
 		// then
 		Element layout = compo.getLayout();
 		Element section = layout.getByTag("section");
+		assertThat(section, notNullValue());
 		assertFalse(section.hasAttr("data-editable"));
 		assertFalse(section.hasAttr("data-template"));
 
@@ -1334,7 +1336,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler());
+		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler(tagCompos));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1355,8 +1357,8 @@ public class ComponentInheritanceTest {
 				"	<h1>Component</h1>" + //
 				"</div>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/page")).thenReturn(pageCompo);
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/page")).thenReturn(pageCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1392,7 +1394,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1420,7 +1422,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1447,7 +1449,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1486,7 +1488,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1529,7 +1531,7 @@ public class ComponentInheritanceTest {
 				"	<h1 w:template='res/template#h1'><b>Content</b></h1>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1558,7 +1560,7 @@ public class ComponentInheritanceTest {
 				"	<h1>Content</h1>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -1581,7 +1583,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		new Component(compoPath, referenceHandler);
@@ -1598,7 +1600,7 @@ public class ComponentInheritanceTest {
 
 		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templateCompo);
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
 		// when
 		new Component(compoPath, referenceHandler);

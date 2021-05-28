@@ -253,7 +253,7 @@ class PageDocument {
 		String src = script.getSource();
 		if (!script.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = handler.handle(project.getFactory().createFilePath(src));
+				src = handler.handle(project.createFilePath(src));
 			}
 			// dynamic scripts are not declared on page head; they are loaded by custom script loaders, e.g. ServiceLoader
 			if (script.isDynamic()) {

@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -28,8 +30,6 @@ import js.wood.impl.XmlnsOperatorsHandler;
 public class ComponentAggregationTest {
 	@Mock
 	private Project project;
-	@Mock
-	private Factory factory;
 
 	@Mock
 	private CompoPath compoPath; // component path
@@ -56,13 +56,14 @@ public class ComponentAggregationTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
+	private Map<String, String> tagCompos;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
-		operatorsHandler = new XmlnsOperatorsHandler();
+		tagCompos = new HashMap<>();
+		operatorsHandler = new XmlnsOperatorsHandler(tagCompos);
 
-		when(project.getFactory()).thenReturn(factory);
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
@@ -99,7 +100,7 @@ public class ComponentAggregationTest {
 				"	<div w:compo='res/child'></div>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/child")).thenReturn(childPath);
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -128,7 +129,7 @@ public class ComponentAggregationTest {
 				"	<div w:compo='res/child' w:param='title:Child'></div>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/child")).thenReturn(childPath);
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -137,6 +138,36 @@ public class ComponentAggregationTest {
 		// then
 		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:compo]"), nullValue());
 		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:param]"), nullValue());
+	}
+	
+	@Test
+	public void GivenSimpleAggregationOnTagCompo_ThenIncludeChildLayout() {
+		// given
+		tagCompos.put("tag", "res/child");
+		
+		String childHTML = "" + //
+				"<tag>" + //
+				"	<h1>Child</h1>" + //
+				"</tag>";
+		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
+
+		String compoHTML = "" + //
+				"<section>" + //
+				"	<h1>Component</h1>" + //
+				"	<tag></tag>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+
+		// then
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Component"));
+		assertThat(headings.item(1).getText(), equalTo("Child"));
 	}
 
 	@Test
@@ -169,7 +200,7 @@ public class ComponentAggregationTest {
 				"	</section>" + //
 				"</div>";
 		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templatePath);
+		when(project.createCompoPath("res/template")).thenReturn(templatePath);
 
 		String compoHTML = "" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
@@ -177,7 +208,7 @@ public class ComponentAggregationTest {
 				"	<article w:compo='res/child'></article>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/child")).thenReturn(childPath);
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -225,14 +256,14 @@ public class ComponentAggregationTest {
 				"	<section id='child' class='child' w:content='section'></section>" + //
 				"</div>";
 		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
-		when(factory.createCompoPath("res/template")).thenReturn(templatePath);
+		when(project.createCompoPath("res/template")).thenReturn(templatePath);
 
 		String compoHTML = "" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<article id='component' class='component' title='component' w:compo='res/child'></article>" + //
 				"</body>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(factory.createCompoPath("res/child")).thenReturn(childPath);
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);

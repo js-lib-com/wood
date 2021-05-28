@@ -26,16 +26,12 @@ public class PageDocumentTest {
 	@Mock
 	private BuilderProject project;
 	@Mock
-	private Factory factory;
-	@Mock
 	private Component compo;
 
 	private PageDocument page;
 
 	@Before
 	public void beforeTest() throws IOException, SAXException {
-		when(project.getFactory()).thenReturn(factory);
-
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		when(compo.getProject()).thenReturn(project);
 		when(compo.getLayout()).thenReturn(builder.parseXML("<body><h1>page</h1></body>").getRoot());
@@ -56,7 +52,7 @@ public class PageDocumentTest {
 		when(script.getSource()).thenReturn("script/index.js");
 		
 		FilePath scriptPath = new FilePath(project, script.getSource());
-		when(factory.createFilePath(script.getSource())).thenReturn(scriptPath);
+		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
 		page.setLanguage("ro-RO");
 		page.setContentType("text/html; charset=UTF-8");
@@ -139,7 +135,7 @@ public class PageDocumentTest {
 		when(script.getDefer()).thenReturn("true");
 		
 		FilePath scriptPath = new FilePath(project, script.getSource());
-		when(factory.createFilePath(script.getSource())).thenReturn(scriptPath);
+		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
 		page.addScript(script, filePath -> filePath.value());
 		String doc = stringify(page.getDocument());
@@ -175,7 +171,7 @@ public class PageDocumentTest {
 		when(script.getSource()).thenReturn("script/index.js");
 		
 		FilePath scriptPath = new FilePath(project, script.getSource());
-		when(factory.createFilePath(script.getSource())).thenReturn(scriptPath);
+		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
 		page.addScript(script, filePath -> "/context/" + filePath.value());
 		String doc = stringify(page.getDocument());

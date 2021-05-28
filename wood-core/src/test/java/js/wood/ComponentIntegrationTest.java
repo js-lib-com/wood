@@ -29,7 +29,7 @@ public class ComponentIntegrationTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project(new File("src/test/resources/project"));
+		project = Project.create(new File("src/test/resources/project"));
 
 		referenceHandler = new IReferenceHandler() {
 			@Override
@@ -48,7 +48,7 @@ public class ComponentIntegrationTest {
 	}
 
 	@Test
-	public void component() {
+	public void createComponent() {
 		Component compo = new Component(new CompoPath(project, "res/compo"), referenceHandler);
 		Element layout = compo.getLayout();
 

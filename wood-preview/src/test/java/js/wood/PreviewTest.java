@@ -28,14 +28,11 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
-import js.wood.impl.ScriptsDependencies;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewTest {
 	@Mock
 	private Project project;
-	@Mock
-	private ScriptsDependencies scriptsDependencies;
 	@Mock
 	private Component compo;
 	@Mock
@@ -45,7 +42,7 @@ public class PreviewTest {
 
 	@Before
 	public void beforeTest() {
-		preview = new Preview(project, scriptsDependencies, compo, "test", true);
+		preview = new Preview(project, compo, "test", true);
 	}
 
 	@Test

@@ -51,7 +51,12 @@ class VariablesCache {
 	 * @return variable value or null if variable not defined or if is empty.
 	 */
 	public String get(Locale locale, Reference reference, FilePath sourceFile, IReferenceHandler handler) {
+		// if source file is in project root there is no parent directory in which case search on asset variables
 		FilePath sourceDir = sourceFile.getParentDir();
+		if (sourceDir == null) {
+			return assetVariables.get(locale, reference, sourceFile, handler);
+		}
+
 		Variables sourceVariables = sourceVariablesMap.get(sourceDir);
 		if (sourceVariables == null) {
 			synchronized (this) {

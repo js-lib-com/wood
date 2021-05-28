@@ -145,7 +145,7 @@ public class CompoPath extends FilePath {
 		if (file.isDirectory()) {
 			return getFilePath(getName() + CT.DOT_LAYOUT_EXT);
 		}
-		return factory.createFilePath(value().substring(0, value().length() - 1) + CT.DOT_LAYOUT_EXT);
+		return project.createFilePath(value().substring(0, value().length() - 1) + CT.DOT_LAYOUT_EXT);
 	}
 
 	/**

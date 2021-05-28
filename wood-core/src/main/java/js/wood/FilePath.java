@@ -76,14 +76,12 @@ public class FilePath implements Iterable<FilePath> {
 			"((?:[a-z0-9-]+/)*)" + // (1) optional parent directory path; if exists it has trailing path separator
 			"([a-z0-9-\\.]+?)" + // (2) file base name does not include variants or extension
 			"(?:_([a-z0-9][a-z0-9-_]*))?" + // (3) optional file variants
-			"(?:\\.([a-z0-9]{2,5}))" + // (4) file extension
+			"(?:\\.([a-z0-9]+))" + // (4) file extension
 			"$", //
 			Pattern.CASE_INSENSITIVE);
 
 	/** Parent project reference. All paths are always relative to this parent project. */
-	private final Project project;
-
-	protected final Factory factory;
+	protected final Project project;
 
 	/** Path value relative to project root. If this path is a directory it always ends with path separator. */
 	private final String value;
@@ -121,7 +119,6 @@ public class FilePath implements Iterable<FilePath> {
 		Params.notNullOrEmpty(value, "Path value");
 
 		this.project = project;
-		this.factory = project.getFactory();
 		this.pathSegments = new ArrayList<>(Strings.split(value, FilePath.SEPARATOR_CHAR));
 
 		Matcher matcher = FILE_PATTERN.matcher(value);
@@ -241,13 +238,13 @@ public class FilePath implements Iterable<FilePath> {
 	}
 
 	/**
-	 * Get this file parent directory.
+	 * Get this file parent directory or null if file is in project root.
 	 * 
-	 * @return parent directory.
+	 * @return parent directory, possible null.
 	 * @see #parentDir
 	 */
 	public FilePath getParentDir() {
-		return parentPath.isEmpty() ? project.getProjectDir() : new FilePath(project, parentPath);
+		return parentPath.isEmpty() ? null : new FilePath(project, parentPath);
 	}
 
 	/**
@@ -427,7 +424,7 @@ public class FilePath implements Iterable<FilePath> {
 	}
 
 	private FilePath createFilePath(String name) {
-		return factory.createFilePath(isProjectRoot() ? name : value + name);
+		return project.createFilePath(value + name);
 	}
 
 	/**
@@ -535,11 +532,11 @@ public class FilePath implements Iterable<FilePath> {
 			}
 
 			if (file.isDirectory()) {
-				handler.onDirectory(factory.createFilePath(file));
+				handler.onDirectory(project.createFilePath(file));
 				continue;
 			}
 
-			FilePath filePath = factory.createFilePath(file);
+			FilePath filePath = project.createFilePath(file);
 			if (!handler.accept(filePath)) {
 				continue;
 			}
@@ -711,7 +708,7 @@ public class FilePath implements Iterable<FilePath> {
 		 */
 		@Override
 		public FilePath next() {
-			return factory.createFilePath(files[index]);
+			return project.createFilePath(files[index]);
 		}
 
 		/**

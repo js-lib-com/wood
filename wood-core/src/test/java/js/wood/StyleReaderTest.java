@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -33,14 +32,7 @@ public class StyleReaderTest {
 	@Mock
 	private Project project;
 	@Mock
-	private Factory factory;
-	@Mock
 	private FilePath styleFile;
-
-	@Before
-	public void beforeTest() {
-		when(project.getFactory()).thenReturn(factory);
-	}
 
 	@Test
 	public void constructor() throws IOException {
@@ -90,7 +82,7 @@ public class StyleReaderTest {
 		};
 		for(File styleFile:styleFiles) {
 			FilePath stylePath = new FilePath(project, styleFile);
-			when(factory.createFilePath(styleFile)).thenReturn(stylePath);
+			when(project.createFilePath(styleFile)).thenReturn(stylePath);
 		}
 
 		File stylesDir = Mockito.mock(File.class);

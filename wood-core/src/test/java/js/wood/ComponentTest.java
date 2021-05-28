@@ -12,6 +12,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,11 +46,13 @@ public class ComponentTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
+	private Map<String, String> tagCompos;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
-		operatorsHandler = new XmlnsOperatorsHandler();
+		tagCompos = new HashMap<>();
+		operatorsHandler = new XmlnsOperatorsHandler(tagCompos);
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);

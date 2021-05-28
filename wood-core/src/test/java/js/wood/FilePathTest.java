@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -32,16 +30,13 @@ public class FilePathTest {
 	@Mock
 	private Project project;
 
-	@Before
-	public void beforeTest() {
-		when(project.getProjectDir()).thenReturn(mock(FilePath.class));
-	}
-
 	@Test
 	public void GivenValidPath_WhenFilePaternMatch_ThenGroupsFound() {
 		Pattern pattern = Classes.getFieldValue(FilePath.class, "FILE_PATTERN");
 		assertThat(pattern, notNullValue());
 
+		assertFilePattern(pattern, ".wood.properties", "", ".wood", null, "properties");
+		assertFilePattern(pattern, "project.xml", "", "project", null, "xml");
 		assertFilePattern(pattern, "res/path/compo/compo.htm", "res/path/compo/", "compo", null, "htm");
 		assertFilePattern(pattern, "res/path/compo/compo_port.htm", "res/path/compo/", "compo", "port", "htm");
 		assertFilePattern(pattern, "res/path/second-compo/second-compo.css", "res/path/second-compo/", "second-compo", null, "css");
@@ -97,7 +92,9 @@ public class FilePathTest {
 	private void assertFilePath(String value, String parent, String basename, String fileName, FileType fileType, String language) {
 		FilePath p = new FilePath(project, value);
 		assertThat(p.value(), equalTo(value));
-		assertThat(p.getParentDir().value(), equalTo(parent));
+		if (parent != null) {
+			assertThat(p.getParentDir().value(), equalTo(parent));
+		}
 		assertThat(p.getBasename(), equalTo(basename));
 		assertThat(p.getName(), equalTo(fileName));
 		assertThat(p.getType(), equalTo(fileType));

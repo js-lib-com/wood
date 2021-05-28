@@ -56,8 +56,6 @@ public class Component {
 	/** Parent project reference. */
 	private final Project project;
 
-	private final Factory factory;
-
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
 
@@ -147,7 +145,6 @@ public class Component {
 		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		this.project = layoutPath.getProject();
-		this.factory = this.project.getFactory();
 		this.operators = this.project.getOperatorsHandler();
 		this.layoutParameters = new LayoutParameters();
 		this.referenceHandler = referenceHandler;
@@ -212,12 +209,12 @@ public class Component {
 
 		// widget path element is part of base component and contains the widget path
 		// it acts as insertion point; is where widget layout is inserted
-		for (Element widgetPathElement : getCompoPathElements(layout)) {
+		for (Element compoPathElement : getCompoPathElements(layout)) {
 
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = factory.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
+			CompoPath compoPath = project.createCompoPath(operators.getOperand(compoPathElement, Operator.COMPO));
 
 			FilePath childLayoutPath = compoPath.getLayoutPath();
 			if (!childLayoutPath.exists()) {
@@ -229,21 +226,21 @@ public class Component {
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
 			// source reader takes care to inject parameter values into widget layout
-			layoutParameters.reload(operators.getOperand(widgetPathElement, Operator.PARAM));
-			operators.removeOperator(widgetPathElement, Operator.PARAM);
+			layoutParameters.reload(operators.getOperand(compoPathElement, Operator.PARAM));
+			operators.removeOperator(compoPathElement, Operator.PARAM);
 			Element widgetLayout = scanComponentsTree(childLayoutPath, guardCount);
 
 			// update widget path element attributes with values from the widget layout root
 			// widget path element has precedence over widget layout attributes so that parent can control widget attributes
-			addAttrs(widgetPathElement, widgetLayout.getAttrs());
+			addAttrs(compoPathElement, widgetLayout.getAttrs());
 
 			// remove all children from widget path element and insert the actual widget layout elements
-			widgetPathElement.removeChildren();
+			compoPathElement.removeChildren();
 			for (Element widgetChild : widgetLayout.getChildren()) {
-				widgetPathElement.addChild(widgetChild);
+				compoPathElement.addChild(widgetChild);
 			}
 
-			operators.removeOperator(widgetPathElement, Operator.COMPO);
+			operators.removeOperator(compoPathElement, Operator.COMPO);
 		}
 
 		return layout.getRoot();
@@ -325,7 +322,7 @@ public class Component {
 	 * @return newly created template document with editable areas resolved.
 	 */
 	private Document consolidateTemplate(FilePath componentLayoutPath, ContentFragment contentFragment, int guardCounter) {
-		CompoPath templateCompoPath = factory.createCompoPath(contentFragment.getTemplatePath());
+		CompoPath templateCompoPath = project.createCompoPath(contentFragment.getTemplatePath());
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
 		if (!templateLayoutPath.exists()) {
 			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, componentLayoutPath);
@@ -498,7 +495,8 @@ public class Component {
 	 * @return script descriptor or null if not defined.
 	 */
 	public IScriptDescriptor getScriptDescriptor(String fileName) {
-		FilePath file = baseLayoutPath.getParentDir().getFilePath(fileName);
+		FilePath compoDir = baseLayoutPath.getParentDir();
+		FilePath file = compoDir != null ? compoDir.getFilePath(fileName) : project.createFilePath(fileName);
 		return file.exists() ? ScriptDescriptor.create(file) : null;
 	}
 
@@ -557,7 +555,7 @@ public class Component {
 	 * @return widgets array possible empty.
 	 */
 	private Element[] getCompoPathElements(Document layout) {
-		EList elist = operators.findByOperator(layout, Operator.COMPO);
+		EList elist = operators.findByOperator(layout.getRoot(), Operator.COMPO);
 		if (elist.isEmpty()) {
 			return EMPTY_ARRAY;
 		}
