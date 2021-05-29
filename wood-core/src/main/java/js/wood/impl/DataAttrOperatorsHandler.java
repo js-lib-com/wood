@@ -9,6 +9,7 @@ import js.dom.EList;
 import js.dom.Element;
 import js.lang.BugError;
 import js.util.Params;
+import js.wood.CompoPath;
 
 /**
  * Operators handler for operator names prefixed with <code>data-</code>, HTML custom attribute prefix. This operators handler
@@ -20,10 +21,10 @@ public class DataAttrOperatorsHandler implements IOperatorsHandler {
 	/** Prefix for custom HTML attribute. */
 	private static final String DATA_PREFIX = "data-";
 
-	private final Map<String, String> tagCompos;
+	private final Map<String, CompoPath> tagCompoPaths;
 
-	public DataAttrOperatorsHandler(Map<String, String> tagCompos) {
-		this.tagCompos = tagCompos;
+	public DataAttrOperatorsHandler(Map<String, CompoPath> tagCompoPaths) {
+		this.tagCompoPaths = tagCompoPaths;
 	}
 
 	@Override
@@ -88,7 +89,8 @@ public class DataAttrOperatorsHandler implements IOperatorsHandler {
 		switch (operator) {
 		case COMPO:
 			if (!element.hasAttr(attrName)) {
-				return tagCompos.get(element.getTag());
+				CompoPath compoPath = tagCompoPaths.get(element.getTag());
+				return compoPath != null ? compoPath.value() : null;
 			}
 			// fall through next case
 
@@ -108,7 +110,7 @@ public class DataAttrOperatorsHandler implements IOperatorsHandler {
 
 		StringBuilder sb = new StringBuilder();
 		if (operator == Operator.COMPO) {
-			for (String tag : tagCompos.keySet()) {
+			for (String tag : tagCompoPaths.keySet()) {
 				sb.append("descendant::");
 				sb.append(tag);
 				sb.append(" | ");

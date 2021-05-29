@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
@@ -39,14 +38,14 @@ public class ProjectDescriptorTest {
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<locale>en</locale>" + //
-				"	<author>j(s)-lib</author>" + //
+				"	<authors>j(s)-lib</authors>" + //
 				"	<naming-strategy>XMLNS</naming-strategy>" + //
 				"	<manifest>res/app-manifest.json</manifest>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
 				"</project>";
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getAuthor(), equalTo("j(s)-lib"));
+		assertThat(descriptor.getAuthors(), contains("j(s)-lib"));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
@@ -89,7 +88,7 @@ public class ProjectDescriptorTest {
 				"</project>";
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getAuthor(), nullValue());
+		assertThat(descriptor.getAuthors().size(), equalTo(0));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getExcludes(), emptyIterable());
 		assertThat(descriptor.getManifest(), equalTo("manifest.json"));

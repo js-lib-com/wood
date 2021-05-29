@@ -53,7 +53,7 @@ class BuilderProject extends Project {
 		this.variables = new HashMap<>();
 		this.pages = new ArrayList<>();
 
-		registerScanHandler(new FilePathVisitor(this, variables, pages));
+		registerVisitor(new FilePathVisitor(variables, pages));
 	}
 
 	/**
@@ -111,18 +111,16 @@ class BuilderProject extends Project {
 	// support for scanning project file system
 
 	static class FilePathVisitor implements IFilePathVisitor {
-		private final Project project;
 		private final Map<FilePath, Variables> variables;
 		private final List<CompoPath> pages;
 
-		public FilePathVisitor(Project project, Map<FilePath, Variables> variables, List<CompoPath> pages) {
-			this.project = project;
+		public FilePathVisitor(Map<FilePath, Variables> variables, List<CompoPath> pages) {
 			this.variables = variables;
 			this.pages = pages;
 		}
 
 		@Override
-		public void visitFile(FilePath file) throws Exception {
+		public void visitFile(Project project, FilePath file) throws Exception {
 			final FilePath parentDir = file.getParentDir();
 			if (parentDir == null) {
 				return;

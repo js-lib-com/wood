@@ -10,6 +10,7 @@ import js.dom.Element;
 import js.lang.Handler;
 import js.util.Classes;
 import js.util.Params;
+import js.util.Strings;
 import js.wood.Component;
 import js.wood.FilePath;
 import js.wood.ILinkDescriptor;
@@ -49,7 +50,7 @@ class PageDocument {
 
 		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
 		this.doc = builder.createHTML();
-		
+
 		this.html = this.doc.getRoot();
 		this.html.addText("\r\n");
 
@@ -98,13 +99,14 @@ class PageDocument {
 	}
 
 	/**
-	 * Set page author. Add meta element to page head, with name <code>Author</code> and provided author value as content.
+	 * Set page authors. Add meta element to page head, with name <code>Author</code> and provided authors, comma joined, as
+	 * content. If given authors list is empty this method does nothing
 	 * 
-	 * @param author page author, null ignored.
+	 * @param authors list of authors, possible empty.
 	 */
-	public void setAuthor(String author) {
-		if (author != null) {
-			head.addChild(doc.createElement("meta", "name", "Author", "content", author));
+	public void setAuthors(List<String> authors) {
+		if (!authors.isEmpty()) {
+			head.addChild(doc.createElement("meta", "name", "Author", "content", Strings.join(authors, ", ")));
 			head.addText("\r\n");
 		}
 	}

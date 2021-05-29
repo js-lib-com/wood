@@ -1,7 +1,6 @@
 package js.wood;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +31,9 @@ import js.wood.impl.XmlnsOperatorsHandler;
 /**
  * A WOOD project is a collection of loosely coupled components. It has a root directory and all paths are relative to this
  * project root. Project instance is initialized from {@link ProjectDescriptor}, but all descriptor properties have sensible
- * default values, therefore descriptor is optional.
+ * default values, therefore descriptor is optional. There is also a mandatory project properties file that contains settings
+ * for WOOD tools. This properties file is private to local development context and usually is not saved to source code
+ * repository.
  * <p>
  * Project is a not constrained tree of directories and files, source files - layouts, styles, scripts, medias and variables,
  * and descriptors. Directories hierarchy is indeed not constrained but there are naming conventions for component files - see
@@ -42,22 +43,40 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * constraints that impose this separation of concerns. It is, for example, allowed to embed WOOD project directories in a
  * master Java project, perhaps Eclipse, e.g. a <code>lib</code> directory for both WOOD components and Java archives. Anyway,
  * master project files must not use file extensions expected by this tool library and files name should obey syntax described
- * by {@link Path} classes hierarchy. Finally, there is the option to exclude certain directories from WOOD builder processing.
+ * by {@link FilePath}. Finally, there is the option to exclude certain directories from WOOD builder processing.
  * 
  * @author Iulian Rotaru
  * @since 1.0
  */
 public class Project {
+	/**
+	 * Create project instance for a given project root directory. Project root should point to a valid WOOD project; current
+	 * implementation requires only project properties file - see {@link ProjectProperties#PROPERTIES_FILE}.
+	 * <p>
+	 * Implementation note: project creation occurs in two steps: instance creation and post create initialization. On instance
+	 * creation constructor takes care to registers file system visitor; the actual file system traversal and visitors
+	 * invocation occur on post create.
+	 * 
+	 * @param projectRoot project root directory.
+	 * @return project instance.
+	 */
 	public static Project create(File projectRoot) {
 		Project project = new Project(projectRoot);
 		project.postCreate();
 		return project;
 	}
 
-	private final Map<String, String> compoPaths = new HashMap<>();
+	/** Map component tag to its component path. This map is used when use tag to declare component aggregation. */
+	private final Map<String, CompoPath> tagCompoPaths = new HashMap<>();
 
+	/** Map script path to its dependencies. Only scripts with declared dependencies are included in this map. */
 	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
 
+	/**
+	 * File path visitors for project file system scanning. This visitors are registered by
+	 * {@link #registerVisitor(IFilePathVisitor)} on constructors, both this class and subclasses, and invoked on file system
+	 * scanning performed on {@link #postCreate()}.
+	 */
 	private final List<IFilePathVisitor> filePathVisitors = new ArrayList<>();
 
 	/** Directories excluded from build processing. */
@@ -113,7 +132,7 @@ public class Project {
 
 		ProjectDescriptor descriptor = new ProjectDescriptor(new File(projectRoot, CT.PROJECT_CONFIG));
 		ProjectProperties properties = new ProjectProperties(this);
-		IFilePathVisitor scanHandler = new FilePathVisitor(compoPaths, scriptDependencies);
+		IFilePathVisitor scanHandler = new FilePathVisitor(tagCompoPaths, scriptDependencies);
 
 		init(descriptor, properties, scanHandler);
 	}
@@ -129,7 +148,15 @@ public class Project {
 		init(descriptor, properties, scanHandler);
 	}
 
-	void init(ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor scanHandler) {
+	/**
+	 * Initialize project instance state. This is the first step of initialization process that is triggered by constructor. The
+	 * second step is {@link #postCreate()}.
+	 * 
+	 * @param descriptor project descriptor,
+	 * @param properties tools specific project properties,
+	 * @param visitor file system scanner visitor.
+	 */
+	void init(ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor visitor) {
 		this.descriptor = descriptor;
 
 		this.excludes.addAll(descriptor.getExcludes().stream().map(exclude -> new File(this.projectRoot, exclude)).collect(Collectors.toList()));
@@ -141,23 +168,40 @@ public class Project {
 		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
 		this.description = descriptor.getDescription(this.display);
 
-		this.filePathVisitors.add(scanHandler);
+		this.filePathVisitors.add(visitor);
 	}
 
-	protected void postCreate() {
+	/**
+	 * Register file system visitor. This method is called from project - and its subclasses, constructor. All registered
+	 * visitors are invoked on {@link #postCreate()} when file system scanning occurs.
+	 * 
+	 * @param visitor file system visitor.
+	 * @see #filePathVisitors
+	 */
+	protected void registerVisitor(IFilePathVisitor visitor) {
+		this.filePathVisitors.add(visitor);
+	}
+
+	/**
+	 * Post create hook is executed after project instance creation. Current implementation executes project file systems
+	 * scanning with {@link #filePathVisitors} invocation and finalize project instance initialization.
+	 * 
+	 * @see #walkFileTree(Project, File, List)
+	 */
+	protected final void postCreate() {
 		walkFileTree(this, projectRoot, filePathVisitors);
 
 		switch (this.descriptor.getNamingStrategy()) {
 		case XMLNS:
-			this.operatorsHandler = new XmlnsOperatorsHandler(this.compoPaths);
+			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths);
 			break;
 
 		case DATA_ATTR:
-			this.operatorsHandler = new DataAttrOperatorsHandler(this.compoPaths);
+			this.operatorsHandler = new DataAttrOperatorsHandler(this.tagCompoPaths);
 			break;
 
 		case ATTR:
-			this.operatorsHandler = new AttrOperatorsHandler(this.compoPaths);
+			this.operatorsHandler = new AttrOperatorsHandler(this.tagCompoPaths);
 			break;
 
 		default:
@@ -165,12 +209,13 @@ public class Project {
 		}
 	}
 
-	protected void registerScanHandler(IFilePathVisitor scanHandler) {
-		this.filePathVisitors.add(scanHandler);
-	}
-
-	public String getAuthor() {
-		return descriptor.getAuthor();
+	/**
+	 * Return the list of authors which may be empty if none declared on project descriptor.
+	 * 
+	 * @return list of authors, possible empty but never null.
+	 */
+	public List<String> getAuthors() {
+		return descriptor.getAuthors();
 	}
 
 	/**
@@ -226,23 +271,31 @@ public class Project {
 	}
 
 	/**
-	 * Get favicon file path as defined on project descriptor. See {@link ProjectDescriptor#getFavicon()}.
+	 * Get favicon file path as defined on project descriptor.
 	 * 
 	 * @return favicon file path.
+	 * @see ProjectDescriptor#getFavicon()
 	 */
 	public FilePath getFavicon() {
 		return createFilePath(descriptor.getFavicon());
 	}
 
 	/**
-	 * Get manifest file path as defined on project descriptor. See {@link ProjectDescriptor#getManifest()}.
+	 * Get file path for PWA manifest, as defined on project descriptor.
 	 * 
-	 * @return manifest file path.
+	 * @return PWA manifest file path.
+	 * @see ProjectDescriptor#getManifest()
 	 */
 	public FilePath getManifest() {
 		return createFilePath(descriptor.getManifest());
 	}
 
+	/**
+	 * Get file path for PWA service worker script, as defined on project descriptor.
+	 * 
+	 * @return file path for PWA service worker script.
+	 * @see ProjectDescriptor#getServiceWorker()
+	 */
 	public FilePath getServiceWorker() {
 		return createFilePath(descriptor.getServiceWorker());
 	}
@@ -271,6 +324,7 @@ public class Project {
 	 * 
 	 * @param alias alias for media query definition.
 	 * @return media query definition or null if alias not defined.
+	 * @see ProjectDescriptor#getMediaQueryDefinitions()
 	 */
 	public MediaQueryDefinition getMediaQueryDefinition(String alias) {
 		return descriptor.getMediaQueryDefinitions().stream().filter(query -> query.getAlias().equals(alias)).findAny().orElse(null);
@@ -282,6 +336,7 @@ public class Project {
 	 * Return empty list if there are no meta descriptors declared on project descriptor. Returned list is not modifiable.
 	 * 
 	 * @return Immutable list of meta descriptors, possible empty.
+	 * @see ProjectDescriptor#getMetaDescriptors()
 	 */
 	public List<IMetaDescriptor> getMetaDescriptors() {
 		return Collections.unmodifiableList(descriptor.getMetaDescriptors());
@@ -293,6 +348,7 @@ public class Project {
 	 * Return empty list if there are no link descriptors declared on project descriptor. Returned list is not modifiable.
 	 * 
 	 * @return Immutable list of link descriptors, possible empty.
+	 * @see {@link ProjectDescriptor#getLinkDescriptors()}
 	 */
 	public List<ILinkDescriptor> getLinkDescriptors() {
 		return Collections.unmodifiableList(descriptor.getLinkDescriptors());
@@ -304,11 +360,20 @@ public class Project {
 	 * Return empty list if there are no script descriptors declared on project descriptor. Returned list is not modifiable.
 	 * 
 	 * @return Immutable list of script descriptors, possible empty.
+	 * @see ProjectDescriptor#getScriptDescriptors()
 	 */
 	public List<IScriptDescriptor> getScriptDescriptors() {
 		return Collections.unmodifiableList(descriptor.getScriptDescriptors());
 	}
 
+	/**
+	 * Get dependencies for requested script file or empty list if none declared. Script dependencies are declared on component
+	 * descriptors and initialized on file system scanning, performed on {@link #postCreate()}.
+	 * 
+	 * @param source script file path.
+	 * @return script dependencies list, possible empty.
+	 * @see FilePathVisitor
+	 */
 	public List<IScriptDescriptor> getScriptDependencies(String source) {
 		List<IScriptDescriptor> dependencies = scriptDependencies.get(source);
 		return Collections.unmodifiableList(dependencies != null ? dependencies : Collections.emptyList());
@@ -428,11 +493,26 @@ public class Project {
 	// --------------------------------------------------------------------------------------------
 	// scanner for project file system
 
-	static void walkFileTree(Project project, File dir, List<IFilePathVisitor> visitors) {
+	/**
+	 * Recursively traverse project file system and invoke visitors for every file found. Visitors are invoked in provided
+	 * order.
+	 * <p>
+	 * This method is executed on {@link #postCreate()}. Walking process is started with project root and recursively invoked it
+	 * self till all project files are visited.
+	 * 
+	 * @param project master project,
+	 * @param dir current visited directory,
+	 * @param visitors visitors list.
+	 * @throws WoodException if fail to list directory or there is an error on visitor execution.
+	 */
+	static void walkFileTree(Project project, File dir, List<IFilePathVisitor> visitors) throws WoodException {
+		Params.isDirectory(dir, "Directory");
+
 		File[] files = dir.listFiles();
 		if (files == null) {
-			return;
+			throw new WoodException("Fail to list directory |%s|.", dir);
 		}
+
 		for (File file : files) {
 			if (file.isDirectory()) {
 				if (file.getName().startsWith(".") || project.excludes.contains(file)) {
@@ -443,7 +523,7 @@ public class Project {
 
 			try {
 				for (IFilePathVisitor visitor : visitors) {
-					visitor.visitFile(project.createFilePath(file));
+					visitor.visitFile(project, project.createFilePath(file));
 				}
 			} catch (Throwable t) {
 				throw new WoodException("Scan processing fail on file %s: %s: %s", file, t.getClass(), t.getMessage());
@@ -451,23 +531,36 @@ public class Project {
 		}
 	}
 
+	/**
+	 * File path visitor for project file system scanning.
+	 * 
+	 * @author Iulian Rotaru
+	 * @since 1.0
+	 */
 	public interface IFilePathVisitor {
-		void visitFile(FilePath file) throws Exception;
+		void visitFile(Project project, FilePath file) throws Exception;
 	}
 
+	/**
+	 * Implementation for file path visitor. Current version scan component descriptors for script dependencies and register
+	 * components path for aggregation based on element tag.
+	 * 
+	 * @author Iulian Rotaru
+	 * @since 1.0
+	 */
 	static class FilePathVisitor implements IFilePathVisitor {
 		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 
-		private final Map<String, String> compoPaths;
+		private final Map<String, CompoPath> compoPaths;
 		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
 
-		public FilePathVisitor(Map<String, String> compoPaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
+		public FilePathVisitor(Map<String, CompoPath> compoPaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
 			this.compoPaths = compoPaths;
 			this.scriptDependencies = scriptDependencies;
 		}
 
 		@Override
-		public void visitFile(FilePath file) throws Exception {
+		public void visitFile(Project project, FilePath file) throws Exception {
 			if (!file.isComponentDescriptor()) {
 				return;
 			}
@@ -487,7 +580,7 @@ public class Project {
 			}
 
 			if (document.getRoot().getTag().equals("compo") && file.getParentDir() != null) {
-				compoPaths.put(file.getBasename(), file.getParentDir().value());
+				compoPaths.put(file.getBasename(), project.createCompoPath(file.getParentDir().value()));
 			}
 		}
 	}

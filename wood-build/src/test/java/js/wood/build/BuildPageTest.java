@@ -68,7 +68,7 @@ public class BuildPageTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(project.getAuthor()).thenReturn("Iulian Rotaru");
+		when(project.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(project.getManifest()).thenReturn(manifest);
 		when(project.getFavicon()).thenReturn(favicon);
 		when(project.getThemeStyles()).thenReturn(theme);

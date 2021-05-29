@@ -181,12 +181,12 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get project author or null if not set.
+	 * Get project authors list which may be empty if none declared.
 	 * 
-	 * @return project author or null.
+	 * @return project authors list, possible empty.
 	 */
-	public String getAuthor() {
-		return text("author", null);
+	public List<String> getAuthors() {
+		return Strings.split(text("authors", ""), ',');
 	}
 
 	/**
@@ -235,7 +235,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	public String getServiceWorker() {
 		return text("service-worker", "ServiceWorker.js");
 	}
-	
+
 	/**
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
 	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.

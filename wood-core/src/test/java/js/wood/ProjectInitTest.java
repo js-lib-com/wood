@@ -61,7 +61,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenNonEmptyDescriptor_WhenConstrutor_ThenStateInitialized() throws FileNotFoundException {
 		// given
-		when(descriptor.getAuthor()).thenReturn("Iulian Rotaru");
+		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(descriptor.getDisplay(anyString())).thenReturn("Project Display");
 		when(descriptor.getDescription(anyString())).thenReturn("Project description.");
 		when(descriptor.getManifest()).thenReturn("manifest.json");
@@ -82,7 +82,7 @@ public class ProjectInitTest {
 		assertThat(project.getManifest().value(), equalTo("manifest.json"));
 		assertThat(project.getFavicon().value(), equalTo("favicon.ico"));
 
-		assertThat(project.getAuthor(), equalTo("Iulian Rotaru"));
+		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
 		assertThat(project.getDisplay(), equalTo("Project Display"));
 		assertThat(project.getDescription(), equalTo("Project description."));
 

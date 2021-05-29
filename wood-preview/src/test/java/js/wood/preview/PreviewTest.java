@@ -58,7 +58,7 @@ public class PreviewTest {
 		// project fixture
 
 		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
-		when(project.getAuthor()).thenReturn("Iulian Rotaru");
+		when(project.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(project.getThemeStyles()).thenReturn(theme);
 
 		List<IMetaDescriptor> projectMetas = metas("og:url", "http://kids-cademy.com");

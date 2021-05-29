@@ -78,7 +78,7 @@ public class ComponentInheritanceTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, String> tagCompos = new HashMap<>();
+	private Map<String, CompoPath> tagCompos = new HashMap<>();
 
 	@Before
 	public void beforeTest() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-	<author>j(s)-lib</author>
+	<authors>j(s)-lib</authors>
 	<name>project</name>
 	<display>Test Project</display>
 	<description>Project used as fixture for unit testing.</description>

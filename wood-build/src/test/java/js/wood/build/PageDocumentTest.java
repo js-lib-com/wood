@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -64,7 +65,7 @@ public class PageDocumentTest {
 		page.setLanguage("ro-RO");
 		page.setContentType("text/html; charset=UTF-8");
 		page.setTitle("title");
-		page.setAuthor("author");
+		page.setAuthors(Arrays.asList("author"));
 		page.setDescription("description");
 		page.addMeta(meta);
 		page.addFavicon("media/favicon.ico");

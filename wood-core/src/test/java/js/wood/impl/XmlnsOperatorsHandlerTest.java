@@ -19,11 +19,12 @@ import js.dom.DocumentBuilder;
 import js.dom.EList;
 import js.dom.Element;
 import js.util.Classes;
+import js.wood.CompoPath;
 import js.wood.WOOD;
 
 public class XmlnsOperatorsHandlerTest {
 	private DocumentBuilder builder;
-	private Map<String, String> tagCompos;
+	private Map<String, CompoPath> tagCompos;
 	private IOperatorsHandler operators;
 
 	@Before

@@ -56,13 +56,13 @@ public class ComponentAggregationTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, String> tagCompos;
+	private Map<String, CompoPath> tagCompoPaths;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
-		tagCompos = new HashMap<>();
-		operatorsHandler = new XmlnsOperatorsHandler(tagCompos);
+		tagCompoPaths = new HashMap<>();
+		operatorsHandler = new XmlnsOperatorsHandler(tagCompoPaths);
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
@@ -139,12 +139,13 @@ public class ComponentAggregationTest {
 		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:compo]"), nullValue());
 		assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:param]"), nullValue());
 	}
-	
+
 	@Test
 	public void GivenSimpleAggregationOnTagCompo_ThenIncludeChildLayout() {
 		// given
-		tagCompos.put("tag", "res/child");
-		
+		tagCompoPaths.put("tag", childPath);
+		when(childPath.value()).thenReturn("res/child");
+
 		String childHTML = "" + //
 				"<tag>" + //
 				"	<h1>Child</h1>" + //

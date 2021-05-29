@@ -46,7 +46,7 @@ public class ComponentTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, String> tagCompos;
+	private Map<String, CompoPath> tagCompos;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before

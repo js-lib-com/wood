@@ -10,6 +10,7 @@ import js.dom.Element;
 import js.dom.NamespaceContext;
 import js.lang.BugError;
 import js.util.Params;
+import js.wood.CompoPath;
 import js.wood.WOOD;
 
 /**
@@ -28,10 +29,10 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 		}
 	};
 
-	private final Map<String, String> tagCompos;
+	private final Map<String, CompoPath> tagCompoPaths;
 
-	public XmlnsOperatorsHandler(Map<String, String> tagCompos) {
-		this.tagCompos = tagCompos;
+	public XmlnsOperatorsHandler(Map<String, CompoPath> tagCompoPaths) {
+		this.tagCompoPaths = tagCompoPaths;
 	}
 
 	@Override
@@ -95,7 +96,8 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 		switch (operator) {
 		case COMPO:
 			if (!element.hasAttrNS(WOOD.NS, operator.value())) {
-				return tagCompos.get(element.getTag());
+				CompoPath compoPath = tagCompoPaths.get(element.getTag());
+				return compoPath != null ? compoPath.value() : null;
 			}
 			// fall through next case
 
@@ -115,7 +117,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 
 		StringBuilder sb = new StringBuilder();
 		if (operator == Operator.COMPO) {
-			for (String tag : tagCompos.keySet()) {
+			for (String tag : tagCompoPaths.keySet()) {
 				sb.append("descendant::");
 				sb.append(tag);
 				sb.append(" | ");

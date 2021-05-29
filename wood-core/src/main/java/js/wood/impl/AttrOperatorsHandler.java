@@ -9,6 +9,7 @@ import js.dom.EList;
 import js.dom.Element;
 import js.lang.BugError;
 import js.util.Params;
+import js.wood.CompoPath;
 
 /**
  * Operators handler implementation for operators with simple attribute name.
@@ -16,10 +17,10 @@ import js.util.Params;
  * @author Iulian Rotaru
  */
 public class AttrOperatorsHandler implements IOperatorsHandler {
-	private final Map<String, String> tagCompos;
+	private final Map<String, CompoPath> tagCompoPaths;
 
-	public AttrOperatorsHandler(Map<String, String> tagCompos) {
-		this.tagCompos = tagCompos;
+	public AttrOperatorsHandler(Map<String, CompoPath> tagCompoPaths) {
+		this.tagCompoPaths = tagCompoPaths;
 	}
 
 	@Override
@@ -83,7 +84,8 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 		switch (operator) {
 		case COMPO:
 			if (!element.hasAttr(operator.value())) {
-				return tagCompos.get(element.getTag());
+				CompoPath compoPath = tagCompoPaths.get(element.getTag());
+				return compoPath != null ? compoPath.value() : null;
 			}
 			// fall through next case
 
@@ -103,7 +105,7 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 
 		StringBuilder sb = new StringBuilder();
 		if (operator == Operator.COMPO) {
-			for (String tag : tagCompos.keySet()) {
+			for (String tag : tagCompoPaths.keySet()) {
 				sb.append("descendant::");
 				sb.append(tag);
 				sb.append(" | ");

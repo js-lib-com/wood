@@ -87,8 +87,8 @@ class Preview {
 			head.addChild(doc.createElement("title").setText(compo.getDisplay()));
 			head.addText("\r\n");
 		}
-		if (project.getAuthor() != null) {
-			head.addChild(doc.createElement("meta", "name", "Author", "content", project.getAuthor()));
+		if (!project.getAuthors().isEmpty()) {
+			head.addChild(doc.createElement("meta", "name", "Author", "content", Strings.join(project.getAuthors(), ", ")));
 			head.addText("\r\n");
 		}
 		if (compo.getDescription() != null) {

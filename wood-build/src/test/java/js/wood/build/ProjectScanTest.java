@@ -28,11 +28,11 @@ public class ProjectScanTest {
 	@Test
 	public void Given_WhenVisitFile_Then() throws Exception {
 		// given
-		Project.IFilePathVisitor visitor = new BuilderProject.FilePathVisitor(project, variables, pages);
+		Project.IFilePathVisitor visitor = new BuilderProject.FilePathVisitor(variables, pages);
 		FilePath file = mock(FilePath.class);
 
 		// when
-		visitor.visitFile(file);
+		visitor.visitFile(project, file);
 
 		// then
 	}
