@@ -58,6 +58,9 @@ public class Builder implements IReferenceHandler {
 	/** Build file system is there all pages and resources are created. */
 	private final BuildFS buildFS;
 
+	/** Current processing component. */
+	private Component currentComponent;
+
 	/** Current processing locale variant. */
 	private Locale locale;
 
@@ -103,13 +106,11 @@ public class Builder implements IReferenceHandler {
 			for (CompoPath page : project.getPages()) {
 				Component pageComponent = new Component(page, this);
 				pageComponent.clean();
-				currentCompo.set(pageComponent);
+				currentComponent = pageComponent;
 				buildPage(pageComponent);
 			}
 		}
 	}
-
-	private ThreadLocal<Component> currentCompo = new ThreadLocal<Component>();
 
 	/**
 	 * Build page identified by given component path and copy to build directory. Component should be designed for page
@@ -246,7 +247,7 @@ public class Builder implements IReferenceHandler {
 
 		switch (source.getType()) {
 		case LAYOUT:
-			return buildFS.writePageMedia(currentCompo.get(), mediaFile);
+			return buildFS.writePageMedia(currentComponent, mediaFile);
 
 		case STYLE:
 			return buildFS.writeStyleMedia(mediaFile);
