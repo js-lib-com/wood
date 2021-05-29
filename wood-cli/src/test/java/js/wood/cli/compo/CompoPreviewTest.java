@@ -142,7 +142,7 @@ public class CompoPreviewTest {
 		// given
 		when(config.get("project.display", "test")).thenReturn("display");
 		when(config.get("project.description", "test")).thenReturn("description");
-		when(config.get("build.target")).thenReturn("build");
+		when(config.get("build.dir")).thenReturn("build");
 
 		StringWriter webxmlWriter = new StringWriter();
 		when(files.exists(webxmlFile)).thenReturn(false);

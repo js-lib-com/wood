@@ -47,9 +47,9 @@ public class ProjectDeploy extends Task {
 
 	@Override
 	protected ExitCode exec() throws Exception {
-		String target = config.get("build.target");
+		String target = config.get("build.dir");
 		if (target == null) {
-			console.print("Missing build.target property.");
+			console.print("Missing build.dir property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}

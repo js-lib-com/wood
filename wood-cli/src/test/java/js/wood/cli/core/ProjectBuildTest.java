@@ -57,7 +57,7 @@ public class ProjectBuildTest {
 		when(projectDir.resolve("build")).thenReturn(buildDir);
 		when(builderConfig.createBuilder()).thenReturn(builder);
 
-		when(config.get("build.target")).thenReturn("build");
+		when(config.get("build.dir")).thenReturn("build");
 		when(config.getex("runtime.home")).thenReturn("runtimes");
 		when(config.getex(eq("runtime.name"), anyString())).thenReturn("test");
 		when(config.getex(eq("runtime.context"), anyString())).thenReturn("context");

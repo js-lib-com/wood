@@ -29,10 +29,10 @@ public class ProjectClean extends Task {
 	@Override
 	protected ExitCode exec() throws IOException {
 		if (target == null) {
-			target = config.get("build.target");
+			target = config.get("build.dir");
 		}
 		if (target == null) {
-			console.print("Missing build target parameter or build.target property.");
+			console.print("Missing build target parameter or build.dir property.");
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}

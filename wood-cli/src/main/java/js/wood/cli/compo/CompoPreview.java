@@ -73,7 +73,7 @@ public class CompoPreview extends Task {
 			template.put("display", config.get("project.display", projectName));
 			template.put("description", config.get("project.description", projectName));
 			template.put("projectDir", projectDir.toAbsolutePath().toString());
-			template.put("buildDir", config.get("build.target"));
+			template.put("buildDir", config.get("build.dir"));
 			template.writeTo(files.getWriter(webxmlFile));
 
 			console.print("Created missing preview configuration.");
