@@ -68,7 +68,8 @@ public class Builder implements IReferenceHandler {
 	 * @param config builder configuration.
 	 */
 	public Builder(BuilderConfig config) {
-		this(BuilderProject.create(config.getProjectDir()), new DefaultBuildFS(config.getBuildDir(), config.getBuildNumber()));
+		this.project = BuilderProject.create(config.getProjectDir());
+		this.buildFS = new DefaultBuildFS(this.project.getBuildDir().toFile(), config.getBuildNumber());
 	}
 
 	/**

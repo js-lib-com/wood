@@ -103,6 +103,9 @@ public class Project {
 	 */
 	private String description;
 
+	/** Build directory where site files are created. Configured on project properties, <code>build.dir</code> property. */
+	private FilePath buildDir;
+
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
 	 * encapsulation. This directory is optional.
@@ -162,6 +165,7 @@ public class Project {
 		this.excludes.addAll(descriptor.getExcludes().stream().map(exclude -> new File(this.projectRoot, exclude)).collect(Collectors.toList()));
 		this.excludes.add(new File(this.projectRoot, properties.getBuildDir()));
 
+		this.buildDir = createFilePath(properties.getBuildDir());
 		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
 		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
 
@@ -246,6 +250,16 @@ public class Project {
 	 */
 	public File getProjectRoot() {
 		return projectRoot;
+	}
+
+	/**
+	 * Get project build directory where site files are created.
+	 * 
+	 * @return build directory.
+	 * @see #buildDir
+	 */
+	public FilePath getBuildDir() {
+		return buildDir;
 	}
 
 	/**

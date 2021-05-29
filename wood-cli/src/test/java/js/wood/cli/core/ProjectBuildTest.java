@@ -84,7 +84,6 @@ public class ProjectBuildTest {
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 
 		verify(builderConfig, times(1)).setProjectDir(any());
-		verify(builderConfig, times(1)).setBuildDir(any());
 		verify(builderConfig, times(1)).setBuildNumber(0);
 		verify(builder, times(1)).build();
 

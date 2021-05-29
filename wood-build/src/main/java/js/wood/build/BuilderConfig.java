@@ -4,7 +4,6 @@ import java.io.File;
 
 public class BuilderConfig {
 	private File projectDir;
-	private File buildDir;
 	private int buildNumber;
 	private BuildFS buildFS;
 
@@ -14,14 +13,6 @@ public class BuilderConfig {
 
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;
-	}
-
-	public File getBuildDir() {
-		return buildDir;
-	}
-
-	public void setBuildDir(File buildDir) {
-		this.buildDir = buildDir;
 	}
 
 	public int getBuildNumber() {

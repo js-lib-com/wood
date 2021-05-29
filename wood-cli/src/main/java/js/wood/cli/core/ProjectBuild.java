@@ -50,7 +50,6 @@ public class ProjectBuild extends Task {
 		}
 
 		builderConfig.setProjectDir(projectDir.toFile());
-		builderConfig.setBuildDir(buildDir.toFile());
 		builderConfig.setBuildNumber(buildNumber);
 
 		String projectName = files.getFileName(projectDir);

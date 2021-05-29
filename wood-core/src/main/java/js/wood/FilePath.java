@@ -600,6 +600,15 @@ public class FilePath implements Iterable<FilePath> {
 	}
 
 	/**
+	 * Access to underlying Java file.
+	 * 
+	 * @return underlying file.
+	 */
+	public File toFile() {
+		return file;
+	}
+
+	/**
 	 * Instance string representation returns the same value as {@link #value()}.
 	 * 
 	 * @return path string representation.

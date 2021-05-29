@@ -240,8 +240,7 @@ public class BuilderIntegrationTest {
 		BuilderConfig config = new BuilderConfig();
 		config.setProjectDir(new File("src/test/resources/" + projectDir));
 		buildDir = new File(config.getProjectDir(), "build/site");
-		config.setBuildDir(buildDir);
-		Files.removeFilesHierarchy(config.getBuildDir());
+		Files.removeFilesHierarchy(buildDir);
 		if (buildNumber.length == 1) {
 			config.setBuildNumber(buildNumber[0]);
 		}
