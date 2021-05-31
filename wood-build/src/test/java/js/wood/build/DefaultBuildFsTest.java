@@ -34,7 +34,7 @@ public class DefaultBuildFsTest {
 			}
 		}
 
-		project = BuilderProject.create(projectRoot);
+		project = new BuilderProject(projectRoot);
 		buildFS = new DefaultBuildFS(buildDir, 0);
 	}
 

@@ -1,6 +1,5 @@
 package js.wood.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -123,22 +122,9 @@ public class ProjectDescriptor extends BaseDescriptor {
 	/** Media query definitions. */
 	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
 
-	public ProjectDescriptor(File file) {
-		super(file);
-		init();
-	}
+	public ProjectDescriptor(FilePath descriptorFile) {
+		super(descriptorFile, descriptorFile.exists() ? descriptorFile.getReader() : null);
 
-	/**
-	 * Test constructor.
-	 * 
-	 * @param descriptorFile descriptor file.
-	 */
-	ProjectDescriptor(FilePath descriptorFile) {
-		super(descriptorFile);
-		init();
-	}
-
-	private void init() {
 		Strings.split(text("locale", "en"), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <locale> element.");

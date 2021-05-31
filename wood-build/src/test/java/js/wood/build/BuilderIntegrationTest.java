@@ -3,36 +3,27 @@ package js.wood.build;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.Test;
 
 import js.dom.Document;
+import js.dom.DocumentBuilder;
 import js.dom.EList;
+import js.util.Classes;
 import js.util.Files;
 import js.wood.CompoPath;
 import js.wood.Component;
-import js.wood.FilePath;
-import js.wood.Variables;
-import js.wood.build.BuildFS;
-import js.wood.build.Builder;
-import js.wood.build.BuilderConfig;
-import js.wood.build.BuilderProject;
-import js.wood.build.DefaultBuildFS;
 
 public class BuilderIntegrationTest {
 	private File buildDir;
@@ -49,80 +40,32 @@ public class BuilderIntegrationTest {
 
 		Collection<CompoPath> pages = builder.getProject().getPages();
 		assertNotNull(pages);
-		assertThat(pages, hasSize(3));
+		assertThat(pages, hasSize(4));
+		assertTrue(pages.contains(new CompoPath(project, "res/page/about")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/index")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/video-player")));
 		assertTrue(pages.contains(new CompoPath(project, "res/page/videos")));
-
-		Map<FilePath, Variables> variables = builder.getProject().getVariables();
-		assertNotNull(variables);
-		assertFalse(variables.isEmpty());
-
-		FilePath themeDir = new FilePath(project, "res/theme/");
-		assertNotNull(variables.get(themeDir));
 	}
 
 	@Test
 	public void build() throws IOException, XPathExpressionException {
-		BuilderProject project = project("project");
-
-		// initialize probes
-		final List<Locale> locales = new ArrayList<>();
-		final List<String> pageFileNames = new ArrayList<>();
-
-		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
-			@Override
-			public void setLocale(Locale locale) {
-				super.setLocale(locale);
-				locales.add(locale);
-			}
-
-			@Override
-			public void writePage(Component page, Document document) throws IOException {
-				pageFileNames.add(page.getLayoutFileName());
-			}
-		};
-		Builder builder = new Builder(project, buildFS);
+		Builder builder = builder("project");
 		builder.build();
-
-		assertThat(locales, hasSize(4));
-
-		assertTrue(locales.contains(new Locale("en")));
-		assertTrue(locales.contains(new Locale("de")));
-		assertTrue(locales.contains(new Locale("fr")));
-		assertTrue(locales.contains(new Locale("ro")));
-
-		assertThat(pageFileNames, hasSize(12));
-		Collections.sort(pageFileNames);
-
-		String[] expectedFileNames = new String[] { "index.htm", "video-player.htm", "videos.htm" };
-		for (int i = 0; i < 12; ++i) {
-			assertThat(pageFileNames.get(i), equalTo(expectedFileNames[i / 4]));
-		}
 	}
 
 	@Test
 	public void buildPage() throws Exception {
-		BuilderProject project = project("project");
+		Builder builder = builder("project");
+		BuilderProject project = builder.getProject();
 
-		BuildFS buildFS = new DefaultBuildFS(buildDir, 0) {
-			@Override
-			public void writePage(Component page, Document document) throws IOException {
-				try {
-					assertPageDocument(document);
-				} catch (XPathExpressionException e) {
-					fail();
-				}
-			}
-		};
-
-		Builder builder = new Builder(project, buildFS);
 		Locale locale = new Locale("en");
 		builder.setLocale(locale);
-		buildFS.setLocale(locale);
 
 		CompoPath indexPage = new CompoPath(project, "res/page/index");
 		builder.buildPage(new Component(indexPage, builder));
+
+		DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+		assertPageDocument(documentBuilder.loadHTML(new File("src/test/resources/project/build/index.htm")));
 	}
 
 	private static void assertPageDocument(Document doc) throws XPathExpressionException {
@@ -147,7 +90,7 @@ public class BuilderIntegrationTest {
 
 		int index = 0;
 		assertStyle("manifest.json", styles, index++);
-		assertStyle("media/favicon.ico", styles, index++);
+		assertStyle("media/res-asset_favicon.ico", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Roboto", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", styles, index++);
 		assertStyle("style/res-theme_reset.css", styles, index++);
@@ -218,32 +161,18 @@ public class BuilderIntegrationTest {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	
-	private BuilderProject project(String projectName) {
-		try {
-			File projectRoot = new File("src/test/resources/" + projectName);
-			buildDir = new File(projectRoot, BuildFS.DEF_BUILD_DIR);
-			BuilderProject project = BuilderProject.create(projectRoot);
-			if (buildDir.exists()) {
-				Files.removeFilesHierarchy(buildDir);
-			}
-			return project;
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Fail to create project instance.");
-		}
-
-		throw new IllegalStateException();
-	}
 
 	private Builder builder(String projectDir, int... buildNumber) throws IOException {
 		BuilderConfig config = new BuilderConfig();
 		config.setProjectDir(new File("src/test/resources/" + projectDir));
+
 		buildDir = new File(config.getProjectDir(), "build/site");
 		Files.removeFilesHierarchy(buildDir);
+
 		if (buildNumber.length == 1) {
 			config.setBuildNumber(buildNumber[0]);
 		}
+
 		return new Builder(config);
 	}
 

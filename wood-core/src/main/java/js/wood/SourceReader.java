@@ -266,6 +266,9 @@ public class SourceReader extends Reader {
 			state = State.VALUE;
 			charAfterMeta = c;
 			valueIndex = 1;
+			if(value == null) {
+				throw new WoodException("Null value for at-meta |%s| in source file |%s|.", metaBuilder.toString(), sourceFile);
+			}
 			return value.charAt(0);
 
 		case VALUE:

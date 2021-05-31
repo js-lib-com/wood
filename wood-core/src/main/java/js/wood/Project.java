@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,11 +59,13 @@ public class Project {
 	 * @param projectRoot project root directory.
 	 * @return project instance.
 	 */
-	public static Project create(File projectRoot) {
+	public static Project create(File projectRoot, IReferenceHandler referenceHandler) {
 		Project project = new Project(projectRoot);
-		project.postCreate();
+		project.create();
 		return project;
 	}
+
+	private final Set<File> excludes;
 
 	/** Map component tag to its component path. This map is used when use tag to declare component aggregation. */
 	private final Map<String, CompoPath> tagCompoPaths = new HashMap<>();
@@ -75,12 +76,9 @@ public class Project {
 	/**
 	 * File path visitors for project file system scanning. This visitors are registered by
 	 * {@link #registerVisitor(IFilePathVisitor)} on constructors, both this class and subclasses, and invoked on file system
-	 * scanning performed on {@link #postCreate()}.
+	 * scanning performed on {@link #configure(ProjectDescriptor)}.
 	 */
 	private final List<IFilePathVisitor> filePathVisitors = new ArrayList<>();
-
-	/** Directories excluded from build processing. */
-	private final Set<File> excludes = new HashSet<>();
 
 	/** Project root directory. All project file are included here, no external references allowed. */
 	private File projectRoot;
@@ -90,18 +88,6 @@ public class Project {
 	 * which case there are sensible default values.
 	 */
 	private ProjectDescriptor descriptor;
-
-	/**
-	 * Project name for user interface. If this value is not provided by {@link ProjectDescriptor#getDisplay(String)} uses
-	 * project name converted to title case.
-	 */
-	private String display;
-
-	/**
-	 * Project description. Uses project display if this value is not provided by
-	 * {@link ProjectDescriptor#getDescription(String)}.
-	 */
-	private String description;
 
 	/** Build directory where site files are created. Configured on project properties, <code>build.dir</code> property. */
 	private FilePath buildDir;
@@ -124,20 +110,32 @@ public class Project {
 	 */
 	private IOperatorsHandler operatorsHandler;
 
+	private ProjectProperties properties;
+
 	/**
 	 * Construct and initialize project instance. Created instance is immutable.
 	 * 
 	 * @param projectRoot path to existing project root directory.
-	 * @throws IllegalArgumentException if project root does not designate an existing directory.
 	 */
-	protected Project(File projectRoot) throws IllegalArgumentException {
+	protected Project(File projectRoot) {
 		this.projectRoot = projectRoot;
 
-		ProjectDescriptor descriptor = new ProjectDescriptor(new File(projectRoot, CT.PROJECT_CONFIG));
-		ProjectProperties properties = new ProjectProperties(this);
-		IFilePathVisitor scanHandler = new FilePathVisitor(tagCompoPaths, scriptDependencies);
+		this.properties = new ProjectProperties(this);
+		this.buildDir = createFilePath(properties.getBuildDir());
+		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
+		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
 
-		init(descriptor, properties, scanHandler);
+		FilePath descriptorFile = createFilePath(CT.PROJECT_CONFIG);
+		this.descriptor = new ProjectDescriptor(descriptorFile);
+		
+		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludes.add(file(properties.getBuildDir()));
+
+		registerVisitor(new FilePathVisitor(tagCompoPaths, scriptDependencies));
+	}
+
+	private File file(String path) {
+		return new File(projectRoot, path);
 	}
 
 	/**
@@ -146,56 +144,33 @@ public class Project {
 	 * @param projectRoot path to existing project root directory,
 	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
 	 */
-	Project(File projectRoot, ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor scanHandler) {
+	Project(File projectRoot, ProjectDescriptor descriptor, ProjectProperties properties) {
 		this.projectRoot = projectRoot;
-		init(descriptor, properties, scanHandler);
-	}
-
-	/**
-	 * Initialize project instance state. This is the first step of initialization process that is triggered by constructor. The
-	 * second step is {@link #postCreate()}.
-	 * 
-	 * @param descriptor project descriptor,
-	 * @param properties tools specific project properties,
-	 * @param visitor file system scanner visitor.
-	 */
-	void init(ProjectDescriptor descriptor, ProjectProperties properties, IFilePathVisitor visitor) {
 		this.descriptor = descriptor;
-
-		this.excludes.addAll(descriptor.getExcludes().stream().map(exclude -> new File(this.projectRoot, exclude)).collect(Collectors.toList()));
-		this.excludes.add(new File(this.projectRoot, properties.getBuildDir()));
 
 		this.buildDir = createFilePath(properties.getBuildDir());
 		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
 		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
-
-		this.display = descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
-		this.description = descriptor.getDescription(this.display);
-
-		this.filePathVisitors.add(visitor);
+		
+		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludes.add(file(properties.getBuildDir()));
 	}
 
 	/**
 	 * Register file system visitor. This method is called from project - and its subclasses, constructor. All registered
-	 * visitors are invoked on {@link #postCreate()} when file system scanning occurs.
+	 * visitors are invoked on {@link #configure(ProjectDescriptor)} when file system scanning occurs.
 	 * 
 	 * @param visitor file system visitor.
 	 * @see #filePathVisitors
 	 */
 	protected void registerVisitor(IFilePathVisitor visitor) {
-		this.filePathVisitors.add(visitor);
+		this.getFilePathVisitors().add(visitor);
 	}
 
-	/**
-	 * Post create hook is executed after project instance creation. Current implementation executes project file systems
-	 * scanning with {@link #filePathVisitors} invocation and finalize project instance initialization.
-	 * 
-	 * @see #walkFileTree(Project, File, List)
-	 */
-	protected final void postCreate() {
+	public final void create() {
 		walkFileTree(this, projectRoot, filePathVisitors);
 
-		switch (this.descriptor.getNamingStrategy()) {
+		switch (properties.getOperatorsNaming()) {
 		case XMLNS:
 			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths);
 			break;
@@ -211,35 +186,6 @@ public class Project {
 		default:
 			this.operatorsHandler = null;
 		}
-	}
-
-	/**
-	 * Return the list of authors which may be empty if none declared on project descriptor.
-	 * 
-	 * @return list of authors, possible empty but never null.
-	 */
-	public List<String> getAuthors() {
-		return descriptor.getAuthors();
-	}
-
-	/**
-	 * Return project name usable on user interfaces.
-	 * 
-	 * @return project display.
-	 * @see #display
-	 */
-	public String getDisplay() {
-		return display;
-	}
-
-	/**
-	 * Get project description.
-	 * 
-	 * @return project description.
-	 * @see #description
-	 */
-	public String getDescription() {
-		return description;
 	}
 
 	/**
@@ -285,6 +231,25 @@ public class Project {
 	}
 
 	/**
+	 * Return the list of authors which may be empty if none declared on project descriptor.
+	 * 
+	 * @return list of authors, possible empty but never null.
+	 */
+	public List<String> getAuthors() {
+		return descriptor.getAuthors();
+	}
+
+	/**
+	 * Return project name usable on user interfaces.
+	 * 
+	 * @return project display.
+	 * @see #display
+	 */
+	public String getDisplay() {
+		return descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
+	}
+
+	/**
 	 * Get favicon file path as defined on project descriptor.
 	 * 
 	 * @return favicon file path.
@@ -293,7 +258,7 @@ public class Project {
 	public FilePath getFavicon() {
 		return createFilePath(descriptor.getFavicon());
 	}
-
+	
 	/**
 	 * Get file path for PWA manifest, as defined on project descriptor.
 	 * 
@@ -301,7 +266,7 @@ public class Project {
 	 * @see ProjectDescriptor#getManifest()
 	 */
 	public FilePath getManifest() {
-		return createFilePath(descriptor.getManifest());
+		return createFilePath(CT.MANIFEST_FILE);
 	}
 
 	/**
@@ -330,6 +295,9 @@ public class Project {
 	 * @return default locale.
 	 */
 	public Locale getDefaultLocale() {
+		if (descriptor == null) {
+			return null;
+		}
 		return descriptor.getLocales().get(0);
 	}
 
@@ -382,7 +350,7 @@ public class Project {
 
 	/**
 	 * Get dependencies for requested script file or empty list if none declared. Script dependencies are declared on component
-	 * descriptors and initialized on file system scanning, performed on {@link #postCreate()}.
+	 * descriptors and initialized on file system scanning, performed on {@link #configure(ProjectDescriptor)}.
 	 * 
 	 * @param source script file path.
 	 * @return script dependencies list, possible empty.
@@ -437,13 +405,13 @@ public class Project {
 	 * @throws IllegalArgumentException if any parameters is null.
 	 */
 	public FilePath getMediaFile(Locale locale, Reference reference, FilePath sourceFile) {
-		Params.notNull(locale, "Locale");
+		//Params.notNull(locale, "Locale");
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
 
-		if (getDefaultLocale().equals(locale)) {
-			locale = null;
-		}
+//		if (getDefaultLocale().equals(locale)) {
+//			locale = null;
+//		}
 
 		// search media files on source and asset directories, in this order
 		// if source file is in project root, e.g. manifest.json, parent directory null
@@ -511,8 +479,8 @@ public class Project {
 	 * Recursively traverse project file system and invoke visitors for every file found. Visitors are invoked in provided
 	 * order.
 	 * <p>
-	 * This method is executed on {@link #postCreate()}. Walking process is started with project root and recursively invoked it
-	 * self till all project files are visited.
+	 * This method is executed on {@link #configure(ProjectDescriptor)}. Walking process is started with project root and
+	 * recursively invoked it self till all project files are visited.
 	 * 
 	 * @param project master project,
 	 * @param dir current visited directory,
@@ -606,7 +574,10 @@ public class Project {
 		return descriptor;
 	}
 
+	List<IFilePathVisitor> getFilePathVisitors() {
+		return filePathVisitors;
+	}
+	
 	Set<File> getExcludes() {
 		return excludes;
-	}
-}
+	}}

@@ -37,8 +37,6 @@ public class ProjectInitTest {
 	private ProjectDescriptor descriptor;
 	@Mock
 	private ProjectProperties properties;
-	@Mock
-	private Project.IFilePathVisitor scanHandler;
 
 	@Mock
 	private FilePath assetDir;
@@ -55,7 +53,7 @@ public class ProjectInitTest {
 	}
 
 	private Project project() {
-		return new Project(new File("."), descriptor, properties, scanHandler);
+		return new Project(new File("."), descriptor, properties);
 	}
 
 	@Test
@@ -63,15 +61,13 @@ public class ProjectInitTest {
 		// given
 		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(descriptor.getDisplay(anyString())).thenReturn("Project Display");
-		when(descriptor.getDescription(anyString())).thenReturn("Project description.");
-		when(descriptor.getManifest()).thenReturn("manifest.json");
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		when(descriptor.getExcludes()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 
 		// when
 		File projectRoot = new File("root/path/project");
-		Project project = new Project(projectRoot, descriptor, properties, scanHandler);
+		Project project = new Project(projectRoot, descriptor, properties);
 
 		// then
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
@@ -84,7 +80,6 @@ public class ProjectInitTest {
 
 		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
 		assertThat(project.getDisplay(), equalTo("Project Display"));
-		assertThat(project.getDescription(), equalTo("Project description."));
 
 		assertThat(project.getLocales(), hasSize(2));
 		assertThat(project.getLocales(), contains(Locale.FRANCE, Locale.GERMAN));
@@ -209,7 +204,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenExistingFile_WhenGetMediaFile_ThenFound() throws FileNotFoundException {
 		// given
-		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
+		//when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 
 		FilePath mediaFile = mock(FilePath.class);
 
@@ -230,7 +225,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenExistingFileAndDefaultLocale_WhenGetMediaFile_TheFound() throws FileNotFoundException {
 		// given
-		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.GERMAN, Locale.FRANCE));
+		//when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.GERMAN, Locale.FRANCE));
 
 		FilePath mediaFile = mock(FilePath.class);
 

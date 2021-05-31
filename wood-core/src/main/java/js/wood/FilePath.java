@@ -387,7 +387,7 @@ public class FilePath implements Iterable<FilePath> {
 	}
 
 	public boolean isManifest() {
-		return project.getManifest().equals(this);
+		return CT.MANIFEST_FILE.equals(value);
 	}
 
 	/**

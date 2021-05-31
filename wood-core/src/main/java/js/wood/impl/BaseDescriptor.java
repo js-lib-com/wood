@@ -1,7 +1,7 @@
 package js.wood.impl;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,42 +24,29 @@ import js.wood.WoodException;
  * @since 1.0
  */
 abstract class BaseDescriptor {
+	/** Descriptor document builder. */
+	private static DocumentBuilder DOC_BUILDER = Classes.loadService(DocumentBuilder.class);
+
 	/** Empty XML document used when component descriptor file is missing. */
-	private static final Document EMPTY_DOC;
-	static {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		EMPTY_DOC = builder.createXML("component");
-	}
+	private static final Document EMPTY_DOC = DOC_BUILDER.createXML("compo");
 
-	/** XML DOM document. */
-	protected final Document doc;
-
+	/** Descriptor file, for logging purposes. */
 	private final String descriptorFile;
 
-	protected BaseDescriptor(FilePath descriptorFile) {
-		Document doc;
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
-		} catch (IOException | SAXException e) {
-			doc = EMPTY_DOC;
-		}
+	/** Descriptor DOM document. */
+	protected final Document doc;
 
-		this.doc = doc;
+	protected BaseDescriptor(FilePath descriptorFile, Reader documentReader) {
+		Document doc = EMPTY_DOC;
+		if (documentReader != null) {
+			try (Reader reader = documentReader) {
+				doc = DOC_BUILDER.loadXML(reader);
+			} catch (IOException | SAXException e) {
+				throw new WoodException("Fail to load document %s: %s: %s", descriptorFile, e.getClass(), e.getMessage());
+			}
+		}
 		this.descriptorFile = descriptorFile.value();
-	}
-
-	protected BaseDescriptor(File descriptorFile) {
-		Document doc;
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			doc = builder.loadXML(descriptorFile);
-		} catch (IOException | SAXException e) {
-			doc = EMPTY_DOC;
-		}
-
 		this.doc = doc;
-		this.descriptorFile = descriptorFile.getPath();
 	}
 
 	/**

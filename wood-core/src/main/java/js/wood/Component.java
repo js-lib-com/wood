@@ -578,7 +578,7 @@ public class Component {
 		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
 
 		// by convention, component path and, descriptor and script files have the same name
-		FilePath scriptFile = descriptor.getFilePath().cloneTo(FileType.SCRIPT);
+		FilePath scriptFile = descriptor.getDescriptorFile().cloneTo(FileType.SCRIPT);
 		if (scriptFile.exists()) {
 			IScriptDescriptor script = ScriptDescriptor.create(scriptFile);
 			if (!scriptDescriptors.contains(script)) {

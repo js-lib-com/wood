@@ -131,7 +131,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		project = (Project) servletContext.getAttribute(Project.class.getName());
 		if (project == null) {
-			project = Project.create(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
+			project = Project.create(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)), this);
 			servletContext.setAttribute(Project.class.getName(), project);
 		}
 		variables = new VariablesCache(project);
@@ -236,21 +236,21 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 * Handler for resource references takes care of variables injection and media file processing.
 	 * 
 	 * @param reference resource references,
-	 * @param source source containing the resource references.
+	 * @param sourceFile source file containing the resource references.
 	 * @return resource variable values or media file source.
 	 */
 	@Override
-	public String onResourceReference(Reference reference, FilePath source) {
+	public String onResourceReference(Reference reference, FilePath sourceFile) {
 		Locale previewLocale = new Locale("en");
 		if (reference.isVariable()) {
-			String value = variables.get(previewLocale, reference, source, this);
+			String value = variables.get(previewLocale, reference, sourceFile, this);
 			return value != null ? value : reference.toString();
 		}
 
 		// discover media file and returns its absolute URL path
-		FilePath mediaFile = project.getMediaFile(previewLocale, reference, source);
+		FilePath mediaFile = project.getMediaFile(previewLocale, reference, sourceFile);
 		if (mediaFile == null) {
-			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, source);
+			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
 		}
 
 		StringBuilder builder = new StringBuilder();

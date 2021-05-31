@@ -2,6 +2,7 @@ package js.wood.impl;
 
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
+import js.wood.SourceReader;
 
 /**
  * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor}
@@ -94,33 +95,22 @@ import js.wood.IReferenceHandler;
  */
 public class ComponentDescriptor extends BaseDescriptor {
 	/** File path for component descriptor. It has owning component name and XML extension. */
-	private final FilePath filePath;
-
-	/** References handler used to actually process referenced resources; defined externally. */
-	private final IReferenceHandler referenceHandler;
-
-	/**
-	 * Resolver parses element values and invoke {@link #referenceHandler} for discovered references, if any. It is necessary
-	 * because is legal for element value to contain resource references.
-	 */
-	private final ReferencesResolver referenceResolver;
+	private final FilePath descriptorFile;
 
 	/**
 	 * Create component descriptor instance and initialize it from given file. Values defined by descriptor may contain resource
 	 * references that need to be resolved. This descriptor uses external defined references handler just for that.
 	 * 
-	 * @param filePath descriptor file path,
+	 * @param descriptorFile descriptor file path,
 	 * @param referenceHandler resource references handler.
 	 */
-	public ComponentDescriptor(FilePath filePath, IReferenceHandler referenceHandler) {
-		super(filePath);
-		this.filePath = filePath;
-		this.referenceHandler = referenceHandler;
-		this.referenceResolver = new ReferencesResolver();
+	public ComponentDescriptor(FilePath descriptorFile, IReferenceHandler referenceHandler) {
+		super(descriptorFile, descriptorFile.exists() ? new SourceReader(descriptorFile, referenceHandler) : null);
+		this.descriptorFile = descriptorFile;
 	}
 
-	public FilePath getFilePath() {
-		return filePath;
+	public FilePath getDescriptorFile() {
+		return descriptorFile;
 	}
 
 	/**
@@ -144,18 +134,5 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 */
 	public String getResourcesGroup() {
 		return text("group", null);
-	}
-
-	/**
-	 * Return text value from element identified by tag name or given default value, if element not found or its text content is
-	 * not set. Uses {@link ReferencesResolver} to resolve value references, if any.
-	 * 
-	 * @param tagName tag name identifying desired element,
-	 * @param defaultValue default value, returned when no value.
-	 * @return element text value or given default value.
-	 */
-	protected String text(String tagName, String defaultValue) {
-		String value = super.text(tagName, null);
-		return value != null ? referenceResolver.parse(value, filePath, referenceHandler) : defaultValue;
 	}
 }

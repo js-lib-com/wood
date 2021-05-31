@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,17 +25,18 @@ import js.wood.FilePath;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectDescriptorTest {
 	@Mock
-	private FilePath filePath;
+	private FilePath descriptorFile;
 
 	private ProjectDescriptor descriptor;
 
 	@Before
 	public void beforeTest() throws FileNotFoundException {
-		when(filePath.exists()).thenReturn(true);
+		when(descriptorFile.exists()).thenReturn(true);
 	}
 
 	@Test
-	public void properties() {
+	public void GivenPropertiesThenRetrieve() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<locale>en</locale>" + //
@@ -42,23 +44,33 @@ public class ProjectDescriptorTest {
 				"	<naming-strategy>XMLNS</naming-strategy>" + //
 				"	<manifest>res/app-manifest.json</manifest>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
+				"	<excludes>page/about</excludes>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
+		// then
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 		assertThat(descriptor.getAuthors(), contains("j(s)-lib"));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
+		assertThat(descriptor.getExcludes(), equalTo(Arrays.asList("page/about")));
 	}
 
 	@Test
-	public void locales() {
+	public void GivenMultipleLocale_ThenRetrieveAll() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<locale>en, de, fr, ro</locale>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
+		// then
 		List<Locale> locales = descriptor.getLocales();
 		assertThat(locales, notNullValue());
 		assertThat(locales, hasSize(4));
@@ -66,28 +78,36 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void excludes() {
+	public void GivenMultipleExcludes_ThenRetrieveAll() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
-				"	<excludes>page/about</excludes>" + //
+				"	<excludes>page/about, page/contact</excludes>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
+		// then
 		List<String> excludes = descriptor.getExcludes();
 		assertThat(excludes, notNullValue());
-		assertThat(excludes, hasSize(1));
+		assertThat(excludes, hasSize(2));
 		assertThat(excludes.get(0), equalTo("page/about"));
+		assertThat(excludes.get(1), equalTo("page/contact"));
 	}
 
 	@Test
-	public void defaults() throws FileNotFoundException {
+	public void GivenMissingProperties_ThenDefaults() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
+		// then
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 		assertThat(descriptor.getAuthors().size(), equalTo(0));
 		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
 		assertThat(descriptor.getExcludes(), emptyIterable());
@@ -95,8 +115,10 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 	}
 
+	// --------------------------------------------------------------------------------------------
+
 	private ProjectDescriptor descriptor(String xml) {
-		when(filePath.getReader()).thenReturn(new StringReader(xml));
-		return new ProjectDescriptor(filePath);
+		when(descriptorFile.getReader()).thenReturn(new StringReader(xml));
+		return new ProjectDescriptor(descriptorFile);
 	}
 }

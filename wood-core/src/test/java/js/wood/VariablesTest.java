@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,8 +27,6 @@ import js.wood.impl.Variants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VariablesTest {
-	@Mock
-	private Project project;
 	@Mock
 	private Variants variants;
 	@Mock
@@ -52,7 +50,6 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		FilePath dir = Mockito.mock(FilePath.class);
-		when(dir.getProject()).thenReturn(project);
 		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
 
 		// when
@@ -81,7 +78,7 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		// when
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		// then
@@ -99,7 +96,7 @@ public class VariablesTest {
 	@Test
 	public void GivenVariablesFileWithLocale_WhenLoad_ThenGetLocalizedValue() {
 		// given
-		when(project.getDefaultLocale()).thenReturn(Locale.US);
+		// when(project.getDefaultLocale()).thenReturn(Locale.US);
 		when(variants.getLocale()).thenReturn(Locale.US);
 
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
@@ -110,12 +107,12 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		// given
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		// then
 		IReferenceHandler handler = mock(IReferenceHandler.class);
-		String value = variables.get(Locale.GERMAN, new Reference(ResourceType.STRING, "title"), file, handler);
+		String value = variables.get(Locale.US, new Reference(ResourceType.STRING, "title"), file, handler);
 		assertThat(value, notNullValue());
 		assertThat(value, equalTo("Title"));
 	}
@@ -130,7 +127,7 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		// when
@@ -152,7 +149,7 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		// when
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		// then
@@ -178,7 +175,7 @@ public class VariablesTest {
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
 		// when
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		// then
@@ -196,7 +193,7 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 	}
 
@@ -212,7 +209,7 @@ public class VariablesTest {
 		FilePath dir = Mockito.mock(FilePath.class);
 		when(dir.iterator()).thenReturn(Arrays.asList(file).iterator());
 
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.reload(dir);
 
 		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
@@ -236,7 +233,7 @@ public class VariablesTest {
 
 		when(file.getReader()).thenReturn(new StringReader(xml));
 
-		Variables variables = new Variables(project);
+		Variables variables = new Variables();
 		variables.load(file);
 
 		IReferenceHandler handler = Mockito.mock(IReferenceHandler.class);
@@ -267,7 +264,6 @@ public class VariablesTest {
 		when(files[1].getReader()).thenReturn(new StringReader(xml2));
 
 		FilePath dir = Mockito.mock(FilePath.class);
-		when(dir.getProject()).thenReturn(project);
 		when(dir.iterator()).thenReturn(Arrays.asList(files).iterator());
 
 		Variables variables = new Variables(dir);

@@ -6,21 +6,4 @@
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en, de, fr, ro</locale>
 	<manifest>manifest.json</manifest>
-	<favicon>res/asset/favicon.ico</favicon>
-	
-	<metas>
-		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-	</metas>
-
-	<links>
-		<link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
-		<link href="http://fonts.googleapis.com/css?family=Great+Vibes" rel="stylesheet" type="text/css" />
-	</links>
-	
-	<scripts>
-		<script src="lib/js-lib/js-lib.js" type="text/javascript"></script>
-	</scripts>
-	
-	<excludes>build,res/page/about</excludes>
 </project>

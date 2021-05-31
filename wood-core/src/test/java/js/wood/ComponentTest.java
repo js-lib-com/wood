@@ -42,7 +42,7 @@ public class ComponentTest {
 	@Mock
 	private FilePath scriptPath;
 	@Mock
-	private FilePath descriptorPath;
+	private FilePath descriptorFile;
 	@Mock
 	private IReferenceHandler referenceHandler;
 
@@ -66,10 +66,10 @@ public class ComponentTest {
 		when(layoutPath.getParentDir()).thenReturn(compoDir);
 		when(layoutPath.exists()).thenReturn(true);
 		when(layoutPath.isLayout()).thenReturn(true);
-		when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorPath);
+		when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorFile);
 		when(layoutPath.cloneTo(FileType.STYLE)).thenReturn(stylePath);
 
-		when(descriptorPath.cloneTo(FileType.SCRIPT)).thenReturn(scriptPath);
+		when(descriptorFile.cloneTo(FileType.SCRIPT)).thenReturn(scriptPath);
 		
 		when(compoDir.getFilePath(any())).thenReturn(Mockito.mock(FilePath.class));
 	}
@@ -108,8 +108,8 @@ public class ComponentTest {
 				"	<script src='script/js/wood/Compo.js'></script>" + //
 				"</scripts>" + //
 				"</compo>";
-		when(descriptorPath.exists()).thenReturn(true);
-		when(descriptorPath.getReader()).thenReturn(new StringReader(descriptor));
+		when(descriptorFile.exists()).thenReturn(true);
+		when(descriptorFile.getReader()).thenReturn(new StringReader(descriptor));
 
 		String layout = "<h1>Compo</h1>";
 		when(layoutPath.getReader()).thenReturn(new StringReader(layout));

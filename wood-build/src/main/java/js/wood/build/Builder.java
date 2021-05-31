@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Locale;
 
-import js.lang.BugError;
 import js.lang.Handler;
 import js.log.Log;
 import js.log.LogFactory;
@@ -71,7 +70,8 @@ public class Builder implements IReferenceHandler {
 	 * @param config builder configuration.
 	 */
 	public Builder(BuilderConfig config) {
-		this.project = BuilderProject.create(config.getProjectDir());
+		this.project = new BuilderProject(config.getProjectDir());
+		this.project.create();
 		this.buildFS = new DefaultBuildFS(this.project.getBuildDir().toFile(), config.getBuildNumber());
 	}
 
@@ -211,41 +211,44 @@ public class Builder implements IReferenceHandler {
 	 * value or null if not found. If media file, copy it to build media directory then return build media file path.
 	 * 
 	 * @param reference resource reference,
-	 * @param source source file where <code>reference</code> is used.
+	 * @param sourceFile source file where <code>reference</code> is used.
 	 * @return value to replace reference on source file.
 	 * @throws IOException if media file write operation fails.
 	 * @throws WoodException if directory variables or media file is missing.
 	 */
 	@Override
-	public String onResourceReference(Reference reference, FilePath source) throws IOException, WoodException {
-		if (locale == null) {
-			throw new BugError("Builder locale not initialized.");
-		}
+	public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException, WoodException {
+		// if (locale == null) {
+		// throw new BugError("Builder locale not initialized.");
+		// }
 		if (reference.isVariable()) {
 			String value = null;
-			Variables dirVariables = project.getVariables().get(source.getParentDir());
+			Variables dirVariables = project.getVariables(sourceFile.getParentDir());
 			// source parent directory can be null in which case dirVariables also null
 			if (dirVariables != null) {
-				value = dirVariables.get(locale, reference, source, this);
+				value = dirVariables.get(locale, reference, sourceFile, this);
 			}
 			if (value == null) {
-				value = project.getAssetVariables().get(locale, reference, source, this);
+				value = project.getAssetVariables().get(locale, reference, sourceFile, this);
 			}
 			if (value == null) {
-				throw new WoodException("Missing variable value for reference |%s:%s|.", source, reference);
+				throw new WoodException("Missing variable value for reference |%s:%s|.", sourceFile, reference);
 			}
 			return value;
 		}
 
-		FilePath mediaFile = project.getMediaFile(locale, reference, source);
+		FilePath mediaFile = project.getMediaFile(locale, reference, sourceFile);
 		if (mediaFile == null) {
-			throw new WoodException("Missing media file for reference |%s:%s|.", source, reference);
+			throw new WoodException("Missing media file for reference |%s:%s|.", sourceFile, reference);
 		}
-		if (source.isManifest()) {
+		if (sourceFile.isManifest()) {
 			return buildFS.writeManifestMedia(mediaFile);
 		}
-
-		switch (source.getType()) {
+		if(sourceFile.isComponentDescriptor()) {
+			return buildFS.writePageMedia(currentComponent, mediaFile);
+		}
+		
+		switch (sourceFile.getType()) {
 		case LAYOUT:
 			return buildFS.writePageMedia(currentComponent, mediaFile);
 

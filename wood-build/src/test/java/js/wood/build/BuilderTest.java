@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -35,9 +33,6 @@ import js.wood.Reference;
 import js.wood.ThemeStyles;
 import js.wood.Variables;
 import js.wood.WoodException;
-import js.wood.build.BuildFS;
-import js.wood.build.Builder;
-import js.wood.build.BuilderProject;
 import js.wood.impl.FileType;
 import js.wood.impl.ResourceType;
 import js.wood.impl.XmlnsOperatorsHandler;
@@ -57,9 +52,7 @@ public class BuilderTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		Map<FilePath, Variables> variables = new HashMap<>();
-		variables.put(null, dirVariables);
-		when(project.getVariables()).thenReturn(variables);
+		when(project.getVariables(null)).thenReturn(dirVariables);
 		when(project.getAssetVariables()).thenReturn(assetVariables);
 
 		builder = new Builder(project, buildFS);

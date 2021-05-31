@@ -29,8 +29,6 @@ public class ProjectMediaFileTest {
 	private ProjectDescriptor descriptor;
 	@Mock
 	private ProjectProperties properties;
-	@Mock
-	private Project.IFilePathVisitor visitor;
 	
 	@Mock
 	private IReferenceHandler referenceHandler;
@@ -71,7 +69,7 @@ public class ProjectMediaFileTest {
 		when(reference.getName()).thenReturn("logo");
 
 		projectRoot = new Directory(".");
-		project = new Project(projectRoot, descriptor, properties, visitor);
+		project = new Project(projectRoot, descriptor, properties);
 		sourceDirPath = new FilePath(project, sourceDir);
 	}
 

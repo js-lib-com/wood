@@ -2,8 +2,10 @@ package js.wood.impl;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 import java.util.Properties;
 
+import js.util.Strings;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.WoodException;
@@ -14,6 +16,8 @@ public class ProjectProperties {
 	private static final String BUILD_DIR = "build.dir";
 	private static final String ASSET_DIR = "asset.dir";
 	private static final String THEME_DIR = "theme.dir";
+	private static final String OPERATORS_NAMING = "operators.naming";
+	private static final String EXCLUDED_DIRS = "excluded.dirs";
 
 	private final Properties properties = new Properties();
 
@@ -40,6 +44,14 @@ public class ProjectProperties {
 
 	public String getThemeDir(String defaultThemeDir) {
 		return getProperty(THEME_DIR, defaultThemeDir);
+	}
+
+	public NamingStrategy getOperatorsNaming() {
+		return NamingStrategy.valueOf(getProperty(OPERATORS_NAMING, "XMLNS"));
+	}
+
+	public List<String> getExcludedDirs() {
+		return Strings.split(getProperty(EXCLUDED_DIRS, ""),',');
 	}
 
 	public String getProperty(String key, String... defaultValue) {

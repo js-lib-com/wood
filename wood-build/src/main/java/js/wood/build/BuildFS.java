@@ -269,11 +269,13 @@ public abstract class BuildFS {
 	// Interface to be implemented by concrete build file system.
 
 	/**
-	 * Get the directory that stores site pages.
+	 * Get the directory that stores site pages. Optional <code>page</code> parameter can be used to create alternative pages
+	 * directories based on component properties, most likely {@link Component#getResourcesGroup()}.
 	 * 
+	 * @param page optional page component, null if not provided.
 	 * @return pages directory.
 	 */
-	protected abstract File getPageDir(Component component);
+	protected abstract File getPageDir(Component page);
 
 	/**
 	 * Get the directory that stores site styles.

@@ -29,7 +29,7 @@ public class ComponentIntegrationTest {
 
 	@Before
 	public void beforeTest() {
-		project = Project.create(new File("src/test/resources/project"));
+		project = Project.create(new File("src/test/resources/compo"), referenceHandler);
 
 		referenceHandler = new IReferenceHandler() {
 			@Override
@@ -142,6 +142,8 @@ public class ComponentIntegrationTest {
 		assertThat(layout.getByTag("div"), nullValue());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	
 	private static Matcher<Component> properties() {
 		return new TypeSafeMatcher<Component>() {
 			@Override

@@ -10,6 +10,8 @@ public final class CT {
 	/** Project configuration file. */
 	public static final String PROJECT_CONFIG = "project.xml";
 
+	public static final String MANIFEST_FILE = "manifest.json";
+	
 	// ------------------------------------------------------
 	// Files types recognized by this build tool
 

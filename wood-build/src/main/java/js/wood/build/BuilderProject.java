@@ -10,6 +10,7 @@ import java.util.Map;
 
 import js.wood.CompoPath;
 import js.wood.FilePath;
+import js.wood.IReferenceHandler;
 import js.wood.Project;
 import js.wood.Variables;
 import js.wood.impl.ResourceType;
@@ -21,9 +22,9 @@ import js.wood.impl.ResourceType;
  * @since 1.0
  */
 class BuilderProject extends Project {
-	public static BuilderProject create(File projectDir) {
-		BuilderProject project = new BuilderProject(projectDir);
-		project.postCreate();
+	public static BuilderProject create(File projectRoot, IReferenceHandler referenceHandler) {
+		BuilderProject project = new BuilderProject(projectRoot);
+		project.create();
 		return project;
 	}
 
@@ -46,7 +47,7 @@ class BuilderProject extends Project {
 	 * 
 	 * @param projectDir project root directory.
 	 */
-	private BuilderProject(File projectDir) {
+	public BuilderProject(File projectDir) {
 		super(projectDir);
 
 		this.assetVariables = new Variables(getAssetDir());
@@ -72,8 +73,8 @@ class BuilderProject extends Project {
 	 * @return project variables.
 	 * @see #variables
 	 */
-	public Map<FilePath, Variables> getVariables() {
-		return Collections.unmodifiableMap(variables);
+	public Variables getVariables(FilePath dir) {
+		return variables.get(dir);
 	}
 
 	/**
@@ -130,7 +131,7 @@ class BuilderProject extends Project {
 			if (file.isXML(ResourceType.variables())) {
 				Variables parentDirVariables = variables.get(parentDir);
 				if (parentDirVariables == null) {
-					parentDirVariables = new Variables(project);
+					parentDirVariables = new Variables();
 					variables.put(parentDir, parentDirVariables);
 				}
 				parentDirVariables.load(file);

@@ -1,8 +1,8 @@
 package js.wood.impl;
 
 /**
- * Operator names strategy. WOOD operators are standard X(HT)ML element attributes with predefined names. In order to
- * avoid name collision and accommodate developer coding style, WOOD uses couple options for names format.
+ * Operator naming strategy. WOOD operators are standard X(HT)ML element attributes with predefined names. In order to
+ * avoid name collision and accommodate developer coding style, WOOD uses couple options for operators name format.
  * <p>
  * <table border="1" style="border-collapse:collapse;">
  * <tr>
