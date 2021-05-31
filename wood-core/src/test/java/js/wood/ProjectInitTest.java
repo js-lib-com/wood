@@ -5,12 +5,11 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -29,7 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.ProjectDescriptor;
 import js.wood.impl.ProjectProperties;
-import js.wood.impl.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectInitTest {
@@ -62,6 +60,7 @@ public class ProjectInitTest {
 		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(descriptor.getDisplay(anyString())).thenReturn("Project Display");
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
+		when(descriptor.getServiceWorker()).thenReturn("sw.js");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		when(descriptor.getExcludes()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 
@@ -73,10 +72,12 @@ public class ProjectInitTest {
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
 		assertThat(project.getDescriptor(), equalTo(descriptor));
 
+		assertThat(project.getBuildDir().value(), equalTo("build/"));
 		assertThat(project.getAssetDir().value(), equalTo("res/asset/"));
 		assertThat(project.getThemeDir().value(), equalTo("res/theme/"));
 		assertThat(project.getManifest().value(), equalTo("manifest.json"));
 		assertThat(project.getFavicon().value(), equalTo("favicon.ico"));
+		assertThat(project.getServiceWorker().value(), equalTo("sw.js"));
 
 		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
 		assertThat(project.getDisplay(), equalTo("Project Display"));
@@ -196,51 +197,23 @@ public class ProjectInitTest {
 		assertThat(scripts, empty());
 	}
 
+	@Test
+	public void GivenScriptWithDependencies_WhenGetScriptDependencies_ThenRetrieve() {
+		// given
+		Project project = project();
+		List<IScriptDescriptor> dependencies = Arrays.asList((IScriptDescriptor) null);
+		project.getScriptDependencies().put("sw.js", dependencies);
+
+		// when
+		List<IScriptDescriptor> scripts = project.getScriptDependencies("sw.js");
+
+		// then
+		assertThat(scripts, not(empty()));
+	}
+
 	@Test(expected = UnsupportedOperationException.class)
 	public void GivenChangeAttempt_WhenGetScriptDescriptors_ThenException() {
 		project().getScriptDescriptors().add(Mockito.mock(IScriptDescriptor.class));
-	}
-
-	@Test
-	public void GivenExistingFile_WhenGetMediaFile_ThenFound() throws FileNotFoundException {
-		// given
-		//when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
-
-		FilePath mediaFile = mock(FilePath.class);
-
-		FilePath sourceDir = mock(FilePath.class);
-		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
-
-		FilePath sourceFile = mock(FilePath.class);
-		when(sourceFile.getParentDir()).thenReturn(sourceDir);
-
-		// when
-		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
-		FilePath foundFile = project().getMediaFile(Locale.GERMAN, reference, sourceFile);
-
-		// then
-		assertThat(foundFile, equalTo(mediaFile));
-	}
-
-	@Test
-	public void GivenExistingFileAndDefaultLocale_WhenGetMediaFile_TheFound() throws FileNotFoundException {
-		// given
-		//when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.GERMAN, Locale.FRANCE));
-
-		FilePath mediaFile = mock(FilePath.class);
-
-		FilePath sourceDir = mock(FilePath.class);
-		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
-
-		FilePath sourceFile = mock(FilePath.class);
-		when(sourceFile.getParentDir()).thenReturn(sourceDir);
-
-		// when
-		Reference reference = new Reference(sourceFile, ResourceType.IMAGE, "logo");
-		FilePath foundFile = project().getMediaFile(Locale.GERMAN, reference, sourceFile);
-
-		// then
-		assertThat(foundFile, equalTo(mediaFile));
 	}
 
 	@Test

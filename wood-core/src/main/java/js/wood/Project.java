@@ -127,7 +127,7 @@ public class Project {
 
 		FilePath descriptorFile = createFilePath(CT.PROJECT_CONFIG);
 		this.descriptor = new ProjectDescriptor(descriptorFile);
-		
+
 		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
 		this.excludes.add(file(properties.getBuildDir()));
 
@@ -151,7 +151,7 @@ public class Project {
 		this.buildDir = createFilePath(properties.getBuildDir());
 		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
 		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
-		
+
 		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
 		this.excludes.add(file(properties.getBuildDir()));
 	}
@@ -258,7 +258,7 @@ public class Project {
 	public FilePath getFavicon() {
 		return createFilePath(descriptor.getFavicon());
 	}
-	
+
 	/**
 	 * Get file path for PWA manifest, as defined on project descriptor.
 	 * 
@@ -295,9 +295,6 @@ public class Project {
 	 * @return default locale.
 	 */
 	public Locale getDefaultLocale() {
-		if (descriptor == null) {
-			return null;
-		}
 		return descriptor.getLocales().get(0);
 	}
 
@@ -572,7 +569,12 @@ public class Project {
 	List<IFilePathVisitor> getFilePathVisitors() {
 		return filePathVisitors;
 	}
-	
+
 	Set<File> getExcludes() {
 		return excludes;
-	}}
+	}
+
+	Map<String, List<IScriptDescriptor>> getScriptDependencies() {
+		return scriptDependencies;
+	}
+}
