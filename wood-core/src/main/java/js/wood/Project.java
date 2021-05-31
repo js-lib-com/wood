@@ -405,13 +405,8 @@ public class Project {
 	 * @throws IllegalArgumentException if any parameters is null.
 	 */
 	public FilePath getMediaFile(Locale locale, Reference reference, FilePath sourceFile) {
-		//Params.notNull(locale, "Locale");
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
-
-//		if (getDefaultLocale().equals(locale)) {
-//			locale = null;
-//		}
 
 		// search media files on source and asset directories, in this order
 		// if source file is in project root, e.g. manifest.json, parent directory null
