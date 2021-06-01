@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Properties;
 
+import javax.xml.xpath.XPathExpressionException;
+
+import org.xml.sax.SAXException;
+
 import com.jslib.commons.cli.Config;
 import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.Home;
@@ -42,7 +46,7 @@ import picocli.CommandLine.Command;
 
 @Command(name = "wood", description = "Command line interface for WOOD tools.", mixinStandardHelpOptions = true, version = "wood, version 1.0.5-SNAPSHOT")
 public class Main {
-	public static void main(String... args) throws IOException {
+	public static void main(String... args) throws IOException, XPathExpressionException, SAXException {
 		Home.setMainClass(Main.class);
 		Properties globalProperties = new Properties();
 		Properties projectProperties = new Properties();

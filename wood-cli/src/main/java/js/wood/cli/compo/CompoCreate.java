@@ -83,7 +83,7 @@ public class CompoCreate extends Task {
 				return ExitCode.ABORT;
 			}
 
-			TemplateDocument templateDoc = createTemplateDocument(getNamingStrategy(projectDir.resolve("project.xml")), files.getReader(templateLayoutFile));
+			TemplateDocument templateDoc = createTemplateDocument(config.getex("project.operators"), files.getReader(templateLayoutFile));
 			if (!templateDoc.hasEditable()) {
 				// throw new BugError("Bad template component %s. Missing editable element.", compoTemplateDir);
 			}
@@ -113,12 +113,22 @@ public class CompoCreate extends Task {
 			variables.put("templateParams", templateDoc.getParamAttr(Strings.join(params, ';')));
 			variables.put("xmlns", templateDoc.getXmlnsAttr());
 
-			String scriptPath = Strings.concat(config.getex("script.dir"), '/', config.getex("project.package").replace('.', '/'), '/', className, ".js");
+			StringBuilder scriptPath = new StringBuilder();
+			if (config.has("script.dir")) {
+				scriptPath.append(config.getex("script.dir"));
+				scriptPath.append('/');
+			}
+			if (config.has("project.package")) {
+				scriptPath.append(config.getex("project.package").replace('.', '/'));
+				scriptPath.append('/');
+			}
+			scriptPath.append(className);
+			scriptPath.append(".js");
+
 			if ("true".equalsIgnoreCase(config.get("compo.script"))) {
 				variables.put("compo-script", "true");
-			}
-			else {
-				variables.put("scriptPath", scriptPath);
+			} else {
+				variables.put("scriptPath", scriptPath.toString());
 			}
 
 			if (templateDoc.hasEditable()) {
@@ -141,19 +151,12 @@ public class CompoCreate extends Task {
 
 			Reader reader = templateProcessor.getExcludedFileReader(compoName + ".js");
 			if (reader != null) {
-				Path scriptFile = projectDir.resolve(scriptPath);
+				Path scriptFile = projectDir.resolve(scriptPath.toString());
 				files.copy(reader, files.getWriter(scriptFile));
 			}
 		}
 
 		return ExitCode.SUCCESS;
-	}
-
-	private String getNamingStrategy(Path projectDescriptorFile) throws IOException, SAXException {
-		DocumentBuilder docBuilder = Classes.loadService(DocumentBuilder.class);
-		Document doc = docBuilder.loadXMLNS(files.getReader(projectDescriptorFile));
-		Element namingElement = doc.getByTag("naming");
-		return namingElement != null ? namingElement.getText() : "XMLNS";
 	}
 
 	private static TemplateDocument createTemplateDocument(String namingStrategy, Reader reader) throws IOException, SAXException {

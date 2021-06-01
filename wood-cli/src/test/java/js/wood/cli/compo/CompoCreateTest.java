@@ -18,7 +18,6 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -31,8 +30,6 @@ import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.FilesUtil;
 import com.jslib.commons.cli.TemplateProcessor;
-
-import js.lang.BugError;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompoCreateTest {
@@ -64,15 +61,11 @@ public class CompoCreateTest {
 	public void beforeTest() throws IOException {
 		when(files.getProjectDir()).thenReturn(projectDir);
 		when(projectDir.resolve((String) null)).thenReturn(compoDir);
-
-		when(projectDir.resolve("project.xml")).thenReturn(projectDescriptorFile);
-		String projectDescriptorDoc = "<project></project>";
-		when(files.getReader(projectDescriptorFile)).thenReturn(new StringReader(projectDescriptorDoc));
 		
 		when(compoTemplate.path()).thenReturn("template/page");
 		when(projectDir.resolve("template/page")).thenReturn(compoTemplateDir);
 
-		when(config.getex("project.package")).thenReturn("app");
+		when(config.getex("project.operators")).thenReturn("XMLNS");
 		
 		task = new CompoCreate();
 		task.setConsole(console);
@@ -163,12 +156,11 @@ public class CompoCreateTest {
 	@Test
 	public void GivenTemplateOptionAndDataAttrNaming_ThenCreateCompo() throws IOException, XPathExpressionException, SAXException {
 		// given
+		when(config.getex("project.operators")).thenReturn("DATA_ATTR");
+
 		when(files.getFileName(compoDir)).thenReturn("about");
 		when(files.exists(compoTemplateDir)).thenReturn(true);
 		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
-
-		String projectDescriptorDoc = "<project><naming>DATA_ATTR</naming></project>";
-		when(files.getReader(projectDescriptorFile)).thenReturn(new StringReader(projectDescriptorDoc));
 
 		String templateLayoutDoc = "<body><section data-editable='section'></section></body>";
 		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(templateLayoutDoc)).thenReturn(new StringReader(templateLayoutDoc));
@@ -253,24 +245,5 @@ public class CompoCreateTest {
 		assertThat(exitCode, equalTo(ExitCode.ABORT));
 		verify(console, times(1)).print(anyString(), eq(compoTemplateDir));
 		verify(console, times(1)).print(anyString());
-	}
-
-	@Ignore
-	@Test(expected = BugError.class)
-	public void GivenTemplateOptionAndMissingEditable_ThenBugError() throws IOException, XPathExpressionException, SAXException {
-		// given
-		when(files.exists(compoTemplateDir)).thenReturn(true);
-		when(files.getFileByExtension(compoTemplateDir, ".htm")).thenReturn(templateLayoutFile);
-
-		// w:editable is misspelled; it has 's' at the end
-		String layoutDocument = "<body xmlns:w='com.js-lib/wood'><section w:editables='section'></section></body>";
-		when(files.getReader(templateLayoutFile)).thenReturn(new StringReader(layoutDocument)).thenReturn(new StringReader(layoutDocument));
-
-		task.setCompoTemplate(compoTemplate);
-
-		// when
-		task.exec();
-
-		// then
 	}
 }
