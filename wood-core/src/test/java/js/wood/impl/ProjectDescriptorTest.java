@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import js.wood.CT;
 import js.wood.FilePath;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,24 +41,40 @@ public class ProjectDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
-				"	<authors>j(s)-lib</authors>" + //
-				"	<naming-strategy>XMLNS</naming-strategy>" + //
-				"	<manifest>res/app-manifest.json</manifest>" + //
+				"	<technology>w3c</technology>" + //
+				"	<package>com.kidscademy</package>" + //
+				"	<operators>XMLNS</operators>" + //
+				"	<build-dir>target/site</build-dir>" + //
+				"	<asset-dir>asset</asset-dir>" + //
+				"	<theme-dir>theme</theme-dir>" + //
+				"	<exclude-dirs>page/about</exclude-dirs>" + //
+				"	<authors>Iulian Rotaru</authors>" + //
+				"	<display>Project Display</display>" + //
+				"	<description>Project description.</description>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
-				"	<excludes>page/about</excludes>" + //
+				"	<manifest>res/app-manifest.json</manifest>" + //
+				"	<service-worker>script/sw.js</service-worker>" + //
+				"	<locale>en</locale>" + //
 				"</project>";
 
 		// when
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
-		assertThat(descriptor.getAuthors(), contains("j(s)-lib"));
-		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
-		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
+		assertThat(descriptor.getTechnology(), equalTo("w3c"));
+		assertThat(descriptor.getPackage(), equalTo("com.kidscademy"));
+		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.XMLNS));
+		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
+		assertThat(descriptor.getAssetDir(), equalTo("asset"));
+		assertThat(descriptor.getThemeDir(), equalTo("theme"));
+		assertThat(descriptor.getExcludeDirs(), equalTo(Arrays.asList("page/about")));
+		assertThat(descriptor.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru")));
+		assertThat(descriptor.getDisplay(null), equalTo("Project Display"));
+		assertThat(descriptor.getDescription(null), equalTo("Project description."));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
-		assertThat(descriptor.getExcludes(), equalTo(Arrays.asList("page/about")));
+		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
+		assertThat(descriptor.getServiceWorker(), equalTo("script/sw.js"));
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 
 	@Test
@@ -78,18 +96,18 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void GivenMultipleExcludes_ThenRetrieveAll() {
+	public void GivenMultipleExcludeDirs_ThenRetrieveAll() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<excludes>page/about, page/contact</excludes>" + //
+				"	<exclude-dirs>page/about, page/contact</exclude-dirs>" + //
 				"</project>";
 
 		// when
 		descriptor = descriptor(xml);
 
 		// then
-		List<String> excludes = descriptor.getExcludes();
+		List<String> excludes = descriptor.getExcludeDirs();
 		assertThat(excludes, notNullValue());
 		assertThat(excludes, hasSize(2));
 		assertThat(excludes.get(0), equalTo("page/about"));
@@ -107,12 +125,20 @@ public class ProjectDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
+		assertThat(descriptor.getTechnology(), equalTo("js-lib"));
+		assertThat(descriptor.getPackage(), equalTo(""));
+		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.DATA_ATTR));
+		assertThat(descriptor.getBuildDir(), equalTo(CT.DEF_BUILD_DIR));
+		assertThat(descriptor.getAssetDir(), equalTo(CT.DEF_ASSET_DIR));
+		assertThat(descriptor.getThemeDir(), equalTo(CT.DEF_THEME_DIR));
+		assertThat(descriptor.getExcludeDirs(), emptyIterable());
 		assertThat(descriptor.getAuthors().size(), equalTo(0));
-		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
-		assertThat(descriptor.getExcludes(), emptyIterable());
-		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
+		assertThat(descriptor.getDisplay(null), nullValue());
+		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
+		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
+		assertThat(descriptor.getServiceWorker(), equalTo("ServiceWorker.js"));
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 
 	// --------------------------------------------------------------------------------------------

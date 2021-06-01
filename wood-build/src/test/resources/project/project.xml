@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-	<authors>j(s)-lib</authors>
 	<name>project</name>
+	<operators>XMLNS</operators>
+	<build-dir>build</build-dir>
+	<exclude-dirs></exclude-dirs>
+	
+	<authors>j(s)-lib</authors>
 	<display>Test Project</display>
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en, de, fr, ro</locale>

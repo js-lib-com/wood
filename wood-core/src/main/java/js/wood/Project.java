@@ -21,9 +21,8 @@ import js.wood.impl.AttrOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
-import js.wood.impl.NamingStrategy;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.ProjectProperties;
 import js.wood.impl.ScriptDescriptor;
 import js.wood.impl.XmlnsOperatorsHandler;
 
@@ -65,7 +64,7 @@ public class Project {
 		return project;
 	}
 
-	private final Set<File> excludes;
+	private final Set<File> excludeDirs;
 
 	/** Map component tag to its component path. This map is used when use tag to declare component aggregation. */
 	private final Map<String, CompoPath> tagCompoPaths = new HashMap<>();
@@ -106,11 +105,9 @@ public class Project {
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
-	 * {@link NamingStrategy#XMLNS}.
+	 * {@link OperatorsNaming#XMLNS}.
 	 */
 	private IOperatorsHandler operatorsHandler;
-
-	private ProjectProperties properties;
 
 	/**
 	 * Construct and initialize project instance. Created instance is immutable.
@@ -120,16 +117,15 @@ public class Project {
 	protected Project(File projectRoot) {
 		this.projectRoot = projectRoot;
 
-		this.properties = new ProjectProperties(this);
-		this.buildDir = createFilePath(properties.getBuildDir());
-		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
-		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
-
 		FilePath descriptorFile = createFilePath(CT.PROJECT_CONFIG);
 		this.descriptor = new ProjectDescriptor(descriptorFile);
 
-		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
-		this.excludes.add(file(properties.getBuildDir()));
+		this.buildDir = createFilePath(descriptor.getBuildDir());
+		this.assetDir = createFilePath(descriptor.getAssetDir());
+		this.themeDir = createFilePath(descriptor.getThemeDir());
+
+		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludeDirs.add(file(descriptor.getBuildDir()));
 
 		registerVisitor(new FilePathVisitor(tagCompoPaths, scriptDependencies));
 	}
@@ -144,16 +140,16 @@ public class Project {
 	 * @param projectRoot path to existing project root directory,
 	 * @param descriptor project descriptor, possible empty if project descriptor file is missing.
 	 */
-	Project(File projectRoot, ProjectDescriptor descriptor, ProjectProperties properties) {
+	Project(File projectRoot, ProjectDescriptor descriptor) {
 		this.projectRoot = projectRoot;
 		this.descriptor = descriptor;
 
-		this.buildDir = createFilePath(properties.getBuildDir());
-		this.assetDir = createFilePath(properties.getAssetDir(CT.DEF_ASSET_DIR));
-		this.themeDir = createFilePath(properties.getThemeDir(CT.DEF_THEME_DIR));
+		this.buildDir = createFilePath(descriptor.getBuildDir());
+		this.assetDir = createFilePath(descriptor.getAssetDir());
+		this.themeDir = createFilePath(descriptor.getThemeDir());
 
-		this.excludes = this.descriptor.getExcludes().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
-		this.excludes.add(file(properties.getBuildDir()));
+		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludeDirs.add(file(descriptor.getBuildDir()));
 	}
 
 	/**
@@ -170,7 +166,7 @@ public class Project {
 	public final void create() {
 		walkFileTree(this, projectRoot, filePathVisitors);
 
-		switch (properties.getOperatorsNaming()) {
+		switch (descriptor.getOperatorsNaming()) {
 		case XMLNS:
 			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths);
 			break;
@@ -494,7 +490,7 @@ public class Project {
 
 		for (File file : files) {
 			if (file.isDirectory()) {
-				if (file.getName().startsWith(".") || project.excludes.contains(file)) {
+				if (file.getName().startsWith(".") || project.excludeDirs.contains(file)) {
 					continue;
 				}
 				walkFileTree(project, file, visitors);
@@ -580,7 +576,7 @@ public class Project {
 	}
 
 	Set<File> getExcludes() {
-		return excludes;
+		return excludeDirs;
 	}
 
 	Map<String, List<IScriptDescriptor>> getScriptDependencies() {

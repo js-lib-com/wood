@@ -31,7 +31,7 @@ package js.wood.impl;
  * @author Iulian Rotaru
  * @since 1.0
  */
-public enum NamingStrategy
+public enum OperatorsNaming
 {
   /** Simple attribute name. Does not use prefix name and is prone to name collision but is simple to use. */
   ATTR,

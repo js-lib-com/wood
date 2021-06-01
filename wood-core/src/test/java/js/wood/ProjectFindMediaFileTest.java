@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,14 +21,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.ProjectProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectFindMediaFileTest {
 	@Mock
 	private ProjectDescriptor descriptor;
-	@Mock
-	private ProjectProperties properties;
 
 	@Mock
 	private IReferenceHandler referenceHandler;
@@ -49,9 +45,9 @@ public class ProjectFindMediaFileTest {
 	public void beforeTest() throws Exception {
 		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
 
-		when(properties.getBuildDir()).thenReturn("build");
-		when(properties.getAssetDir(anyString())).thenReturn("res/asset");
-		when(properties.getThemeDir(anyString())).thenReturn("res/theme");
+		when(descriptor.getBuildDir()).thenReturn("build");
+		when(descriptor.getAssetDir()).thenReturn("res/asset");
+		when(descriptor.getThemeDir()).thenReturn("res/theme");
 
 		when(sourceDir.getPath()).thenReturn("res/page/");
 		when(sourceDir.exists()).thenReturn(true);
@@ -70,7 +66,7 @@ public class ProjectFindMediaFileTest {
 		when(reference.getName()).thenReturn("logo");
 
 		projectRoot = new Directory(".");
-		project = new Project(projectRoot, descriptor, properties);
+		project = new Project(projectRoot, descriptor);
 
 		sourceDirPath = new FilePath(project, sourceDir);
 	}

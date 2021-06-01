@@ -13,7 +13,7 @@ import js.wood.CompoPath;
 
 /**
  * Operators handler for operator names prefixed with <code>data-</code>, HTML custom attribute prefix. This operators handler
- * is used when developer select {@link NamingStrategy#DATA_ATTR} naming strategy.
+ * is used when developer select {@link OperatorsNaming#DATA_ATTR} naming strategy.
  * 
  * @author Iulian Rotaru
  */

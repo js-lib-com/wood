@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,14 +18,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.ProjectProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectGetMediaFileTest {
 	@Mock
 	private ProjectDescriptor descriptor;
-	@Mock
-	private ProjectProperties properties;
 
 	@Mock
 	private FilePath mediaFile;
@@ -44,14 +40,14 @@ public class ProjectGetMediaFileTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		when(properties.getBuildDir()).thenReturn("build");
-		when(properties.getAssetDir(anyString())).thenReturn("res/asset");
-		when(properties.getThemeDir(anyString())).thenReturn("res/theme");
+		when(descriptor.getBuildDir()).thenReturn("build");
+		when(descriptor.getAssetDir()).thenReturn("res/asset");
+		when(descriptor.getThemeDir()).thenReturn("res/theme");
 
 		when(sourceDir.findFirst(any())).thenReturn(mediaFile);
 		when(sourceFile.getParentDir()).thenReturn(sourceDir);
 
-		project = new Project(new File("."), descriptor, properties);
+		project = new Project(new File("."), descriptor);
 		project.setAssetDir(assetDir);
 	}
 

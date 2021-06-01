@@ -15,7 +15,7 @@ import js.wood.WOOD;
 
 /**
  * Document handler for operator naming with XML name space. This document handler is the default naming strategy or enacted
- * when user explicitly select the {@link NamingStrategy#XMLNS}. Name space should be declared using WOOD public URI:
+ * when user explicitly select the {@link OperatorsNaming#XMLNS}. Name space should be declared using WOOD public URI:
  * <code>xmlns:wood="js-lib.com/wood"</code>.
  * 
  * @author Iulian Rotaru

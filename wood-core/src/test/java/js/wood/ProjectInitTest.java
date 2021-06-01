@@ -27,14 +27,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.ProjectDescriptor;
-import js.wood.impl.ProjectProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectInitTest {
 	@Mock
 	private ProjectDescriptor descriptor;
-	@Mock
-	private ProjectProperties properties;
 
 	@Mock
 	private FilePath assetDir;
@@ -45,13 +42,13 @@ public class ProjectInitTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		when(properties.getBuildDir()).thenReturn("build");
-		when(properties.getAssetDir(anyString())).thenReturn("res/asset");
-		when(properties.getThemeDir(anyString())).thenReturn("res/theme");
+		when(descriptor.getBuildDir()).thenReturn("build");
+		when(descriptor.getAssetDir()).thenReturn("res/asset");
+		when(descriptor.getThemeDir()).thenReturn("res/theme");
 	}
 
 	private Project project() {
-		return new Project(new File("."), descriptor, properties);
+		return new Project(new File("."), descriptor);
 	}
 
 	@Test
@@ -62,11 +59,11 @@ public class ProjectInitTest {
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getServiceWorker()).thenReturn("sw.js");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
-		when(descriptor.getExcludes()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
+		when(descriptor.getExcludeDirs()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 
 		// when
 		File projectRoot = new File("root/path/project");
-		Project project = new Project(projectRoot, descriptor, properties);
+		Project project = new Project(projectRoot, descriptor);
 
 		// then
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));

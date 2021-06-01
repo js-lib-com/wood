@@ -38,6 +38,8 @@ public final class CT {
 	// ------------------------------------------------------
 	// Project directories relative to project root
 
+	public static final String DEF_BUILD_DIR = "build/";
+	
 	/**
 	 * Project assets directory stores global variables and media files. This field stores the default value; it can be
 	 * overwritten by <code>asset.dir</code> property from project properties file.
