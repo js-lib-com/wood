@@ -386,27 +386,30 @@ public class Project {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// media files
+	// media files retrieving
 
 	/**
-	 * Get project media file referenced from given source file. This method tries to locate media file into source parent and
-	 * assets directories, in this order. When search for media file only base name and language variant is considered, that is,
-	 * no extension.
+	 * Get the file path for project media file referenced from given source file. This method tries to locate media file into
+	 * the parent of given source file and assets directories, in this order. If reference has path - see
+	 * {@link Reference#hasPath()}, attempt to find media file on source parent subdirectory. If source file is in project root,
+	 * e.g. manifest.json, source parent directory is null, in which case searches only asset directory.
+	 * <p>
+	 * When search for media file only base name and locale variant is considered, that is, no extension. Anyway, if locale
+	 * variant parameter is null searches only media files without variants at all.
 	 * <p>
 	 * Returns null if media file is not found.
 	 * 
-	 * @param locale locale variant,
+	 * @param locale locale variant, possible null.
 	 * @param reference media resource reference,
 	 * @param sourceFile source file using media resource.
 	 * @return media file or null.
-	 * @throws IllegalArgumentException if any parameters is null.
 	 */
 	public FilePath getMediaFile(Locale locale, Reference reference, FilePath sourceFile) {
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
 
 		// search media files on source and asset directories, in this order
-		// if source file is in project root, e.g. manifest.json, parent directory null
+		// if source file is in project root, e.g. manifest.json, source directory is null
 		// if this is the case search for media files only on asset directory
 
 		FilePath sourceDir = sourceFile.getParentDir();
@@ -431,13 +434,15 @@ public class Project {
 		if (reference.hasPath()) {
 			sourceDir = sourceDir.getSubdirPath(reference.getPath());
 		}
-		if (locale == null) {
-			return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
+		FilePath mediaFile = null;
+		if (locale != null) {
+			// scan directory for first media file with basename and locale variant
+			mediaFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
 		}
-		FilePath mediaFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
 		if (mediaFile != null) {
 			return mediaFile;
 		}
+		// scan directory for first media file with basename and no variants at all
 		return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 	}
 
@@ -561,6 +566,10 @@ public class Project {
 
 	// --------------------------------------------------------------------------------------------
 	// Test support
+
+	void setAssetDir(FilePath assetDir) {
+		this.assetDir = assetDir;
+	}
 
 	ProjectDescriptor getDescriptor() {
 		return descriptor;
