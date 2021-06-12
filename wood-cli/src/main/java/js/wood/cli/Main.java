@@ -11,9 +11,9 @@ import org.xml.sax.SAXException;
 import com.jslib.commons.cli.Config;
 import com.jslib.commons.cli.Console;
 import com.jslib.commons.cli.Home;
+import com.jslib.commons.cli.IConsole;
 import com.jslib.commons.cli.Task;
 
-import js.io.IConsole;
 import js.lang.BugError;
 import js.wood.cli.atref.RenameVariable;
 import js.wood.cli.compo.CompoCommands;
