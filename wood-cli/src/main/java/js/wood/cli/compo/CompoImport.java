@@ -42,7 +42,7 @@ public final class CompoImport extends Task {
 	/** Pattern for files listed on index page. */
 	private static final Pattern FILE_PATTERN = Pattern.compile("^[a-z0-9_.\\-]+\\.[a-z0-9]+$", Pattern.CASE_INSENSITIVE);
 
-	@Option(names = { "-r", "--reload" }, description = "Force reload from repository. Local component files are deleted.")
+	@Option(names = { "-r", "--reload" }, description = "Force reload from central repository. Local component files are deleted.")
 	private boolean reload;
 	@Option(names = { "-y", "--yes" }, description = "Auto-confirm import.")
 	private boolean yes;
@@ -60,7 +60,7 @@ public final class CompoImport extends Task {
 	public CompoImport() {
 		documentBuilder = Classes.loadService(DocumentBuilder.class);
 	}
-	
+
 	@Override
 	protected ExitCode exec() throws Exception {
 		console.print("Import component.");
@@ -101,6 +101,9 @@ public final class CompoImport extends Task {
 
 		// recursive import of the component's dependencies
 		for (CompoCoordinates dependency : repository.getCompoDependencies(compoCoordinates)) {
+			if (!reload && projectCompoDir(dependency) != null) {
+				continue;
+			}
 			ExitCode code = importComponent(dependency);
 			if (code != ExitCode.SUCCESS) {
 				return code;
@@ -300,7 +303,18 @@ public final class CompoImport extends Task {
 			return repositoryDir.resolve(coordinates.toPath());
 		}
 
-		public List<CompoCoordinates> getCompoDependencies(CompoCoordinates coordinates) throws XPathExpressionException, IOException, SAXException {
+		/**
+		 * Get dependencies declared on component descriptor for component identified by its coordinates. If requested component
+		 * does not exist on local repository takes care to download it. If {@link #reload} flag is set on command options,
+		 * force download and local cache overwrite.
+		 * 
+		 * @param coordinates component coordinates.
+		 * @return dependencies list, possible empty if there are no dependencies declared on component descriptor.
+		 * @throws IOException if a file system operation fails.
+		 * @throws XPathExpressionException if there are internal XPath syntax error.
+		 * @throws SAXException if downloaded document is not well formed.
+		 */
+		public List<CompoCoordinates> getCompoDependencies(CompoCoordinates coordinates) throws IOException, XPathExpressionException, SAXException {
 			Path repositoryCompoDir = repositoryDir.resolve(coordinates.toPath());
 			if (!files.exists(repositoryCompoDir)) {
 				reload = true;
