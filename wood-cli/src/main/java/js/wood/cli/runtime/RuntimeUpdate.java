@@ -2,12 +2,15 @@ package js.wood.cli.runtime;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.IFile;
+import com.jslib.commons.cli.IProgress;
 import com.jslib.commons.cli.Task;
 
+import js.format.FileSize;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -17,6 +20,9 @@ public class RuntimeUpdate extends Task {
 	private static final Pattern DIRECTORY_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d*(?:-[a-z0-9]+)?/$", Pattern.CASE_INSENSITIVE);
 	// wood-core-1.1.0-20210422.044635-1.jar
 	private static final Pattern FILE_PATTERN = Pattern.compile("^wood-(?:core|preview)-(?:[0-9.-]+).jar$");
+
+	private static final DateTimeFormatter modificationTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	private static final FileSize fileSizeFormatter = new FileSize();
 
 	@Option(names = { "-y", "--yes" }, description = "Auto-confirm update.")
 	private boolean yes;
@@ -38,24 +44,30 @@ public class RuntimeUpdate extends Task {
 			console.print("Checking WOOD libraries repository...");
 		}
 
+		IProgress<IFile> fileProgress = file -> {
+			if (verbose) {
+				console.print("%s %s\t%s", modificationTimeFormatter.format(file.getModificationTime()), fileSizeFormatter.format(file.getSize()), file.getName());
+			}
+		};
+
 		// is critical to end the path with separator
 		URI coreURI = DISTRIBUTION_URI.resolve("wood-core/");
-		IFile coreDir = webs.latestVersion(coreURI, DIRECTORY_PATTERN, verbose);
+		IFile coreDir = httpRequest.scanLatestFileVersion(coreURI, DIRECTORY_PATTERN, fileProgress);
 		if (!assertValid(() -> coreDir != null, "Empty WOOD core library repository %s.", coreURI)) {
 			return ExitCode.ABORT;
 		}
-		IFile coreFile = webs.latestVersion(coreDir.getURI(), FILE_PATTERN, verbose);
+		IFile coreFile = httpRequest.scanLatestFileVersion(coreDir.getURI(), FILE_PATTERN, fileProgress);
 		if (!assertValid(() -> coreFile != null, "Invalid WOOD core version %s. No archive found.", coreDir.getURI())) {
 			return ExitCode.ABORT;
 		}
 
 		// is critical to end the path with separator
 		URI previewURI = DISTRIBUTION_URI.resolve("wood-preview/");
-		IFile previewDir = webs.latestVersion(previewURI, DIRECTORY_PATTERN, verbose);
+		IFile previewDir = httpRequest.scanLatestFileVersion(previewURI, DIRECTORY_PATTERN, fileProgress);
 		if (!assertValid(() -> previewDir != null, "Empty WOOD preview library repository %s.", previewURI)) {
 			return ExitCode.ABORT;
 		}
-		IFile previewFile = webs.latestVersion(previewDir.getURI(), FILE_PATTERN, verbose);
+		IFile previewFile = httpRequest.scanLatestFileVersion(previewDir.getURI(), FILE_PATTERN, fileProgress);
 		if (!assertValid(() -> previewFile != null, "Invalid WOOD preview version %s. No archive found.", previewDir.getURI())) {
 			return ExitCode.ABORT;
 		}
@@ -67,11 +79,23 @@ public class RuntimeUpdate extends Task {
 			return ExitCode.CANCEL;
 		}
 
+		IProgress<Integer> downloadProgress = length -> {
+			if (verbose) {
+				console.print('.');
+			}
+		};
+
 		console.print("Downloading WOOD core archive %s", coreFile.getName());
-		Path downloadedCoreFile = webs.download(coreFile, libDir.resolve("~" + coreFile.getName()), verbose);
+		Path downloadedCoreFile = httpRequest.download(coreFile.getURI(), libDir.resolve("~" + coreFile.getName()), downloadProgress);
+		if (verbose) {
+			console.crlf();
+		}
 
 		console.print("Downloading WOOD preview archive %s", previewFile.getName());
-		Path downloadedPreviewFile = webs.download(previewFile, libDir.resolve("~" + previewFile.getName()), verbose);
+		Path downloadedPreviewFile = httpRequest.download(previewFile.getURI(), libDir.resolve("~" + previewFile.getName()), downloadProgress);
+		if (verbose) {
+			console.crlf();
+		}
 
 		console.print("Replacing WOOD core archive %s", coreFile.getName());
 		files.deleteIfExists(files.getFileByNamePattern(libDir, Pattern.compile("^wood-core-\\d+\\.\\d+.+\\.jar$")));
