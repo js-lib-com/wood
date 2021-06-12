@@ -57,10 +57,13 @@ public final class CompoImport extends Task {
 	private DocumentBuilder documentBuilder;
 	private CompoRepository repository;
 
+	public CompoImport() {
+		documentBuilder = Classes.loadService(DocumentBuilder.class);
+	}
+	
 	@Override
 	protected ExitCode exec() throws Exception {
 		console.print("Import component.");
-		documentBuilder = Classes.loadService(DocumentBuilder.class);
 		repository = new CompoRepository();
 
 		if (coordinates == null) {
