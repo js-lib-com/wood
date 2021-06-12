@@ -87,6 +87,7 @@ public final class CompoImport extends Task {
 	}
 
 	private ExitCode importComponent(CompoCoordinates compoCoordinates) throws Exception {
+		console.crlf();
 		console.print("Importing %s", compoCoordinates);
 
 		String path = console.input("local path");
@@ -108,9 +109,7 @@ public final class CompoImport extends Task {
 
 		Path projectDir = files.getProjectDir();
 		Path compoDir = projectDir.resolve(path);
-		if (!files.exists(compoDir)) {
-			files.createDirectory(compoDir);
-		}
+		compoCopy(compoCoordinates, compoDir);
 
 		Path descriptorFile = compoDir.resolve(files.getFileName(compoDir) + ".xml");
 		if (!files.exists(descriptorFile)) {
@@ -146,6 +145,9 @@ public final class CompoImport extends Task {
 	 * @throws IOException if copy operation fails.
 	 */
 	void compoCopy(CompoCoordinates compoCoordinates, Path compoDir) throws IOException {
+		if (!files.exists(compoDir)) {
+			files.createDirectory(compoDir);
+		}
 		files.cleanDirectory(compoDir, verbose);
 
 		files.walkFileTree(repository.getCompoDir(compoCoordinates), new SimpleFileVisitor<Path>() {

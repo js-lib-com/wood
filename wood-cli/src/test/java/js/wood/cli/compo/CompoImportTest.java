@@ -116,13 +116,28 @@ public class CompoImportTest {
 
 		// then
 		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
-		
 		verify(httpRequest, times(1)).loadHTML(any());
 		verify(httpRequest, times(1)).download(any(), any());
+	}
+
+	@Test
+	public void GivenTestSetup_ThenCopyComponentFiles() throws Exception {
+		// given
+
+		// when
+		ExitCode exitCode = task.exec();
+
+		// then
+		assertThat(exitCode, equalTo(ExitCode.SUCCESS));
 
 		verify(files, times(1)).createDirectories(repositoryCompoDir);
 		verify(files, times(1)).cleanDirectory(repositoryCompoDir, false);
+
 		verify(files, times(1)).createDirectory(projectCompoDir);
+		verify(files, times(1)).cleanDirectory(projectCompoDir, false);
+
+		verify(files, times(1)).walkFileTree(eq(repositoryCompoDir), any());
+		verify(files, times(1)).walkFileTree(eq(projectCompoDir), any());
 	}
 
 	@Test
@@ -142,7 +157,7 @@ public class CompoImportTest {
 
 		verify(httpRequest, times(1)).getApacheDirectoryIndex(eq(URI.create("http://server.com/com/js-lib/web/")), any());
 		verify(httpRequest, times(1)).getApacheDirectoryIndex(eq(URI.create("http://server.com/com/js-lib/web/dialog/")), any());
-		
+
 		assertThat(task.getCoordinates(), notNullValue());
 		assertThat(task.getCoordinates().getGroupId(), equalTo("com.js-lib.web"));
 		assertThat(task.getCoordinates().getArtifactId(), equalTo("dialog"));
