@@ -33,7 +33,7 @@ public class CompoDescriptorTest {
 	@Mock
 	private FilesUtil files;
 	@Mock
-	private Path projectRoot;
+	private Path projectDir;
 	@Mock
 	private Path descriptorFile;
 	@Mock
@@ -43,9 +43,10 @@ public class CompoDescriptorTest {
 
 	@Before
 	public void beforeTest() throws IOException {
-		when(files.getProjectDir()).thenReturn(projectRoot);
-		when(projectRoot.relativize(any())).thenReturn(scriptFile);
+		when(files.getProjectDir()).thenReturn(projectDir);
+		when(projectDir.relativize(any())).thenReturn(scriptFile);
 		when(scriptFile.toString()).thenReturn("lib/js-lib/js-lib.js");
+		when(files.exists(descriptorFile)).thenReturn(true);
 	}
 
 	@Test
@@ -140,15 +141,15 @@ public class CompoDescriptorTest {
 	@Test
 	public void GivenDependenciesDefined_WhenCreateScripts_ThenNotNull() throws IOException {
 		// given
-//		Path compoDir = mock(Path.class);
-//		Path scriptFile = mock(Path.class);
-//		when(compoDir.resolve(".js")).thenReturn(scriptFile);
-//		when(scriptFile.toString()).thenReturn("lib/js-lib/js-lib.js");
+		// Path compoDir = mock(Path.class);
+		// Path scriptFile = mock(Path.class);
+		// when(compoDir.resolve(".js")).thenReturn(scriptFile);
+		// when(scriptFile.toString()).thenReturn("lib/js-lib/js-lib.js");
 
 		String xml = "" + //
 				"<compo>" + //
-				"	<dependencies>"+//
-				"	</dependencies>"+//
+				"	<dependencies>" + //
+				"	</dependencies>" + //
 				"</compo>" + //
 				"";
 		when(files.getReader(any())).thenReturn(new StringReader(xml));
@@ -169,7 +170,7 @@ public class CompoDescriptorTest {
 	public void GivenScripDefined_WhenAddScriptDependency_ThenAddChild() throws IOException {
 		// given
 		Path scriptFile = mock(Path.class);
-		
+
 		String xml = "" + //
 				"<compo>" + //
 				"	<scripts>" + //
@@ -184,14 +185,14 @@ public class CompoDescriptorTest {
 
 		// when
 		descriptor.addScriptDependency(scriptFile);
-		
+
 		// then
 		Document document = descriptor.getDocument();
 		Element dependency = document.getByTag("dependency");
 		assertThat(dependency, notNullValue());
 		assertThat(dependency.getAttr("src"), equalTo("lib/js-lib/js-lib.js"));
 	}
-	
+
 	@Test
 	public void GivenCoordinatesDefined_WhenGetCoordinates_ThenExpectedValues() throws IOException {
 		// given
@@ -204,10 +205,10 @@ public class CompoDescriptorTest {
 				"";
 		when(files.getReader(any())).thenReturn(new StringReader(xml));
 		descriptor = new CompoDescriptor(files, descriptorFile);
-		
+
 		// when
 		CompoCoordinates coordinates = descriptor.getCoordinates();
-		
+
 		// then
 		assertThat(coordinates.getGroupId(), equalTo("com.js-lib"));
 		assertThat(coordinates.getArtifactId(), equalTo("js-lib"));

@@ -51,8 +51,6 @@ public final class CompoImport extends Task {
 
 	@Parameters(index = "0", description = "Component repository coordinates, e.g. com.js-lib.web:captcha:1.1", converter = CompoCoordinatesConverter.class, arity = "0..1")
 	private CompoCoordinates coordinates;
-	@Parameters(index = "1", description = "Target directory path, relative to project root.", arity = "0..1")
-	private String path;
 
 	private DocumentBuilder documentBuilder;
 	private CompoRepository repository;
@@ -90,9 +88,20 @@ public final class CompoImport extends Task {
 		console.crlf();
 		console.print("Importing %s", compoCoordinates);
 
-		String path = console.input("local path");
+		Path projectDir = files.getProjectDir();
+		Path projectCompoDir = projectCompoDir(compoCoordinates);
+		if (!reload && projectCompoDir != null) {
+			console.print("Component %s already loaded on %s.", compoCoordinates, compoPath(projectCompoDir));
+			return ExitCode.SUCCESS;
+		}
+
+		if (projectCompoDir == null) {
+			String path = console.input("local path");
+			projectCompoDir = projectDir.resolve(path);
+		}
+
 		if (!yes) {
-			console.warning("All component '%s' files will be permanently removed and replaced.", path);
+			console.warning("All component %s files will be permanently removed and replaced.", compoPath(projectCompoDir));
 			if (!console.confirm("Please confirm: yes | [no]", "yes")) {
 				console.print("User cancel.");
 				return ExitCode.CANCEL;
@@ -101,23 +110,15 @@ public final class CompoImport extends Task {
 
 		// recursive import of the component's dependencies
 		for (CompoCoordinates dependency : repository.getCompoDependencies(compoCoordinates)) {
-			if (!reload && projectCompoDir(dependency) != null) {
-				continue;
-			}
 			ExitCode code = importComponent(dependency);
 			if (code != ExitCode.SUCCESS) {
 				return code;
 			}
 		}
 
-		Path projectDir = files.getProjectDir();
-		Path compoDir = projectDir.resolve(path);
-		compoCopy(compoCoordinates, compoDir);
+		copyComponent(compoCoordinates, projectCompoDir);
 
-		Path descriptorFile = compoDir.resolve(files.getFileName(compoDir) + ".xml");
-		if (!files.exists(descriptorFile)) {
-			throw new WoodException("Invalid component |%s|. Missing component descriptor.", compoDir);
-		}
+		Path descriptorFile = projectCompoDir.resolve(files.getFileName(projectCompoDir) + ".xml");
 		CompoDescriptor compoDescriptor = new CompoDescriptor(files, descriptorFile);
 
 		compoDescriptor.createScripts();
@@ -144,14 +145,14 @@ public final class CompoImport extends Task {
 	 * Warning: this method remove all target component directory files.
 	 * 
 	 * @param compoCoordinates coordinates for repository component,
-	 * @param compoDir project component directory.
+	 * @param projectCompoDir project component directory.
 	 * @throws IOException if copy operation fails.
 	 */
-	void compoCopy(CompoCoordinates compoCoordinates, Path compoDir) throws IOException {
-		if (!files.exists(compoDir)) {
-			files.createDirectory(compoDir);
+	void copyComponent(CompoCoordinates compoCoordinates, Path projectCompoDir) throws IOException {
+		if (!files.exists(projectCompoDir)) {
+			files.createDirectory(projectCompoDir);
 		}
-		files.cleanDirectory(compoDir, verbose);
+		files.cleanDirectory(projectCompoDir, verbose);
 
 		files.walkFileTree(repository.getCompoDir(compoCoordinates), new SimpleFileVisitor<Path>() {
 			@Override
@@ -160,17 +161,17 @@ public final class CompoImport extends Task {
 				// ensure that original repository component files are renamed using project component directory name
 				// this applies to layout, style, script and descriptor files
 				if (Files.basename(fileName).equals(compoCoordinates.getArtifactId())) {
-					fileName = concat(files.getFileName(compoDir), '.', Files.getExtension(fileName));
+					fileName = concat(files.getFileName(projectCompoDir), '.', Files.getExtension(fileName));
 				}
 				if (verbose) {
 					console.print("Copy file %s", file);
 				}
-				files.copy(file, compoDir.resolve(fileName));
+				files.copy(file, projectCompoDir.resolve(fileName));
 				return FileVisitResult.CONTINUE;
 			}
 		});
 
-		files.walkFileTree(compoDir, new SimpleFileVisitor<Path>() {
+		files.walkFileTree(projectCompoDir, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (files.getFileName(file).endsWith(".htm")) {
@@ -232,9 +233,14 @@ public final class CompoImport extends Task {
 		}
 	}
 
-	Path compoFile(Path compoPath, String extension) {
-		String compoName = files.getFileName(compoPath);
-		return compoPath.resolve(concat(compoName, '.', extension));
+	String compoPath(Path compoDir) {
+		Path projectDir = files.getProjectDir();
+		return projectDir.relativize(compoDir).toString().replace('\\', '/');
+	}
+
+	Path compoFile(Path compoDir, String extension) {
+		String compoName = files.getFileName(compoDir);
+		return compoDir.resolve(concat(compoName, '.', extension));
 	}
 
 	Path projectCompoDir(CompoCoordinates coordinates) throws IOException {
@@ -374,6 +380,9 @@ public final class CompoImport extends Task {
 		private Element scriptElement;
 
 		public CompoDescriptor(FilesUtil files, Path descriptorFile) throws IOException {
+			if (!files.exists(descriptorFile)) {
+				throw new WoodException("Missing component descriptor %s.", descriptorFile);
+			}
 			this.files = files;
 			this.descriptorFile = descriptorFile;
 			try {
@@ -465,10 +474,6 @@ public final class CompoImport extends Task {
 
 	CompoCoordinates getCoordinates() {
 		return coordinates;
-	}
-
-	void setPath(String path) {
-		this.path = path;
 	}
 
 	void setReload(boolean reload) {

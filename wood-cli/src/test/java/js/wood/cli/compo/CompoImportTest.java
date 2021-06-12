@@ -77,6 +77,7 @@ public class CompoImportTest {
 				"</compo>";
 		when(files.getReader(descriptorFile)).thenReturn(new StringReader(descriptor)).thenReturn(new StringReader(descriptor));
 		when(files.getWriter(descriptorFile)).thenReturn(new StringWriter());
+		when(files.exists(descriptorFile)).thenReturn(true);
 
 		when(files.getPath("/home/user/repository")).thenReturn(repositoryDir);
 		when(repositoryDir.resolve("com/js-lib/web/dialog/1.0")).thenReturn(repositoryCompoDir);
@@ -84,6 +85,7 @@ public class CompoImportTest {
 		when(files.exists(descriptorFile)).thenReturn(true);
 
 		when(files.getProjectDir()).thenReturn(projectDir);
+		when(projectDir.relativize(projectCompoDir)).thenReturn(projectCompoDir);
 		when(projectDir.resolve("res/compo/dialog")).thenReturn(projectCompoDir);
 		when(files.getFileName(projectCompoDir)).thenReturn("dialog");
 		when(projectCompoDir.resolve("dialog.xml")).thenReturn(descriptorFile);
@@ -104,7 +106,6 @@ public class CompoImportTest {
 		task.setHttpRequest(httpRequest);
 
 		task.setCoordinates(new CompoCoordinates("com.js-lib.web", "dialog", "1.0"));
-		task.setPath("res/compo/dialog");
 	}
 
 	@Test

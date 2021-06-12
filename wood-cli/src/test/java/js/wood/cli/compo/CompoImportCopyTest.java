@@ -66,7 +66,7 @@ public class CompoImportCopyTest {
 		// given
 
 		// when
-		compoImport.compoCopy(compoCoordinates, projectCompoDir);
+		compoImport.copyComponent(compoCoordinates, projectCompoDir);
 
 		// then
 		verify(files, times(1)).cleanDirectory(projectCompoDir, false);
@@ -80,7 +80,7 @@ public class CompoImportCopyTest {
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<FileVisitor<Path>> visitor = ArgumentCaptor.forClass(FileVisitor.class);
 
-		compoImport.compoCopy(compoCoordinates, projectCompoDir);
+		compoImport.copyComponent(compoCoordinates, projectCompoDir);
 		verify(files, times(1)).walkFileTree(eq(repositoryCompoDir), visitor.capture());
 
 		Path file = Mockito.mock(Path.class);
@@ -104,7 +104,7 @@ public class CompoImportCopyTest {
 		when(repository.getCompoDir(compoCoordinates)).thenReturn(repositoryCompoDir);
 		when(files.getFileName(projectCompoDir)).thenReturn("geo");
 
-		compoImport.compoCopy(compoCoordinates, projectCompoDir);
+		compoImport.copyComponent(compoCoordinates, projectCompoDir);
 		verify(files, times(1)).walkFileTree(eq(repositoryCompoDir), visitor.capture());
 
 		Path file = Mockito.mock(Path.class);
@@ -124,7 +124,7 @@ public class CompoImportCopyTest {
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<FileVisitor<Path>> visitor = ArgumentCaptor.forClass(FileVisitor.class);
 
-		compoImport.compoCopy(compoCoordinates, projectCompoDir);
+		compoImport.copyComponent(compoCoordinates, projectCompoDir);
 		verify(files, times(1)).walkFileTree(eq(projectCompoDir), visitor.capture());
 
 		Path file = Mockito.mock(Path.class);
