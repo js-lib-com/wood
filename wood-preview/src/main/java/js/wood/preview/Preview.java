@@ -8,6 +8,8 @@ import java.util.List;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
+import js.log.Log;
+import js.log.LogFactory;
 import js.util.Classes;
 import js.util.Strings;
 import js.wood.CT;
@@ -32,6 +34,8 @@ import js.wood.ThemeStyles;
  * @since 1.0
  */
 class Preview {
+	private static final Log log = LogFactory.getLog(Preview.class);
+
 	/** Project reference. */
 	private final Project project;
 
@@ -56,6 +60,7 @@ class Preview {
 	 * @param controlScript enable control script injection.
 	 */
 	public Preview(Project project, Component compo, String contextPath, boolean controlScript) {
+		log.trace("Preview(Project,Component,String,boolean)");
 		this.project = project;
 		this.compo = compo;
 		this.contextPath = contextPath;
@@ -282,6 +287,7 @@ class Preview {
 	 * @throws IOException if script source loading fails.
 	 */
 	private void addScript(Document doc, IScriptDescriptor script) throws IOException {
+		log.debug("Add script |%s|.", script);
 		if (processedScripts.contains(script.getSource())) {
 			return;
 		}

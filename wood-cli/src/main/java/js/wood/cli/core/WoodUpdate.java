@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 import com.jslib.commons.cli.ExitCode;
 import com.jslib.commons.cli.Home;
+import com.jslib.commons.cli.IFile;
 import com.jslib.commons.cli.Task;
-import com.jslib.commons.cli.WebsUtil;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -35,14 +35,14 @@ public class WoodUpdate extends Task {
 			console.print("Checking WOOD assemblies repository...");
 		}
 
-		WebsUtil.File assemblyDir = webs.latestVersion(DISTRIBUTION_URI, ARCHIVE_DIRECTORY_PATTERN, verbose);
+		IFile assemblyDir = webs.latestVersion(DISTRIBUTION_URI, ARCHIVE_DIRECTORY_PATTERN, verbose);
 		if (assemblyDir == null) {
 			console.print("Empty WOOD assemblies repository %s.", DISTRIBUTION_URI);
 			console.print("Command abort.");
 			return ExitCode.ABORT;
 		}
 
-		WebsUtil.File assemblyFile = webs.latestVersion(assemblyDir.getURI(), ARCHIVE_FILE_PATTERN, verbose);
+		IFile assemblyFile = webs.latestVersion(assemblyDir.getURI(), ARCHIVE_FILE_PATTERN, verbose);
 		if (assemblyFile == null) {
 			console.print("Invalid WOOD assembly version %s. No assembly found.", assemblyDir.getURI());
 			console.print("Command abort.");

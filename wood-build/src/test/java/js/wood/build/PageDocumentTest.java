@@ -78,18 +78,20 @@ public class PageDocumentTest {
 		int index = 0;
 		assertThat(doc[index++], equalTo("<!DOCTYPE html>"));
 		assertThat(doc[index++], equalTo("<HTML lang=\"ro-RO\">"));
-		assertThat(doc[index++], equalTo("<HEAD>"));
-		assertThat(doc[index++], equalTo("<META content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />"));
-		assertThat(doc[index++], equalTo("<TITLE>title</TITLE>"));
-		assertThat(doc[index++], equalTo("<META content=\"author\" name=\"Author\" />"));
-		assertThat(doc[index++], equalTo("<META content=\"description\" name=\"Description\" />"));
-		assertThat(doc[index++], equalTo("<META content=\"IE=9; IE=8; IE=7; IE=EDGE\" http-equiv=\"X-UA-Compatible\" />"));
-		assertThat(doc[index++], equalTo("<LINK href=\"media/favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\" />"));
-		assertThat(doc[index++], equalTo("<LINK href=\"styles/reset.css\" rel=\"stylesheet\" type=\"text/css\" />"));
-		assertThat(doc[index++], equalTo("<LINK href=\"style/index.css\" rel=\"stylesheet\" type=\"text/css\" />"));
-		assertThat(doc[index++], equalTo("<SCRIPT src=\"script/index.js\" type=\"text/javascript\"></SCRIPT>"));
-		assertThat(doc[index++], equalTo("</HEAD>"));
-		assertThat(doc[index++], equalTo("<BODY><H1>page</H1></BODY>"));
+		assertThat(doc[index++], equalTo("\t<HEAD>"));
+		assertThat(doc[index++], equalTo("\t\t<META content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />"));
+		assertThat(doc[index++], equalTo("\t\t<TITLE>title</TITLE>"));
+		assertThat(doc[index++], equalTo("\t\t<META content=\"author\" name=\"Author\" />"));
+		assertThat(doc[index++], equalTo("\t\t<META content=\"description\" name=\"Description\" />"));
+		assertThat(doc[index++], equalTo("\t\t<META content=\"IE=9; IE=8; IE=7; IE=EDGE\" http-equiv=\"X-UA-Compatible\" />"));
+		assertThat(doc[index++], equalTo("\t\t<LINK href=\"media/favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\" />"));
+		assertThat(doc[index++], equalTo("\t\t<LINK href=\"styles/reset.css\" rel=\"stylesheet\" type=\"text/css\" />"));
+		assertThat(doc[index++], equalTo("\t\t<LINK href=\"style/index.css\" rel=\"stylesheet\" type=\"text/css\" />"));
+		assertThat(doc[index++], equalTo("\t\t<SCRIPT src=\"script/index.js\" type=\"text/javascript\"></SCRIPT>"));
+		assertThat(doc[index++], equalTo("\t</HEAD>"));
+		assertThat(doc[index++], equalTo("\t<BODY>"));
+		assertThat(doc[index++], equalTo("\t\t<H1>page</H1>"));
+		assertThat(doc[index++], equalTo("\t</BODY>"));
 		assertThat(doc[index++], equalTo("</HTML>"));
 	}
 

@@ -5,8 +5,8 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 import com.jslib.commons.cli.ExitCode;
+import com.jslib.commons.cli.IFile;
 import com.jslib.commons.cli.Task;
-import com.jslib.commons.cli.WebsUtil;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -40,22 +40,22 @@ public class RuntimeUpdate extends Task {
 
 		// is critical to end the path with separator
 		URI coreURI = DISTRIBUTION_URI.resolve("wood-core/");
-		WebsUtil.File coreDir = webs.latestVersion(coreURI, DIRECTORY_PATTERN, verbose);
+		IFile coreDir = webs.latestVersion(coreURI, DIRECTORY_PATTERN, verbose);
 		if (!assertValid(() -> coreDir != null, "Empty WOOD core library repository %s.", coreURI)) {
 			return ExitCode.ABORT;
 		}
-		WebsUtil.File coreFile = webs.latestVersion(coreDir.getURI(), FILE_PATTERN, verbose);
+		IFile coreFile = webs.latestVersion(coreDir.getURI(), FILE_PATTERN, verbose);
 		if (!assertValid(() -> coreFile != null, "Invalid WOOD core version %s. No archive found.", coreDir.getURI())) {
 			return ExitCode.ABORT;
 		}
 
 		// is critical to end the path with separator
 		URI previewURI = DISTRIBUTION_URI.resolve("wood-preview/");
-		WebsUtil.File previewDir = webs.latestVersion(previewURI, DIRECTORY_PATTERN, verbose);
+		IFile previewDir = webs.latestVersion(previewURI, DIRECTORY_PATTERN, verbose);
 		if (!assertValid(() -> previewDir != null, "Empty WOOD preview library repository %s.", previewURI)) {
 			return ExitCode.ABORT;
 		}
-		WebsUtil.File previewFile = webs.latestVersion(previewDir.getURI(), FILE_PATTERN, verbose);
+		IFile previewFile = webs.latestVersion(previewDir.getURI(), FILE_PATTERN, verbose);
 		if (!assertValid(() -> previewFile != null, "Invalid WOOD preview version %s. No archive found.", previewDir.getURI())) {
 			return ExitCode.ABORT;
 		}
