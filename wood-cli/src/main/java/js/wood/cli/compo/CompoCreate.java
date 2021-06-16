@@ -66,7 +66,7 @@ public class CompoCreate extends Task {
 		console.print("Create component %s.", compoDir);
 		files.createDirectory(compoDir);
 		String compoName = files.getFileName(compoDir);
-		String className = Strings.toTitleCase(compoName);
+		String className = Strings.toMemberName(compoName);
 
 		if (compoTemplate != null) {
 			Path compoTemplateDir = projectDir.resolve(compoTemplate.path());
