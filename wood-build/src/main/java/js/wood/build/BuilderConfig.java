@@ -1,6 +1,7 @@
 package js.wood.build;
 
 import java.io.File;
+import java.io.IOException;
 
 public class BuilderConfig {
 	private File projectDir;
@@ -31,7 +32,7 @@ public class BuilderConfig {
 		this.buildFS = buildFS;
 	}
 
-	public Builder createBuilder() {
+	public Builder createBuilder() throws IOException {
 		return new Builder(this);
 	}
 }

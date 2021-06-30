@@ -121,7 +121,7 @@ public class CreateIcons extends Task {
 		String command = buildCommand(parameterizedCommand, args);
 		if (verbose) {
 			console.print(command);
-			convert.setConsole(console);
+			//convert.setConsole(console);
 		}
 		convert.setTimeout(30000L);
 		if (resultType == null) {

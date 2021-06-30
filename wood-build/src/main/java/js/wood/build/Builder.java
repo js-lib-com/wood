@@ -1,6 +1,7 @@
 package js.wood.build;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -65,14 +66,21 @@ public class Builder implements IReferenceHandler {
 
 	/**
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
-	 * and script files and initialize project pages and variables map. Create build FS instance.
+	 * and script files and initialize project pages and variables map. Create build FS instance taking care to create build
+	 * directory, if missing.
 	 * 
 	 * @param config builder configuration.
+	 * @throws IOException if build directory creation fails.
 	 */
-	public Builder(BuilderConfig config) {
+	public Builder(BuilderConfig config) throws IOException {
 		this.project = new BuilderProject(config.getProjectDir());
 		this.project.create();
-		this.buildFS = new DefaultBuildFS(this.project.getBuildDir().toFile(), config.getBuildNumber());
+
+		File buildDir = this.project.getBuildDir().toFile();
+		if (!buildDir.exists() && !buildDir.mkdirs()) {
+			throw new IOException("Fail to create build directory " + buildDir);
+		}
+		this.buildFS = new DefaultBuildFS(buildDir, config.getBuildNumber());
 	}
 
 	/**
@@ -244,10 +252,10 @@ public class Builder implements IReferenceHandler {
 		if (sourceFile.isManifest()) {
 			return buildFS.writeManifestMedia(mediaFile);
 		}
-		if(sourceFile.isComponentDescriptor()) {
+		if (sourceFile.isComponentDescriptor()) {
 			return buildFS.writePageMedia(currentComponent, mediaFile);
 		}
-		
+
 		switch (sourceFile.getType()) {
 		case LAYOUT:
 			return buildFS.writePageMedia(currentComponent, mediaFile);
