@@ -40,7 +40,6 @@ public class ComponentDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
-				"	<version>1.0</version>" + //
 				"	<group>admin</group>" + //
 				"</component>";
 		
@@ -49,7 +48,6 @@ public class ComponentDescriptorTest {
 
 		// then
 		assertThat(descriptor.getDescriptorFile(), equalTo(descriptorFile));
-		assertThat(descriptor.getVersion(), equalTo("1.0"));
 		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
@@ -58,15 +56,15 @@ public class ComponentDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
-				"	<version>@string/version</version>" + //
+				"	<group>@string/role</group>" + //
 				"</component>";
-		when(referenceHandler.onResourceReference(eq(new Reference(ResourceType.STRING, "version")), any(FilePath.class))).thenReturn("1.0");
+		when(referenceHandler.onResourceReference(eq(new Reference(ResourceType.STRING, "role")), any(FilePath.class))).thenReturn("admin");
 
 		// when
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getVersion(), equalTo("1.0"));
+		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
 	@Test
@@ -80,7 +78,6 @@ public class ComponentDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getVersion(), nullValue());
 		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
@@ -97,7 +94,6 @@ public class ComponentDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getVersion(), nullValue());
 		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 

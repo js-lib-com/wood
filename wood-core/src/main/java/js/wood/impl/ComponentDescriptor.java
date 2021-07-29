@@ -114,16 +114,6 @@ public class ComponentDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get component version or null if missing or not set. This property is loaded from <code>version</code> element. Note that
-	 * version property is especially useful for library components.
-	 * 
-	 * @return component version or null.
-	 */
-	public String getVersion() {
-		return text("version", null);
-	}
-
-	/**
 	 * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
 	 * in descriptor using <code>group</code> element.
 	 * <p>
