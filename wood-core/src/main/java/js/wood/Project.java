@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
+import js.log.Log;
+import js.log.LogFactory;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Params;
@@ -47,6 +49,8 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @since 1.0
  */
 public class Project {
+	private static final Log log = LogFactory.getLog(Project.class);
+
 	/**
 	 * Create project instance for a given project root directory. Project root should point to a valid WOOD project; current
 	 * implementation requires only project properties file - see {@link ProjectProperties#PROPERTIES_FILE}.
@@ -556,6 +560,7 @@ public class Project {
 
 			if (document.getRoot().getTag().equals("compo") && file.getParentDir() != null) {
 				compoPaths.put(file.getBasename(), project.createCompoPath(file.getParentDir().value()));
+				log.debug("Register tag |%s| component path |%s|.", file.getBasename(), compoPaths.get(file.getBasename()));
 			}
 		}
 	}

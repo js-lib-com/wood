@@ -41,8 +41,6 @@ import js.wood.FilePath;
 import js.wood.IReferenceHandler;
 import js.wood.SourceReader;
 import js.wood.WoodException;
-import js.wood.build.BuildFS;
-import js.wood.build.PageDocument;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildFsTest {

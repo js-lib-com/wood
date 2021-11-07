@@ -34,10 +34,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.json.Json;
 import js.lang.Event;
 import js.lang.KeepAliveEvent;
-import js.wood.preview.EventsManager;
-import js.wood.preview.EventsServlet;
-import js.wood.preview.FileSystemEvent;
-import js.wood.preview.ShutdownEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventsServletTest {

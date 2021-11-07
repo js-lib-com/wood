@@ -1,7 +1,8 @@
 package js.wood.build;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -26,8 +27,6 @@ import js.wood.FilePath;
 import js.wood.ILinkDescriptor;
 import js.wood.IMetaDescriptor;
 import js.wood.IScriptDescriptor;
-import js.wood.build.BuilderProject;
-import js.wood.build.PageDocument;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PageDocumentTest {

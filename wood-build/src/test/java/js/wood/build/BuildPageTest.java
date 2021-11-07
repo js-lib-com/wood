@@ -39,9 +39,6 @@ import js.wood.IReferenceHandler;
 import js.wood.IScriptDescriptor;
 import js.wood.SourceReader;
 import js.wood.ThemeStyles;
-import js.wood.build.BuildFS;
-import js.wood.build.Builder;
-import js.wood.build.BuilderProject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildPageTest {

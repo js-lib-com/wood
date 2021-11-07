@@ -27,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.WoodException;
-import js.wood.preview.ForwardFilter;
-import js.wood.preview.Matchers;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ForwardFilterTest {

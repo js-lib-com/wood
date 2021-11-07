@@ -54,8 +54,6 @@ import js.wood.Reference;
 import js.wood.ThemeStyles;
 import js.wood.WoodException;
 import js.wood.impl.ResourceType;
-import js.wood.preview.PreviewServlet;
-import js.wood.preview.VariablesCache;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewServletTest {

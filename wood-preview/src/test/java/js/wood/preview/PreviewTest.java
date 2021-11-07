@@ -35,7 +35,6 @@ import js.wood.IMetaDescriptor;
 import js.wood.IScriptDescriptor;
 import js.wood.Project;
 import js.wood.ThemeStyles;
-import js.wood.preview.Preview;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewTest {

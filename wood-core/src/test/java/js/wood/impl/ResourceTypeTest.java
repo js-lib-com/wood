@@ -7,8 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import js.wood.impl.ResourceType;
-
 public class ResourceTypeTest {
 	@Test
 	public void valueOf() {

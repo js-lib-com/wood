@@ -28,8 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.util.Strings;
 import js.wood.Project;
 import js.wood.WoodException;
-import js.wood.impl.MediaQueries;
-import js.wood.impl.MediaQueryDefinition;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MediaQueriesTest {

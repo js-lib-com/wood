@@ -14,9 +14,6 @@ import org.mockito.Mockito;
 import js.util.Files;
 import js.wood.Component;
 import js.wood.FilePath;
-import js.wood.build.BuildFS;
-import js.wood.build.BuilderProject;
-import js.wood.build.DefaultBuildFS;
 
 public class DefaultBuildFsTest {
 	private BuilderProject project;

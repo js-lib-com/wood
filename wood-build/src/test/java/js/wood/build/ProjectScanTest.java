@@ -14,7 +14,6 @@ import js.wood.CompoPath;
 import js.wood.FilePath;
 import js.wood.Project;
 import js.wood.Variables;
-import js.wood.build.BuilderProject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectScanTest {

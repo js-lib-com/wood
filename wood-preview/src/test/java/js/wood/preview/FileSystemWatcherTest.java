@@ -1,5 +1,6 @@
 package js.wood.preview;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
@@ -14,8 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -40,8 +39,6 @@ import org.mockito.stubbing.Answer;
 
 import js.lang.Event;
 import js.wood.WoodException;
-import js.wood.preview.EventsManager;
-import js.wood.preview.FileSystemWatcher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemWatcherTest {

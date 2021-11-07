@@ -1,9 +1,12 @@
 package js.wood.preview;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Locale;
 
@@ -19,7 +22,6 @@ import js.wood.Project;
 import js.wood.Reference;
 import js.wood.Variables;
 import js.wood.impl.ResourceType;
-import js.wood.preview.VariablesCache;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VariablesCacheTest {
