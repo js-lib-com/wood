@@ -95,8 +95,16 @@
 				<version>1.2.2</version>
 				<executions>
 					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
 						<goals>
 							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
 							<goal>clean</goal>
 						</goals>
 					</execution>
