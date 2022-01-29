@@ -96,7 +96,7 @@ abstract class BaseDescriptor {
 		List<ILinkDescriptor> descriptors = new ArrayList<>();
 		for (Element element : doc.findByTag("link")) {
 			if (!element.hasAttr("href")) {
-				throw new WoodException("Invalid descriptor file |%s|. Missing 'href' attribute from <style> element.", descriptorFile);
+				throw new WoodException("Invalid descriptor file |%s|. Missing 'href' attribute from <link> element.", descriptorFile);
 			}
 			LinkDescriptor descriptor = LinkDescriptor.create(element);
 			if (descriptors.contains(descriptor)) {

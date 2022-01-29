@@ -207,11 +207,16 @@ class Preview {
 	 * @param doc page document,
 	 * @param link link element descriptor.
 	 */
-	private static void addLink(Document doc, ILinkDescriptor link) {
+	private void addLink(Document doc, ILinkDescriptor link) {
 		Element head = doc.getByTag("head");
 
+		String href = link.getHref();
+		if (link.isStyleSheet() && FilePath.accept(href)) {
+			href = urlAbsolutePath(new FilePath(project, href));
+		}
+		
 		Element linkElement = doc.createElement("link");
-		linkElement.setAttr("href", link.getHref());
+		linkElement.setAttr("href", href);
 
 		setAttr(linkElement, "hreflang", link.getHreflang());
 		setAttr(linkElement, "rel", link.getRelationship(), "stylesheet");

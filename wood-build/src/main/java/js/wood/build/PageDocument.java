@@ -3,11 +3,11 @@ package js.wood.build;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.lang.Handler;
 import js.util.Classes;
 import js.util.Params;
 import js.util.Strings;
@@ -178,35 +178,41 @@ class PageDocument {
 	}
 
 	/**
-	 * Add link element to this page head. Create <code>link</code> element and set all attributes provided by link reference
+	 * Add link element to this page head. Create <code>link</code> element and set all attributes provided by link descriptor
 	 * parameter. There is no validation on link reference; attributes are set exactly as provided.
 	 * <p>
 	 * This setter is not used only for external style sheets; all standard links attributes are supported. See
 	 * {@link ILinkDescriptor} for a list of supported attributes.
 	 * 
-	 * @param link non null link reference.
+	 * @param linkDescriptor link descriptor.
 	 * @throws IllegalArgumentException if link reference parameter is null or <code>href</code> attribute is null or empty.
 	 */
-	public void addLink(ILinkDescriptor link) {
-		Params.notNull(link, "Link reference");
-		final String href = link.getHref();
-		Params.notNullOrEmpty(href, "Link HREF");
+	public void addLink(ILinkDescriptor linkDescriptor, Function<FilePath, String> fileHandler) {
+		Params.notNull(linkDescriptor, "Link descriptor");
+		Params.notNullOrEmpty(linkDescriptor.getHref(), "Link HREF");
+		Params.notNull(fileHandler, "File handler");
+
+		String href = linkDescriptor.getHref();
+		if (linkDescriptor.isStyleSheet() && FilePath.accept(href)) {
+			final BuilderProject project = (BuilderProject) component.getProject();
+			href = fileHandler.apply(project.createFilePath(href));
+		}
 
 		Element linkElement = doc.createElement("link", "href", href);
 
-		setAttr(linkElement, "hreflang", link.getHreflang());
-		setAttr(linkElement, "rel", link.getRelationship(), "stylesheet");
-		setAttr(linkElement, "type", link.getType(), "text/css");
-		setAttr(linkElement, "media", link.getMedia());
-		setAttr(linkElement, "referrerpolicy", link.getReferrerPolicy());
-		setAttr(linkElement, "crossorigin", link.getCrossOrigin());
-		setAttr(linkElement, "integrity", link.getIntegrity());
-		setAttr(linkElement, "disabled", link.getDisabled());
-		setAttr(linkElement, "as", link.getAsType());
-		setAttr(linkElement, "sizes", link.getSizes());
-		setAttr(linkElement, "imagesizes", link.getImageSizes());
-		setAttr(linkElement, "imagesrcset", link.getImageSrcSet());
-		setAttr(linkElement, "title", link.getTitle());
+		setAttr(linkElement, "hreflang", linkDescriptor.getHreflang());
+		setAttr(linkElement, "rel", linkDescriptor.getRelationship(), "stylesheet");
+		setAttr(linkElement, "type", linkDescriptor.getType(), "text/css");
+		setAttr(linkElement, "media", linkDescriptor.getMedia());
+		setAttr(linkElement, "referrerpolicy", linkDescriptor.getReferrerPolicy());
+		setAttr(linkElement, "crossorigin", linkDescriptor.getCrossOrigin());
+		setAttr(linkElement, "integrity", linkDescriptor.getIntegrity());
+		setAttr(linkElement, "disabled", linkDescriptor.getDisabled());
+		setAttr(linkElement, "as", linkDescriptor.getAsType());
+		setAttr(linkElement, "sizes", linkDescriptor.getSizes());
+		setAttr(linkElement, "imagesizes", linkDescriptor.getImageSizes());
+		setAttr(linkElement, "imagesrcset", linkDescriptor.getImageSrcSet());
+		setAttr(linkElement, "title", linkDescriptor.getTitle());
 
 		head.addChild(linkElement);
 		head.addText("\r\n");
@@ -229,62 +235,62 @@ class PageDocument {
 	private final List<String> processedScripts = new ArrayList<>();
 
 	/**
-	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script reference
-	 * parameter. There is no validation on link reference; attributes are set exactly as provided. See
+	 * Add script element to this page head. Create <code>script</code> element and set attributes provided by script descriptor
+	 * parameter. There is no validation on script descriptor; attributes are set exactly as provided. See
 	 * {@link IScriptDescriptor} for a list of supported attributes.
 	 * <p>
 	 * If {@link IScriptDescriptor#getSource()} is a file path relative this project, as accepted by
-	 * {@link FilePath#accept(String)}, invoke {@link Handler#handle(Object)} with {@link FilePath} created from script source
-	 * attribute. Handler returned value is used to replace current script source.
+	 * {@link FilePath#accept(String)}, invoke {@link Function#apply(Object)} with {@link FilePath} created from script source
+	 * attribute. File handler returned value is used to replace current script source.
 	 * <p>
 	 * If script is embedded, see {@link IScriptDescriptor#isEmbedded()}, load script as text content to created script element,
 	 * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptDescriptor#getSource()} is project relative
 	 * path of the script file from where text content is loaded.
 	 * 
-	 * @param script script reference,
-	 * @param handler file handler.
+	 * @param scriptDescriptor script descriptor,
+	 * @param fileHandler file handler, used only if script source is a local file.
 	 * @throws IllegalArgumentException if script or handler parameter is null or script source is missing.
 	 * @throws IOException if script is embedded and script content loading fails.
 	 */
-	public void addScript(IScriptDescriptor script, Handler<String, FilePath> handler) throws IOException {
-		Params.notNull(script, "Script reference");
-		Params.notNull(script.getSource(), "The source of script");
-		Params.notNull(handler, "File handler");
+	public void addScript(IScriptDescriptor scriptDescriptor, Function<FilePath, String> fileHandler) throws IOException {
+		Params.notNull(scriptDescriptor, "Script descriptor");
+		Params.notNull(scriptDescriptor.getSource(), "Script source");
+		Params.notNull(fileHandler, "File handler");
 
-		if (processedScripts.contains(script.getSource())) {
+		if (processedScripts.contains(scriptDescriptor.getSource())) {
 			return;
 		}
-		processedScripts.add(script.getSource());
+		processedScripts.add(scriptDescriptor.getSource());
 
 		final BuilderProject project = (BuilderProject) component.getProject();
-		String src = script.getSource();
-		if (!script.isEmbedded()) {
+		String src = scriptDescriptor.getSource();
+		if (!scriptDescriptor.isEmbedded()) {
 			if (FilePath.accept(src)) {
-				src = handler.handle(project.createFilePath(src));
+				src = fileHandler.apply(project.createFilePath(src));
 			}
 			// dynamic scripts are not declared on page head; they are loaded by custom script loaders, e.g. ServiceLoader
-			if (script.isDynamic()) {
+			if (scriptDescriptor.isDynamic()) {
 				return;
 			}
 		}
 
 		Element scriptElement = doc.createElement("script");
-		if (!script.isEmbedded()) {
+		if (!scriptDescriptor.isEmbedded()) {
 			scriptElement.setAttr("src", src);
 		}
 
-		setAttr(scriptElement, "type", script.getType(), "text/javascript");
-		setAttr(scriptElement, "async", script.getAsync());
-		if (!script.isEmbedded()) {
-			setAttr(scriptElement, "defer", script.getDefer());
+		setAttr(scriptElement, "type", scriptDescriptor.getType(), "text/javascript");
+		setAttr(scriptElement, "async", scriptDescriptor.getAsync());
+		if (!scriptDescriptor.isEmbedded()) {
+			setAttr(scriptElement, "defer", scriptDescriptor.getDefer());
 		}
-		setAttr(scriptElement, "nomodule", script.getNoModule());
-		setAttr(scriptElement, "nonce", script.getNonce());
-		setAttr(scriptElement, "referrerpolicy", script.getReferrerPolicy());
-		setAttr(scriptElement, "crossorigin", script.getCrossOrigin());
-		setAttr(scriptElement, "integrity", script.getIntegrity());
+		setAttr(scriptElement, "nomodule", scriptDescriptor.getNoModule());
+		setAttr(scriptElement, "nonce", scriptDescriptor.getNonce());
+		setAttr(scriptElement, "referrerpolicy", scriptDescriptor.getReferrerPolicy());
+		setAttr(scriptElement, "crossorigin", scriptDescriptor.getCrossOrigin());
+		setAttr(scriptElement, "integrity", scriptDescriptor.getIntegrity());
 
-		if (script.isEmbedded()) {
+		if (scriptDescriptor.isEmbedded()) {
 			scriptElement.setText(project.loadFile(src));
 		}
 

@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.function.Function;
 
-import js.lang.Handler;
 import js.log.Log;
 import js.log.LogFactory;
 import js.wood.CompoPath;
@@ -175,10 +175,10 @@ public class Builder implements IReferenceHandler {
 		// 6. component styles - first use template and child component styles then parent component
 
 		for (ILinkDescriptor link : project.getLinkDescriptors()) {
-			pageDocument.addLink(link);
+			pageDocument.addLink(link, exlambda(file -> buildFS.writeStyle(pageComponent, file, this)));
 		}
 		for (ILinkDescriptor link : pageComponent.getLinkDescriptors()) {
-			pageDocument.addLink(link);
+			pageDocument.addLink(link, exlambda(file -> buildFS.writeStyle(pageComponent, file, this)));
 		}
 
 		ThemeStyles themeStyles = project.getThemeStyles();
@@ -273,15 +273,23 @@ public class Builder implements IReferenceHandler {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * Functional interface that accepts checked exception.
+	 * 
+	 * @author Iulian Rotaru
+	 *
+	 * @param <T> the type of the input to the function
+	 * @param <R> the type of the result of the function
+	 */
 	@FunctionalInterface
-	public interface ThrowingConsumer<Value, Argument> {
-		Value accept(Argument argument) throws Exception;
+	public interface CheckedFunction<T, R> {
+		R apply(T argument) throws Exception;
 	}
 
-	private static <Value, Argument> Handler<Value, Argument> exlambda(ThrowingConsumer<Value, Argument> handler) {
+	private static <T, R> Function<T, R> exlambda(CheckedFunction<T, R> handler) {
 		return argument -> {
 			try {
-				return handler.accept(argument);
+				return handler.apply(argument);
 			} catch (Exception ex) {
 				throw new WoodException(ex);
 			}

@@ -1,6 +1,7 @@
 package js.wood;
 
 public interface IScriptDescriptor {
+	/** Script source is local file path or the URL from where third script is to be loaded. */
 	String getSource();
 
 	String getType();

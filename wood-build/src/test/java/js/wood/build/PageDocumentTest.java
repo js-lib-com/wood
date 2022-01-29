@@ -57,7 +57,7 @@ public class PageDocumentTest {
 
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
-		
+
 		FilePath scriptPath = new FilePath(project, script.getSource());
 		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
@@ -68,7 +68,7 @@ public class PageDocumentTest {
 		page.setDescription("description");
 		page.addMeta(meta);
 		page.addFavicon("media/favicon.ico");
-		page.addLink(link);
+		page.addLink(link, filePath -> filePath.value());
 		page.addStyle("style/index.css");
 		page.addScript(script, filePath -> filePath.value());
 
@@ -115,21 +115,21 @@ public class PageDocumentTest {
 		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn("http://js-lib.com/styles/reset.css");
 
-		page.addLink(link);
+		page.addLink(link, filePath -> filePath.value());
 		String doc = stringify(page.getDocument());
 		assertThat(doc, containsString("<LINK href=\"http://js-lib.com/styles/reset.css\" rel=\"stylesheet\" type=\"text/css\" />"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addLink_NullLinkReference() {
-		page.addLink(null);
+		page.addLink(null, filePath -> filePath.value());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addLink_MissingHref() throws IOException {
 		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn(null);
-		page.addLink(link);
+		page.addLink(link, filePath -> filePath.value());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -142,7 +142,7 @@ public class PageDocumentTest {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		when(script.getDefer()).thenReturn("true");
-		
+
 		FilePath scriptPath = new FilePath(project, script.getSource());
 		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
@@ -178,7 +178,7 @@ public class PageDocumentTest {
 	public void addScript_UrlAbsolutePath() throws IOException, XPathExpressionException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
-		
+
 		FilePath scriptPath = new FilePath(project, script.getSource());
 		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 

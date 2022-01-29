@@ -1,5 +1,6 @@
 package js.wood;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -259,6 +260,39 @@ public class ComponentInheritanceTest {
 
 		// then
 		Element layout = compo.getLayout();
+
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(1));
+		assertThat(headings.item(0).getText(), equalTo("Content"));
+
+		assertThat(layout.getByTag("section"), notNullValue());
+	}
+
+	@Test
+	public void GivenEmptyTemplateOnTagCompo_ThenCopyContent() {
+		// given
+		tagCompos.put("tag", templateCompo);
+
+		String templateHTML = "" + //
+				"<tag>" + //
+				"</tag>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<tag w:template='res/template' xmlns:w='js-lib.com/wood'>" + //
+				"	<section>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</tag>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		layout.getDocument().dump();
 
 		EList headings = layout.findByTag("h1");
 		assertThat(headings.size(), equalTo(1));

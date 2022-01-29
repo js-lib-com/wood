@@ -2,6 +2,7 @@ package js.wood.impl;
 
 import js.dom.Element;
 import js.util.Params;
+import js.wood.FilePath;
 import js.wood.ILinkDescriptor;
 
 /**
@@ -12,7 +13,9 @@ import js.wood.ILinkDescriptor;
  * @since 1.0
  */
 class LinkDescriptor implements ILinkDescriptor {
-	private String href;
+	/** Link hyper-reference is local file path or the URL from where third party file is to be loaded. */
+	private final String href;
+
 	private String hreflang;
 	private String relationship;
 	private String media;
@@ -165,6 +168,11 @@ class LinkDescriptor implements ILinkDescriptor {
 	}
 
 	@Override
+	public boolean isStyleSheet() {
+		return relationship != null && relationship.equalsIgnoreCase("stylesheet");
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -194,17 +202,34 @@ class LinkDescriptor implements ILinkDescriptor {
 		return href;
 	}
 
+	private static final String DEF_LINK_REL = "stylesheet";
+	private static final String DEF_LINK_TYPE = "text/css";
+
+	/**
+	 * Create link descriptor for local style file. Uses file path value for <code>href</code> attribute with related
+	 * {@link #DEF_LINK_REL} and {@link #DEF_LINK_TYPE}.
+	 * 
+	 * @param styleFile project file path for local style file.
+	 * @return link descriptor.
+	 */
+	public static LinkDescriptor create(FilePath styleFile) {
+		LinkDescriptor script = new LinkDescriptor(styleFile.value());
+		script.setRelationship(DEF_LINK_REL);
+		script.setType(DEF_LINK_TYPE);
+		return script;
+	}
+
 	public static LinkDescriptor create(Element linkElement) {
 		final String href = linkElement.getAttr("href");
 		assert href != null;
 		LinkDescriptor link = new LinkDescriptor(href);
 
 		link.setHreflang(linkElement.getAttr("hreflang"));
-		link.setRelationship(linkElement.getAttr("rel"));
+		link.setRelationship(value(linkElement.getAttr("rel"), DEF_LINK_REL));
 		link.setMedia(linkElement.getAttr("media"));
 		link.setReferrerPolicy(linkElement.getAttr("referrerpolicy"));
 		link.setDisabled(linkElement.getAttr("disabled"));
-		link.setType(linkElement.getAttr("type"));
+		link.setType(value(linkElement.getAttr("type"), DEF_LINK_TYPE));
 		link.setAsType(linkElement.getAttr("as"));
 		link.setPrefetch(linkElement.getAttr("prefetch"));
 		link.setSizes(linkElement.getAttr("sizes"));
@@ -215,5 +240,9 @@ class LinkDescriptor implements ILinkDescriptor {
 		link.setCrossOrigin(linkElement.getAttr("crossorigin"));
 
 		return link;
+	}
+
+	private static String value(String base, String defaults) {
+		return base != null ? base : defaults;
 	}
 }

@@ -13,7 +13,7 @@ import js.wood.IScriptDescriptor;
  * @since 1.0
  */
 public class ScriptDescriptor implements IScriptDescriptor {
-	/** Script source is local file path or the URL from where third script is to be loaded. */
+	/** Script source is local file path or the URL from where third party script is to be loaded. */
 	private final String source;
 
 	private String type;

@@ -30,4 +30,6 @@ public interface ILinkDescriptor {
 	String getImageSrcSet();
 
 	String getTitle();
+	
+	boolean isStyleSheet();
 }
