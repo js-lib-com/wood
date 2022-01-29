@@ -62,7 +62,7 @@ public class BuilderTest {
 	@Test
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(Collections.emptyMap()));
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(Collections.emptyMap(), Collections.emptyMap()));
 		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getServiceWorker()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));

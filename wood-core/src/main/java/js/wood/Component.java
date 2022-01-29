@@ -281,6 +281,10 @@ public class Component {
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
 
+		if (!layoutDoc.getRoot().hasChildren()) {
+			return layoutDoc;
+		}
+
 		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
 		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
 		if (contentFragments.isEmpty()) {

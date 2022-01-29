@@ -30,9 +30,11 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	};
 
 	private final Map<String, CompoPath> tagCompoPaths;
+	private final Map<String, CompoPath> tagTemplatePaths;
 
-	public XmlnsOperatorsHandler(Map<String, CompoPath> tagCompoPaths) {
+	public XmlnsOperatorsHandler(Map<String, CompoPath> tagCompoPaths, Map<String, CompoPath> tagTemplatePaths) {
 		this.tagCompoPaths = tagCompoPaths;
+		this.tagTemplatePaths = tagTemplatePaths;
 	}
 
 	@Override
@@ -99,7 +101,14 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 				CompoPath compoPath = tagCompoPaths.get(element.getTag());
 				return compoPath != null ? compoPath.value() : null;
 			}
-			// fall through next case
+			return element.getAttrNS(WOOD.NS, operator.value());
+
+		case TEMPLATE:
+			if (element.getParent() != null && !element.hasAttrNS(WOOD.NS, operator.value())) {
+				CompoPath compoPath = tagTemplatePaths.get(element.getTag());
+				return compoPath != null ? compoPath.value() : null;
+			}
+			return element.getAttrNS(WOOD.NS, operator.value());
 
 		default:
 			return element.getAttrNS(WOOD.NS, operator.value());
@@ -118,6 +127,13 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 		StringBuilder sb = new StringBuilder();
 		if (operator == Operator.COMPO) {
 			for (String tag : tagCompoPaths.keySet()) {
+				sb.append("descendant::");
+				sb.append(tag);
+				sb.append(" | ");
+			}
+		}
+		if (operator == Operator.TEMPLATE) {
+			for (String tag : tagTemplatePaths.keySet()) {
 				sb.append("descendant::");
 				sb.append(tag);
 				sb.append(" | ");

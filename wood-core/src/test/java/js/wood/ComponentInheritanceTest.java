@@ -80,12 +80,13 @@ public class ComponentInheritanceTest {
 	private IReferenceHandler referenceHandler;
 
 	private Map<String, CompoPath> tagCompos = new HashMap<>();
+	private Map<String, CompoPath> tagTemplates = new HashMap<>();
 
 	@Before
 	public void beforeTest() {
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(tagCompos));
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(tagCompos, tagTemplates));
 
 		when(pageLayout.exists()).thenReturn(true);
 		when(pageLayout.isLayout()).thenReturn(true);
@@ -903,7 +904,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndDataAttrOperators_ThenBothContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
 
 		String templateHTML = "" + //
 				"<body>" + //
@@ -1123,7 +1124,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndOneInlineTemplateAndDataAttrOperators_ThenAllThreeContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1328,7 +1329,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndDataAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1370,7 +1371,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler(tagCompos));
+		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler(tagCompos, tagTemplates));
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1481,7 +1482,7 @@ public class ComponentInheritanceTest {
 				"</div>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
-		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
+		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'><p>Content</p></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
@@ -1520,7 +1521,7 @@ public class ComponentInheritanceTest {
 		when(compoDescriptor.exists()).thenReturn(true);
 		when(compoDescriptor.getReader()).thenReturn(new StringReader(compoDescriptorXML));
 
-		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'>Content</h1>";
+		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'><p>Content</p></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
@@ -1615,7 +1616,7 @@ public class ComponentInheritanceTest {
 		String templateLayoutHTML = "<body><h1 w:editable='h1' xmlns:w='js-lib.com/wood'></h1></body>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
-		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'></h1>";
+		String compoLayoutHTML = "<h1 w:template='res/template#fake' xmlns:w='js-lib.com/wood'><p></p></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 
@@ -1632,7 +1633,7 @@ public class ComponentInheritanceTest {
 		String templateLayoutHTML = "<h1 w:editable='h1' xmlns:w='js-lib.com/wood'><b>Title</b></h1>";
 		when(templateLayout.getReader()).thenReturn(new StringReader(templateLayoutHTML));
 
-		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'></h1>";
+		String compoLayoutHTML = "<h1 w:template='res/template#h1' xmlns:w='js-lib.com/wood'><p></p></h1>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoLayoutHTML));
 		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
 

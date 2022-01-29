@@ -86,7 +86,7 @@ public class BuilderIntegrationTest {
 		assertThat(metas.item(4).getAttr("name"), equalTo("viewport"));
 
 		EList styles = doc.findByTag("link");
-		assertThat(styles.size(), equalTo(14));
+		assertThat(styles.size(), equalTo(16));
 
 		int index = 0;
 		assertStyle("manifest.json", styles, index++);
@@ -102,10 +102,12 @@ public class BuilderIntegrationTest {
 
 		index += 2; // skip form.css and fx.css
 		assertStyle("style/res-template_dialog.css", styles, index++);
+		assertStyle("style/res-compo_grid-view.css", styles, index++);
 		assertStyle("style/lib_paging.css", styles, index++);
 		assertStyle("style/lib_list-view.css", styles, index++);
 		assertStyle("style/res-template_page.css", styles, index++);
 		assertStyle("style/res-template_sidebar-page.css", styles, index++);
+		assertStyle("style/res-compo_tab-view.css", styles, index++);
 		assertStyle("style/res-page_index.css", styles, index++);
 
 		EList elist = doc.findByTag("script");
@@ -113,7 +115,7 @@ public class BuilderIntegrationTest {
 		for (int i = 0; i < elist.size(); ++i) {
 			scripts.add(elist.item(i).getAttr("src"));
 		}
-		assertThat(scripts, hasSize(10));
+		assertThat(scripts, hasSize(12));
 
 		assertTrue(scripts.indexOf("script/script.hc.page.Index.js") > scripts.indexOf("script/lib.js-lib.js"));
 		assertTrue(scripts.indexOf("script/script.hc.view.DiscographyView.js") > scripts.indexOf("script/lib.js-lib.js"));
@@ -132,6 +134,9 @@ public class BuilderIntegrationTest {
 		assertTrue(scripts.contains("script/lib.list-view.js"));
 		assertTrue(scripts.contains("script/lib.paging.js"));
 		assertTrue(scripts.contains("script/script.js.hood.TopMenu.js"));
+
+		assertTrue(scripts.contains("script/res.compo.tab-view.js"));
+		assertTrue(scripts.contains("script/res.compo.grid-view.js"));
 
 		EList anchors = doc.findByTag("a");
 		assertThat(anchors.size(), equalTo(8));

@@ -20,6 +20,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import js.wood.impl.FileType;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectFilePathVisitorTest {
 	@Mock
@@ -28,6 +30,7 @@ public class ProjectFilePathVisitorTest {
 	private FilePath file;
 
 	private Map<String, CompoPath> tagCompoPaths = new HashMap<>();
+	private Map<String, CompoPath> tagtemplatePaths = new HashMap<>();
 	private Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
 
 	private Project.IFilePathVisitor visitor;
@@ -36,7 +39,7 @@ public class ProjectFilePathVisitorTest {
 	public void beforeTest() {
 		when(file.isComponentDescriptor()).thenReturn(true);
 
-		visitor = new Project.FilePathVisitor(tagCompoPaths, scriptDependencies);
+		visitor = new Project.FilePathVisitor(tagCompoPaths, tagtemplatePaths, scriptDependencies);
 	}
 
 	@Test
@@ -51,6 +54,11 @@ public class ProjectFilePathVisitorTest {
 
 		when(file.getBasename()).thenReturn("geo-map");
 		when(file.getReader()).thenReturn(new StringReader("<compo></compo>"));
+		
+		FilePath layoutFile = mock(FilePath.class);
+		when(file.cloneTo(FileType.LAYOUT)).thenReturn(layoutFile);
+		when(layoutFile.exists()).thenReturn(true);
+		when(layoutFile.getReader()).thenReturn(new StringReader("<geo-map></geo-map>"));
 
 		// when
 		visitor.visitFile(project, file);

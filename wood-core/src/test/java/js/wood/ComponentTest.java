@@ -47,12 +47,14 @@ public class ComponentTest {
 	private IReferenceHandler referenceHandler;
 
 	private Map<String, CompoPath> tagCompos;
+	private Map<String, CompoPath> tagTemplates;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
 		tagCompos = new HashMap<>();
-		operatorsHandler = new XmlnsOperatorsHandler(tagCompos);
+		tagTemplates = new HashMap<>();
+		operatorsHandler = new XmlnsOperatorsHandler(tagCompos, tagTemplates);
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
@@ -70,7 +72,7 @@ public class ComponentTest {
 		when(layoutPath.cloneTo(FileType.STYLE)).thenReturn(stylePath);
 
 		when(descriptorFile.cloneTo(FileType.SCRIPT)).thenReturn(scriptPath);
-		
+
 		when(compoDir.getFilePath(any())).thenReturn(Mockito.mock(FilePath.class));
 	}
 
@@ -88,7 +90,7 @@ public class ComponentTest {
 		assertThat(compo.getDescription(), equalTo("Components / Layout"));
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
 		assertThat(compo.toString(), equalTo("Components / Layout"));
-		
+
 		assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 		assertThat(compo.getScriptDescriptors(), empty());
 		assertThat(compo.getLinkDescriptors(), empty());
@@ -102,7 +104,7 @@ public class ComponentTest {
 		String descriptor = "<compo>" + //
 				"<display>Page Compo</display>" + //
 				"<description>Page description.</description>" + //
-				"<group>admin</group>"+//
+				"<group>admin</group>" + //
 				"<scripts>" + //
 				"	<script src='lib/js-lib.js'></script>" + //
 				"	<script src='script/js/wood/Compo.js'></script>" + //
@@ -123,13 +125,13 @@ public class ComponentTest {
 		assertThat(compo.getDescription(), equalTo("Page description."));
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
 		assertThat(compo.toString(), equalTo("Page Compo"));
-		
+
 		assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 		assertThat(compo.getLinkDescriptors(), empty());
 		assertThat(compo.getMetaDescriptors(), empty());
 		assertThat(compo.getResourcesGroup(), equalTo("admin"));
 		assertTrue(compo.getStyleFiles().isEmpty());
-		
+
 		assertThat(compo.getScriptDescriptors(), hasSize(2));
 		assertThat(compo.getScriptDescriptors().get(0).getSource(), equalTo("lib/js-lib.js"));
 		assertThat(compo.getScriptDescriptors().get(1).getSource(), equalTo("script/js/wood/Compo.js"));
@@ -169,7 +171,7 @@ public class ComponentTest {
 		assertFalse(layout.hasAttr("xmlns:w"));
 		assertThat(layout.getByTag("section"), nullValue());
 	}
-	
+
 	/**
 	 * Create component from CompoPath. If {@link CompoPath#getLayoutPathEx()} fails to find layout file, component constructor
 	 * should throw {@link WoodException}.

@@ -25,13 +25,14 @@ import js.wood.WOOD;
 public class XmlnsOperatorsHandlerTest {
 	private DocumentBuilder builder;
 	private Map<String, CompoPath> tagCompos;
+	private Map<String, CompoPath> tagTemplates;
 	private IOperatorsHandler operators;
 
 	@Before
 	public void beforeTest() {
 		builder = Classes.loadService(DocumentBuilder.class);
 		tagCompos = new HashMap<>();
-		operators = new XmlnsOperatorsHandler(tagCompos);
+		operators = new XmlnsOperatorsHandler(tagCompos, tagTemplates);
 	}
 
 	@Test

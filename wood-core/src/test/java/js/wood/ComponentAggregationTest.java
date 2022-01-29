@@ -57,12 +57,14 @@ public class ComponentAggregationTest {
 	private IReferenceHandler referenceHandler;
 
 	private Map<String, CompoPath> tagCompoPaths;
+	private Map<String, CompoPath> tagTemplatePaths;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
 		tagCompoPaths = new HashMap<>();
-		operatorsHandler = new XmlnsOperatorsHandler(tagCompoPaths);
+		tagTemplatePaths = new HashMap<>();
+		operatorsHandler = new XmlnsOperatorsHandler(tagCompoPaths, tagTemplatePaths);
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);

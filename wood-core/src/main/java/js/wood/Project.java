@@ -1,6 +1,8 @@
 package js.wood;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttrOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
+import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.OperatorsNaming;
@@ -72,6 +75,8 @@ public class Project {
 
 	/** Map component tag to its component path. This map is used when use tag to declare component aggregation. */
 	private final Map<String, CompoPath> tagCompoPaths = new HashMap<>();
+
+	private final Map<String, CompoPath> tagTemplatePaths = new HashMap<>();
 
 	/** Map script path to its dependencies. Only scripts with declared dependencies are included in this map. */
 	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
@@ -131,7 +136,7 @@ public class Project {
 		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
 		this.excludeDirs.add(file(descriptor.getBuildDir()));
 
-		registerVisitor(new FilePathVisitor(tagCompoPaths, scriptDependencies));
+		registerVisitor(new FilePathVisitor(tagCompoPaths, tagTemplatePaths, scriptDependencies));
 	}
 
 	private File file(String path) {
@@ -172,15 +177,15 @@ public class Project {
 
 		switch (descriptor.getOperatorsNaming()) {
 		case XMLNS:
-			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths);
+			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
 			break;
 
 		case DATA_ATTR:
-			this.operatorsHandler = new DataAttrOperatorsHandler(this.tagCompoPaths);
+			this.operatorsHandler = new DataAttrOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
 			break;
 
 		case ATTR:
-			this.operatorsHandler = new AttrOperatorsHandler(this.tagCompoPaths);
+			this.operatorsHandler = new AttrOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
 			break;
 
 		default:
@@ -531,10 +536,12 @@ public class Project {
 		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		private final Map<String, CompoPath> compoPaths;
+		private final Map<String, CompoPath> templatePaths;
 		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
 
-		public FilePathVisitor(Map<String, CompoPath> compoPaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
+		public FilePathVisitor(Map<String, CompoPath> compoPaths, Map<String, CompoPath> templatePaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
 			this.compoPaths = compoPaths;
+			this.templatePaths = templatePaths;
 			this.scriptDependencies = scriptDependencies;
 		}
 
@@ -558,10 +565,60 @@ public class Project {
 				}
 			}
 
-			if (document.getRoot().getTag().equals("compo") && file.getParentDir() != null) {
-				compoPaths.put(file.getBasename(), project.createCompoPath(file.getParentDir().value()));
-				log.debug("Register tag |%s| component path |%s|.", file.getBasename(), compoPaths.get(file.getBasename()));
+			FilePath parentDir = file.getParentDir();
+			if (parentDir == null) {
+				return;
 			}
+			String documentRoot = document.getRoot().getTag();
+
+			if (documentRoot.equals("compo")) {
+				String tag = layoutRoot(file);
+				if (tag != null) {
+					compoPaths.put(tag, project.createCompoPath(parentDir.value()));
+					log.debug("Register tag |%s| component path |%s|.", tag, compoPaths.get(file.getBasename()));
+				}
+			}
+
+			if (documentRoot.equals("template")) {
+				String tag = layoutRoot(file);
+				if (tag != null) {
+					templatePaths.put(tag, project.createCompoPath(parentDir.value()));
+					log.debug("Register tag |%s| template path |%s|.", tag, templatePaths.get(file.getBasename()));
+				}
+			}
+		}
+	}
+
+	private static String layoutRoot(FilePath descriptorFile) throws IOException {
+		FilePath layoutFile = descriptorFile.cloneTo(FileType.LAYOUT);
+		if (!layoutFile.exists()) {
+			return null;
+		}
+		StringBuilder builder = new StringBuilder();
+		int dashesCount = 0;
+		try (Reader reader = layoutFile.getReader()) {
+			for (;;) {
+				int i = reader.read();
+				if (i == -1) {
+					return null;
+				}
+				char c = (char) i;
+				if (Character.isWhitespace(c) || c == '>') {
+					break;
+				}
+				if (c == '-') {
+					++dashesCount;
+				}
+				builder.append(c);
+			}
+
+			if (dashesCount == 0) {
+				return null;
+			}
+			if (builder.charAt(0) != '<') {
+				return null;
+			}
+			return builder.substring(1);
 		}
 	}
 

@@ -18,9 +18,11 @@ import js.wood.CompoPath;
  */
 public class AttrOperatorsHandler implements IOperatorsHandler {
 	private final Map<String, CompoPath> tagCompoPaths;
+	private final Map<String, CompoPath> tagTemplatePaths;
 
-	public AttrOperatorsHandler(Map<String, CompoPath> tagCompoPaths) {
+	public AttrOperatorsHandler(Map<String, CompoPath> tagCompoPaths, Map<String, CompoPath> tagTemplatePaths) {
 		this.tagCompoPaths = tagCompoPaths;
+		this.tagTemplatePaths = tagTemplatePaths;
 	}
 
 	@Override
@@ -87,7 +89,14 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 				CompoPath compoPath = tagCompoPaths.get(element.getTag());
 				return compoPath != null ? compoPath.value() : null;
 			}
-			// fall through next case
+			return element.getAttr(operator.value());
+
+		case TEMPLATE:
+			if (!element.hasAttr(operator.value())) {
+				CompoPath compoPath = tagTemplatePaths.get(element.getTag());
+				return compoPath != null ? compoPath.value() : null;
+			}
+			return element.getAttr(operator.value());
 
 		default:
 			return element.getAttr(operator.value());
@@ -106,6 +115,13 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 		StringBuilder sb = new StringBuilder();
 		if (operator == Operator.COMPO) {
 			for (String tag : tagCompoPaths.keySet()) {
+				sb.append("descendant::");
+				sb.append(tag);
+				sb.append(" | ");
+			}
+		}
+		if (operator == Operator.TEMPLATE) {
+			for (String tag : tagTemplatePaths.keySet()) {
 				sb.append("descendant::");
 				sb.append(tag);
 				sb.append(" | ");
