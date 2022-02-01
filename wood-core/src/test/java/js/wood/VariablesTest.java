@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import js.wood.impl.FileType;
 import js.wood.impl.ResourceType;
 import js.wood.impl.Variants;
 
@@ -31,12 +32,16 @@ public class VariablesTest {
 	private Variants variants;
 	@Mock
 	private FilePath file;
+	@Mock
+	private FilePath varFile; 
 
 	@Before
 	public void beforeTest() {
-		when(file.exists()).thenReturn(true);
 		when(file.isVariables()).thenReturn(true);
 		when(file.getVariants()).thenReturn(variants);
+		
+		when(file.cloneTo(FileType.VAR)).thenReturn(varFile);
+		when(varFile.isSynthetic()).thenReturn(true);
 	}
 
 	@Test

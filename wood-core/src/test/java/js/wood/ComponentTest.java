@@ -12,8 +12,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,19 +45,16 @@ public class ComponentTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, CompoPath> tagCompos;
-	private Map<String, CompoPath> tagTemplates;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
-		tagCompos = new HashMap<>();
-		tagTemplates = new HashMap<>();
-		operatorsHandler = new XmlnsOperatorsHandler(tagCompos, tagTemplates);
+		operatorsHandler = new XmlnsOperatorsHandler();
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
+		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 
 		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
 

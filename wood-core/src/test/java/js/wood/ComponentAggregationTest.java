@@ -7,8 +7,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -24,12 +22,17 @@ import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.Operator;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentAggregationTest {
 	@Mock
 	private Project project;
+	@Mock
+	private ICustomElementsRegistry customElementsRegistry;
+	@Mock
+	private ICustomElement customElement;
 
 	@Mock
 	private CompoPath compoPath; // component path
@@ -56,20 +59,22 @@ public class ComponentAggregationTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, CompoPath> tagCompoPaths;
-	private Map<String, CompoPath> tagTemplatePaths;
 	private IOperatorsHandler operatorsHandler;
 
 	@Before
 	public void beforeTest() {
-		tagCompoPaths = new HashMap<>();
-		tagTemplatePaths = new HashMap<>();
-		operatorsHandler = new XmlnsOperatorsHandler(tagCompoPaths, tagTemplatePaths);
+		operatorsHandler = new XmlnsOperatorsHandler();
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
+		when(project.getCustomElementsRegistry()).thenReturn(customElementsRegistry);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
+		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 
+		when(customElementsRegistry.getByTagName("custom-element")).thenReturn(customElement);
+		when(customElement.compoPath()).thenReturn("compos/custom-element");
+		when(customElement.operator()).thenReturn("compo");
+		
 		when(compoPath.getLayoutPath()).thenReturn(compoLayout);
 		when(compoLayout.getProject()).thenReturn(project);
 		when(compoLayout.exists()).thenReturn(true);
@@ -79,6 +84,7 @@ public class ComponentAggregationTest {
 		when(compoDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(compoScript);
 
 		when(childPath.getLayoutPath()).thenReturn(childLayout);
+		when(childLayout.getProject()).thenReturn(project);
 		when(childLayout.exists()).thenReturn(true);
 		when(childLayout.isLayout()).thenReturn(true);
 		when(childLayout.cloneTo(FileType.XML)).thenReturn(childDescriptor);
@@ -143,24 +149,21 @@ public class ComponentAggregationTest {
 	}
 
 	@Test
-	public void GivenSimpleAggregationOnTagCompo_ThenIncludeChildLayout() {
+	public void GivenSimpleAggregationOnCustomElement_ThenIncludeChildLayout() {
 		// given
-		tagCompoPaths.put("tag", childPath);
-		when(childPath.value()).thenReturn("res/child");
-
 		String childHTML = "" + //
-				"<tag>" + //
+				"<custom-element>" + //
 				"	<h1>Child</h1>" + //
-				"</tag>";
+				"</custom-element>";
 		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
-
+	
 		String compoHTML = "" + //
-				"<section>" + //
+				"<section xmlns:w='js-lib.com/wood'>" + //
 				"	<h1>Component</h1>" + //
-				"	<tag></tag>" + //
+				"	<custom-element></custom-element>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(project.createCompoPath("res/child")).thenReturn(childPath);
+		when(project.createCompoPath("compos/custom-element")).thenReturn(childPath);
 
 		// when
 		Component compo = new Component(compoPath, referenceHandler);
@@ -177,6 +180,7 @@ public class ComponentAggregationTest {
 	public void GivenAggregationOnStandaloneTemplate_ThenIncludeResolvedTemplate() {
 		// given
 		FilePath templateLayout = Mockito.mock(FilePath.class);
+		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 
@@ -237,6 +241,7 @@ public class ComponentAggregationTest {
 	public void GivenAggregationOnStandaloneTemplate_ThenMergeAttributes() {
 		// given
 		FilePath templateLayout = Mockito.mock(FilePath.class);
+		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 

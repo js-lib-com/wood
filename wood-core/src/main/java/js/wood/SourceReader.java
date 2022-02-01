@@ -128,10 +128,10 @@ public class SourceReader extends Reader {
 		super();
 		Params.notNull(reader, "Reader");
 		Params.notNull(sourceFile, "Source file");
-		Params.isTrue(sourceFile.exists(), "Source file does not exist");
+		Params.isTrue(sourceFile.isSynthetic() || sourceFile.exists(), "Source file does not exist");
 		Params.notNull(referenceHandler, "Reference handler");
 
-		this.reader = reader;
+		this.reader = sourceFile.isLayout() ? new LayoutReader(reader, sourceFile) : reader;
 		this.sourceFile = sourceFile;
 		this.referenceHandler = referenceHandler;
 		this.interpreter = new Interpreter();
@@ -266,7 +266,7 @@ public class SourceReader extends Reader {
 			state = State.VALUE;
 			charAfterMeta = c;
 			valueIndex = 1;
-			if(value == null) {
+			if (value == null) {
 				throw new WoodException("Null value for at-meta |%s| in source file |%s|.", metaBuilder.toString(), sourceFile);
 			}
 			return value.charAt(0);

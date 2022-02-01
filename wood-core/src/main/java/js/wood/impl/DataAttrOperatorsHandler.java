@@ -1,7 +1,5 @@
 package js.wood.impl;
 
-import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import js.dom.Document;
@@ -9,7 +7,6 @@ import js.dom.EList;
 import js.dom.Element;
 import js.lang.BugError;
 import js.util.Params;
-import js.wood.CompoPath;
 
 /**
  * Operators handler for operator names prefixed with <code>data-</code>, HTML custom attribute prefix. This operators handler
@@ -20,14 +17,6 @@ import js.wood.CompoPath;
 public class DataAttrOperatorsHandler implements IOperatorsHandler {
 	/** Prefix for custom HTML attribute. */
 	private static final String DATA_PREFIX = "data-";
-
-	private final Map<String, CompoPath> tagCompoPaths;
-	private final Map<String, CompoPath> tagTemplatePaths;
-
-	public DataAttrOperatorsHandler(Map<String, CompoPath> tagCompoPaths, Map<String, CompoPath> tagTemplatePaths) {
-		this.tagCompoPaths = tagCompoPaths;
-		this.tagTemplatePaths = tagTemplatePaths;
-	}
 
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
@@ -88,24 +77,7 @@ public class DataAttrOperatorsHandler implements IOperatorsHandler {
 	public String getOperand(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
 		String attrName = DATA_PREFIX + operator.value();
-		switch (operator) {
-		case COMPO:
-			if (!element.hasAttr(attrName)) {
-				CompoPath compoPath = tagCompoPaths.get(element.getTag());
-				return compoPath != null ? compoPath.value() : null;
-			}
-			return element.getAttr(attrName);
-
-		case TEMPLATE:
-			if (!element.hasAttr(attrName)) {
-				CompoPath compoPath = tagTemplatePaths.get(element.getTag());
-				return compoPath != null ? compoPath.value() : null;
-			}
-			return element.getAttr(attrName);
-
-		default:
-			return element.getAttr(attrName);
-		}
+		return element.getAttr(attrName);
 	}
 
 	@Override
@@ -115,24 +87,9 @@ public class DataAttrOperatorsHandler implements IOperatorsHandler {
 	}
 
 	private String buildXPath(Operator operator, String... operand) {
-		// descendant::tag1 | descendant::tag2 | descendant-or-self::node()[@data-compo='res/compo/dialog']
+		// descendant-or-self::node()[@data-compo='res/compo/dialog']
 
 		StringBuilder sb = new StringBuilder();
-		if (operator == Operator.COMPO) {
-			for (String tag : tagCompoPaths.keySet()) {
-				sb.append("descendant::");
-				sb.append(tag);
-				sb.append(" | ");
-			}
-		}
-		if (operator == Operator.TEMPLATE) {
-			for (String tag : tagTemplatePaths.keySet()) {
-				sb.append("descendant::");
-				sb.append(tag);
-				sb.append(" | ");
-			}
-		}
-
 		sb.append("descendant-or-self::node()[@");
 		sb.append(DATA_PREFIX);
 		sb.append(operator.value());

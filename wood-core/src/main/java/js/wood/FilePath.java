@@ -390,6 +390,10 @@ public class FilePath implements Iterable<FilePath> {
 		return CT.MANIFEST_FILE.equals(value);
 	}
 
+	public boolean isSynthetic() {
+		return fileType == FileType.VAR;
+	}
+
 	/**
 	 * Get this directory path segments. Returned list is unmodifiable.
 	 * 

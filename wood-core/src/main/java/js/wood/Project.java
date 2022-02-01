@@ -15,15 +15,13 @@ import java.util.stream.Collectors;
 import js.dom.Document;
 import js.dom.DocumentBuilder;
 import js.dom.Element;
-import js.log.Log;
-import js.log.LogFactory;
 import js.util.Classes;
 import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttrOperatorsHandler;
+import js.wood.impl.CustomElementsRegistry;
 import js.wood.impl.DataAttrOperatorsHandler;
-import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.OperatorsNaming;
@@ -52,8 +50,6 @@ import js.wood.impl.XmlnsOperatorsHandler;
  * @since 1.0
  */
 public class Project {
-	private static final Log log = LogFactory.getLog(Project.class);
-
 	/**
 	 * Create project instance for a given project root directory. Project root should point to a valid WOOD project; current
 	 * implementation requires only project properties file - see {@link ProjectProperties#PROPERTIES_FILE}.
@@ -73,10 +69,11 @@ public class Project {
 
 	private final Set<File> excludeDirs;
 
-	/** Map component tag to its component path. This map is used when use tag to declare component aggregation. */
-	private final Map<String, CompoPath> tagCompoPaths = new HashMap<>();
-
-	private final Map<String, CompoPath> tagTemplatePaths = new HashMap<>();
+	/**
+	 * Registry for components based on W3C custom elements. It contains information about custom element tag name, component
+	 * path and related WOOD operator.
+	 */
+	private final CustomElementsRegistry customElements = new CustomElementsRegistry();
 
 	/** Map script path to its dependencies. Only scripts with declared dependencies are included in this map. */
 	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
@@ -136,7 +133,7 @@ public class Project {
 		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
 		this.excludeDirs.add(file(descriptor.getBuildDir()));
 
-		registerVisitor(new FilePathVisitor(tagCompoPaths, tagTemplatePaths, scriptDependencies));
+		registerVisitor(new FilePathVisitor(customElements, scriptDependencies));
 	}
 
 	private File file(String path) {
@@ -177,15 +174,15 @@ public class Project {
 
 		switch (descriptor.getOperatorsNaming()) {
 		case XMLNS:
-			this.operatorsHandler = new XmlnsOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
+			this.operatorsHandler = new XmlnsOperatorsHandler();
 			break;
 
 		case DATA_ATTR:
-			this.operatorsHandler = new DataAttrOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
+			this.operatorsHandler = new DataAttrOperatorsHandler();
 			break;
 
 		case ATTR:
-			this.operatorsHandler = new AttrOperatorsHandler(this.tagCompoPaths, this.tagTemplatePaths);
+			this.operatorsHandler = new AttrOperatorsHandler();
 			break;
 
 		default:
@@ -372,6 +369,10 @@ public class Project {
 		return new ThemeStyles(getThemeDir());
 	}
 
+	public OperatorsNaming getOperatorsNaming() {
+		return descriptor.getOperatorsNaming();
+	}
+
 	/**
 	 * Get operator handler as configured by selected naming strategy.
 	 * 
@@ -386,8 +387,12 @@ public class Project {
 	 * 
 	 * @return true if project naming convention requires XML name space.
 	 */
-	public boolean hasNamespace() {
+	boolean hasNamespace() {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
+	}
+
+	ICustomElementsRegistry getCustomElementsRegistry() {
+		return customElements;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -527,7 +532,7 @@ public class Project {
 
 	/**
 	 * Implementation for file path visitor. Current version scan component descriptors for script dependencies and register
-	 * components path for aggregation based on element tag.
+	 * components based on W3C custom elements.
 	 * 
 	 * @author Iulian Rotaru
 	 * @since 1.0
@@ -535,13 +540,11 @@ public class Project {
 	static class FilePathVisitor implements IFilePathVisitor {
 		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 
-		private final Map<String, CompoPath> compoPaths;
-		private final Map<String, CompoPath> templatePaths;
+		private final ICustomElementsRegistry customElements;
 		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
 
-		public FilePathVisitor(Map<String, CompoPath> compoPaths, Map<String, CompoPath> templatePaths, Map<String, List<IScriptDescriptor>> scriptDependencies) {
-			this.compoPaths = compoPaths;
-			this.templatePaths = templatePaths;
+		public FilePathVisitor(ICustomElementsRegistry customElements, Map<String, List<IScriptDescriptor>> scriptDependencies) {
+			this.customElements = customElements;
 			this.scriptDependencies = scriptDependencies;
 		}
 
@@ -569,33 +572,39 @@ public class Project {
 			if (parentDir == null) {
 				return;
 			}
-			String documentRoot = document.getRoot().getTag();
 
-			if (documentRoot.equals("compo")) {
-				String tag = layoutRoot(file);
-				if (tag != null) {
-					compoPaths.put(tag, project.createCompoPath(parentDir.value()));
-					log.debug("Register tag |%s| component path |%s|.", tag, compoPaths.get(file.getBasename()));
-				}
-			}
-
-			if (documentRoot.equals("template")) {
-				String tag = layoutRoot(file);
-				if (tag != null) {
-					templatePaths.put(tag, project.createCompoPath(parentDir.value()));
-					log.debug("Register tag |%s| template path |%s|.", tag, templatePaths.get(file.getBasename()));
-				}
+			String tagName = layoutRootTagName(file.getParentDir());
+			if (tagName != null) {
+				// by convention descriptor document root is WOOD operator simple name
+				String operator = document.getRoot().getTag();
+				customElements.register(tagName, project.createCompoPath(parentDir.value()), operator);
 			}
 		}
 	}
 
-	private static String layoutRoot(FilePath descriptorFile) throws IOException {
-		FilePath layoutFile = descriptorFile.cloneTo(FileType.LAYOUT);
+	/**
+	 * Get root tag name for components based on W3C custom elements. Returns null if component is not based on W3C custom
+	 * element. This method opens layout file - by WOOD component convention layout file should have the same name as directory
+	 * base name, and read tag name for its root element.
+	 * 
+	 * If layout file is missing return null. Also returns null if root tag name does not obey W3C custom elements naming
+	 * convention: it should have at least one hyphen.
+	 * 
+	 * @param compoDir component directory.
+	 * @return root tag name or null if component is not based on custom element.
+	 * @throws IOException if layout file reading fails.
+	 */
+	private static String layoutRootTagName(FilePath compoDir) throws IOException {
+		if (compoDir == null) {
+			return null;
+		}
+		FilePath layoutFile = compoDir.getFilePath(compoDir.getBasename() + CT.DOT_LAYOUT_EXT);
 		if (!layoutFile.exists()) {
 			return null;
 		}
+
 		StringBuilder builder = new StringBuilder();
-		int dashesCount = 0;
+		int hyphensCount = 0;
 		try (Reader reader = layoutFile.getReader()) {
 			for (;;) {
 				int i = reader.read();
@@ -607,12 +616,12 @@ public class Project {
 					break;
 				}
 				if (c == '-') {
-					++dashesCount;
+					++hyphensCount;
 				}
 				builder.append(c);
 			}
 
-			if (dashesCount == 0) {
+			if (hyphensCount == 0) {
 				return null;
 			}
 			if (builder.charAt(0) != '<') {

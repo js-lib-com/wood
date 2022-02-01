@@ -1,7 +1,5 @@
 package js.wood.impl;
 
-import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import js.dom.Document;
@@ -10,7 +8,6 @@ import js.dom.Element;
 import js.dom.NamespaceContext;
 import js.lang.BugError;
 import js.util.Params;
-import js.wood.CompoPath;
 import js.wood.WOOD;
 
 /**
@@ -28,14 +25,6 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 			return WOOD.NS;
 		}
 	};
-
-	private final Map<String, CompoPath> tagCompoPaths;
-	private final Map<String, CompoPath> tagTemplatePaths;
-
-	public XmlnsOperatorsHandler(Map<String, CompoPath> tagCompoPaths, Map<String, CompoPath> tagTemplatePaths) {
-		this.tagCompoPaths = tagCompoPaths;
-		this.tagTemplatePaths = tagTemplatePaths;
-	}
 
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
@@ -95,24 +84,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public String getOperand(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
-		switch (operator) {
-		case COMPO:
-			if (!element.hasAttrNS(WOOD.NS, operator.value())) {
-				CompoPath compoPath = tagCompoPaths.get(element.getTag());
-				return compoPath != null ? compoPath.value() : null;
-			}
-			return element.getAttrNS(WOOD.NS, operator.value());
-
-		case TEMPLATE:
-			if (element.getParent() != null && !element.hasAttrNS(WOOD.NS, operator.value())) {
-				CompoPath compoPath = tagTemplatePaths.get(element.getTag());
-				return compoPath != null ? compoPath.value() : null;
-			}
-			return element.getAttrNS(WOOD.NS, operator.value());
-
-		default:
-			return element.getAttrNS(WOOD.NS, operator.value());
-		}
+		return element.getAttrNS(WOOD.NS, operator.value());
 	}
 
 	@Override
@@ -122,24 +94,9 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	}
 
 	private String buildXPath(Operator operator, String... operand) {
-		// descendant::tag1 | descendant::tag2 | descendant-or-self::node()[@wood:compo='res/compo/dialog']
+		// descendant-or-self::node()[@wood:compo='res/compo/dialog']
 
 		StringBuilder sb = new StringBuilder();
-		if (operator == Operator.COMPO) {
-			for (String tag : tagCompoPaths.keySet()) {
-				sb.append("descendant::");
-				sb.append(tag);
-				sb.append(" | ");
-			}
-		}
-		if (operator == Operator.TEMPLATE) {
-			for (String tag : tagTemplatePaths.keySet()) {
-				sb.append("descendant::");
-				sb.append(tag);
-				sb.append(" | ");
-			}
-		}
-
 		sb.append("descendant-or-self::node()[@wood:");
 		sb.append(operator.value());
 		if (operand.length == 1) {

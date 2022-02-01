@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -34,6 +33,7 @@ import js.wood.ThemeStyles;
 import js.wood.Variables;
 import js.wood.WoodException;
 import js.wood.impl.FileType;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.ResourceType;
 import js.wood.impl.XmlnsOperatorsHandler;
 
@@ -62,7 +62,8 @@ public class BuilderTest {
 	@Test
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(Collections.emptyMap(), Collections.emptyMap()));
+		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getServiceWorker()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));

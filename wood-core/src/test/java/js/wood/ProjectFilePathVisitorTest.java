@@ -20,17 +20,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.impl.FileType;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectFilePathVisitorTest {
 	@Mock
 	private Project project;
 	@Mock
+	private ICustomElementsRegistry customElements;
+	@Mock
 	private FilePath file;
 
-	private Map<String, CompoPath> tagCompoPaths = new HashMap<>();
-	private Map<String, CompoPath> tagtemplatePaths = new HashMap<>();
 	private Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
 
 	private Project.IFilePathVisitor visitor;
@@ -39,34 +37,18 @@ public class ProjectFilePathVisitorTest {
 	public void beforeTest() {
 		when(file.isComponentDescriptor()).thenReturn(true);
 
-		visitor = new Project.FilePathVisitor(tagCompoPaths, tagtemplatePaths, scriptDependencies);
+		visitor = new Project.FilePathVisitor(customElements, scriptDependencies);
 	}
 
 	@Test
 	public void GivenFileIsComponentDescriptor_ThenCollectTagCompoPath() throws Exception {
 		// given
 		FilePath parentDir = mock(FilePath.class);
-		when(parentDir.value()).thenReturn("lib/geo-map");
-		when(file.getParentDir()).thenReturn(parentDir);
-
-		CompoPath compoPath = mock(CompoPath.class);
-		when(project.createCompoPath("lib/geo-map")).thenReturn(compoPath);
-
-		when(file.getBasename()).thenReturn("geo-map");
-		when(file.getReader()).thenReturn(new StringReader("<compo></compo>"));
-		
-		FilePath layoutFile = mock(FilePath.class);
-		when(file.cloneTo(FileType.LAYOUT)).thenReturn(layoutFile);
-		when(layoutFile.exists()).thenReturn(true);
-		when(layoutFile.getReader()).thenReturn(new StringReader("<geo-map></geo-map>"));
 
 		// when
-		visitor.visitFile(project, file);
+		visitor.visitFile(project, parentDir);
 
 		// then
-		assertThat(tagCompoPaths.keySet(), hasSize(1));
-		assertTrue(tagCompoPaths.containsKey("geo-map"));
-		assertThat(tagCompoPaths.get("geo-map"), equalTo(compoPath));
 	}
 
 	@Test
@@ -131,7 +113,6 @@ public class ProjectFilePathVisitorTest {
 		visitor.visitFile(project, file);
 
 		// then
-		assertThat(tagCompoPaths.keySet(), hasSize(0));
 	}
 
 	@Test
@@ -143,7 +124,6 @@ public class ProjectFilePathVisitorTest {
 		visitor.visitFile(project, file);
 
 		// then
-		assertThat(tagCompoPaths.keySet(), hasSize(0));
 	}
 
 	@Test
@@ -156,6 +136,5 @@ public class ProjectFilePathVisitorTest {
 		visitor.visitFile(project, file);
 
 		// then
-		assertThat(tagCompoPaths.keySet(), hasSize(0));
 	}
 }

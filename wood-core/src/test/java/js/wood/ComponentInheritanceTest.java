@@ -12,9 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +25,7 @@ import js.dom.Element;
 import js.wood.impl.AttrOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.FileType;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -79,15 +78,14 @@ public class ComponentInheritanceTest {
 	@Mock
 	private IReferenceHandler referenceHandler;
 
-	private Map<String, CompoPath> tagCompos = new HashMap<>();
-	private Map<String, CompoPath> tagTemplates = new HashMap<>();
-
 	@Before
 	public void beforeTest() {
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
-		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler(tagCompos, tagTemplates));
+		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
+		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 
+		when(pageLayout.getProject()).thenReturn(project);
 		when(pageLayout.exists()).thenReturn(true);
 		when(pageLayout.isLayout()).thenReturn(true);
 		when(pageLayout.cloneTo(FileType.XML)).thenReturn(pageDescriptor);
@@ -95,6 +93,7 @@ public class ComponentInheritanceTest {
 		when(pageDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(pageScript);
 		when(pageCompo.getLayoutPath()).thenReturn(pageLayout);
 
+		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 		when(templateLayout.cloneTo(FileType.XML)).thenReturn(templateDescriptor);
@@ -272,8 +271,6 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenEmptyTemplateOnTagCompo_ThenCopyContent() {
 		// given
-		tagCompos.put("tag", templateCompo);
-
 		String templateHTML = "" + //
 				"<tag>" + //
 				"</tag>";
@@ -904,7 +901,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndDataAttrOperators_ThenBothContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
 
 		String templateHTML = "" + //
 				"<body>" + //
@@ -1124,7 +1121,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoEditablesAndOneInlineTemplateAndDataAttrOperators_ThenAllThreeContentsMerged() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1329,7 +1326,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndDataAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler(tagCompos, tagTemplates));
+		when(project.getOperatorsHandler()).thenReturn(new DataAttrOperatorsHandler());
 
 		String pageHTML = "" + //
 				"<body>" + //
@@ -1371,7 +1368,7 @@ public class ComponentInheritanceTest {
 	@Test
 	public void GivenTwoLevelsHierarchyAndAttrOperators_ThenOperatorsRemoved() {
 		// given
-		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler(tagCompos, tagTemplates));
+		when(project.getOperatorsHandler()).thenReturn(new AttrOperatorsHandler());
 
 		String pageHTML = "" + //
 				"<body>" + //

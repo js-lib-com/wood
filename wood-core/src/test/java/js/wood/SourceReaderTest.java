@@ -22,11 +22,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.util.Classes;
 import js.util.Files;
+import js.wood.impl.FileType;
 import js.wood.impl.LayoutParameters;
+import js.wood.impl.OperatorsNaming;
 import js.wood.impl.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceReaderTest {
+	@Mock
+	private Project project;
 	@Mock
 	private FilePath sourceFile;
 	@Mock
@@ -35,6 +39,8 @@ public class SourceReaderTest {
 	@Before
 	public void beforeTest() throws Exception {
 		when(sourceFile.exists()).thenReturn(true);
+		when(sourceFile.getProject()).thenReturn(project);
+		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 	}
 
 	@Test
@@ -115,6 +121,7 @@ public class SourceReaderTest {
 				"	width: @eval(add 2px (add 3px 4px));" + //
 				"}";
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+		when(sourceFile.cloneTo(FileType.VAR)).thenReturn(sourceFile);
 
 		SourceReader reader = new SourceReader(sourceFile, handler);
 

@@ -15,8 +15,8 @@ import js.wood.CT;
  * @since 1.0
  */
 public enum FileType {
-	NONE, 
-	
+	NONE,
+
 	/** Layout is HTM file that describe UI structure. */
 	LAYOUT,
 
@@ -30,7 +30,10 @@ public enum FileType {
 	XML,
 
 	/** Media files, mostly support images. */
-	MEDIA;
+	MEDIA,
+
+	/** Synthetic file used to convey path information about component when resolving variables. */
+	VAR;
 
 	public String extension() {
 		switch (this) {
@@ -45,6 +48,9 @@ public enum FileType {
 
 		case XML:
 			return CT.XML_EXT;
+
+		case VAR:
+			return CT.VAR_EXT;
 
 		default:
 			throw new BugError("Attempt to got extension for file type |%s|.", this);
@@ -86,6 +92,9 @@ public enum FileType {
 
 		case CT.XML_EXT:
 			return FileType.XML;
+			
+		case CT.VAR_EXT:
+			return FileType.VAR;
 		}
 		return MEDIA;
 	}
