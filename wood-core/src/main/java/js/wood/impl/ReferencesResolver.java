@@ -40,7 +40,10 @@ public class ReferencesResolver {
 	public String parse(String value, FilePath sourceFile, IReferenceHandler referenceHandler) {
 		Params.notNullOrEmpty(value, "Value");
 
-		Reader reader = new SourceReader(new StringReader(value), sourceFile, referenceHandler);
+		// variable file is a synthetic file used only to convey information about related component path
+		FilePath varFile = sourceFile.isSynthetic() ? sourceFile : sourceFile.cloneTo(FileType.VAR);
+
+		Reader reader = new SourceReader(new StringReader(value), varFile, referenceHandler);
 		StringWriter writer = new StringWriter();
 		try {
 			Files.copy(reader, writer);

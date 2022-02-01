@@ -1,10 +1,14 @@
 package js.wood.impl;
 
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.StringReader;
 
 import org.junit.Before;
@@ -15,11 +19,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
+import js.wood.Reference;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentDescriptorTest {
 	@Mock
-	private FilePath filePath;
+	private FilePath descriptorFile;
 	@Mock
 	private IReferenceHandler referenceHandler;
 
@@ -27,48 +32,75 @@ public class ComponentDescriptorTest {
 
 	@Before
 	public void beforeTest() {
-		when(filePath.exists()).thenReturn(true);
+		when(descriptorFile.exists()).thenReturn(true);
 	}
 
 	@Test
-	public void properties() {
+	public void GivenProperties_ThenRetrieve() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
-				"	<version>1.0</version>" + //
-				"	<security-role>admin</security-role>" + //
+				"	<group>admin</group>" + //
 				"</component>";
+		
+		// when
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getVersion(), equalTo("1.0"));
-		assertThat(descriptor.getSecurityRole(), equalTo("admin"));
+		// then
+		assertThat(descriptor.getDescriptorFile(), equalTo(descriptorFile));
+		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
 	@Test
-	public void properties_Missing() {
+	public void GivenPropertyWithVariable_ThenResolve() throws IOException {
+		// given
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<component>" + //
+				"	<group>@string/role</group>" + //
+				"</component>";
+		when(referenceHandler.onResourceReference(eq(new Reference(ResourceType.STRING, "role")), any(FilePath.class))).thenReturn("admin");
+
+		// when
+		descriptor = descriptor(xml);
+
+		// then
+		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
+	}
+
+	@Test
+	public void GivenMissingProperty_ThenNull() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"</component>";
+		
+		// when
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getVersion(), nullValue());
-		assertThat(descriptor.getSecurityRole(), nullValue());
+		// then
+		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
 	@Test
-	public void properties_Empty() {
+	public void GivenEmptyProperty_ThenNull() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"	<version></version>" + //
-				"	<security-role></security-role>" + //
+				"	<group></group>" + //
 				"</component>";
+		
+		// when
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getVersion(), nullValue());
-		assertThat(descriptor.getSecurityRole(), nullValue());
+		// then
+		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	
 	private ComponentDescriptor descriptor(String xml) {
-		when(filePath.getReader()).thenReturn(new StringReader(xml));
-		return new ComponentDescriptor(filePath, referenceHandler);
+		when(descriptorFile.getReader()).thenReturn(new StringReader(xml));
+		return new ComponentDescriptor(descriptorFile, referenceHandler);
 	}
 }

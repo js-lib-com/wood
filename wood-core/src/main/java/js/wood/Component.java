@@ -56,8 +56,6 @@ public class Component {
 	/** Parent project reference. */
 	private final Project project;
 
-	private final Factory factory;
-
 	/** Operators handler created by project, based on the naming strategy selected by developer. */
 	private final IOperatorsHandler operators;
 
@@ -69,7 +67,7 @@ public class Component {
 
 	private final String description;
 
-	private final String securityRole;
+	private final String resourcesGroup;
 
 	/** This component base layout file path. */
 	private final FilePath baseLayoutPath;
@@ -90,6 +88,10 @@ public class Component {
 	 * Descriptors for page meta elements, declared on this component descriptor. Meta descriptors order is preserved.
 	 * <p>
 	 * This field is optional with default to empty list.
+	 * <p>
+	 * Implementation note: use list instead of linked hash set to simplify the interface of this class, even if this means to
+	 * add some extra internal checks, when insert values. The same is true for {@link #linkDescriptors} and
+	 * {@link #scriptDescriptors}.
 	 */
 	private final List<IMetaDescriptor> metaDescriptors = new ArrayList<>();
 
@@ -122,7 +124,7 @@ public class Component {
 	 * @param referenceHandler resource references handler.
 	 */
 	public Component(CompoPath compoPath, IReferenceHandler referenceHandler) {
-		this(compoPath.getLayoutPathEx(), referenceHandler);
+		this(compoPath.getLayoutPath(), referenceHandler);
 	}
 
 	/**
@@ -137,10 +139,12 @@ public class Component {
 	 * @param referenceHandler resource references handler,
 	 */
 	public Component(FilePath layoutPath, IReferenceHandler referenceHandler) {
+		if (!layoutPath.exists()) {
+			throw new WoodException("Missing component layout |%s|.", layoutPath);
+		}
 		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
 
 		this.project = layoutPath.getProject();
-		this.factory = this.project.getFactory();
 		this.operators = this.project.getOperatorsHandler();
 		this.layoutParameters = new LayoutParameters();
 		this.referenceHandler = referenceHandler;
@@ -149,18 +153,15 @@ public class Component {
 		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 
 		this.baseLayoutPath = layoutPath;
-		this.name = layoutPath.getBaseName();
+		this.name = layoutPath.getBasename();
 		this.display = descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", Strings.toTitleCase(name)));
 		this.description = descriptor.getDescription(this.display);
-		this.securityRole = descriptor.getSecurityRole();
+		this.resourcesGroup = descriptor.getResourcesGroup();
 
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
-
-		addAll(metaDescriptors, descriptor.getMetaDescriptors());
-		addAll(linkDescriptors, descriptor.getLinkDescriptors());
-		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
+		mergeDescriptor(descriptor);
 	}
 
 	public void clean() {
@@ -208,12 +209,12 @@ public class Component {
 
 		// widget path element is part of base component and contains the widget path
 		// it acts as insertion point; is where widget layout is inserted
-		for (Element widgetPathElement : getCompoPathElements(layout)) {
+		for (Element compoPathElement : getCompoPathElements(layout)) {
 
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = factory.createCompoPath(operators.getOperand(widgetPathElement, Operator.COMPO));
+			CompoPath compoPath = project.createCompoPath(operators.getOperand(compoPathElement, Operator.COMPO));
 
 			FilePath childLayoutPath = compoPath.getLayoutPath();
 			if (!childLayoutPath.exists()) {
@@ -225,21 +226,21 @@ public class Component {
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
 			// source reader takes care to inject parameter values into widget layout
-			layoutParameters.reload(operators.getOperand(widgetPathElement, Operator.PARAM));
-			operators.removeOperator(widgetPathElement, Operator.PARAM);
+			layoutParameters.reload(operators.getOperand(compoPathElement, Operator.PARAM));
+			operators.removeOperator(compoPathElement, Operator.PARAM);
 			Element widgetLayout = scanComponentsTree(childLayoutPath, guardCount);
 
 			// update widget path element attributes with values from the widget layout root
 			// widget path element has precedence over widget layout attributes so that parent can control widget attributes
-			addAttrs(widgetPathElement, widgetLayout.getAttrs());
+			addAttrs(compoPathElement, widgetLayout.getAttrs());
 
 			// remove all children from widget path element and insert the actual widget layout elements
-			widgetPathElement.removeChildren();
+			compoPathElement.removeChildren();
 			for (Element widgetChild : widgetLayout.getChildren()) {
-				widgetPathElement.addChild(widgetChild);
+				compoPathElement.addChild(widgetChild);
 			}
 
-			operators.removeOperator(widgetPathElement, Operator.COMPO);
+			operators.removeOperator(compoPathElement, Operator.COMPO);
 		}
 
 		return layout.getRoot();
@@ -279,6 +280,10 @@ public class Component {
 
 		// component layout may have related style file; collect if into this base component used styles list
 		collectRelatedStyle(layoutPath);
+
+		if (!layoutDoc.getRoot().hasChildren()) {
+			return layoutDoc;
+		}
 
 		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
 		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
@@ -321,7 +326,7 @@ public class Component {
 	 * @return newly created template document with editable areas resolved.
 	 */
 	private Document consolidateTemplate(FilePath componentLayoutPath, ContentFragment contentFragment, int guardCounter) {
-		CompoPath templateCompoPath = factory.createCompoPath(contentFragment.getTemplatePath());
+		CompoPath templateCompoPath = project.createCompoPath(contentFragment.getTemplatePath());
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
 		if (!templateLayoutPath.exists()) {
 			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, componentLayoutPath);
@@ -360,9 +365,10 @@ public class Component {
 
 			if (editableElement.getParent() != null) {
 				// insert content element - and all its descendants into template document, before editable element
+				// ensure that newly imported content element has the same tag as editable element
 				// then merge newly inserted content and editable elements attributes, but content attributes takes precedence
 				editableElement.insertBefore(contentElement);
-				addAttrs(editableElement.getPreviousSibling(), editableElement.getAttrs());
+				addAttrs(editableElement.getPreviousSibling().renameElement(editableElement.getTag()), editableElement.getAttrs());
 				cleanupEditables = true;
 			} else {
 				for (Element child : contentElement.getChildren()) {
@@ -375,6 +381,8 @@ public class Component {
 		if (cleanupEditables) {
 			editables.remove();
 		}
+		addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+		operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
 		return templateDoc;
 	}
 
@@ -389,15 +397,16 @@ public class Component {
 	}
 
 	/**
-	 * Return page security role or null if security role is not defined. This property has meaning only on page components.
+	 * Return resources group this component belongs or null if component is in global space. This property has meaning only on
+	 * page components.
 	 * <p>
-	 * Security role is declared on page components and is used by site builder to create specific sub-directories where to
-	 * store role related files.
+	 * Resources group is declared on page components and is used by site builder to create specific sub-directories where to
+	 * store group related resources.
 	 * 
-	 * @return page security role or null if not defined.
+	 * @return resources group or null if component is in global space.
 	 */
-	public String getSecurityRole() {
-		return securityRole;
+	public String getResourcesGroup() {
+		return resourcesGroup;
 	}
 
 	/**
@@ -490,8 +499,9 @@ public class Component {
 	 * @return script descriptor or null if not defined.
 	 */
 	public IScriptDescriptor getScriptDescriptor(String fileName) {
-		FilePath file = baseLayoutPath.getParentDirPath().getFilePath(fileName);
-		return file.exists() ? new ScriptDescriptor(file.value()) : null;
+		FilePath compoDir = baseLayoutPath.getParentDir();
+		FilePath file = compoDir != null ? compoDir.getFilePath(fileName) : project.createFilePath(fileName);
+		return file.exists() ? ScriptDescriptor.create(file) : null;
 	}
 
 	/**
@@ -549,7 +559,7 @@ public class Component {
 	 * @return widgets array possible empty.
 	 */
 	private Element[] getCompoPathElements(Document layout) {
-		EList elist = operators.findByOperator(layout, Operator.COMPO);
+		EList elist = operators.findByOperator(layout.getRoot(), Operator.COMPO);
 		if (elist.isEmpty()) {
 			return EMPTY_ARRAY;
 		}
@@ -563,9 +573,22 @@ public class Component {
 	private void mergeDescriptor(FilePath layoutPath) {
 		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
 		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		mergeDescriptor(descriptor);
+	}
+
+	private void mergeDescriptor(ComponentDescriptor descriptor) {
 		addAll(metaDescriptors, descriptor.getMetaDescriptors());
 		addAll(linkDescriptors, descriptor.getLinkDescriptors());
 		addAll(scriptDescriptors, descriptor.getScriptDescriptors());
+
+		// by convention, component path and, descriptor and script files have the same name
+		FilePath scriptFile = descriptor.getDescriptorFile().cloneTo(FileType.SCRIPT);
+		if (scriptFile.exists()) {
+			IScriptDescriptor script = ScriptDescriptor.create(scriptFile);
+			if (!scriptDescriptors.contains(script)) {
+				scriptDescriptors.add(script);
+			}
+		}
 	}
 
 	/**
@@ -717,6 +740,10 @@ public class Component {
 			if (this.contentElements.isEmpty()) {
 				this.contentElements.add(root);
 			}
+		}
+
+		public Element getRoot() {
+			return root;
 		}
 
 		public String getTemplatePath() {

@@ -39,9 +39,6 @@ import js.wood.impl.ResourceType;
  * @since 1.0
  */
 public class Variables {
-	/** WOOD project context. */
-	private final Project project;
-
 	/**
 	 * Resource references resolver for this variable values. A variable value may contain references to nested variables,
 	 * creating a references tree.
@@ -66,11 +63,9 @@ public class Variables {
 	/**
 	 * Create empty variables instance.
 	 * 
-	 * @param project WOOD project.
 	 * @throws WoodException if SAXA parser initialization fails.
 	 */
-	public Variables(Project project) {
-		this.project = project;
+	public Variables() {
 		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			this.saxParser = factory.newSAXParser();
@@ -87,13 +82,13 @@ public class Variables {
 	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this
 	 * constructor does not load values and resulting variables instance is empty.
 	 * 
-	 * @param dirPath directory to scan for variables definition files.
+	 * @param dir directory to scan for variables definition files.
 	 * @throws WoodException if SAXA parser initialization fails.
-	 * @see #load(DirPath)
+	 * @see #loadDir(FilePath)
 	 */
-	public Variables(DirPath dirPath) {
-		this(dirPath.getProject());
-		load(dirPath);
+	public Variables(FilePath dir) {
+		this();
+		loadDir(dir);
 	}
 
 	/**
@@ -103,12 +98,12 @@ public class Variables {
 	 * If given <code>dirPath</code> parameter is not an existing directory or has no variables definition files, this method
 	 * just clean-up this variables instance values.
 	 * 
-	 * @param dirPath directory to scan for variables definition files.
-	 * @see #load(DirPath)
+	 * @param dir directory to scan for variables definition files.
+	 * @see #loadDir(FilePath)
 	 */
-	public void reload(DirPath dirPath) {
+	public void reload(FilePath dir) {
 		localeValues.clear();
-		load(dirPath);
+		loadDir(dir);
 	}
 
 	/**
@@ -118,14 +113,14 @@ public class Variables {
 	 * <p>
 	 * Note that only direct child files are parsed. Also, if given directory does not exist this method does nothing.
 	 * 
-	 * @param dirPath directory path.
+	 * @param dir directory path.
 	 * @throws WoodException if file reading or parsing fails.
 	 */
-	private void load(DirPath dirPath) {
-		for (FilePath filePath : dirPath) {
-			if (filePath.isVariables()) {
+	private void loadDir(FilePath dir) {
+		for (FilePath file : dir) {
+			if (file.isVariables()) {
 				try {
-					_load(filePath);
+					_load(file);
 				} catch (IOException | SAXException e) {
 					throw new WoodException(e);
 				}
@@ -167,9 +162,7 @@ public class Variables {
 	 */
 	private void _load(FilePath file) throws IOException, SAXException {
 		Locale locale = file.getVariants().getLocale();
-		if (locale == null) {
-			locale = project.getDefaultLocale();
-		}
+		// at this point locale can be null for files without locale variant
 		Map<Reference, String> values = localeValues.get(locale);
 		if (values == null) {
 			values = new HashMap<Reference, String>();
@@ -185,7 +178,7 @@ public class Variables {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Variable value retrieving with circular dependencies detection on references resolver
+	// Variable value retrieving with circular dependencies detection
 
 	/**
 	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when locale variant is not used.
@@ -242,7 +235,7 @@ public class Variables {
 
 		// 2. if not found try to get value for default locale
 		if (value == null) {
-			values = localeValues.get(project.getDefaultLocale());
+			values = localeValues.get(null);
 			if (values != null) {
 				value = values.get(reference);
 			}

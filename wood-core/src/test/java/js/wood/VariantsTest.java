@@ -19,9 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import js.wood.FilePath;
-import js.wood.Project;
-import js.wood.WoodException;
 import js.wood.impl.MediaQueryDefinition;
 import js.wood.impl.Variants;
 

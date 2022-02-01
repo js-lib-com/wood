@@ -1,6 +1,5 @@
 package js.wood.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +11,7 @@ import java.util.regex.Matcher;
 
 import js.dom.Element;
 import js.util.Strings;
+import js.wood.CT;
 import js.wood.FilePath;
 import js.wood.WoodException;
 
@@ -123,22 +123,9 @@ public class ProjectDescriptor extends BaseDescriptor {
 	/** Media query definitions. */
 	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
 
-	public ProjectDescriptor(File file) {
-		super(file);
-		init();
-	}
+	public ProjectDescriptor(FilePath descriptorFile) {
+		super(descriptorFile, descriptorFile.exists() ? descriptorFile.getReader() : null);
 
-	/**
-	 * Test constructor.
-	 * 
-	 * @param descriptorFile descriptor file.
-	 */
-	ProjectDescriptor(FilePath descriptorFile) {
-		super(descriptorFile);
-		init();
-	}
-
-	private void init() {
 		Strings.split(text("locale", "en"), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <locale> element.");
@@ -180,36 +167,65 @@ public class ProjectDescriptor extends BaseDescriptor {
 		return new Locale(matcher.group(1), country);
 	}
 
-	/**
-	 * Get project author or null if not set.
-	 * 
-	 * @return project author or null.
-	 */
-	public String getAuthor() {
-		return text("author", null);
+	// --------------------------------------------------------------------------------------------
+	
+	public String name() {
+		return text("name", null);
+	}
+	
+	public String getTechnology() {
+		return text("technology", "js-lib");
+	}
+
+	public String getPackage() {
+		return text("package", "");
 	}
 
 	/**
-	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
-	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
-	 * 
-	 * @return unmodifiable list of project locales.
-	 * @see #locales
-	 */
-	public List<Locale> getLocales() {
-		return Collections.unmodifiableList(locales);
-	}
-
-	/**
-	 * Get naming strategy used to declare <em>WOOD</em> operators. Supported values are defined by {@link NamingStrategy}
-	 * enumeration.
+	 * Get naming strategy used to declare <em>WOOD</em> operators. Property name is <code>operators</code> and supported values
+	 * are defined by {@link OperatorsNaming} enumeration.
 	 * <p>
-	 * If no naming strategy is declared on project descriptor uses {@link NamingStrategy#XMLNS}.
+	 * If no naming strategy is declared on project descriptor uses {@link OperatorsNaming#DATA_ATTR}.
 	 * 
 	 * @return naming strategy for <em>WOOD</em> operators.
 	 */
-	public NamingStrategy getNamingStrategy() {
-		return NamingStrategy.valueOf(text("naming", NamingStrategy.XMLNS.name()));
+	public OperatorsNaming getOperatorsNaming() {
+		return OperatorsNaming.valueOf(text("operators", OperatorsNaming.DATA_ATTR.name()));
+	}
+
+	public String getBuildDir() {
+		return text("build-dir", CT.DEF_BUILD_DIR);
+	}
+
+	public String getAssetDir() {
+		return text("asset-dir", CT.DEF_ASSET_DIR);
+	}
+
+	public String getThemeDir() {
+		return text("theme-dir", CT.DEF_THEME_DIR);
+	}
+
+	/**
+	 * Get the list of pages excluded from build process. Returned list is empty if <code>excludes</code> element is not
+	 * present.
+	 * 
+	 * @return unmodifiable excluded paths list, possible empty.
+	 */
+	public List<String> getExcludeDirs() {
+		Element el = doc.getByTag("exclude-dirs");
+		if (el == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(Strings.split(el.getText(), ',', ' '));
+	}
+
+	/**
+	 * Get project authors list which may be empty if none declared.
+	 * 
+	 * @return project authors list, possible empty.
+	 */
+	public List<String> getAuthors() {
+		return Strings.split(text("authors", ""), ',');
 	}
 
 	/**
@@ -235,7 +251,18 @@ public class ProjectDescriptor extends BaseDescriptor {
 	public String getServiceWorker() {
 		return text("service-worker", "ServiceWorker.js");
 	}
-	
+
+	/**
+	 * Return project configured locales. Returned list has at least one record, even if <code>locale</code> element is missing
+	 * from project configuration file. See {@link #locales} for details. Returned list is immutable.
+	 * 
+	 * @return unmodifiable list of project locales.
+	 * @see #locales
+	 */
+	public List<Locale> getLocales() {
+		return Collections.unmodifiableList(locales);
+	}
+
 	/**
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
 	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
@@ -253,19 +280,5 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 */
 	public Collection<MediaQueryDefinition> getMediaQueryDefinitions() {
 		return Collections.unmodifiableCollection(mediaQueries);
-	}
-
-	/**
-	 * Get the list of pages excluded from build process. Returned list is empty if <code>excludes</code> element is not
-	 * present.
-	 * 
-	 * @return unmodifiable excluded paths list, possible empty.
-	 */
-	public List<String> getExcludes() {
-		Element el = doc.getByTag("excludes");
-		if (el == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableList(Strings.split(el.getText(), ',', ' '));
 	}
 }

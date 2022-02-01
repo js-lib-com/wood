@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.js-lib</groupId>
 		<artifactId>wood</artifactId>
-		<version>${project.version}</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>wood-preview</artifactId>
 
@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>com.js-lib</groupId>
 			<artifactId>wood-core</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.js-lib</groupId>
@@ -24,10 +24,11 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<groupId>com.js-lib</groupId>
+			<artifactId>js-servlet-api</artifactId>
+			<version>1.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.js-lib</groupId>
 			<artifactId>js-json</artifactId>

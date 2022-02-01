@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,46 +21,74 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import js.wood.CT;
 import js.wood.FilePath;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectDescriptorTest {
 	@Mock
-	private FilePath filePath;
+	private FilePath descriptorFile;
 
 	private ProjectDescriptor descriptor;
 
 	@Before
 	public void beforeTest() throws FileNotFoundException {
-		when(filePath.exists()).thenReturn(true);
+		when(descriptorFile.exists()).thenReturn(true);
 	}
 
 	@Test
-	public void properties() {
+	public void GivenPropertiesThenRetrieve() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
-				"	<author>j(s)-lib</author>" + //
-				"	<naming-strategy>XMLNS</naming-strategy>" + //
-				"	<manifest>res/app-manifest.json</manifest>" + //
+				"	<technology>w3c</technology>" + //
+				"	<package>com.kidscademy</package>" + //
+				"	<operators>XMLNS</operators>" + //
+				"	<build-dir>target/site</build-dir>" + //
+				"	<asset-dir>asset</asset-dir>" + //
+				"	<theme-dir>theme</theme-dir>" + //
+				"	<exclude-dirs>page/about</exclude-dirs>" + //
+				"	<authors>Iulian Rotaru</authors>" + //
+				"	<display>Project Display</display>" + //
+				"	<description>Project description.</description>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
+				"	<manifest>res/app-manifest.json</manifest>" + //
+				"	<service-worker>script/sw.js</service-worker>" + //
+				"	<locale>en</locale>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getAuthor(), equalTo("j(s)-lib"));
-		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
-		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
+		// then
+		assertThat(descriptor.getTechnology(), equalTo("w3c"));
+		assertThat(descriptor.getPackage(), equalTo("com.kidscademy"));
+		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.XMLNS));
+		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
+		assertThat(descriptor.getAssetDir(), equalTo("asset"));
+		assertThat(descriptor.getThemeDir(), equalTo("theme"));
+		assertThat(descriptor.getExcludeDirs(), equalTo(Arrays.asList("page/about")));
+		assertThat(descriptor.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru")));
+		assertThat(descriptor.getDisplay(null), equalTo("Project Display"));
+		assertThat(descriptor.getDescription(null), equalTo("Project description."));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
+		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
+		assertThat(descriptor.getServiceWorker(), equalTo("script/sw.js"));
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 
 	@Test
-	public void locales() {
+	public void GivenMultipleLocale_ThenRetrieveAll() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<locale>en, de, fr, ro</locale>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
+		// then
 		List<Locale> locales = descriptor.getLocales();
 		assertThat(locales, notNullValue());
 		assertThat(locales, hasSize(4));
@@ -67,37 +96,55 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void excludes() {
+	public void GivenMultipleExcludeDirs_ThenRetrieveAll() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
-				"	<excludes>page/about</excludes>" + //
+				"	<exclude-dirs>page/about, page/contact</exclude-dirs>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
-		List<String> excludes = descriptor.getExcludes();
+		// then
+		List<String> excludes = descriptor.getExcludeDirs();
 		assertThat(excludes, notNullValue());
-		assertThat(excludes, hasSize(1));
+		assertThat(excludes, hasSize(2));
 		assertThat(excludes.get(0), equalTo("page/about"));
+		assertThat(excludes.get(1), equalTo("page/contact"));
 	}
 
 	@Test
-	public void defaults() throws FileNotFoundException {
+	public void GivenMissingProperties_ThenDefaults() {
+		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en</locale>" + //
 				"</project>";
+
+		// when
 		descriptor = descriptor(xml);
 
-		assertThat(descriptor.getAuthor(), nullValue());
-		assertThat(descriptor.getNamingStrategy(), equalTo(NamingStrategy.XMLNS));
-		assertThat(descriptor.getExcludes(), emptyIterable());
-		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
+		// then
+		assertThat(descriptor.getTechnology(), equalTo("js-lib"));
+		assertThat(descriptor.getPackage(), equalTo(""));
+		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.DATA_ATTR));
+		assertThat(descriptor.getBuildDir(), equalTo(CT.DEF_BUILD_DIR));
+		assertThat(descriptor.getAssetDir(), equalTo(CT.DEF_ASSET_DIR));
+		assertThat(descriptor.getThemeDir(), equalTo(CT.DEF_THEME_DIR));
+		assertThat(descriptor.getExcludeDirs(), emptyIterable());
+		assertThat(descriptor.getAuthors().size(), equalTo(0));
+		assertThat(descriptor.getDisplay(null), nullValue());
+		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
+		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
+		assertThat(descriptor.getServiceWorker(), equalTo("ServiceWorker.js"));
+		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 
+	// --------------------------------------------------------------------------------------------
+
 	private ProjectDescriptor descriptor(String xml) {
-		when(filePath.getReader()).thenReturn(new StringReader(xml));
-		return new ProjectDescriptor(filePath);
+		when(descriptorFile.getReader()).thenReturn(new StringReader(xml));
+		return new ProjectDescriptor(descriptorFile);
 	}
 }

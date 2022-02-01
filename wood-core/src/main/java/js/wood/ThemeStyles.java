@@ -8,7 +8,7 @@ public class ThemeStyles {
 	private final FilePath fx;
 	private final List<FilePath> styles = new ArrayList<>();
 
-	public ThemeStyles(DirPath themeDir) {
+	public ThemeStyles(FilePath themeDir) {
 		FilePath reset = null;
 		FilePath fx = null;
 		
@@ -36,15 +36,15 @@ public class ThemeStyles {
 		this.fx = fx;
 	}
 
-	FilePath getReset() {
+	public FilePath getReset() {
 		return reset;
 	}
 
-	FilePath getFx() {
+	public FilePath getFx() {
 		return fx;
 	}
 
-	List<FilePath> getStyles() {
+	public List<FilePath> getStyles() {
 		return styles;
 	}
 }

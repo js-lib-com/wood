@@ -1,0 +1,5 @@
+<compo>
+	<script src="lib/paging/paging.js">
+		<dependency src="lib/js-lib/js-lib.js"></dependency>
+	</script>
+</compo>

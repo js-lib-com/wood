@@ -10,6 +10,8 @@ public final class CT {
 	/** Project configuration file. */
 	public static final String PROJECT_CONFIG = "project.xml";
 
+	public static final String MANIFEST_FILE = "manifest.json";
+
 	// ------------------------------------------------------
 	// Files types recognized by this build tool
 
@@ -33,14 +35,25 @@ public final class CT {
 	/** Same as {@link #XML_EXT} but with leading dot. */
 	public static final String DOT_XML_EXT = ".xml";
 
+	/** Synthetic file used to convey path information about component variables. */
+	public static final String VAR_EXT = "var";
+
 	// ------------------------------------------------------
 	// Project directories relative to project root
 
-	/** Project assets directory stores global variables and media files. */
-	public static final String ASSETS_DIR = "res/asset/";
+	public static final String DEF_BUILD_DIR = "build/";
 
-	/** Site theme directory for styles related to UI primitive elements design and theme variables. */
-	public static final String THEME_DIR = "res/theme/";
+	/**
+	 * Project assets directory stores global variables and media files. This field stores the default value; it can be
+	 * overwritten by <code>asset.dir</code> property from project properties file.
+	 */
+	public static final String DEF_ASSET_DIR = "res/asset/";
+
+	/**
+	 * Project theme directory for styles related to UI primitive elements design and theme variables. This field sores the
+	 * default value; it can be overwritten by <code>theme.dir</code> property from project properties file.
+	 */
+	public static final String DEF_THEME_DIR = "res/theme/";
 
 	// ------------------------------------------------------
 	// Dynamic generated files

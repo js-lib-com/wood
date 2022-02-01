@@ -29,15 +29,15 @@ public class ComponentIntegrationTest {
 
 	@Before
 	public void beforeTest() {
-		project = new Project(new File("src/test/resources/project"));
+		project = Project.create(new File("src/test/resources/compo"), referenceHandler);
 
 		referenceHandler = new IReferenceHandler() {
 			@Override
 			public String onResourceReference(Reference reference, FilePath sourcePath) {
-				Variables variables = new Variables(sourcePath.getParentDirPath());
-				if (project.getAssetsDir().exists()) {
+				Variables variables = new Variables(sourcePath.getParentDir());
+				if (project.getAssetDir().exists()) {
 					try {
-						Classes.invoke(variables, "load", project.getAssetsDir());
+						Classes.invoke(variables, "load", project.getAssetDir());
 					} catch (Exception e) {
 						throw new IllegalStateException(e);
 					}
@@ -48,7 +48,7 @@ public class ComponentIntegrationTest {
 	}
 
 	@Test
-	public void component() {
+	public void createComponent() {
 		Component compo = new Component(new CompoPath(project, "res/compo"), referenceHandler);
 		Element layout = compo.getLayout();
 
@@ -142,6 +142,8 @@ public class ComponentIntegrationTest {
 		assertThat(layout.getByTag("div"), nullValue());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	
 	private static Matcher<Component> properties() {
 		return new TypeSafeMatcher<Component>() {
 			@Override
@@ -159,7 +161,7 @@ public class ComponentIntegrationTest {
 				assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 				assertThat(compo.getLinkDescriptors(), empty());
 				assertThat(compo.getMetaDescriptors(), empty());
-				assertThat(compo.getSecurityRole(), nullValue());
+				assertThat(compo.getResourcesGroup(), nullValue());
 				return true;
 			}
 		};

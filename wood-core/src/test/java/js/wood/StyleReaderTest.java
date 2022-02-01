@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -33,14 +32,7 @@ public class StyleReaderTest {
 	@Mock
 	private Project project;
 	@Mock
-	private Factory factory;
-	@Mock
 	private FilePath styleFile;
-
-	@Before
-	public void beforeTest() {
-		when(project.getFactory()).thenReturn(factory);
-	}
 
 	@Test
 	public void constructor() throws IOException {
@@ -90,17 +82,17 @@ public class StyleReaderTest {
 		};
 		for(File styleFile:styleFiles) {
 			FilePath stylePath = new FilePath(project, styleFile);
-			when(factory.createFilePath(styleFile)).thenReturn(stylePath);
+			when(project.createFilePath(styleFile)).thenReturn(stylePath);
 		}
 
 		File stylesDir = Mockito.mock(File.class);
 		when(stylesDir.exists()).thenReturn(true);
 		when(stylesDir.getPath()).thenReturn("res/page");
 		when(stylesDir.listFiles()).thenReturn(styleFiles);
-		DirPath parentDir = new DirPath(project, stylesDir);
+		FilePath parentDir = new FilePath(project, stylesDir);
 
-		when(styleFile.getBaseName()).thenReturn("page");
-		when(styleFile.getParentDirPath()).thenReturn(parentDir);
+		when(styleFile.getBasename()).thenReturn("page");
+		when(styleFile.getParentDir()).thenReturn(parentDir);
 
 		String source = "body { width: 960px; }";
 		when(styleFile.getReader()).thenReturn(new StringReader(source));
@@ -164,11 +156,11 @@ public class StyleReaderTest {
 				new Mock("min-width: 1200px", "body { width: 1200px; }") //
 		};
 
-		DirPath parentDir = Mockito.mock(DirPath.class);
+		FilePath parentDir = Mockito.mock(FilePath.class);
 		List<FilePath> files = Arrays.stream(mocks).map(mock -> mock.file).collect(Collectors.toList());
 		when(parentDir.filter(any())).thenReturn(files);
 
-		when(styleFile.getParentDirPath()).thenReturn(parentDir);
+		when(styleFile.getParentDir()).thenReturn(parentDir);
 
 		String source = "body { width: 560px; }";
 		when(styleFile.getReader()).thenReturn(new StringReader(source));

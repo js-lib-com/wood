@@ -20,12 +20,15 @@ import js.wood.Reference;
 public class ReferencesResolverTest {
 	@Mock
 	private FilePath sourceFile;
+	@Mock
+	private FilePath varFile;
 
 	private ReferencesResolver resolver;
 
 	@Before
 	public void beforeTest() {
-		when(sourceFile.exists()).thenReturn(true);
+		when(sourceFile.cloneTo(FileType.VAR)).thenReturn(varFile);
+		when(varFile.isSynthetic()).thenReturn(true);
 		resolver = new ReferencesResolver();
 	}
 

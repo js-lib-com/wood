@@ -82,9 +82,10 @@ public class StyleReader extends Reader {
 		this.reader = styleFile.getReader();
 		this.state = State.BASE_CONTENT;
 
-		final String basename = styleFile.getBaseName();
-		this.variants = styleFile.getParentDirPath().filter(filePath -> {
-			return filePath.getBaseName().equals(basename) && filePath.getVariants().hasMediaQueries();
+		final String basename = styleFile.getBasename();
+		FilePath parentDir = styleFile.getParentDir();
+		this.variants = parentDir == null ? Collections.emptyList() : parentDir.filter(filePath -> {
+			return filePath.getBasename().equals(basename) && filePath.getVariants().hasMediaQueries();
 		});
 
 		Collections.sort(variants, (filePath1, filePath2) -> {

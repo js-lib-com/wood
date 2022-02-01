@@ -1,6 +1,8 @@
 package js.wood.impl;
 
 import js.dom.Element;
+import js.util.Params;
+import js.wood.FilePath;
 import js.wood.IScriptDescriptor;
 
 /**
@@ -11,7 +13,7 @@ import js.wood.IScriptDescriptor;
  * @since 1.0
  */
 public class ScriptDescriptor implements IScriptDescriptor {
-	/** Script source is the URL from where third script is to be loaded. */
+	/** Script source is local file path or the URL from where third party script is to be loaded. */
 	private final String source;
 
 	private String type;
@@ -25,7 +27,8 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	private boolean embedded;
 	private boolean dynamic;
 
-	public ScriptDescriptor(String source) {
+	private ScriptDescriptor(String source) {
+		Params.notNull(source, "Script source");
 		this.source = source;
 	}
 
@@ -154,21 +157,31 @@ public class ScriptDescriptor implements IScriptDescriptor {
 		return source;
 	}
 
-	public static ScriptDescriptor create(Element scriptElement, IScriptDescriptor defaults) {
+	private static final String DEF_SCRIPT_TYPE = "text/javascript";
+	private static final String DEF_SCRIPT_DEFER = "true";
+
+	public static ScriptDescriptor create(FilePath scriptFile) {
+		ScriptDescriptor script = new ScriptDescriptor(scriptFile.value());
+		script.setType(DEF_SCRIPT_TYPE);
+		script.setDefer(DEF_SCRIPT_DEFER);
+		return script;
+	}
+
+	public static ScriptDescriptor create(Element scriptElement) {
 		final String src = scriptElement.getAttr("src");
 		assert src != null;
 		ScriptDescriptor script = new ScriptDescriptor(src);
 
-		script.setType(value(scriptElement.getAttr("type"), defaults.getType()));
-		script.setAsync(value(scriptElement.getAttr("async"), defaults.getAsync()));
-		script.setDefer(value(scriptElement.getAttr("defer"), defaults.getDefer()));
-		script.setNoModule(value(scriptElement.getAttr("nomodule"), defaults.getNoModule()));
-		script.setNonce(value(scriptElement.getAttr("nonce"), defaults.getNonce()));
-		script.setReferrerPolicy(value(scriptElement.getAttr("referrerpolicy"), defaults.getReferrerPolicy()));
-		script.setIntegrity(value(scriptElement.getAttr("integrity"), defaults.getIntegrity()));
-		script.setCrossOrigin(value(scriptElement.getAttr("crossorigin"), defaults.getCrossOrigin()));
-		script.setEmbedded(Boolean.parseBoolean(scriptElement.getAttr("embedded")));
-		script.setDynamic(Boolean.parseBoolean(scriptElement.getAttr("dynamic")));
+		script.setType(value(scriptElement.getAttr("type"), DEF_SCRIPT_TYPE));
+		script.setAsync(scriptElement.getAttr("async"));
+		script.setDefer(value(scriptElement.getAttr("defer"), DEF_SCRIPT_DEFER));
+		script.setNoModule(scriptElement.getAttr("nomodule"));
+		script.setNonce(scriptElement.getAttr("nonce"));
+		script.setReferrerPolicy(scriptElement.getAttr("referrerpolicy"));
+		script.setIntegrity(scriptElement.getAttr("integrity"));
+		script.setCrossOrigin(scriptElement.getAttr("crossorigin"));
+		script.setEmbedded(Boolean.parseBoolean(value(scriptElement.getAttr("embedded"), "false")));
+		script.setDynamic(Boolean.parseBoolean(value(scriptElement.getAttr("dynamic"), "false")));
 
 		return script;
 	}

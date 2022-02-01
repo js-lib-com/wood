@@ -1,7 +1,7 @@
 package js.wood.impl;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,48 +24,29 @@ import js.wood.WoodException;
  * @since 1.0
  */
 abstract class BaseDescriptor {
-	/** Empty XML document used when component descriptor file is missing. */
-	private static final Document EMPTY_DOC;
-	static {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-		EMPTY_DOC = builder.createXML("component");
-	}
+	/** Descriptor document builder. */
+	private static DocumentBuilder DOC_BUILDER = Classes.loadService(DocumentBuilder.class);
 
-	/** XML DOM document. */
+	/** Empty XML document used when component descriptor file is missing. */
+	private static final Document EMPTY_DOC = DOC_BUILDER.createXML("compo");
+
+	/** Descriptor file, for logging purposes. */
+	private final String descriptorFile;
+
+	/** Descriptor DOM document. */
 	protected final Document doc;
 
-	private final String descriptorFile;
-	private final ILinkDescriptor linkDefaults;
-	private final IScriptDescriptor scriptDefaults;
-
-	protected BaseDescriptor(FilePath descriptorFile) {
-		Document doc;
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			doc = descriptorFile.exists() ? builder.loadXML(descriptorFile.getReader()) : EMPTY_DOC;
-		} catch (IOException | SAXException e) {
-			doc = EMPTY_DOC;
+	protected BaseDescriptor(FilePath descriptorFile, Reader documentReader) {
+		Document doc = EMPTY_DOC;
+		if (documentReader != null) {
+			try (Reader reader = documentReader) {
+				doc = DOC_BUILDER.loadXML(reader);
+			} catch (IOException | SAXException e) {
+				throw new WoodException("Fail to load document %s: %s: %s", descriptorFile, e.getClass(), e.getMessage());
+			}
 		}
-
-		this.doc = doc;
 		this.descriptorFile = descriptorFile.value();
-		this.linkDefaults = new LinkDefaults(doc);
-		this.scriptDefaults = new ScriptDefaults(doc);
-	}
-
-	protected BaseDescriptor(File descriptorFile) {
-		Document doc;
-		try {
-			DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
-			doc = builder.loadXML(descriptorFile);
-		} catch (IOException | SAXException e) {
-			doc = EMPTY_DOC;
-		}
-
 		this.doc = doc;
-		this.descriptorFile = descriptorFile.getPath();
-		this.linkDefaults = new LinkDefaults(doc);
-		this.scriptDefaults = new ScriptDefaults(doc);
 	}
 
 	/**
@@ -115,9 +96,9 @@ abstract class BaseDescriptor {
 		List<ILinkDescriptor> descriptors = new ArrayList<>();
 		for (Element element : doc.findByTag("link")) {
 			if (!element.hasAttr("href")) {
-				throw new WoodException("Invalid descriptor file |%s|. Missing 'href' attribute from <style> element.", descriptorFile);
+				throw new WoodException("Invalid descriptor file |%s|. Missing 'href' attribute from <link> element.", descriptorFile);
 			}
-			LinkDescriptor descriptor = LinkDescriptor.create(element, linkDefaults);
+			LinkDescriptor descriptor = LinkDescriptor.create(element);
 			if (descriptors.contains(descriptor)) {
 				throw new WoodException("Duplicate link |%s| in project descriptor.", descriptor);
 			}
@@ -156,7 +137,7 @@ abstract class BaseDescriptor {
 			if (!element.hasAttr("src")) {
 				throw new WoodException("Invalid descriptor file |%s|. Missing 'src' attribute from <script> element.", descriptorFile);
 			}
-			ScriptDescriptor descriptor = ScriptDescriptor.create(element, scriptDefaults);
+			ScriptDescriptor descriptor = ScriptDescriptor.create(element);
 			if (descriptors.contains(descriptor)) {
 				throw new WoodException("Duplicate script |%s| in project descriptor.", descriptor);
 			}
@@ -179,161 +160,5 @@ abstract class BaseDescriptor {
 		}
 		String value = el.getText();
 		return !value.isEmpty() ? value : defaultValue;
-	}
-
-	private static class LinkDefaults implements ILinkDescriptor {
-		private final Document doc;
-
-		public LinkDefaults(Document doc) {
-			this.doc = doc;
-		}
-
-		@Override
-		public String getHref() {
-			return text("href");
-		}
-
-		@Override
-		public String getHreflang() {
-			return text("hreflang");
-		}
-
-		@Override
-		public String getRelationship() {
-			return text("rel", "stylesheet");
-		}
-
-		@Override
-		public String getType() {
-			return text("type", "text/css");
-		}
-
-		@Override
-		public String getMedia() {
-			return text("media");
-		}
-
-		@Override
-		public String getReferrerPolicy() {
-			return text("referrerpolicy");
-		}
-
-		@Override
-		public String getCrossOrigin() {
-			return text("crossorigin");
-		}
-
-		@Override
-		public String getIntegrity() {
-			return text("integrity");
-		}
-
-		@Override
-		public String getDisabled() {
-			return text("disabled");
-		}
-
-		@Override
-		public String getAsType() {
-			return text("as");
-		}
-
-		@Override
-		public String getPrefetch() {
-			return text("prefetch");
-		}
-
-		@Override
-		public String getSizes() {
-			return text("sizes");
-		}
-
-		@Override
-		public String getImageSizes() {
-			return text("imagesizes");
-		}
-
-		@Override
-		public String getImageSrcSet() {
-			return text("imagesrcset");
-		}
-
-		@Override
-		public String getTitle() {
-			return text("title");
-		}
-
-		private String text(String attribute, String... defaults) {
-			Element element = doc.getByTag("link-" + attribute);
-			return element != null ? element.getTextContent() : defaults.length == 1 ? defaults[0] : null;
-		}
-	}
-
-	private static class ScriptDefaults implements IScriptDescriptor {
-		private final Document doc;
-
-		public ScriptDefaults(Document doc) {
-			this.doc = doc;
-		}
-
-		@Override
-		public String getSource() {
-			return text("src");
-		}
-
-		@Override
-		public String getType() {
-			return text("type", "text/javascript");
-		}
-
-		@Override
-		public String getAsync() {
-			return text("async");
-		}
-
-		@Override
-		public String getDefer() {
-			return text("defer", "true");
-		}
-
-		@Override
-		public String getNoModule() {
-			return text("nomodule");
-		}
-
-		@Override
-		public String getNonce() {
-			return text("nonce");
-		}
-
-		@Override
-		public String getReferrerPolicy() {
-			return text("referrerpolicy");
-		}
-
-		@Override
-		public String getIntegrity() {
-			return text("integrity");
-		}
-
-		@Override
-		public String getCrossOrigin() {
-			return text("crossorigin");
-		}
-
-		@Override
-		public boolean isEmbedded() {
-			return Boolean.parseBoolean(text("embedded"));
-		}
-
-		@Override
-		public boolean isDynamic() {
-			return Boolean.parseBoolean(text("dynamic"));
-		}
-
-		private String text(String attribute, String... defaults) {
-			Element element = doc.getByTag("script-" + attribute);
-			return element != null ? element.getTextContent() : defaults.length == 1 ? defaults[0] : null;
-		}
 	}
 }

@@ -2,6 +2,7 @@ package js.wood.impl;
 
 import js.wood.FilePath;
 import js.wood.IReferenceHandler;
+import js.wood.SourceReader;
 
 /**
  * Component descriptor contains properties customizable at component level. This is in contrast with {@link ProjectDescriptor}
@@ -94,62 +95,34 @@ import js.wood.IReferenceHandler;
  */
 public class ComponentDescriptor extends BaseDescriptor {
 	/** File path for component descriptor. It has owning component name and XML extension. */
-	private final FilePath filePath;
-
-	/** References handler used to actually process referenced resources; defined externally. */
-	private final IReferenceHandler referenceHandler;
-
-	/**
-	 * Resolver parses element values and invoke {@link #referenceHandler} for discovered references, if any. It is necessary
-	 * because is legal for element value to contain resource references.
-	 */
-	private final ReferencesResolver referenceResolver;
+	private final FilePath descriptorFile;
 
 	/**
 	 * Create component descriptor instance and initialize it from given file. Values defined by descriptor may contain resource
 	 * references that need to be resolved. This descriptor uses external defined references handler just for that.
 	 * 
-	 * @param filePath descriptor file path,
+	 * @param descriptorFile descriptor file path,
 	 * @param referenceHandler resource references handler.
 	 */
-	public ComponentDescriptor(FilePath filePath, IReferenceHandler referenceHandler) {
-		super(filePath);
-		this.filePath = filePath;
-		this.referenceHandler = referenceHandler;
-		this.referenceResolver = new ReferencesResolver();
+	public ComponentDescriptor(FilePath descriptorFile, IReferenceHandler referenceHandler) {
+		super(descriptorFile, descriptorFile.exists() ? new SourceReader(descriptorFile, referenceHandler) : null);
+		this.descriptorFile = descriptorFile;
+	}
+
+	public FilePath getDescriptorFile() {
+		return descriptorFile;
 	}
 
 	/**
-	 * Get component version or null if missing or not set. This property is loaded from <code>version</code> element. Note that
-	 * version property is especially useful for library components.
+	 * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
+	 * in descriptor using <code>group</code> element.
+	 * <p>
+	 * Components can be declared on named resources groups. Build tool uses this group name as context path. For example, login
+	 * page can be declared on <code>WEB-INF</code> group so that it becomes private.
 	 * 
-	 * @return component version or null.
+	 * @return resources group or null if component is in global space.
 	 */
-	public String getVersion() {
-		return text("version", null);
-	}
-
-	/**
-	 * Get directory path to store page layout file or supplied default value if path is missing. This property is loaded from
-	 * <code>path</code> element.
-	 * 
-	 * @param defaultValue default path value.
-	 * @return page layout directory path or supplied default value.
-	 */
-	public String getSecurityRole() {
-		return text("security-role", null);
-	}
-
-	/**
-	 * Return text value from element identified by tag name or given default value, if element not found or its text content is
-	 * not set. Uses {@link ReferencesResolver} to resolve value references, if any.
-	 * 
-	 * @param tagName tag name identifying desired element,
-	 * @param defaultValue default value, returned when no value.
-	 * @return element text value or given default value.
-	 */
-	protected String text(String tagName, String defaultValue) {
-		String value = super.text(tagName, null);
-		return value != null ? referenceResolver.parse(value, filePath, referenceHandler) : defaultValue;
+	public String getResourcesGroup() {
+		return text("group", null);
 	}
 }

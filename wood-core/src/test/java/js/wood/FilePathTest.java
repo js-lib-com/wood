@@ -10,13 +10,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -32,28 +30,25 @@ public class FilePathTest {
 	@Mock
 	private Project project;
 
-	@Before
-	public void beforeTest() {
-		when(project.getProjectRoot()).thenReturn(new File("."));
-	}
-
 	@Test
-	public void pattern() {
-		Pattern pattern = Classes.getFieldValue(FilePath.class, "PATTERN");
+	public void GivenValidPath_WhenFilePaternMatch_ThenGroupsFound() {
+		Pattern pattern = Classes.getFieldValue(FilePath.class, "FILE_PATTERN");
 		assertThat(pattern, notNullValue());
 
-		assertPattern(pattern, "res/path/compo/compo.htm", "res/path/compo/", "compo", null, "htm");
-		assertPattern(pattern, "res/path/compo/compo_port.htm", "res/path/compo/", "compo", "port", "htm");
-		assertPattern(pattern, "res/path/second-compo/second-compo.css", "res/path/second-compo/", "second-compo", null, "css");
-		assertPattern(pattern, "res/path/second-compo/second-compo_w800.css", "res/path/second-compo/", "second-compo", "w800", "css");
-		assertPattern(pattern, "lib/js-lib.js", "lib/", "js-lib", null, "js");
-		assertPattern(pattern, "script/js/format/RichText.js", "script/js/format/", "RichText", null, "js");
-		assertPattern(pattern, "gen/js/widget/Paging.js", "gen/js/widget/", "Paging", null, "js");
-		assertPattern(pattern, "res/path/compo/background_port_ro.png", "res/path/compo/", "background", "port_ro", "png");
-		assertPattern(pattern, "res/3pty-scripts/3pty-scripts.htm", "res/3pty-scripts/", "3pty-scripts", null, "htm");
+		assertFilePattern(pattern, ".wood.properties", "", ".wood", null, "properties");
+		assertFilePattern(pattern, "project.xml", "", "project", null, "xml");
+		assertFilePattern(pattern, "res/path/compo/compo.htm", "res/path/compo/", "compo", null, "htm");
+		assertFilePattern(pattern, "res/path/compo/compo_port.htm", "res/path/compo/", "compo", "port", "htm");
+		assertFilePattern(pattern, "res/path/second-compo/second-compo.css", "res/path/second-compo/", "second-compo", null, "css");
+		assertFilePattern(pattern, "res/path/second-compo/second-compo_w800.css", "res/path/second-compo/", "second-compo", "w800", "css");
+		assertFilePattern(pattern, "lib/js-lib.js", "lib/", "js-lib", null, "js");
+		assertFilePattern(pattern, "script/js/format/RichText.js", "script/js/format/", "RichText", null, "js");
+		assertFilePattern(pattern, "gen/js/widget/Paging.js", "gen/js/widget/", "Paging", null, "js");
+		assertFilePattern(pattern, "res/path/compo/background_port_ro.png", "res/path/compo/", "background", "port_ro", "png");
+		assertFilePattern(pattern, "res/3pty-scripts/3pty-scripts.htm", "res/3pty-scripts/", "3pty-scripts", null, "htm");
 	}
 
-	private static void assertPattern(Pattern pattern, String value, String... groups) {
+	private static void assertFilePattern(Pattern pattern, String value, String... groups) {
 		Matcher m = pattern.matcher(value);
 		assertThat(m.find(), equalTo(true));
 		assertThat(groups[0], equalTo(m.group(1)));
@@ -63,18 +58,44 @@ public class FilePathTest {
 	}
 
 	@Test
-	public void constructor() {
-		assertFilePath("res/compo/discography/discography_ro.css", "res/compo/discography/", "discography.css", FileType.STYLE, "ro");
-		assertFilePath("res/compo/discography/strings.xml", "res/compo/discography/", "strings.xml", FileType.XML, null);
-		assertFilePath("res/compo/discography/logo_de.png", "res/compo/discography/", "logo.png", FileType.MEDIA, "de");
-		assertFilePath("lib/js-lib.js", "lib/", "js-lib.js", FileType.SCRIPT, null);
-		assertFilePath("script/js/compo/Dialog.js", "script/js/compo/", "Dialog.js", FileType.SCRIPT, null);
+	public void GivenValidPath_WhenDirectoryPaternMatch_ThenGroupsFound() {
+		Pattern pattern = Classes.getFieldValue(FilePath.class, "DIRECTORY_PATTERN");
+		assertThat(pattern, notNullValue());
+
+		assertDirectoryPattern(pattern, "res", "", "res");
+		assertDirectoryPattern(pattern, "res/", "", "res");
+		assertDirectoryPattern(pattern, "res/path/compo", "res/path/", "compo");
+		assertDirectoryPattern(pattern, "res/path/compo/", "res/path/", "compo");
 	}
 
-	private void assertFilePath(String pathValue, String path, String fileName, FileType fileType, String language) {
-		FilePath p = new FilePath(project, pathValue);
-		assertThat(p.value(), equalTo(pathValue));
-		assertThat(p.getParentDirPath().value(), equalTo(path));
+	private static void assertDirectoryPattern(Pattern pattern, String value, String... groups) {
+		Matcher m = pattern.matcher(value);
+		assertThat(m.find(), equalTo(true));
+		assertThat(groups[0], equalTo(m.group(1)));
+		assertThat(groups[1], equalTo(m.group(2)));
+	}
+
+	@Test
+	public void GivenValidPath_WhenConstructor_ThenInternalStateInit() {
+		assertFilePath("res/", null, "res", "res", FileType.NONE, null);
+		assertFilePath("res/", null, "res", "res", FileType.NONE, null);
+		assertFilePath("res/compo/discography/", "res/compo/", "discography", "discography", FileType.NONE, null);
+		assertFilePath("res/compo/discography/", "res/compo/", "discography", "discography", FileType.NONE, null);
+
+		assertFilePath("res/compo/discography/discography_ro.css", "res/compo/discography/", "discography", "discography.css", FileType.STYLE, "ro");
+		assertFilePath("res/compo/discography/strings.xml", "res/compo/discography/", "strings", "strings.xml", FileType.XML, null);
+		assertFilePath("res/compo/discography/logo_de.png", "res/compo/discography/", "logo", "logo.png", FileType.MEDIA, "de");
+		assertFilePath("lib/js-lib-1.2.3.js", "lib/", "js-lib-1.2.3", "js-lib-1.2.3.js", FileType.SCRIPT, null);
+		assertFilePath("script/js/compo/Dialog.js", "script/js/compo/", "Dialog", "Dialog.js", FileType.SCRIPT, null);
+	}
+
+	private void assertFilePath(String value, String parent, String basename, String fileName, FileType fileType, String language) {
+		FilePath p = new FilePath(project, value);
+		assertThat(p.value(), equalTo(value));
+		if (parent != null) {
+			assertThat(p.getParentDir().value(), equalTo(parent));
+		}
+		assertThat(p.getBasename(), equalTo(basename));
 		assertThat(p.getName(), equalTo(fileName));
 		assertThat(p.getType(), equalTo(fileType));
 		assertThat(p.getVariants(), notNullValue());
@@ -86,75 +107,124 @@ public class FilePathTest {
 	}
 
 	@Test(expected = WoodException.class)
-	public void constructor_InvlaidPath() {
+	public void GivenInvalidPath_WhenConstructor_ThenException() {
 		new FilePath(project, "http://server/path");
 	}
 
 	@Test
-	public void baseName() {
-		FilePath path = new FilePath(project, "res/compo/compo.css");
-		assertThat(path.getBaseName(), equalTo("compo"));
-		assertThat(path.hasBaseName("compo"), equalTo(true));
+	public void GivenValidDirectory_WhenGetBaseName_ThenExpectedValue() {
+		// given
+		FilePath path = new FilePath(project, "res/page/about/");
 
-		path = new FilePath(project, "res/compo/strings_de.xml");
-		assertThat(path.getBaseName(), equalTo("strings"));
-		assertThat(path.hasBaseName("strings"), equalTo(true));
+		// when
+		String basename = path.getBasename();
+
+		// then
+		assertThat(basename, equalTo("about"));
 	}
 
 	@Test
-	public void cloneToStyle() {
-		when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "", 0));
+	public void GivenValidFile_WhenGetBaseName_ThenExpectedValue() {
+		// given
+		FilePath path = new FilePath(project, "res/compo/compo.css");
 
+		// when
+		String basename = path.getBasename();
+
+		// then
+		assertThat(basename, equalTo("compo"));
+	}
+
+	@Test
+	public void GivenValidFileWithVariant_WhenGetBaseName_ThenExpectedValue() {
+		// given
+		FilePath path = new FilePath(project, "res/compo/strings_de.xml");
+
+		// when
+		String basename = path.getBasename();
+
+		// then
+		assertThat(basename, equalTo("strings"));
+	}
+
+	@Test
+	public void GivenLayoutFileWithVariants_WhenCloneToStyle_ThenPreserveState() {
+		// given
+		when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "", 0));
 		FilePath layoutFile = new FilePath(project, "res/compo/compo_w800.htm");
+
+		// when
 		FilePath styleFile = layoutFile.cloneTo(FileType.STYLE);
+
+		// then
 		assertThat(layoutFile.isLayout(), equalTo(true));
 		assertThat(styleFile.isStyle(), equalTo(true));
-		assertThat(layoutFile.getBaseName(), equalTo(styleFile.getBaseName()));
-		assertThat(layoutFile.getParentDirPath(), equalTo(styleFile.getParentDirPath()));
+		assertThat(layoutFile.getBasename(), equalTo(styleFile.getBasename()));
+		assertThat(layoutFile.getParentDir(), equalTo(styleFile.getParentDir()));
 		assertThat(layoutFile.getVariants().getLocale(), equalTo(styleFile.getVariants().getLocale()));
 		assertThat(layoutFile.getVariants().getMediaQueries(), equalTo(styleFile.getVariants().getMediaQueries()));
 	}
 
 	@Test
-	public void getDirPath() {
+	public void GivenFilePath_WhenGetParentDir_ThenExpectedValue() {
+		// given
 		FilePath path = new FilePath(project, "res/asset/background.jpg");
-		assertThat(path.getParentDirPath().value(), equalTo("res/asset/"));
+
+		// when
+		FilePath parentDir = path.getParentDir();
+
+		// then
+		assertThat(parentDir.value(), equalTo("res/asset/"));
 	}
 
 	@Test
-	public void predicates() {
+	public void GivenDirectoryPath_WhenGetParentDir_ThenExpectedValue() {
+		// given
+		FilePath path = new FilePath(project, "res/asset/icons");
+
+		// when
+		FilePath parentDir = path.getParentDir();
+
+		// then
+		assertThat(parentDir.value(), equalTo("res/asset/"));
+	}
+
+	@Test
+	public void GivenFilePath_WhenExpectedValue_ThenTrue() {
 		assertTrue(new FilePath(project, "res/asset/background.jpg").isMedia());
-		assertFalse(new FilePath(project, "res/compo/compo.css").isMedia());
-
 		assertTrue(new FilePath(project, "res/compo/compo.htm").isLayout());
-		assertFalse(new FilePath(project, "res/compo/compo.css").isLayout());
-
 		assertTrue(new FilePath(project, "res/compo/compo.css").isStyle());
-		assertFalse(new FilePath(project, "res/compo/preview.js").isStyle());
-
 		assertTrue(new FilePath(project, "res/compo/preview.js").isScript());
-		assertFalse(new FilePath(project, "res/compo/preview.css").isScript());
-
 		assertTrue(new FilePath(project, "res/compo/preview.js").isPreviewScript());
-		assertFalse(new FilePath(project, "res/compo/compo.js").isPreviewScript());
-
 		assertTrue(new FilePath(project, "res/compo/compo.xml").isComponentDescriptor());
+		assertTrue(new FilePath(project, "res/compo/strings.xml").isVariables());
+	}
+
+	@Test
+	public void GivenFilePath_WhenNotExpectedValue_ThenFalse() {
+		assertFalse(new FilePath(project, "res/compo/compo.css").isMedia());
+		assertFalse(new FilePath(project, "res/compo/compo.css").isLayout());
+		assertFalse(new FilePath(project, "res/compo/preview.js").isStyle());
+		assertFalse(new FilePath(project, "res/compo/preview.css").isScript());
+		assertFalse(new FilePath(project, "res/compo/compo.js").isPreviewScript());
 		assertFalse(new FilePath(project, "res/compo/compo.htm").isComponentDescriptor());
 		assertFalse(new FilePath(project, "res/compo/strings.xml").isComponentDescriptor());
-
-		assertTrue(new FilePath(project, "res/compo/strings.xml").isVariables());
 		assertFalse(new FilePath(project, "res/compo/compo.xml").isVariables());
 		assertFalse(new FilePath(project, "res/compo/compo.htm").isVariables());
 	}
 
 	@Test
-	public void hasVariants() {
-		assertThat(new FilePath(project, "res/compo/strings.xml").hasVariants(), equalTo(false));
-		assertThat(new FilePath(project, "res/compo/strings_de.xml").hasVariants(), equalTo(true));
+	public void GivenFileWithVariant_WhenHasVariants_ThenTrue() {
+		assertTrue(new FilePath(project, "res/compo/strings_de.xml").hasVariants());
 	}
 
 	@Test
-	public void getVariants() {
+	public void GivenFileWithoutVariant_WhenHasVariants_ThenFalse() {
+		assertFalse(new FilePath(project, "res/compo/strings.xml").hasVariants());
+	}
+
+	@Test
+	public void GivenProjectWithMediaQuery_WhenGetVariants_ThenNotNullValue() {
 		when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "min-width: 800px", 0));
 		when(project.getMediaQueryDefinition("h800")).thenReturn(new MediaQueryDefinition("h800", "min-height: 800px", 1));
 		when(project.getMediaQueryDefinition("lgd")).thenReturn(new MediaQueryDefinition("lgd", "min-width: 992px", 1));
@@ -204,33 +274,29 @@ public class FilePathTest {
 	}
 
 	@Test(expected = WoodException.class)
-	public void getVariants_notRecognized() {
+	public void GivenProjectWithoutMediaQueryAndPathWithVariant_WhenConstructor_ThenException() {
 		new FilePath(project, "res/compo/colors_q800.xml");
 	}
 
-	/** Attempting to create reader from this test case fails with file not found. */
-	@Test(expected = WoodException.class)
-	public void getReader() {
-		FilePath path = new FilePath(project, "res/asset/background.jpg");
-		path.getReader();
-	}
-
 	@Test
-	public void accept() {
+	public void GivenValidPath_WhenAccept_ThenTrue() {
 		assertTrue(FilePath.accept("res/template/page/page.htm"));
 		assertTrue(FilePath.accept("lib/js-lib.js"));
 		assertTrue(FilePath.accept("res/compo/video-player/video-player.xml"));
-		assertTrue(FilePath.accept("lib/js-lib.1.2.3.js"));
+		assertTrue(FilePath.accept("lib/js-lib-1.2.3.js"));
 		assertTrue(FilePath.accept("template/page/page_ro.htm"));
 		assertTrue(FilePath.accept("dir/template/page/page_w800_ro.htm"));
 		assertTrue(FilePath.accept("project.xml"));
+	}
 
+	@Test
+	public void GivenInvalidPath_WhenAccept_ThenFalse() {
 		assertFalse(FilePath.accept("res/template/page/page.htm#body"));
 		assertFalse(FilePath.accept("dir/template/page#body"));
 	}
 
 	@Test
-	public void getMimeType() throws IOException {
+	public void GivenFileWithExtension_WhenGetMimeType_ThenExpectedValue() throws IOException {
 		assertThat(new FilePath(project, "file.htm").getMimeType(), equalTo("text/html"));
 		assertThat(new FilePath(project, "file.html").getMimeType(), equalTo("text/html"));
 		assertThat(new FilePath(project, "file.xhtml").getMimeType(), equalTo("application/xhtml+xml"));

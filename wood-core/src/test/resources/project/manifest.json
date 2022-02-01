@@ -1,0 +1,42 @@
+{
+    "name": "@string/app-name",
+    "short_name": "@string/app-short-name",
+    "icons": [
+        {
+            "src": "@image/app-icon-128",
+            "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src": "@image/app-icon-144",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "@image/app-icon-152",
+            "sizes": "152x152",
+            "type": "image/png"
+        },
+        {
+            "src": "@image/app-icon-192",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "@image/app-icon-256",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "@image/app-icon-512",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "lang": "en-US",
+    "start_url": "/ngo/index.htm",
+    "display": "fullscreen",
+    "background_color": "white",
+    "theme_color": "white"
+}

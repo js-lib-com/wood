@@ -1,6 +1,5 @@
 package js.wood.impl;
 
-import js.wood.DirPath;
 import js.wood.FilePath;
 
 /**
@@ -24,7 +23,7 @@ import js.wood.FilePath;
  * approach.
  * 
  * <pre>
- * public void scan(DirPath dir)
+ * public void scan(FilePath dir)
  * {
  *   dir.files(new FilesHandler()
  *   {
@@ -52,7 +51,7 @@ public abstract class FilesHandler
    * 
    * @param dir sub-directory.
    */
-  public void onDirectory(DirPath dir)
+  public void onDirectory(FilePath dir)
   {
   }
 

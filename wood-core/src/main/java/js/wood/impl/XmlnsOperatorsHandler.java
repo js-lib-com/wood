@@ -12,7 +12,7 @@ import js.wood.WOOD;
 
 /**
  * Document handler for operator naming with XML name space. This document handler is the default naming strategy or enacted
- * when user explicitly select the {@link NamingStrategy#XMLNS}. Name space should be declared using WOOD public URI:
+ * when user explicitly select the {@link OperatorsNaming#XMLNS}. Name space should be declared using WOOD public URI:
  * <code>xmlns:wood="js-lib.com/wood"</code>.
  * 
  * @author Iulian Rotaru
@@ -30,7 +30,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	public EList findByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
 		try {
-			return document.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+			return document.findByXPathNS(namespaceContext, buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -41,7 +41,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	public EList findByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
 		try {
-			return element.findByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+			return element.findByXPathNS(namespaceContext, buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -52,7 +52,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	public Element getByOperator(Document document, Operator operator) {
 		Params.notNull(document, "Layout document");
 		try {
-			return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+			return document.getByXPathNS(namespaceContext, buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -63,7 +63,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	public Element getByOperator(Element element, Operator operator) {
 		Params.notNull(element, "Layout element");
 		try {
-			return element.getByXPathNS(namespaceContext, buildAttrXPath(operator.value()));
+			return element.getByXPathNS(namespaceContext, buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -74,7 +74,7 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 	public Element getByOperator(Document document, Operator operator, String operand) {
 		Params.notNull(document, "Layout document");
 		try {
-			return document.getByXPathNS(namespaceContext, buildAttrXPath(operator.value(), operand));
+			return document.getByXPathNS(namespaceContext, buildXPath(operator, operand));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
 			throw new BugError(e);
@@ -93,23 +93,19 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
 		element.removeAttrNS(WOOD.NS, operator.value());
 	}
 
-	/**
-	 * Build XPath expression for attribute names with name space.
-	 * 
-	 * @param name attribute name,
-	 * @param value optional attribute value.
-	 * @return XPath expression.
-	 */
-	private static String buildAttrXPath(String name, String... value) {
+	private String buildXPath(Operator operator, String... operand) {
+		// descendant-or-self::node()[@wood:compo='res/compo/dialog']
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("descendant-or-self::node()[@wood:");
-		sb.append(name);
-		if (value.length == 1) {
+		sb.append(operator.value());
+		if (operand.length == 1) {
 			sb.append("='");
-			sb.append(value[0]);
+			sb.append(operand[0]);
 			sb.append("'");
 		}
 		sb.append("]");
+
 		return sb.toString();
 	}
 }
