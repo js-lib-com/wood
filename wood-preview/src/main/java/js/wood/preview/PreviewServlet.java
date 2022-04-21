@@ -248,7 +248,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		// discover media file and returns its absolute URL path
-		FilePath mediaFile = project.getMediaFile(previewLocale, reference, sourceFile);
+		FilePath mediaFile = project.getResourceFile(previewLocale, reference, sourceFile);
 		if (mediaFile == null) {
 			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
 		}

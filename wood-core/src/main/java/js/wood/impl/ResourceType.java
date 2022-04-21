@@ -1,13 +1,15 @@
 package js.wood.impl;
 
 /**
- * Resource type, both variables and media files. Resources are external entities referenced from source files. There are two
- * major kinds: variables and media files. Variables are text replaced with their value, media file references are replaced by
+ * Resource type, both variables and files. Resources are external entities referenced from source files. There are two major
+ * kinds: variables and resource files. Variables are text replaced with their value, resource file references are replaced by
  * URL path, absolute or relative.
  * 
  * @author Iulian Rotaru
  */
 public enum ResourceType {
+	// VARIABLES
+
 	/** Plain string values mainly for multi-languages support. */
 	STRING,
 
@@ -29,7 +31,9 @@ public enum ResourceType {
 	/** Tool-tip value. */
 	TIP,
 
-	/** Image file stored on server and URL linked from source files, be it layout, style or script. */
+	// RESOURCE FILES
+
+	/** Image file stored on server and linked via URLs from source files, be it layout, style or script. */
 	IMAGE,
 
 	/** The same as {@link #IMAGE} but with audio content. */
@@ -37,6 +41,12 @@ public enum ResourceType {
 
 	/** The same as {@link #IMAGE} but with video content. */
 	VIDEO,
+
+	/** Font family file loaded from server and declared by <code>@font-face</code> style rule. */
+	FONT,
+
+	/** Generic file, for example license text file. */
+	FILE,
 
 	/** Unknown type makes reference using this type as invalid. */
 	UNKNOWN;
@@ -52,12 +62,22 @@ public enum ResourceType {
 	}
 
 	/**
+	 * Test if resource type is a resource file. Current implementation consider as resource file next types: {@link #IMAGE},
+	 * {@link #AUDIO}, {@link #VIDEO}, {@link #FONT} and {@link #FILE}.
+	 * 
+	 * @return true if resource is a file.
+	 */
+	public boolean isFile() {
+		return this == IMAGE || this == AUDIO || this == VIDEO || this == FONT || this == FILE;
+	}
+
+	/**
 	 * Test if resource type is a media file. Current implementation consider as media file next types: {@link #IMAGE},
 	 * {@link #AUDIO} and {@link #VIDEO}.
 	 * 
 	 * @return true if resource is media file.
 	 */
-	public boolean isMedia() {
+	public boolean isMediaFile() {
 		return this == IMAGE || this == AUDIO || this == VIDEO;
 	}
 

@@ -397,6 +397,16 @@ public class BuildFsTest {
 		}
 
 		@Override
+		protected File getFontDir() {
+			return createDirectory("font");
+		}
+
+		@Override
+		protected File getFilesDir() {
+			return createDirectory("files");
+		}
+
+		@Override
 		protected String formatPageName(String pageName) {
 			return pageName;
 		}

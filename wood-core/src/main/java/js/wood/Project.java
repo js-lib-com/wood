@@ -399,7 +399,7 @@ public class Project {
 	// media files retrieving
 
 	/**
-	 * Get the file path for project media file referenced from given source file. This method tries to locate media file into
+	 * Get the file path for project resource file referenced from given source file. This method tries to locate media file into
 	 * the parent of given source file and assets directories, in this order. If reference has path - see
 	 * {@link Reference#hasPath()}, attempt to find media file on source parent subdirectory. If source file is in project root,
 	 * e.g. manifest.json, source parent directory is null, in which case searches only asset directory.
@@ -414,7 +414,7 @@ public class Project {
 	 * @param sourceFile source file using media resource.
 	 * @return media file or null.
 	 */
-	public FilePath getMediaFile(Locale locale, Reference reference, FilePath sourceFile) {
+	public FilePath getResourceFile(Locale locale, Reference reference, FilePath sourceFile) {
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
 

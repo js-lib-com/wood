@@ -29,14 +29,14 @@ public class ResourceTypeTest {
 		assertFalse(ResourceType.VIDEO.isVariable());
 		assertFalse(ResourceType.UNKNOWN.isVariable());
 
-		assertTrue(ResourceType.IMAGE.isMedia());
-		assertTrue(ResourceType.AUDIO.isMedia());
-		assertTrue(ResourceType.VIDEO.isMedia());
+		assertTrue(ResourceType.IMAGE.isMediaFile());
+		assertTrue(ResourceType.AUDIO.isMediaFile());
+		assertTrue(ResourceType.VIDEO.isMediaFile());
 
-		assertFalse(ResourceType.STRING.isMedia());
-		assertFalse(ResourceType.TEXT.isMedia());
-		assertFalse(ResourceType.COLOR.isMedia());
-		assertFalse(ResourceType.DIMEN.isMedia());
-		assertFalse(ResourceType.UNKNOWN.isMedia());
+		assertFalse(ResourceType.STRING.isMediaFile());
+		assertFalse(ResourceType.TEXT.isMediaFile());
+		assertFalse(ResourceType.COLOR.isMediaFile());
+		assertFalse(ResourceType.DIMEN.isMediaFile());
+		assertFalse(ResourceType.UNKNOWN.isMediaFile());
 	}
 }

@@ -112,7 +112,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 		}
 
 		// discover media file and returns its absolute URL path
-		FilePath mediaFile = sourceFile.getProject().getMediaFile(locale, reference, sourceFile);
+		FilePath mediaFile = sourceFile.getProject().getResourceFile(locale, reference, sourceFile);
 		if (mediaFile == null) {
 			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
 		}

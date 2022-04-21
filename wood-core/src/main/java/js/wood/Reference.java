@@ -177,8 +177,26 @@ public class Reference {
 	 * @return true if resource is media file.
 	 * @see ResourceType#isMedia()
 	 */
-	public boolean isMedia() {
-		return resourceType.isMedia();
+	public boolean isMediaFile() {
+		return resourceType.isMediaFile();
+	}
+
+	/**
+	 * Test if referenced resource is a font family file.
+	 * 
+	 * @return true if resource is a font family file.
+	 */
+	public boolean isFontFile() {
+		return resourceType == ResourceType.FONT;
+	}
+
+	/**
+	 * Test if referenced resource is a generic file.
+	 * 
+	 * @return true if resource is a generic file.
+	 */
+	public boolean isGenericFile() {
+		return resourceType == ResourceType.FONT;
 	}
 
 	/**

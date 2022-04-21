@@ -148,7 +148,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.LAYOUT);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
 		when(buildFS.writePageMedia(null, mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);
@@ -163,7 +163,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.STYLE);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
 		when(buildFS.writeStyleMedia(mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);
@@ -178,7 +178,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.XML);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
 
 		assertThat(builder.onResourceReference(reference, source), nullValue());
 	}
@@ -190,7 +190,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.SCRIPT);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
 		when(buildFS.writeScriptMedia(mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);

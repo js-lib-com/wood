@@ -56,7 +56,7 @@ public class ProjectGetMediaFileTest {
 		// given
 
 		// when
-		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -69,7 +69,7 @@ public class ProjectGetMediaFileTest {
 		// given
 
 		// when
-		FilePath foundFile = project.getMediaFile(null, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -85,7 +85,7 @@ public class ProjectGetMediaFileTest {
 		when(sourceDir.getSubdirPath(null)).thenReturn(sourceDir);
 		
 		// when
-		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -104,7 +104,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -123,7 +123,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getMediaFile(null, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -142,7 +142,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(null);
 
 		// when
-		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, nullValue());
@@ -161,7 +161,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(null);
 
 		// when
-		FilePath foundFile = project.getMediaFile(null, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, nullValue());
@@ -176,7 +176,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getMediaFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -191,7 +191,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getMediaFile(null, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));

@@ -101,6 +101,16 @@ class DefaultBuildFS extends BuildFS {
 		return buildDir;
 	}
 
+	@Override
+	protected File getFontDir() {
+		return createDirectory("style");
+	}
+
+	@Override
+	protected File getFilesDir() {
+		return createDirectory("files");
+	}
+
 	/**
 	 * Returns original page name, unchanged.
 	 * 

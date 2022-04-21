@@ -159,7 +159,7 @@ public abstract class BuildFS {
 	 * @throws IOException if media file write fails.
 	 */
 	public String writePageMedia(Component page, FilePath mediaFile) throws IOException {
-		return writeMedia(getPageDir(page), mediaFile);
+		return writeFile(getPageDir(page), getMediaDir(), mediaFile);
 	}
 
 	/**
@@ -175,21 +175,33 @@ public abstract class BuildFS {
 	 * @throws IOException if media file write fails.
 	 */
 	public String writeStyleMedia(FilePath mediaFile) throws IOException {
-		return writeMedia(getStyleDir(), mediaFile);
+		return writeFile(getStyleDir(), getMediaDir(), mediaFile);
 	}
 
 	public String writeScriptMedia(FilePath mediaFile) throws IOException {
-		return writeMedia(getScriptDir(), mediaFile);
+		return writeFile(getScriptDir(), getMediaDir(), mediaFile);
 	}
 
 	public String writeManifestMedia(FilePath mediaFile) throws IOException {
-		return writeMedia(getManifestDir(), mediaFile);
+		return writeFile(getManifestDir(), getMediaDir(), mediaFile);
 	}
 
-	private String writeMedia(File sourceDir, FilePath mediaFile) throws IOException {
-		File targetFile = new File(getMediaDir(), insertBuildNumber(formatMediaName(mediaFile)));
+	public String writeFontFile(FilePath fontFile) throws IOException {
+		return writeFile(getStyleDir(), getFontDir(), fontFile);
+	}
+
+	public String writePageFile(Component page, FilePath genericFile) throws IOException {
+		return writeFile(getPageDir(page), getFilesDir(), genericFile);
+	}
+
+	public String writeScriptFile(FilePath genericFile) throws IOException {
+		return writeFile(getScriptDir(), getFilesDir(), genericFile);
+	}
+
+	private String writeFile(File sourceDir, File targetDir, FilePath file) throws IOException {
+		File targetFile = new File(targetDir, insertBuildNumber(formatMediaName(file)));
 		if (!processedFiles.contains(targetFile)) {
-			mediaFile.copyTo(new FileOutputStream(targetFile));
+			file.copyTo(new FileOutputStream(targetFile));
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(sourceDir, targetFile, true);
@@ -299,6 +311,21 @@ public abstract class BuildFS {
 	protected abstract File getMediaDir();
 
 	protected abstract File getManifestDir();
+
+	/**
+	 * Get the directory that stores font files, if build file system implementation decides to keep them separated from style
+	 * files.
+	 * 
+	 * @return font files directory.
+	 */
+	protected abstract File getFontDir();
+
+	/**
+	 * Get the directory that stores generic files like license or other legal stuff but not limited to.
+	 * 
+	 * @return generic files directory.
+	 */
+	protected abstract File getFilesDir();
 
 	/**
 	 * Format the page file name. Implementation is free to pre-process page name in every way, including returning original

@@ -229,6 +229,7 @@ public class Builder implements IReferenceHandler {
 		// if (locale == null) {
 		// throw new BugError("Builder locale not initialized.");
 		// }
+
 		if (reference.isVariable()) {
 			String value = null;
 			Variables dirVariables = project.getVariables(sourceFile.getParentDir());
@@ -245,29 +246,53 @@ public class Builder implements IReferenceHandler {
 			return value;
 		}
 
-		FilePath mediaFile = project.getMediaFile(locale, reference, sourceFile);
-		if (mediaFile == null) {
-			throw new WoodException("Missing media file for reference |%s:%s|.", sourceFile, reference);
-		}
-		if (sourceFile.isManifest()) {
-			return buildFS.writeManifestMedia(mediaFile);
-		}
-		if (sourceFile.isComponentDescriptor()) {
-			return buildFS.writePageMedia(currentComponent, mediaFile);
+		// here reference is a resource file
+		
+		FilePath resourceFile = project.getResourceFile(locale, reference, sourceFile);
+		if (resourceFile == null) {
+			throw new WoodException("Missing resource file for reference |%s:%s|.", sourceFile, reference);
 		}
 
-		switch (sourceFile.getType()) {
-		case LAYOUT:
-			return buildFS.writePageMedia(currentComponent, mediaFile);
+		if (reference.isMediaFile()) {
+			if (sourceFile.isManifest()) {
+				return buildFS.writeManifestMedia(resourceFile);
+			}
+			if (sourceFile.isComponentDescriptor()) {
+				return buildFS.writePageMedia(currentComponent, resourceFile);
+			}
 
-		case STYLE:
-			return buildFS.writeStyleMedia(mediaFile);
+			switch (sourceFile.getType()) {
+			case LAYOUT:
+				return buildFS.writePageMedia(currentComponent, resourceFile);
 
-		case SCRIPT:
-			return buildFS.writeScriptMedia(mediaFile);
+			case STYLE:
+				return buildFS.writeStyleMedia(resourceFile);
 
-		default:
+			case SCRIPT:
+				return buildFS.writeScriptMedia(resourceFile);
+
+			default:
+			}
 		}
+
+		if (reference.isFontFile() && sourceFile.isStyle()) {
+			// font files can be referenced only from style files
+			return buildFS.writeFontFile(resourceFile);
+		}
+
+		if (reference.isGenericFile()) {
+			switch (sourceFile.getType()) {
+			case LAYOUT:
+				return buildFS.writePageFile(currentComponent, resourceFile);
+
+			case SCRIPT:
+				return buildFS.writeScriptFile(resourceFile);
+
+			default:
+				break;
+			}
+		}
+
 		return null;
 	}
 

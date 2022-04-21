@@ -302,7 +302,7 @@ public class PreviewServletTest {
 		FilePath media = mock(FilePath.class);
 		when(media.getParentDir()).thenReturn(mediaDir);
 		when(media.getName()).thenReturn("logo.png");
-		when(project.getMediaFile(Locale.ENGLISH, reference, source)).thenReturn(media);
+		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(media);
 
 		assertThat(servlet.onResourceReference(reference, source), equalTo("/test-preview/res/asset/logo.png"));
 	}
