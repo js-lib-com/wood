@@ -33,7 +33,6 @@ import js.wood.ThemeStyles;
 import js.wood.Variables;
 import js.wood.WoodException;
 import js.wood.impl.FileType;
-import js.wood.impl.OperatorsNaming;
 import js.wood.impl.ResourceType;
 import js.wood.impl.XmlnsOperatorsHandler;
 
