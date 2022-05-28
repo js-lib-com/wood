@@ -1,8 +1,6 @@
 package js.wood;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,7 +18,6 @@ import js.util.Files;
 import js.util.Params;
 import js.util.Strings;
 import js.wood.impl.AttrOperatorsHandler;
-import js.wood.impl.CustomElementsRegistry;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.MediaQueryDefinition;
@@ -68,12 +65,6 @@ public class Project {
 	}
 
 	private final Set<File> excludeDirs;
-
-	/**
-	 * Registry for components based on W3C custom elements. It contains information about custom element tag name, component
-	 * path and related WOOD operator.
-	 */
-	private final CustomElementsRegistry customElements = new CustomElementsRegistry();
 
 	/** Map script path to its dependencies. Only scripts with declared dependencies are included in this map. */
 	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
@@ -133,7 +124,7 @@ public class Project {
 		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
 		this.excludeDirs.add(file(descriptor.getBuildDir()));
 
-		registerVisitor(new FilePathVisitor(customElements, scriptDependencies));
+		registerVisitor(new FilePathVisitor(scriptDependencies));
 	}
 
 	private File file(String path) {
@@ -391,10 +382,6 @@ public class Project {
 		return operatorsHandler instanceof XmlnsOperatorsHandler;
 	}
 
-	ICustomElementsRegistry getCustomElementsRegistry() {
-		return customElements;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// media files retrieving
 
@@ -540,11 +527,9 @@ public class Project {
 	static class FilePathVisitor implements IFilePathVisitor {
 		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
 
-		private final ICustomElementsRegistry customElements;
 		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
 
-		public FilePathVisitor(ICustomElementsRegistry customElements, Map<String, List<IScriptDescriptor>> scriptDependencies) {
-			this.customElements = customElements;
+		public FilePathVisitor(Map<String, List<IScriptDescriptor>> scriptDependencies) {
 			this.scriptDependencies = scriptDependencies;
 		}
 
@@ -572,62 +557,6 @@ public class Project {
 			if (parentDir == null) {
 				return;
 			}
-
-			String tagName = layoutRootTagName(file.getParentDir());
-			if (tagName != null) {
-				// by convention descriptor document root is WOOD operator simple name
-				String operator = document.getRoot().getTag();
-				customElements.register(tagName, project.createCompoPath(parentDir.value()), operator);
-			}
-		}
-	}
-
-	/**
-	 * Get root tag name for components based on W3C custom elements. Returns null if component is not based on W3C custom
-	 * element. This method opens layout file - by WOOD component convention layout file should have the same name as directory
-	 * base name, and read tag name for its root element.
-	 * 
-	 * If layout file is missing return null. Also returns null if root tag name does not obey W3C custom elements naming
-	 * convention: it should have at least one hyphen.
-	 * 
-	 * @param compoDir component directory.
-	 * @return root tag name or null if component is not based on custom element.
-	 * @throws IOException if layout file reading fails.
-	 */
-	private static String layoutRootTagName(FilePath compoDir) throws IOException {
-		if (compoDir == null) {
-			return null;
-		}
-		FilePath layoutFile = compoDir.getFilePath(compoDir.getBasename() + CT.DOT_LAYOUT_EXT);
-		if (!layoutFile.exists()) {
-			return null;
-		}
-
-		StringBuilder builder = new StringBuilder();
-		int hyphensCount = 0;
-		try (Reader reader = layoutFile.getReader()) {
-			for (;;) {
-				int i = reader.read();
-				if (i == -1) {
-					return null;
-				}
-				char c = (char) i;
-				if (Character.isWhitespace(c) || c == '>') {
-					break;
-				}
-				if (c == '-') {
-					++hyphensCount;
-				}
-				builder.append(c);
-			}
-
-			if (hyphensCount == 0) {
-				return null;
-			}
-			if (builder.charAt(0) != '<') {
-				return null;
-			}
-			return builder.substring(1);
 		}
 	}
 

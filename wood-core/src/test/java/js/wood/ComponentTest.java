@@ -23,7 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
-import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,7 +53,6 @@ public class ComponentTest {
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
-		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 
 		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
 

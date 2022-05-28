@@ -22,17 +22,12 @@ import js.dom.Element;
 import js.wood.impl.FileType;
 import js.wood.impl.IOperatorsHandler;
 import js.wood.impl.Operator;
-import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentAggregationTest {
 	@Mock
 	private Project project;
-	@Mock
-	private ICustomElementsRegistry customElementsRegistry;
-	@Mock
-	private ICustomElement customElement;
 
 	@Mock
 	private CompoPath compoPath; // component path
@@ -67,13 +62,7 @@ public class ComponentAggregationTest {
 
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
-		when(project.getCustomElementsRegistry()).thenReturn(customElementsRegistry);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
-		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
-
-		when(customElementsRegistry.getByTagName("custom-element")).thenReturn(customElement);
-		when(customElement.compoPath()).thenReturn("compos/custom-element");
-		when(customElement.operator()).thenReturn("compo");
 		
 		when(compoPath.getLayoutPath()).thenReturn(compoLayout);
 		when(compoLayout.getProject()).thenReturn(project);
@@ -84,7 +73,6 @@ public class ComponentAggregationTest {
 		when(compoDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(compoScript);
 
 		when(childPath.getLayoutPath()).thenReturn(childLayout);
-		when(childLayout.getProject()).thenReturn(project);
 		when(childLayout.exists()).thenReturn(true);
 		when(childLayout.isLayout()).thenReturn(true);
 		when(childLayout.cloneTo(FileType.XML)).thenReturn(childDescriptor);
@@ -106,6 +94,34 @@ public class ComponentAggregationTest {
 				"<section xmlns:w='js-lib.com/wood'>" + //
 				"	<h1>Component</h1>" + //
 				"	<div w:compo='res/child'></div>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+
+		// then
+		EList headings = layout.findByTag("h1");
+		assertThat(headings.size(), equalTo(2));
+		assertThat(headings.item(0).getText(), equalTo("Component"));
+		assertThat(headings.item(1).getText(), equalTo("Child"));
+	}
+
+	@Test
+	public void GivenSimpleAggregationAndChildTagNameWithDash_ThenIncludeChildLayout() {
+		// given
+		String childHTML = "" + //
+				"<x-div>" + //
+				"	<h1>Child</h1>" + //
+				"</x-div>";
+		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
+
+		String compoHTML = "" + //
+				"<section xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Component</h1>" + //
+				"	<x-div w:compo='res/child'></x-div>" + //
 				"</section>";
 		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
 		when(project.createCompoPath("res/child")).thenReturn(childPath);
@@ -149,38 +165,9 @@ public class ComponentAggregationTest {
 	}
 
 	@Test
-	public void GivenSimpleAggregationOnCustomElement_ThenIncludeChildLayout() {
-		// given
-		String childHTML = "" + //
-				"<custom-element>" + //
-				"	<h1>Child</h1>" + //
-				"</custom-element>";
-		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
-	
-		String compoHTML = "" + //
-				"<section xmlns:w='js-lib.com/wood'>" + //
-				"	<h1>Component</h1>" + //
-				"	<custom-element></custom-element>" + //
-				"</section>";
-		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
-		when(project.createCompoPath("compos/custom-element")).thenReturn(childPath);
-
-		// when
-		Component compo = new Component(compoPath, referenceHandler);
-		Element layout = compo.getLayout();
-
-		// then
-		EList headings = layout.findByTag("h1");
-		assertThat(headings.size(), equalTo(2));
-		assertThat(headings.item(0).getText(), equalTo("Component"));
-		assertThat(headings.item(1).getText(), equalTo("Child"));
-	}
-
-	@Test
 	public void GivenAggregationOnStandaloneTemplate_ThenIncludeResolvedTemplate() {
 		// given
 		FilePath templateLayout = Mockito.mock(FilePath.class);
-		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 
@@ -241,7 +228,6 @@ public class ComponentAggregationTest {
 	public void GivenAggregationOnStandaloneTemplate_ThenMergeAttributes() {
 		// given
 		FilePath templateLayout = Mockito.mock(FilePath.class);
-		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 

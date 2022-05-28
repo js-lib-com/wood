@@ -25,8 +25,6 @@ public class ProjectFilePathVisitorTest {
 	@Mock
 	private Project project;
 	@Mock
-	private ICustomElementsRegistry customElements;
-	@Mock
 	private FilePath file;
 
 	private Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
@@ -37,7 +35,7 @@ public class ProjectFilePathVisitorTest {
 	public void beforeTest() {
 		when(file.isComponentDescriptor()).thenReturn(true);
 
-		visitor = new Project.FilePathVisitor(customElements, scriptDependencies);
+		visitor = new Project.FilePathVisitor(scriptDependencies);
 	}
 
 	@Test

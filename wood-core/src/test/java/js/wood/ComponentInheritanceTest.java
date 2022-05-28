@@ -25,7 +25,6 @@ import js.dom.Element;
 import js.wood.impl.AttrOperatorsHandler;
 import js.wood.impl.DataAttrOperatorsHandler;
 import js.wood.impl.FileType;
-import js.wood.impl.OperatorsNaming;
 import js.wood.impl.XmlnsOperatorsHandler;
 
 /**
@@ -83,9 +82,7 @@ public class ComponentInheritanceTest {
 		when(project.getDisplay()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
-		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 
-		when(pageLayout.getProject()).thenReturn(project);
 		when(pageLayout.exists()).thenReturn(true);
 		when(pageLayout.isLayout()).thenReturn(true);
 		when(pageLayout.cloneTo(FileType.XML)).thenReturn(pageDescriptor);
@@ -93,7 +90,6 @@ public class ComponentInheritanceTest {
 		when(pageDescriptor.cloneTo(FileType.SCRIPT)).thenReturn(pageScript);
 		when(pageCompo.getLayoutPath()).thenReturn(pageLayout);
 
-		when(templateLayout.getProject()).thenReturn(project);
 		when(templateLayout.exists()).thenReturn(true);
 		when(templateLayout.isLayout()).thenReturn(true);
 		when(templateLayout.cloneTo(FileType.XML)).thenReturn(templateDescriptor);

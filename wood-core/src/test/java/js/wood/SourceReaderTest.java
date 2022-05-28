@@ -24,7 +24,6 @@ import js.util.Classes;
 import js.util.Files;
 import js.wood.impl.FileType;
 import js.wood.impl.LayoutParameters;
-import js.wood.impl.OperatorsNaming;
 import js.wood.impl.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,8 +38,6 @@ public class SourceReaderTest {
 	@Before
 	public void beforeTest() throws Exception {
 		when(sourceFile.exists()).thenReturn(true);
-		when(sourceFile.getProject()).thenReturn(project);
-		when(project.getOperatorsNaming()).thenReturn(OperatorsNaming.XMLNS);
 	}
 
 	@Test
