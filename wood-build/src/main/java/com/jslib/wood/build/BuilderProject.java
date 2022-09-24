@@ -12,8 +12,8 @@ import com.jslib.wood.CompoPath;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.IReferenceHandler;
 import com.jslib.wood.Project;
+import com.jslib.wood.Reference;
 import com.jslib.wood.Variables;
-import com.jslib.wood.impl.ResourceType;
 
 /**
  * WOOD {@link Project} extension for build process.
@@ -128,7 +128,7 @@ class BuilderProject extends Project {
 			}
 
 			// variables definition files are XML files with root element one of defined resource type variables
-			if (file.isXML(ResourceType.variables())) {
+			if (file.isXML(Reference.Type.variables())) {
 				Variables parentDirVariables = variables.get(parentDir);
 				if (parentDirVariables == null) {
 					parentDirVariables = new Variables();

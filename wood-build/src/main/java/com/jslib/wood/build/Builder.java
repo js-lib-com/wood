@@ -146,7 +146,7 @@ public class Builder implements IReferenceHandler {
 		PageDocument pageDocument = new PageDocument(pageComponent);
 		pageDocument.setLanguage(locale.toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");
-		pageDocument.setTitle(pageComponent.getDisplay());
+		pageDocument.setTitle(pageComponent.getTitle());
 		pageDocument.setAuthors(project.getAuthors());
 		pageDocument.setDescription(pageComponent.getDescription());
 

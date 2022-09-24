@@ -62,8 +62,8 @@ public class Component {
 	/** Component name. By convention is the name of component directory. */
 	private final String name;
 
-	/** Display is the component name formatted for user interface. */
-	private final String display;
+	/** Component name for page head title and user interface. */
+	private final String title;
 
 	private final String description;
 
@@ -154,8 +154,8 @@ public class Component {
 
 		this.baseLayoutPath = layoutPath;
 		this.name = layoutPath.getBasename();
-		this.display = descriptor.getDisplay(Strings.concat(project.getDisplay(), " / ", Strings.toTitleCase(name)));
-		this.description = descriptor.getDescription(this.display);
+		this.title = descriptor.getTitle(Strings.concat(project.getTitle(), " / ", Strings.toTitleCase(name)));
+		this.description = descriptor.getDescription(this.title);
 		this.resourcesGroup = descriptor.getResourcesGroup();
 
 		// consolidate component layout from its templates and widgets
@@ -287,6 +287,9 @@ public class Component {
 
 		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
 		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
+		if(contentFragments.size()>1) {
+		//	throw new IllegalStateException();
+		}
 		if (contentFragments.isEmpty()) {
 			// if there are no content fragments, currently loaded layout does not inherit from a template component
 			return layoutDoc;
@@ -295,7 +298,7 @@ public class Component {
 		// if content fragment is the document root we have a stand alone content component
 		// it is not allowed to have multiple content fragments in a stand alone content component
 		ContentFragment contentFragment = new ContentFragment(operators, contentFragments.item(0));
-		if (contentFragment.isRoot()) {
+		if (contentFragment.hasParent()) {
 			for (int i = 1; i < contentFragments.size(); ++i) {
 				Element inlineContentFragment = contentFragments.item(i);
 				Document templateDoc = consolidateTemplate(layoutPath, new ContentFragment(operators, inlineContentFragment), guardCounter);
@@ -381,7 +384,9 @@ public class Component {
 		if (cleanupEditables) {
 			editables.remove();
 		}
-		addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+		if (contentFragment.isShortTemplateNotation()) {
+			addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+		}
 		operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
 		return templateDoc;
 	}
@@ -419,8 +424,8 @@ public class Component {
 		return name;
 	}
 
-	public String getDisplay() {
-		return display;
+	public String getTitle() {
+		return title;
 	}
 
 	public String getDescription() {
@@ -512,7 +517,7 @@ public class Component {
 	 */
 	@Override
 	public String toString() {
-		return display;
+		return title;
 	}
 
 	// --------------------------------------------------------
@@ -746,6 +751,10 @@ public class Component {
 			return root;
 		}
 
+		public boolean isShortTemplateNotation() {
+			return templatePathEditableName == null;
+		}
+
 		public String getTemplatePath() {
 			return templatePath;
 		}
@@ -764,7 +773,7 @@ public class Component {
 			return editableName;
 		}
 
-		public boolean isRoot() {
+		public boolean hasParent() {
 			return root.getParent() == null;
 		}
 

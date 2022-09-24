@@ -69,7 +69,7 @@ public class BuilderIntegrationTest {
 	}
 
 	private static void assertPageDocument(Document doc) throws XPathExpressionException {
-		assertThat(doc.getByTag("title").getText(), equalTo("Test Project / Index"));
+		assertThat(doc.getByTag("title").getText(), equalTo("Index Page"));
 
 		EList metas = doc.findByTag("meta");
 		assertThat(metas.size(), equalTo(5));

@@ -50,14 +50,14 @@ abstract class BaseDescriptor {
 	}
 
 	/**
-	 * Get object display or given default value, if display is missing or not set. This property is loaded from
-	 * <code>display</code> element.
+	 * Get object title or given default value, if title is missing or not set. This property is loaded from
+	 * <code>title</code> element.
 	 * 
-	 * @param defaultValue default display value.
-	 * @return object display or supplied default value.
+	 * @param defaultValue default title value.
+	 * @return object title or supplied default value.
 	 */
-	public String getDisplay(String defaultValue) {
-		return text("display", defaultValue);
+	public String getTitle(String defaultValue) {
+		return text("title", defaultValue);
 	}
 
 	/**

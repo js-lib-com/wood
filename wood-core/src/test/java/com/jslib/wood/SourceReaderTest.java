@@ -22,9 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.jslib.util.Classes;
 import com.jslib.util.Files;
-import com.jslib.wood.impl.FileType;
 import com.jslib.wood.impl.LayoutParameters;
-import com.jslib.wood.impl.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceReaderTest {
@@ -90,9 +88,27 @@ public class SourceReaderTest {
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 
-		assertThat(referenceCaptor.getValue().getResourceType(), equalTo(ResourceType.STRING));
+		assertThat(referenceCaptor.getValue().getType(), equalTo(Reference.Type.STRING));
 		assertThat(referenceCaptor.getValue().getName(), equalTo("title"));
 		assertThat(sourceFileCaptor.getValue().value(), equalTo("res/compo/compo.htm"));
+	}
+
+	@Test
+	public void GivenLiteralAtMetaReference_WhenCopySource_ThenPreserveAtChar() throws IOException {
+		// given
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@@string/title</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
+
+		// when
+		SourceReader reader = new SourceReader(sourceFile, handler);
+		StringWriter writer = new StringWriter();
+		Files.copy(reader, writer);
+		
+		// then
+		assertTrue(writer.toString().contains("<h1>@string/title</h1>"));
 	}
 
 	@Test
@@ -103,28 +119,12 @@ public class SourceReaderTest {
 				"</body>";
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
-		when(handler.onResourceReference(new Reference(ResourceType.STRING, "title"), sourceFile)).thenReturn("Component Title");
+		when(handler.onResourceReference(new Reference(Reference.Type.STRING, "title"), sourceFile)).thenReturn("Component Title");
 
 		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 		assertTrue(writer.toString().contains("<h1>Component Title</h1>"));
-	}
-
-	@Test
-	public void copy_ExpressionEval() throws IOException {
-		String source = "" + //
-				"body {" + //
-				"	width: @eval(add 2px (add 3px 4px));" + //
-				"}";
-		when(sourceFile.getReader()).thenReturn(new StringReader(source));
-		when(sourceFile.cloneTo(FileType.VAR)).thenReturn(sourceFile);
-
-		SourceReader reader = new SourceReader(sourceFile, handler);
-
-		StringWriter writer = new StringWriter();
-		Files.copy(reader, writer);
-		assertTrue(writer.toString().contains("width: 9.0px;"));
 	}
 
 	@Test
@@ -191,17 +191,22 @@ public class SourceReaderTest {
 		Files.copy(reader, writer);
 	}
 
-	@Test(expected = WoodException.class)
-	public void unknownType() throws IOException {
+	@Test
+	public void GivenUnknownReferenceType_WhenSourceRead_ThenPreserveText() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@strings/value</h1>" + //
 				"</body>";
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
+		assertTrue(writer.toString().contains("@strings/value"));
 	}
 
 	// --------------------------------------------------------------------------------------------

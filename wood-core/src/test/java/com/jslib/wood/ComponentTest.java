@@ -50,7 +50,7 @@ public class ComponentTest {
 	public void beforeTest() {
 		operatorsHandler = new XmlnsOperatorsHandler();
 
-		when(project.getDisplay()).thenReturn("Components");
+		when(project.getTitle()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
 
@@ -80,7 +80,7 @@ public class ComponentTest {
 		assertThat(compo.getProject(), equalTo(project));
 		assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
 		assertThat(compo.getName(), equalTo("layout"));
-		assertThat(compo.getDisplay(), equalTo("Components / Layout"));
+		assertThat(compo.getTitle(), equalTo("Components / Layout"));
 		assertThat(compo.getDescription(), equalTo("Components / Layout"));
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
 		assertThat(compo.toString(), equalTo("Components / Layout"));
@@ -96,7 +96,7 @@ public class ComponentTest {
 	@Test
 	public void descriptor() {
 		String descriptor = "<compo>" + //
-				"<display>Page Compo</display>" + //
+				"<title>Page Compo</title>" + //
 				"<description>Page description.</description>" + //
 				"<group>admin</group>" + //
 				"<scripts>" + //
@@ -115,7 +115,7 @@ public class ComponentTest {
 		assertThat(compo.getProject(), equalTo(project));
 		assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
 		assertThat(compo.getName(), equalTo("layout"));
-		assertThat(compo.getDisplay(), equalTo("Page Compo"));
+		assertThat(compo.getTitle(), equalTo("Page Compo"));
 		assertThat(compo.getDescription(), equalTo("Page description."));
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
 		assertThat(compo.toString(), equalTo("Page Compo"));

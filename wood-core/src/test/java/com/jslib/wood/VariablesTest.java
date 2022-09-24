@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.jslib.wood.impl.FileType;
-import com.jslib.wood.impl.ResourceType;
 import com.jslib.wood.impl.Variants;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,7 +67,7 @@ public class VariablesTest {
 		Map<Reference, String> values = localeValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
-		assertThat(values.keySet(), contains(new Reference(ResourceType.STRING, "title")));
+		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));
 		assertThat(values.values(), contains("Title"));
 	}
 
@@ -94,7 +93,7 @@ public class VariablesTest {
 		Map<Reference, String> values = localeValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
-		assertThat(values.keySet(), contains(new Reference(ResourceType.STRING, "title")));
+		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));
 		assertThat(values.values(), contains("Title"));
 	}
 
@@ -117,7 +116,7 @@ public class VariablesTest {
 
 		// then
 		IReferenceHandler handler = mock(IReferenceHandler.class);
-		String value = variables.get(Locale.US, new Reference(ResourceType.STRING, "title"), file, handler);
+		String value = variables.get(Locale.US, new Reference(Reference.Type.STRING, "title"), file, handler);
 		assertThat(value, notNullValue());
 		assertThat(value, equalTo("Title"));
 	}
@@ -137,7 +136,7 @@ public class VariablesTest {
 
 		// when
 		IReferenceHandler handler = mock(IReferenceHandler.class);
-		String value = variables.get(new Reference(ResourceType.STRING, "title"), file, handler);
+		String value = variables.get(new Reference(Reference.Type.STRING, "title"), file, handler);
 
 		// then
 		assertThat(value, nullValue());
@@ -165,7 +164,7 @@ public class VariablesTest {
 		Map<Reference, String> values = localeValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
-		assertThat(values.keySet(), contains(new Reference(ResourceType.TEXT, "title")));
+		assertThat(values.keySet(), contains(new Reference(Reference.Type.TEXT, "title")));
 		assertThat(values.values(), contains("<b>Big</b> Title"));
 	}
 
@@ -224,7 +223,7 @@ public class VariablesTest {
 		Map<Reference, String> values = localeValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
-		assertThat(values.keySet(), contains(new Reference(ResourceType.STRING, "title")));
+		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));
 		assertThat(values.values(), contains("Title"));
 	}
 
@@ -244,7 +243,7 @@ public class VariablesTest {
 		IReferenceHandler handler = Mockito.mock(IReferenceHandler.class);
 
 		// when
-		String value = variables.get(new Reference(ResourceType.STRING, "title"), file, handler);
+		String value = variables.get(new Reference(Reference.Type.STRING, "title"), file, handler);
 
 		// then
 		assertThat(value, notNullValue());
@@ -280,7 +279,7 @@ public class VariablesTest {
 		};
 
 		// when
-		variables.get(new Reference(ResourceType.STRING, "app"), file, handler);
+		variables.get(new Reference(Reference.Type.STRING, "app"), file, handler);
 	}
 
 	private FilePath file() {

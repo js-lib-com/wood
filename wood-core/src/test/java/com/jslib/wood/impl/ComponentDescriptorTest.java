@@ -58,7 +58,7 @@ public class ComponentDescriptorTest {
 				"<component>" + //
 				"	<group>@string/role</group>" + //
 				"</component>";
-		when(referenceHandler.onResourceReference(eq(new Reference(ResourceType.STRING, "role")), any(FilePath.class))).thenReturn("admin");
+		when(referenceHandler.onResourceReference(eq(new Reference(Reference.Type.STRING, "role")), any(FilePath.class))).thenReturn("admin");
 
 		// when
 		descriptor = descriptor(xml);

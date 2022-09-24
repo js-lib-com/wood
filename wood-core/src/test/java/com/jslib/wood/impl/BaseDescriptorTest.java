@@ -37,7 +37,7 @@ public class BaseDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
-				"	<display>Test Project</display>" + //
+				"	<title>Test Project</title>" + //
 				"	<description>Test project description.</description>" + //
 				"</component>";
 
@@ -45,7 +45,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getDisplay("Display"), equalTo("Test Project"));
+		assertThat(descriptor.getTitle("Display"), equalTo("Test Project"));
 		assertThat(descriptor.getDescription("Description"), equalTo("Test project description."));
 	}
 
@@ -54,7 +54,7 @@ public class BaseDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
-				"	<display>Test Project</display>" + //
+				"	<title>Test Project</title>" + //
 				"	<description>Test project description.</description>" + //
 				"</component>";
 
@@ -62,7 +62,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getDisplay(null), equalTo("Test Project"));
+		assertThat(descriptor.getTitle(null), equalTo("Test Project"));
 		assertThat(descriptor.getDescription(null), equalTo("Test project description."));
 	}
 
@@ -77,7 +77,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getDisplay("Display"), equalTo("Display"));
+		assertThat(descriptor.getTitle("Title"), equalTo("Title"));
 		assertThat(descriptor.getDescription("Description"), equalTo("Description"));
 	}
 
@@ -163,7 +163,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getDisplay(null), nullValue());
+		assertThat(descriptor.getTitle(null), nullValue());
 		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getMetaDescriptors(), emptyIterable());
 		assertThat(descriptor.getLinkDescriptors(), emptyIterable());

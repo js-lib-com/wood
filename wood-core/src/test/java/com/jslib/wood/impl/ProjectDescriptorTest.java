@@ -49,7 +49,7 @@ public class ProjectDescriptorTest {
 				"	<theme-dir>theme</theme-dir>" + //
 				"	<exclude-dirs>page/about</exclude-dirs>" + //
 				"	<authors>Iulian Rotaru</authors>" + //
-				"	<display>Project Display</display>" + //
+				"	<title>Project Display</title>" + //
 				"	<description>Project description.</description>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
 				"	<manifest>res/app-manifest.json</manifest>" + //
@@ -69,7 +69,7 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getThemeDir(), equalTo("theme"));
 		assertThat(descriptor.getExcludeDirs(), equalTo(Arrays.asList("page/about")));
 		assertThat(descriptor.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru")));
-		assertThat(descriptor.getDisplay(null), equalTo("Project Display"));
+		assertThat(descriptor.getTitle(null), equalTo("Project Display"));
 		assertThat(descriptor.getDescription(null), equalTo("Project description."));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
 		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
@@ -133,7 +133,7 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getThemeDir(), equalTo(CT.DEF_THEME_DIR));
 		assertThat(descriptor.getExcludeDirs(), emptyIterable());
 		assertThat(descriptor.getAuthors().size(), equalTo(0));
-		assertThat(descriptor.getDisplay(null), nullValue());
+		assertThat(descriptor.getTitle(null), nullValue());
 		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 		assertThat(descriptor.getManifest(), equalTo("manifest.json"));

@@ -60,7 +60,7 @@ public class ComponentAggregationTest {
 	public void beforeTest() {
 		operatorsHandler = new XmlnsOperatorsHandler();
 
-		when(project.getDisplay()).thenReturn("Components");
+		when(project.getTitle()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
 		
@@ -107,6 +107,27 @@ public class ComponentAggregationTest {
 		assertThat(headings.size(), equalTo(2));
 		assertThat(headings.item(0).getText(), equalTo("Component"));
 		assertThat(headings.item(1).getText(), equalTo("Child"));
+	}
+
+	@Test
+	public void GivenSimpleAggregationAndAttributeCollision_ThenParentTakesPrecedence() {
+		// given
+		String childHTML = "<div id='child'></div>";
+		when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
+
+		String compoHTML = "" + //
+				"<section xmlns:w='js-lib.com/wood'>" + //
+				"	<div id='parent' w:compo='res/child'></div>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/child")).thenReturn(childPath);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+		Element layout = compo.getLayout();
+
+		// then
+		assertThat(layout.getByTag("div").getAttr("id"), equalTo("parent"));
 	}
 
 	@Test
@@ -272,5 +293,14 @@ public class ComponentAggregationTest {
 		assertThat(article.hasCssClass("component"), equalTo(true));
 		assertThat(article.hasCssClass("container"), equalTo(true));
 		assertThat(article.hasCssClass("template"), equalTo(true));
+
+		// do not alter parent body attributes
+		assertThat(layout.getAttr("id"), nullValue());
+		assertThat(layout.getAttr("name"), nullValue());
+		assertThat(layout.getAttr("title"), nullValue());
+		assertThat(layout.getAttr("data-cfg"), nullValue());
+		assertThat(layout.hasCssClass("component"), equalTo(false));
+		assertThat(layout.hasCssClass("container"), equalTo(false));
+		assertThat(layout.hasCssClass("template"), equalTo(false));
 	}
 }

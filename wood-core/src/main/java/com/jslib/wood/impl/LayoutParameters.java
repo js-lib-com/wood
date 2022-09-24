@@ -5,7 +5,9 @@ import java.util.Map;
 
 import com.jslib.lang.Pair;
 import com.jslib.util.Strings;
+import com.jslib.wood.FilePath;
 import com.jslib.wood.SourceReader;
+import com.jslib.wood.WoodException;
 
 /**
  * Template and child component layout parameters.Layout parameters are a mean to customize a reusable component. Parameters are
@@ -70,12 +72,17 @@ public class LayoutParameters {
 	}
 
 	/**
-	 * Get parameter value or null if named parameter does not exist.
+	 * Get parameter value or throw runtime exception if named parameter does not exist.
 	 * 
+	 * @param sourceFile source file, for exception handling,
 	 * @param name parameter name.
-	 * @return parameter value, possible null.
+	 * @return parameter value.
 	 */
-	public String getValue(String name) {
-		return parameters.get(name);
+	public String getValue(FilePath sourceFile, String name) {
+		String value = parameters.get(name);
+		if (value == null) {
+			throw new WoodException("Missing layout parameter |%s| in source file |%s|.", name, sourceFile);
+		}
+		return value;
 	}
 }

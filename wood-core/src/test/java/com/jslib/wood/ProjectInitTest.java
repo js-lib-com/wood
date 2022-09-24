@@ -55,7 +55,7 @@ public class ProjectInitTest {
 	public void GivenNonEmptyDescriptor_WhenConstrutor_ThenStateInitialized() throws FileNotFoundException {
 		// given
 		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
-		when(descriptor.getDisplay(anyString())).thenReturn("Project Display");
+		when(descriptor.getTitle(anyString())).thenReturn("Project Display");
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getServiceWorker()).thenReturn("sw.js");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
@@ -77,7 +77,7 @@ public class ProjectInitTest {
 		assertThat(project.getServiceWorker().value(), equalTo("sw.js"));
 
 		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
-		assertThat(project.getDisplay(), equalTo("Project Display"));
+		assertThat(project.getTitle(), equalTo("Project Display"));
 
 		assertThat(project.getLocales(), hasSize(2));
 		assertThat(project.getLocales(), contains(Locale.FRANCE, Locale.GERMAN));

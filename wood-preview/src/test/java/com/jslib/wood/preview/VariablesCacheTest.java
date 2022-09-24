@@ -21,7 +21,6 @@ import com.jslib.wood.IReferenceHandler;
 import com.jslib.wood.Project;
 import com.jslib.wood.Reference;
 import com.jslib.wood.Variables;
-import com.jslib.wood.impl.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VariablesCacheTest {
@@ -65,7 +64,7 @@ public class VariablesCacheTest {
 	@Test
 	public void GivenVariableFoundOnSource_WhenGet_ThenAssetNotInvoked() {
 		// given
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(sourceVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Compo Title");
@@ -82,7 +81,7 @@ public class VariablesCacheTest {
 	@Test
 	public void GivenVariableNotFoundOnSource_WhenGet_ThenAssetInvoked() {
 		// given
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(assetVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Asset Title");
@@ -99,7 +98,7 @@ public class VariablesCacheTest {
 	@Test
 	public void GivenVariableNotFoundOnSourceOrAsset_WhenGet_ThenNull() {
 		// given
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 

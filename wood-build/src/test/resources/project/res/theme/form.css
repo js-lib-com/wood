@@ -1,4 +1,4 @@
 form {
-	width: @dimen/form-width;
-	background-color: @color/form-color;
+	width: 50%;
+	background-color: blue;
 }

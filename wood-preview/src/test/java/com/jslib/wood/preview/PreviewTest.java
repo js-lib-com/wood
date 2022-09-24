@@ -83,7 +83,7 @@ public class PreviewTest {
 
 		// component fixture
 
-		when(compo.getDisplay()).thenReturn("Test compo");
+		when(compo.getTitle()).thenReturn("Test compo");
 		when(compo.getDescription()).thenReturn("Test compo description.");
 
 		List<IMetaDescriptor> compoMetas = metas("og:title", "Test compo");

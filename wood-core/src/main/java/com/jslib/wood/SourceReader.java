@@ -4,41 +4,35 @@ import java.io.IOException;
 import java.io.Reader;
 
 import com.jslib.util.Params;
-import com.jslib.wood.eval.Interpreter;
 import com.jslib.wood.impl.LayoutParameters;
 import com.jslib.wood.impl.ReferencesResolver;
-import com.jslib.wood.impl.ResourceType;
 
 /**
- * Source file reader with {@literal @}meta, also known as at-meta, processing. This class is a decorator for a characters
- * stream reader. Beside standard reading it looks for resource references and expressions evaluation described by at-meta
- * syntax and invokes external {@link IReferenceHandler}, respective {@link Interpreter} when discover them. Also inject layout
- * parameters provided by {@link LayoutParameters} when encounter <code>@param</code> reference.
+ * Source file reader with at-meta reference processing. This class is a decorator for a characters stream reader. Beside
+ * standard reading it looks for at-meta references and invokes external {@link IReferenceHandler} when discover them. Also
+ * inject layout parameters provided by {@link LayoutParameters} when encounter <code>@param</code> reference.
  * <p>
- * As mentioned, at-meta annotations define both references and evaluations. General syntax is described here.
+ * General at-meta reference syntax is described here.
  * 
  * <pre>
- * at-meta    = AT meta
- * meta       = reference | parameter | evaluation
- * reference  = resource-type SEP ?(path SEP) name
- * parameter  = PARAM SEP name 
- * evaluation = EVAL expression
- * ; for complete reference description see {@link Reference}
- * ; for parameters details see {@link LayoutParameters}
- * ; expression is defined by {@link com.jslib.wood.eval.Expression}
+ * reference = AT type SEP ?(path SEP) name
+ * path      = 1*CH           ; optional path, for resource files only
+ * name      = 1*CH           ; reference name, unique in scope
+ * ; type is defined in references description table
  * 
  * ; terminal symbols definition
- * AT    = "@"      ; at-meta mark
- * SEP   = "/"      ; path separator
- * PARAM = "param"  ; layout parameter reference
- * EVAL  = "eval"   ; expression evaluation identifier
+ * AT  = "@"                 ; at-meta reference mark
+ * SEP = "/"                 ; reference name and optional path separator
+ * CH  = ALPHA / DIGIT / "-" ; character is US-ASCII alphanumeric and dash
+ * 
+ * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * 
- * <h5>Resource Reference</h5>
+ * <h5>Variables Reference Processing</h5>
  * <p>
- * Source files can contain references to variables. Is legal for variable values to also contain references; this creates a
- * tree of references that is traversed recursively in depth-first order. There are a number of methods invoked in a chain that
- * creates this recursive reference scanning.
+ * Source files can contain references to variables. Is legal for variable values to also contain references to variables; this
+ * creates a tree of variable references that is traversed recursively in depth-first order. There are a number of methods
+ * invoked in a chain that creates this recursive reference scanning.
  * <ol>
  * <li>{@link SourceReader} discovers a variable reference and delegates reference handler,
  * <li>{@link IReferenceHandler} retrieves value from variables instance,
@@ -48,11 +42,19 @@ import com.jslib.wood.impl.ResourceType;
  * </ol>
  * Note that variables value getter, at point 3, implements recursive loop level guard.
  * 
- * <h5>Layout Parameters</h5>
+ * <h5>Layout Parameters Processing</h5>
  * <p>
- * Component layouts can contain layout parameters defined by <code>@param</code> parameter references. When source reader
- * discover a parameter reference uses {@link #layoutParameters} to retrieve named parameter value and text replace parameter
- * reference with its value. Layout parameters map is initialized beforehand and injected via constructor
+ * Component layouts can contain layout parameters defined by `@param/name` parameter reference syntax. For example a child
+ * section title provided by parent component.
+ * 
+ * <pre>
+ * <section>
+ * 	<h1>@param/title</h1>
+ * </section>
+ * </pre>
+ * <p>
+ * When source reader discover a parameter reference uses {@link #layoutParameters} to retrieve named parameter value and text
+ * replace parameter reference with its value. Layout parameters map is initialized beforehand and injected via constructor
  * {@link SourceReader#SourceReader(FilePath, LayoutParameters, IReferenceHandler)}.
  * <p>
  * Layout parameters map is initialized from <code>wood:param</code> operator at component creation.
@@ -66,16 +68,6 @@ import com.jslib.wood.impl.ResourceType;
  * As stated layout parameters are the operand for <code>wood:param</code> operator; see {@link LayoutParameters} for layout
  * parameters syntax.
  * 
- * <h5>Expression Evaluation</h5>
- * <p>
- * Expression evaluation syntax has two parts: evaluation and expression. This source reader uses {@link MetaBuilder} to detect
- * evaluations and extract expression that is passed to {@link Interpreter}. At this stage expression is legal to contain
- * resource references; this class uses {@link ReferencesResolver} to resolve them before passing expression to interpreter.
- * Note that reference resolver is step 4. from recursive reference scanning described by resource reference section.
- * <p>
- * Interpreter performs the actual expression evaluation and returns a not null and not empty value that is used by this class
- * to replace evaluation annotation from source file.
- * 
  * @author Iulian Rotaru
  * @since 1.0
  */
@@ -85,12 +77,6 @@ public class SourceReader extends Reader {
 
 	/** External defined reference handler in charge with resource references processing. */
 	private final IReferenceHandler referenceHandler;
-
-	/** Expression interpreter. */
-	private final Interpreter interpreter;
-
-	/** Resource references resolver. */
-	private final ReferencesResolver referencesResolver;
 
 	/** External defined reader, decorated by this source reader instance. */
 	private final Reader reader;
@@ -115,14 +101,13 @@ public class SourceReader extends Reader {
 
 	/**
 	 * Create source reader decorator for external defined reader. Source may contain resource references and expression
-	 * evaluations that are declared into source file as at-meta annotations. For resources processing this constructor takes
+	 * evaluations that are declared into source file as at-meta references. For resources processing this constructor takes
 	 * external defined resource references handler. For expression evaluations creates interpreter and references resolver
 	 * instances.
 	 * 
 	 * @param reader external defined reader,
 	 * @param sourceFile source file used as scope for resource references,
 	 * @param referenceHandler external reference handler.
-	 * @throws IllegalArgumentException if any parameter is null or source file does not exist.
 	 */
 	public SourceReader(Reader reader, FilePath sourceFile, IReferenceHandler referenceHandler) {
 		super();
@@ -134,8 +119,6 @@ public class SourceReader extends Reader {
 		this.reader = sourceFile.isLayout() ? new LayoutReader(reader, sourceFile) : reader;
 		this.sourceFile = sourceFile;
 		this.referenceHandler = referenceHandler;
-		this.interpreter = new Interpreter();
-		this.referencesResolver = new ReferencesResolver();
 		this.metaBuilder = new MetaBuilder(sourceFile);
 		this.state = State.TEXT;
 	}
@@ -146,7 +129,6 @@ public class SourceReader extends Reader {
 	 * 
 	 * @param sourceFile source file to create source reader for,
 	 * @param referenceHandler external defined reference handler.
-	 * @throws IllegalArgumentException if any parameter is null or source file does not exist.
 	 */
 	public SourceReader(FilePath sourceFile, IReferenceHandler referenceHandler) {
 		this(reader(sourceFile), sourceFile, referenceHandler);
@@ -160,7 +142,6 @@ public class SourceReader extends Reader {
 	 * @param sourceFile source file for widget layout,
 	 * @param layoutParameters layout parameters, possible empty,
 	 * @param referenceHandler external reference handler.
-	 * @throws IllegalArgumentException if any parameter is null, source file does not exist or is not a layout.
 	 */
 	public SourceReader(FilePath sourceFile, LayoutParameters layoutParameters, IReferenceHandler referenceHandler) {
 		this(reader(sourceFile), sourceFile, referenceHandler);
@@ -173,7 +154,6 @@ public class SourceReader extends Reader {
 	 * 
 	 * @param sourceFile source file path.
 	 * @return source file reader.
-	 * @throws IllegalArgumentException if source file parameter is null.
 	 */
 	private static Reader reader(FilePath sourceFile) {
 		Params.notNull(sourceFile, "Source file");
@@ -209,10 +189,9 @@ public class SourceReader extends Reader {
 	/**
 	 * Get character from decorated reader and process it accordingly current state value. On the fly updates the state.
 	 * <p>
-	 * If current reader position is outside at-meta annotation this method just return the source text character. When discover
-	 * at-meta mark, this method blocks reading the at-meta content. Once at-meta annotation parsed, delegates
-	 * {@link #referenceHandler} or {@link #interpreter} to process resource reference, respective expression evaluation, that
-	 * return a not null not empty value.
+	 * If current reader position is outside at-meta reference this method just return the source text character. When discover
+	 * at-meta mark, this method blocks, reading the at-meta content. Once at-meta reference parsed, delegates
+	 * {@link #referenceHandler} to process at-meta reference that return a not null, not empty value.
 	 * <p>
 	 * At this point, this method start returning the value, char by char, instead of reading from decorated reader. When value
 	 * is completely retrieved start processing again the source text characters.
@@ -238,25 +217,16 @@ public class SourceReader extends Reader {
 				c = reader.read();
 			}
 
-			if (metaBuilder.isReference()) {
-				Reference reference = metaBuilder.getReference();
-				if (!reference.isValid()) {
-					throw new WoodException("Invalid reference |%s| in source file |%s|. Unknown type.", metaBuilder, sourceFile);
+			Reference reference = metaBuilder.getReference();
+			if (reference != null) {
+				if (reference.getType() == Reference.Type.PARAM) {
+					if (layoutParameters == null) {
+						throw new WoodException("Found @param at-meta but missing layout parameters for source file |%s|.", sourceFile);
+					}
+					value = layoutParameters.getValue(sourceFile, reference.getName());
+				} else {
+					value = referenceHandler.onResourceReference(reference, sourceFile);
 				}
-				value = referenceHandler.onResourceReference(reference, sourceFile);
-			} else if (metaBuilder.isParameter()) {
-				if (layoutParameters == null) {
-					throw new WoodException("Found @param at-meta but missing layout parameters for source file |%s|.", sourceFile);
-				}
-				String parameter = metaBuilder.getParameter();
-				value = layoutParameters.getValue(parameter);
-				if (value == null) {
-					throw new WoodException("Missing layout parameter |%s| in source file |%s|.", parameter, sourceFile);
-				}
-			} else if (metaBuilder.isEvaluation()) {
-				// is valid for expression to contain resource references that need to be resolved before evaluation
-				String expression = referencesResolver.parse(metaBuilder.getExpression(), sourceFile, referenceHandler);
-				value = interpreter.evaluate(expression, sourceFile.toString());
 			} else {
 				// if built reference is not recognized sent it back to source stream unchanged since is valid to have reference
 				// mark in source syntax, e.g. @media from CSS file
@@ -267,7 +237,7 @@ public class SourceReader extends Reader {
 			charAfterMeta = c;
 			valueIndex = 1;
 			if (value == null) {
-				throw new WoodException("Null value for at-meta |%s| in source file |%s|.", metaBuilder.toString(), sourceFile);
+				throw new WoodException("Null value for at-meta reference |%s| in source file |%s|.", metaBuilder.toString(), sourceFile);
 			}
 			return value.charAt(0);
 
@@ -283,9 +253,6 @@ public class SourceReader extends Reader {
 		return c;
 	}
 
-	/**
-	 * Close this source reader instance.
-	 */
 	@Override
 	public void close() throws IOException {
 		reader.close();
@@ -304,76 +271,51 @@ public class SourceReader extends Reader {
 		/** Source file text, outside reference. */
 		TEXT,
 
-		/** At-meta annotation is parsing. */
+		/** At-meta reference is parsing. */
 		AT_META,
 
-		/** At-meta is completely parsed and its value is returning, char by char. */
+		/** At-meta reference is completely parsed and its value is returning, char by char. */
 		VALUE
 	}
 
 	/**
-	 * At-meta annotation builder is enacted when stream reader discover at-meta mark. It collects at-meta annotation characters
-	 * till end mark or EOF, see {@link #add(int)}. On the fly detects if at-meta is a resource reference or an expression
-	 * evaluation and update {@link #isEvaluation} flag accordingly.
+	 * At-meta reference builder is enacted when source reader discovers at-meta mark. It collects at-meta reference characters
+	 * till end mark or EOF, see {@link #add(int)}. Also detects escape sequence - double <code>at</code> character.
 	 * 
 	 * @author Iulian Rotaru
+	 * @since 1.0
 	 */
 	private static class MetaBuilder {
-		/** Widget actual parameter identifier. */
-		private static final String PARAMETER_ID = "@param";
-
-		/** Expression evaluation identifier. */
-		private static final String EVALUATION_ID = "@eval";
-
-		/** Mark for expression begin. */
-		private static final char EXPRESSION_BEGIN = '(';
-
-		/** Mark for expression end. */
-		private static final char EXPRESSION_END = ')';
+		/** Escape sequence. */
+		private static final String ESCAPE = "@@";
 
 		private final FilePath sourceFile;
 
-		/** Internal characters collector for reference value. */
-		private final StringBuilder builder = new StringBuilder();
+		private final StringBuilder builder;
 
 		/** Store reference separator index for reference instance creation, see {@link #getReference()}. */
 		private int separatorIndex;
 
-		/** True if this at-meta annotation is a reference to a variable or media file. */
-		private boolean isReference;
-
-		/** True if this at-meta annotation is an widget parameters. */
-		private boolean isParameter;
-
-		/** Flag indicating that this at-meta annotation is an expression evaluation. */
-		private boolean isEvaluation;
-
-		/**
-		 * Expression to evaluate allows for nested expressions of not limited nesting level. This field keeps track of
-		 * expressions nesting level. It is used to detect expression end.
-		 */
-		private int expressionNestingLevel;
+		/** Flag true only is escape sequence (double <code>at</code> character) was discovered. */
+		private boolean escape;
 
 		public MetaBuilder(FilePath sourceFile) {
 			super();
 			this.sourceFile = sourceFile;
+			this.builder = new StringBuilder();
 		}
 
-		/**
-		 * Reset this instance state for a new reference build.
-		 */
 		public void reset() {
 			builder.setLength(0);
 			separatorIndex = 0;
-			isReference = false;
-			isParameter = false;
-			isEvaluation = false;
-			expressionNestingLevel = 0;
 		}
 
 		/**
 		 * Store reference character and return true if collecting is to be continuing. Returns false if reference end mark or
 		 * end of file is detected. On the fly updates {@link #separatorIndex}.
+		 * <p>
+		 * Also return false if escape sequence (double <code>at</code> character) was discovered. In this case builder content
+		 * is replaced with a single <code>at</code> character.
 		 * <p>
 		 * This method is designed for usage in a <code>while</code> loop, see sample code.
 		 * 
@@ -387,7 +329,11 @@ public class SourceReader extends Reader {
 		 * @return true if reference collecting is to be continuing.
 		 */
 		public boolean add(int c) {
-			if (c == -1 || isEndMark(c)) {
+			if (escape) {
+				builder.replace(0, builder.length(), "@");
+				return false;
+			}
+			if (c == -1 || !Reference.isChar(c)) {
 				return false;
 			}
 
@@ -395,119 +341,40 @@ public class SourceReader extends Reader {
 			// if expression separator found initialize expression flag and expression nesting level to 1
 			if (separatorIndex == 0) {
 				switch (c) {
-				case EXPRESSION_BEGIN:
-					if (EVALUATION_ID.equals(builder.toString())) {
-						isEvaluation = true;
-						expressionNestingLevel = 1;
-					}
-					separatorIndex = builder.length();
-					break;
-
 				case Reference.SEPARATOR:
-					if (PARAMETER_ID.equals(builder.toString())) {
-						isParameter = true;
-					} else {
-						isReference = true;
-					}
 					separatorIndex = builder.length();
-					break;
-				}
-			}
-
-			// update expression nesting level only after separator found
-			else {
-				switch (c) {
-				case EXPRESSION_BEGIN:
-					++expressionNestingLevel;
-					break;
-
-				case EXPRESSION_END:
-					--expressionNestingLevel;
 					break;
 				}
 			}
 
 			builder.append((char) c);
+			if (ESCAPE.equals(builder.toString())) {
+				escape = true;
+			}
 			return true;
 		}
 
 		/**
-		 * Test if current processing at-meta is a resource reference. This predicate should be called only after at-meta build
-		 * completes otherwise its value is not defined.
-		 * <p>
-		 * Current implementation consider resource reference if at-meta uses '/' as separator.
+		 * Get at-meta reference instance. Create and return a new at-meta reference instance. Return null on at-meta escape or
+		 * not recognized reference type; in this case internal builder still contains original source text.
 		 * 
-		 * @return true if this at-meta is a resource reference.
-		 */
-		public boolean isReference() {
-			// if no separator found this at-meta is a source file syntax at-syntax, perhaps CSS at-rule or script annotation
-			return isReference;
-		}
-
-		/**
-		 * Get resource reference instance. This method should be called only if {@link #isReference()} predicate returns true.
-		 * Otherwise returned value is not defined.
-		 * 
-		 * @return reference instance.
+		 * @return newly created reference instance or null.
 		 */
 		public Reference getReference() {
-			ResourceType resourceType = ResourceType.getValueOf(builder.substring(1, separatorIndex));
+			if (escape || separatorIndex == 0) {
+				return null;
+			}
+			Reference.Type type = Reference.Type.getValueOf(builder.substring(1, separatorIndex));
+			if (type == null) {
+				return null;
+			}
 			String name = builder.substring(separatorIndex + 1);
-			return new Reference(sourceFile, resourceType, name);
+			return new Reference(sourceFile, type, name);
 		}
 
-		/**
-		 * Test if current parsing at-meta is an expression evaluation. At-meta qualifies for expression evaluation if
-		 * expression separator was found and if at-meta identified equals {@link #EVALUATION_ID}.
-		 * 
-		 * @return true if this at-meta is an expression evaluation.
-		 */
-		public boolean isEvaluation() {
-			return isEvaluation;
-		}
-
-		/**
-		 * Return expression including opening and closing parenthesis. This method returns meaningful data only if this at-meta
-		 * is an expression evaluation. Caller should ensure that calling first {@link #isEvaluation}.
-		 * 
-		 * @return the expression of the evaluation meta.
-		 */
-		public String getExpression() {
-			return builder.substring(separatorIndex);
-		}
-
-		/**
-		 * Test if current parsing at-meta is an widget parameter. At-meta is a widget parameter if at-meta identified equals
-		 * {@link #PARAMETER_ID}.
-		 * 
-		 * @return true if this at-meta is an expression evaluation.
-		 */
-		public boolean isParameter() {
-			return isParameter;
-		}
-
-		public String getParameter() {
-			return builder.substring(separatorIndex + 1);
-		}
-
-		/**
-		 * Return instance string representation of current loaded reference value.
-		 * 
-		 * @return instance string representation.
-		 */
 		@Override
 		public String toString() {
 			return builder.toString();
-		}
-
-		/**
-		 * Test if character is a reference end mark.
-		 * 
-		 * @param c character to test.
-		 * @return true if character is reference end mark.
-		 */
-		private boolean isEndMark(int c) {
-			return isEvaluation ? expressionNestingLevel == 0 : !Reference.isChar(c) && c != EXPRESSION_BEGIN;
 		}
 	}
 }

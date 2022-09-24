@@ -79,7 +79,7 @@ public class ComponentInheritanceTest {
 
 	@Before
 	public void beforeTest() {
-		when(project.getDisplay()).thenReturn("Components");
+		when(project.getTitle()).thenReturn("Components");
 		when(project.hasNamespace()).thenReturn(true);
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 
@@ -167,6 +167,63 @@ public class ComponentInheritanceTest {
 		assertFalse(section.hasAttrNS(WOOD.NS, "editable"));
 		assertFalse(section.hasAttrNS(WOOD.NS, "template"));
 		assertTrue(section.hasAttr("xmlns:w"));
+	}
+
+	@Test
+	public void GivenSingleEditableAndShortNotation_ThenClassMerged() {
+		// given
+		String templateHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section class='section' w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section class='content' w:template='res/template#section' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertTrue(layout.hasAttr("xmlns:w"));
+
+		Element section = layout.getByTag("section");
+		assertTrue(section.hasCssClass("section"));
+		assertTrue(section.hasCssClass("content"));
+	}
+
+	@Test
+	public void GivenSingleEditableAndShortNotation_ThenTemplateClassNotChanged() {
+		// given
+		String templateHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section class='section' w:editable='section'></section>" + //
+				"</body>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<section class='content' w:template='res/template#section' xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Content</h1>" + //
+				"</section>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		assertTrue(layout.hasAttr("xmlns:w"));
+
+		assertFalse(layout.hasCssClass("section"));
+		assertFalse(layout.hasCssClass("content"));
 	}
 
 	@Test
@@ -286,7 +343,6 @@ public class ComponentInheritanceTest {
 
 		// then
 		Element layout = compo.getLayout();
-		layout.getDocument().dump();
 
 		EList headings = layout.findByTag("h1");
 		assertThat(headings.size(), equalTo(1));
@@ -493,6 +549,34 @@ public class ComponentInheritanceTest {
 		assertThat(section.getAttr("data-list"), equalTo("list"));
 		assertThat(section.hasCssClass("template"), equalTo(true));
 		assertThat(section.hasCssClass("compo"), equalTo(true));
+	}
+
+	@Test
+	public void GivenSingleInlineTemplateAndAttributeCollision_ThenParentTakesPrecedence() {
+		// given
+		String templateHTML = "" + //
+				"<article xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Template</h1>" + //
+				"	<section id='list' w:editable='section'></section>" + //
+				"</article>";
+		when(templateLayout.getReader()).thenReturn(new StringReader(templateHTML));
+
+		String compoHTML = "" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<section id='section' w:template='res/template#section'>" + //
+				"		<h1>Content</h1>" + //
+				"	</section>" + //
+				"</body>";
+		when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
+		when(project.createCompoPath("res/template")).thenReturn(templateCompo);
+
+		// when
+		Component compo = new Component(compoPath, referenceHandler);
+
+		// then
+		Element layout = compo.getLayout();
+		Element section = layout.getByTag("section");
+		assertThat(section.getAttr("id"), equalTo("section"));
 	}
 
 	@Test
@@ -988,6 +1072,7 @@ public class ComponentInheritanceTest {
 
 		String compoHTML = "" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<h1>Page</h1>" + //
 				"	<article type='text/html' w:template='res/template'>" + //
 				"		<section w:content='section-1'>" + //
 				"			<h1>Content One</h1>" + //
@@ -1010,10 +1095,11 @@ public class ComponentInheritanceTest {
 		assertThat(layout.getByTag("embed"), nullValue());
 
 		EList headings = layout.findByTag("h1");
-		assertThat(headings.size(), equalTo(3));
-		assertThat(headings.item(0).getText(), equalTo("Template"));
-		assertThat(headings.item(1).getText(), equalTo("Content One"));
-		assertThat(headings.item(2).getText(), equalTo("Content Two"));
+		assertThat(headings.size(), equalTo(4));
+		assertThat(headings.item(0).getText(), equalTo("Page"));
+		assertThat(headings.item(1).getText(), equalTo("Template"));
+		assertThat(headings.item(2).getText(), equalTo("Content One"));
+		assertThat(headings.item(3).getText(), equalTo("Content Two"));
 
 		assertThat(layout.findByTag("section").size(), equalTo(2));
 	}

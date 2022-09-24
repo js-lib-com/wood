@@ -17,12 +17,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jslib.io.ReaderInputStream;
 import com.jslib.util.Strings;
 import com.jslib.wood.impl.ReferencesResolver;
-import com.jslib.wood.impl.ResourceType;
 
 /**
- * Variables store holds name/value pairs that can be referenced from source files. In addition to having a name, variable
- * belongs to a type; so to fully refer a variable one need to know both type and name. See {@link ResourceType} for recognized
- * types and {@link Reference} for syntax and sample usage.
+ * Variables hold name/value pairs that can be referenced from source files. In addition to having a name, variable belongs to a
+ * type; so to fully refer a variable one need to know both type and name. See {@link ResourceType} for recognized types and
+ * {@link Reference} for syntax and sample usage.
  * <p>
  * Variables are resources and are processed the same way as media files: by {@link IReferenceHandler}. When source file is
  * read, {@link SourceReader} discovers references and delegates reference handler. There are distinct reference handler
@@ -321,10 +320,10 @@ public class Variables {
 		private final Map<Reference, String> values;
 
 		/**
-		 * Variable values definition file has a resource type used to create reference instances. Note that by design all
+		 * Variable values definition file has a reference type used to create reference instances. Note that by design all
 		 * variables from a file should have the same type.
 		 */
-		private ResourceType resourceType;
+		private Reference.Type referenceType;
 
 		/**
 		 * Value builder used to actually collect currently processed variable value. There are specialized value builders for
@@ -360,10 +359,10 @@ public class Variables {
 		}
 
 		/**
-		 * Handle new element discovered into SAX stream. When detect root element this method initialized {@link #resourceType}
-		 * and create value builder instance, see {@link #builder}. For every element direct child to root, that is, nesting
-		 * level 1, reset the builder and add parameters from element attributes, if any. For the other deeper descendants just
-		 * invoke {@link ValueBuilder#startTag(String)} with element name.
+		 * Handle new element discovered into SAX stream. When detect root element this method initialized
+		 * {@link #referenceType} and create value builder instance, see {@link #builder}. For every element direct child to
+		 * root, that is, nesting level 1, reset the builder and add parameters from element attributes, if any. For the other
+		 * deeper descendants just invoke {@link ValueBuilder#startTag(String)} with element name.
 		 * 
 		 * @param uri unused namespace URI,
 		 * @param localName local name unused because namespace is not used,
@@ -374,11 +373,11 @@ public class Variables {
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			switch (level) {
 			case 0:
-				resourceType = ResourceType.getValueOf(qName);
-				if (resourceType == ResourceType.UNKNOWN) {
+				referenceType = Reference.Type.getValueOf(qName);
+				if (referenceType == null) {
 					throw new NoVariablesDefinitionException();
 				}
-				builder = ValueBuilder.instance(resourceType);
+				builder = ValueBuilder.instance(referenceType);
 				break;
 
 			case 1:
@@ -386,7 +385,7 @@ public class Variables {
 				break;
 
 			default:
-				if (resourceType != ResourceType.TEXT) {
+				if (referenceType != Reference.Type.TEXT) {
 					throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text variables support nested elements.", qName, sourceFile);
 				}
 				builder.startTag(qName);
@@ -410,7 +409,7 @@ public class Variables {
 				break;
 
 			case 1:
-				values.put(new Reference(sourceFile, resourceType, qName), builder.toString());
+				values.put(new Reference(sourceFile, referenceType, qName), builder.toString());
 				break;
 
 			default:
@@ -514,11 +513,11 @@ public class Variables {
 		/**
 		 * Create value builder instance suitable for resource type.
 		 * 
-		 * @param resourceType resource type.
+		 * @param referenceType resource type.
 		 * @return value builder instance for resource type.
 		 */
-		public static ValueBuilder instance(ResourceType resourceType) {
-			switch (resourceType) {
+		public static ValueBuilder instance(Reference.Type referenceType) {
+			switch (referenceType) {
 			case TEXT:
 				return new TextValueBuilder();
 

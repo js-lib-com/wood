@@ -44,7 +44,6 @@ import com.jslib.wood.Project;
 import com.jslib.wood.Reference;
 import com.jslib.wood.ThemeStyles;
 import com.jslib.wood.WoodException;
-import com.jslib.wood.impl.ResourceType;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
@@ -278,7 +277,7 @@ public class PreviewServletTest {
 
 	@Test
 	public void onResourceReference_Variable() {
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(variables.get(Locale.ENGLISH, reference, source, servlet)).thenReturn("Compo Title");
 		assertThat(servlet.onResourceReference(reference, source), equalTo("Compo Title"));
@@ -286,14 +285,14 @@ public class PreviewServletTest {
 
 	@Test
 	public void onResourceReference_Variable_NotDefined() {
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		assertThat(servlet.onResourceReference(reference, source), equalTo("@string/title"));
 	}
 
 	@Test
 	public void onResourceReference_Media() {
-		Reference reference = new Reference(ResourceType.IMAGE, "res/asset/logo.png");
+		Reference reference = new Reference(Reference.Type.IMAGE, "res/asset/logo.png");
 		FilePath source = mock(FilePath.class);
 
 		FilePath mediaDir = mock(FilePath.class);
@@ -309,7 +308,7 @@ public class PreviewServletTest {
 
 	@Test(expected = WoodException.class)
 	public void onResourceReference_Media_Missing() {
-		Reference reference = new Reference(ResourceType.IMAGE, "res/asset/logo.png");
+		Reference reference = new Reference(Reference.Type.IMAGE, "res/asset/logo.png");
 		FilePath source = mock(FilePath.class);
 		servlet.onResourceReference(reference, source);
 	}

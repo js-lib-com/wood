@@ -71,7 +71,7 @@ public class BuildPageTest {
 		when(project.getThemeStyles()).thenReturn(theme);
 
 		when(page.getProject()).thenReturn(project);
-		when(page.getDisplay()).thenReturn("Test Page");
+		when(page.getTitle()).thenReturn("Test Page");
 		when(page.getDescription()).thenReturn("Test page description.");
 
 		builder = new Builder(project, buildFS);

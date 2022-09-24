@@ -88,10 +88,8 @@ class Preview {
 
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
-		if (compo.getDisplay() != null) {
-			head.addChild(doc.createElement("title").setText(compo.getDisplay()));
-			head.addText("\r\n");
-		}
+		head.addChild(doc.createElement("title").setText(compo.getTitle()));
+		head.addText("\r\n");
 		if (!project.getAuthors().isEmpty()) {
 			head.addChild(doc.createElement("meta", "name", "Author", "content", Strings.join(project.getAuthors(), ", ")));
 			head.addText("\r\n");
@@ -214,7 +212,7 @@ class Preview {
 		if (link.isStyleSheet() && FilePath.accept(href)) {
 			href = urlAbsolutePath(new FilePath(project, href));
 		}
-		
+
 		Element linkElement = doc.createElement("link");
 		linkElement.setAttr("href", href);
 

@@ -1,27 +1,25 @@
 package com.jslib.wood;
 
 import com.jslib.util.Params;
-import com.jslib.wood.impl.ResourceType;
 
 /**
- * Immutable resource reference. Simply put, a reference is a pointer from a source file to a resource, be it variable or media
- * file. It has a resource type and a name - uniquely identifying the resource in its scope. Resource reference scope is the
- * source file defining the reference plus global assets scope.
+ * Immutable at-meta reference. There are three families of at-meta references: variables, resource files - mostly media files,
+ * and layout parameters references. At-meta reference has a type and a name - uniquely identifying the reference in its scope.
+ * At-meta reference scope is the source file defining the reference plus global assets scope.
  * <p>
- * Regarding media files, resource reference is a sort of abstract addressing. It does not identify precisely the file;
- * extension and variants are not included into media reference name. Also media file can be stored private into component
- * directory or global into assets. Anyway, media file references support sub-directories, for example
+ * Regarding resource files, at-meta reference is a sort of abstract addressing. It does not identify precisely the file;
+ * extension and variants are not included into resource reference name. Also resource file can be stored private into component
+ * directory or global into assets. Anyway, resource file references support sub-directories, for example
  * <code>@image/icon/logo</code>. There are methods to test and retrieve the file path, see {@link #hasPath()} and
  * {@link #getPath()}.
  * <p>
- * Reference syntax is described below. This syntax is the same, no mater the source file type where reference is used: layout,
- * style, script or descriptors.
+ * At-meta reference syntax is described below.
  * 
  * <pre>
- * reference = MARK resource-type SEP ?(path SEP) name
- * path      = 1*CH           ; optional path, for media files only
- * name      = 1*CH           ; resource name
- * ; resource-type is defined by {@link ResourceType}, to lower case
+ * reference = MARK type SEP ?(path SEP) name
+ * path      = 1*CH           ; optional path, for resource files only
+ * name      = 1*CH           ; reference name, unique in scope
+ * ; type is defined by {@link Reference.Type}, to lower case
  * 
  * ; terminal symbols definition
  * MARK = "@"                 ; reference mark
@@ -31,9 +29,8 @@ import com.jslib.wood.impl.ResourceType;
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * <p>
- * As stated variables and media files can be referenced from any source file: layout, style, script or descriptors. Here are
- * sample usage cases. Note that references are text replaced and where source file syntax requires quotes (") they should be
- * explicitly used.
+ * Here are sample usage cases. Note that references are text replaced and where source file syntax requires quotes (") they
+ * should be explicitly used.
  * 
  * <pre>
  *  &lt;body&gt;
@@ -44,16 +41,14 @@ import com.jslib.wood.impl.ResourceType;
  *  &lt;/body&gt;
  *  
  *  body {
- *      width: {@literal @}dimen/page-width;
  *      background-image: url("@image/page-bg");
- *      background-color: {@literal @}color/page-color;
  *      . . .
  *  }
  * 
- *  js.ua.System.alert("@string/exception");
- *  this.setRichText("@text/message");
- *  this.logo.setSrc("@image/logo");
- *  this.audioPlayer.play("@audio/beep");
+ *  alert("@string/exception");
+ *  this.section.innerHTML = "@text/message";
+ *  this.logo.src = "@image/logo";
+ *  this.audioPlayer.src = "@audio/beep";
  * </pre>
  * 
  * @author Iulian Rotaru
@@ -68,75 +63,62 @@ public class Reference {
 
 	private final FilePath sourceFile;
 
-	/** Referenced resource type. If type is {@link ResourceType#UNKNOWN} this resource reference is invalid. */
-	private final ResourceType resourceType;
+	/** Reference type. */
+	private final Type type;
 
-	/** Optional path, for media files only. */
+	/** Optional path, for resource files only. Default to null. */
 	private final String path;
 
 	/**
-	 * Resource name, unique in scope. Resource reference name scope is the component directory in which it is used plus global
-	 * project assets.
+	 * Reference name, unique in scope. Reference name scope is the component directory in which it is used plus global project
+	 * assets.
 	 */
 	private final String name;
 
 	/**
-	 * Create immutable reference instance from given type and name.
+	 * Create immutable reference instance for given type and name.
 	 * 
 	 * @param sourceFile source file, for exception handling and debugging,
-	 * @param resourceType referenced resource type,
-	 * @param resourceName name uniquely identifying referred resource, in its scope.
-	 * @throws IllegalArgumentException if a parameter is null.
+	 * @param type reference type,
+	 * @param name reference name, uniquely identifying this reference in its scope.
 	 */
-	public Reference(FilePath sourceFile, ResourceType resourceType, String resourceName) throws IllegalArgumentException {
-		Params.notNull(resourceType, "Resource type");
-		Params.notNullOrEmpty(resourceName, "Resource name");
+	public Reference(FilePath sourceFile, Reference.Type type, String name) {
+		Params.notNull(type, "Reference type");
+		Params.notNullOrEmpty(name, "Reference name");
 		this.sourceFile = sourceFile;
-		this.resourceType = resourceType;
+		this.type = type;
 
-		int pathSeparator = resourceName.lastIndexOf(SEPARATOR);
+		int pathSeparator = name.lastIndexOf(SEPARATOR);
 		if (pathSeparator == -1) {
 			this.path = null;
-			this.name = resourceName;
+			this.name = name;
 		} else {
 			if (isVariable()) {
-				throw new WoodException("Invalid reference |%s| syntax on file |%s|. Variable reference with path.", resourceName, sourceFile);
+				throw new WoodException("Invalid reference |%s:%s| syntax on file |%s|. Variable reference with path.", type, name, sourceFile);
 			}
-			this.path = resourceName.substring(0, pathSeparator);
-			this.name = resourceName.substring(pathSeparator + 1);
+			this.path = name.substring(0, pathSeparator).replace('\\', '/');
+			this.name = name.substring(pathSeparator + 1);
 		}
 	}
 
 	/**
-	 * Test contructor.
+	 * Test constructor.
 	 * 
-	 * @param resourceType referenced resource type,
-	 * @param name name uniquely identifying resource in its scope.
+	 * @param type reference type,
+	 * @param name unique name identifying reference in its scope.
 	 */
-	public Reference(ResourceType resourceType, String name) throws IllegalArgumentException {
-		this(null, resourceType, name);
+	public Reference(Reference.Type type, String name) {
+		this(null, type, name);
 	}
 
 	public FilePath getSourceFile() {
 		return sourceFile;
 	}
 
-	/**
-	 * Get resource type.
-	 * 
-	 * @return resource type.
-	 * @see #resourceType
-	 */
-	public ResourceType getResourceType() {
-		return resourceType;
+	public Reference.Type getType() {
+		return type;
 	}
 
-	/**
-	 * Get resource name.
-	 * 
-	 * @return resource name.
-	 * @see #name
-	 */
 	public String getName() {
 		return name;
 	}
@@ -145,7 +127,6 @@ public class Reference {
 	 * Test if this reference contains path.
 	 * 
 	 * @return true if reference contains path.
-	 * @see #path
 	 */
 	public boolean hasPath() {
 		return path != null;
@@ -154,63 +135,52 @@ public class Reference {
 	/**
 	 * Return this reference path, possible null.
 	 * 
-	 * @return reference path.
-	 * @see #path
+	 * @return this reference path, possible null.
 	 */
 	public String getPath() {
 		return path;
 	}
 
 	/**
-	 * Test if referenced resource is a variable. This predicate delegates {@link ResourceType#isVariable()}.
+	 * Test if this reference type is a variable. Current implementation consider as variable next reference types:
+	 * {@link #STRING}, {@link #TEXT}, {@link #STYLE}, {@link #LINK} and {@link #TIP}.
 	 * 
-	 * @return true if resource is a variable.
-	 * @see ResourceType#isVariable()
+	 * @return true if this reference type is a variable.
 	 */
 	public boolean isVariable() {
-		return resourceType.isVariable();
+		return type == Type.STRING || type == Type.TEXT || type == Type.LINK || type == Type.TIP;
 	}
 
 	/**
-	 * Test if referenced resource is a media file. This predicate delegates {@link ResourceType#isMedia()}.
+	 * Test if this reference type is a media file. Current implementation consider as media file next reference types:
+	 * {@link #IMAGE}, {@link #AUDIO} and {@link #VIDEO}.
 	 * 
-	 * @return true if resource is media file.
-	 * @see ResourceType#isMedia()
+	 * @return true if reference type is media file.
 	 */
 	public boolean isMediaFile() {
-		return resourceType.isMediaFile();
+		return type == Type.IMAGE || type == Type.AUDIO || type == Type.VIDEO;
 	}
 
 	/**
-	 * Test if referenced resource is a font family file.
+	 * Test if this reference type is a font family file.
 	 * 
-	 * @return true if resource is a font family file.
+	 * @return true if this reference type is a font family file.
 	 */
 	public boolean isFontFile() {
-		return resourceType == ResourceType.FONT;
+		return type == Type.FONT;
 	}
 
 	/**
-	 * Test if referenced resource is a generic file.
+	 * Test if this reference type is a generic file.
 	 * 
-	 * @return true if resource is a generic file.
+	 * @return true if this reference type is a generic file.
 	 */
 	public boolean isGenericFile() {
-		return resourceType == ResourceType.FONT;
+		return type == Type.FILE;
 	}
 
 	/**
-	 * Test if this reference is valid, that is, referenced resource type is known.
-	 * 
-	 * @return true if this reference is valid.
-	 * @see #resourceType
-	 */
-	public boolean isValid() {
-		return resourceType != ResourceType.UNKNOWN;
-	}
-
-	/**
-	 * Test if character is valid for resource reference. Current reference implementation accept only US-ASCII alphanumeric
+	 * Test if character is valid for reference reference. Current reference implementation accept only US-ASCII alphanumeric
 	 * characters and dash (-), reference mark and separator - see {@link #MARK}, {@link #SEPARATOR}.
 	 * 
 	 * @param c character to test.
@@ -226,7 +196,7 @@ public class Reference {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		result = prime * result + ((resourceType == null) ? 0 : resourceType.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -249,28 +219,89 @@ public class Reference {
 				return false;
 		} else if (!path.equals(other.path))
 			return false;
-		if (resourceType != other.resourceType)
+		if (type != other.type)
 			return false;
 		return true;
 	}
 
-	/**
-	 * Get reference instance string representation.
-	 * 
-	 * @return string representation.
-	 * @see #string
-	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append('@');
-		builder.append(resourceType.name().toLowerCase());
+		builder.append(type.name().toLowerCase());
 		builder.append(SEPARATOR);
-		if (this.path != null) {
-			builder.append(this.path);
+		if (path != null) {
+			builder.append(path);
 			builder.append(SEPARATOR);
 		}
 		builder.append(this.name);
 		return builder.toString();
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * Types enumeration for at-meta references.
+	 * 
+	 * @author Iulian Rotaru
+	 */
+	public static enum Type {
+		// VARIABLES
+
+		/** Plain string values mainly for multi-languages support. */
+		STRING,
+
+		/** Same as string but allows for HTML format. */
+		TEXT,
+
+		/** Links references to local or third part resources, mainly for <code>href</code> attribute. */
+		LINK,
+
+		/** Tool-tip value, usually for elements supporting <code>title</code> attribute. */
+		TIP,
+
+		// RESOURCE FILES
+
+		/** Image file stored on server and linked via URLs from source files, be it layout, style or script. */
+		IMAGE,
+
+		/** The same as {@link #IMAGE} but with audio content. */
+		AUDIO,
+
+		/** The same as {@link #IMAGE} but with video content. */
+		VIDEO,
+
+		/** Font family file loaded from server and declared by <code>@font-face</code> style rule. */
+		FONT,
+
+		/** Generic file, for example license text file. */
+		FILE,
+
+		// LAYOUT PARAMETERS
+
+		/** Layout parameter declared by child component and with value defined by parent. */
+		PARAM;
+
+		/**
+		 * Create reference type enumeration from type value, not case sensitive. Returns null if given reference type parameter
+		 * does not denote an enumeration constant.
+		 * 
+		 * @param type value of reference type.
+		 * @return reference type enumeration, possible null.
+		 */
+		public static Type getValueOf(String type) {
+			try {
+				return Type.valueOf(type.toUpperCase());
+			} catch (Exception unused) {
+			}
+			return null;
+		}
+
+		// WARN: keep variable names in sync with reference type constants
+		private static String[] variables = new String[] { "string", "text", "link", "tip" };
+
+		public static String[] variables() {
+			return variables;
+		}
 	}
 }

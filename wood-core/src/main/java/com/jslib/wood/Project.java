@@ -233,13 +233,12 @@ public class Project {
 	}
 
 	/**
-	 * Return project name usable on user interfaces.
+	 * Return project name usable on page head title and user interfaces.
 	 * 
-	 * @return project display.
-	 * @see #display
+	 * @return project title.
 	 */
-	public String getDisplay() {
-		return descriptor.getDisplay(Strings.toTitleCase(this.projectRoot.getName()));
+	public String getTitle() {
+		return descriptor.getTitle(Strings.toTitleCase(this.projectRoot.getName()));
 	}
 
 	/**

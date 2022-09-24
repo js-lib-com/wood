@@ -33,7 +33,6 @@ import com.jslib.wood.ThemeStyles;
 import com.jslib.wood.Variables;
 import com.jslib.wood.WoodException;
 import com.jslib.wood.impl.FileType;
-import com.jslib.wood.impl.ResourceType;
 import com.jslib.wood.impl.XmlnsOperatorsHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -112,7 +111,7 @@ public class BuilderTest {
 
 	@Test
 	public void onResourceReference_DirVariables() throws IOException {
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(dirVariables.get(Locale.ENGLISH, reference, source, builder)).thenReturn("Page Title");
 
@@ -123,7 +122,7 @@ public class BuilderTest {
 
 	@Test
 	public void onResourceReference_AssetVariables() throws IOException {
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(assetVariables.get(Locale.ENGLISH, reference, source, builder)).thenReturn("Project Title");
 
@@ -134,14 +133,14 @@ public class BuilderTest {
 
 	@Test(expected = WoodException.class)
 	public void onResourceReference_MissingVariables() throws IOException {
-		Reference reference = new Reference(ResourceType.STRING, "title");
+		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = Mockito.mock(FilePath.class);
 		builder.onResourceReference(reference, source);
 	}
 
 	@Test
 	public void onResourceReference_LayoutMedia() throws IOException {
-		Reference reference = new Reference(ResourceType.IMAGE, "icon");
+		Reference reference = new Reference(Reference.Type.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(source.getType()).thenReturn(FileType.LAYOUT);
 
@@ -156,7 +155,7 @@ public class BuilderTest {
 
 	@Test
 	public void onResourceReference_StyleMedia() throws IOException {
-		Reference reference = new Reference(ResourceType.IMAGE, "icon");
+		Reference reference = new Reference(Reference.Type.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(source.getType()).thenReturn(FileType.STYLE);
 
@@ -171,7 +170,7 @@ public class BuilderTest {
 
 	@Test
 	public void onResourceReference_BadSourceForMedia() throws IOException {
-		Reference reference = new Reference(ResourceType.IMAGE, "icon");
+		Reference reference = new Reference(Reference.Type.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(source.getType()).thenReturn(FileType.XML);
 
@@ -183,7 +182,7 @@ public class BuilderTest {
 
 	@Test
 	public void onResourceReference_ScriptMedia() throws IOException {
-		Reference reference = new Reference(ResourceType.IMAGE, "icon");
+		Reference reference = new Reference(Reference.Type.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
 		when(source.getType()).thenReturn(FileType.SCRIPT);
 
@@ -198,7 +197,7 @@ public class BuilderTest {
 
 	@Test(expected = WoodException.class)
 	public void onResourceReference_MissingMedia() throws IOException {
-		Reference reference = new Reference(ResourceType.IMAGE, "icon");
+		Reference reference = new Reference(Reference.Type.IMAGE, "icon");
 		FilePath source = Mockito.mock(FilePath.class);
 		builder.onResourceReference(reference, source);
 	}

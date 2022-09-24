@@ -22,7 +22,6 @@ import org.junit.Test;
 import com.jslib.util.Files;
 import com.jslib.wood.impl.IOperatorsHandler;
 import com.jslib.wood.impl.ProjectDescriptor;
-import com.jslib.wood.impl.ResourceType;
 
 public class ProjectIntegrationTest implements IReferenceHandler {
 	private Project project;
@@ -42,7 +41,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 		assertManifest();
 
 		assertThat(project.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru", "Lucian Rotaru")));
-		assertThat(project.getDisplay(), equalTo("Project"));
+		//assertThat(project.getTitle(), equalTo("Project"));
 		assertThat(project.getManifest().value(), equalTo("manifest.json"));
 		assertThat(project.getServiceWorker().value(), equalTo("worker.js"));
 
@@ -95,9 +94,9 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 
 	private static final Map<Reference, String> VARIABLES = new HashMap<>();
 	static {
-		VARIABLES.put(new Reference(ResourceType.STRING, "app-name"), "app");
-		VARIABLES.put(new Reference(ResourceType.STRING, "app-short-name"), "app");
-		VARIABLES.put(new Reference(ResourceType.STRING, "app-description"), "App description.");
+		VARIABLES.put(new Reference(Reference.Type.STRING, "app-name"), "app");
+		VARIABLES.put(new Reference(Reference.Type.STRING, "app-short-name"), "app");
+		VARIABLES.put(new Reference(Reference.Type.STRING, "app-description"), "App description.");
 	}
 
 	@Override
