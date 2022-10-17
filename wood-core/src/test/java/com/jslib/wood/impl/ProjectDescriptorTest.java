@@ -61,7 +61,6 @@ public class ProjectDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getTechnology(), equalTo("w3c"));
 		assertThat(descriptor.getPackage(), equalTo("com.kidscademy"));
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.XMLNS));
 		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
@@ -125,7 +124,6 @@ public class ProjectDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getTechnology(), equalTo("js-lib"));
 		assertThat(descriptor.getPackage(), equalTo(""));
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.DATA_ATTR));
 		assertThat(descriptor.getBuildDir(), equalTo(CT.DEF_BUILD_DIR));

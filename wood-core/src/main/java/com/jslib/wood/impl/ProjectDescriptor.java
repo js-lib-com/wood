@@ -168,14 +168,6 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	
-	public String name() {
-		return text("name", null);
-	}
-	
-	public String getTechnology() {
-		return text("technology", "js-lib");
-	}
 
 	public String getPackage() {
 		return text("package", "");
