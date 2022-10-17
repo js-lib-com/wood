@@ -105,10 +105,22 @@ class PageDocument {
 	 * @param authors list of authors, possible empty.
 	 */
 	public void setAuthors(List<String> authors) {
-		if (!authors.isEmpty()) {
-			head.addChild(doc.createElement("meta", "name", "Author", "content", Strings.join(authors, ", ")));
-			head.addText("\r\n");
+		switch (authors.size()) {
+		case 0:
+			return;
+
+		case 1:
+			head.addChild(doc.createElement("meta", "name", "Author", "content", authors.get(0)));
+			break;
+
+		default:
+			StringBuilder content = new StringBuilder();
+			content.append("co-authored by ");
+			content.append(Strings.join(authors, ", "));
+			head.addChild(doc.createElement("meta", "name", "Author", "content", content.toString()));
+			break;
 		}
+		head.addText("\r\n");
 	}
 
 	/**
