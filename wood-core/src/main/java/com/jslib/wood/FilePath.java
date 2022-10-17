@@ -44,7 +44,7 @@ import com.jslib.wood.impl.Variants;
  * path-segment = 1*CH F-SEP
  * base-name    = 1*CH
  * variant      = V-SEP 1*(ALPHA / DIGIT / "-")
- * extension    = 2*3(ALPHA / DIGIT)
+ * extension    = 1*(ALPHA / DIGIT)
  * 
  * ; terminal symbols definition
  * F-SEP = "/"                         ; file separator is always slash
