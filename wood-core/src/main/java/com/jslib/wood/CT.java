@@ -47,19 +47,22 @@ public final class CT {
 	 * Project assets directory stores global variables and media files. This field stores the default value; it can be
 	 * overwritten by <code>asset.dir</code> property from project properties file.
 	 */
-	public static final String DEF_ASSET_DIR = "res/asset/";
+	public static final String DEF_ASSET_DIR = "asset/";
 
 	/**
 	 * Project theme directory for styles related to UI primitive elements design and theme variables. This field sores the
 	 * default value; it can be overwritten by <code>theme.dir</code> property from project properties file.
 	 */
-	public static final String DEF_THEME_DIR = "res/theme/";
+	public static final String DEF_THEME_DIR = "theme/";
 
 	// ------------------------------------------------------
 	// Dynamic generated files
 
-	/** File name for styles reset. */
-	public static final String RESET_CSS = "reset.css";
+	/** File name for styles variables. */
+	public static final String VARIABLES_CSS = "var.css";
+
+	/** File name for default styles. */
+	public static final String DEFAULT_CSS = "default.css";
 
 	/** File name for key frames used for CSS animations. */
 	public static final String FX_CSS = "fx.css";
