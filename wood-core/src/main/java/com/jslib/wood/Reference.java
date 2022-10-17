@@ -170,6 +170,10 @@ public class Reference {
 		return type == Type.FONT;
 	}
 
+	public boolean isStyleFile() {
+		return type == Type.STYLE;
+	}
+	
 	/**
 	 * Test if this reference type is a generic file.
 	 * 
@@ -274,6 +278,9 @@ public class Reference {
 		/** Font family file loaded from server and declared by <code>@font-face</code> style rule. */
 		FONT,
 
+		/** CSS style file usable, for example, by dynamic style loading. */
+		STYLE,
+		
 		/** Generic file, for example license text file. */
 		FILE,
 

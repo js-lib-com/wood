@@ -229,6 +229,10 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
+	public String writeShadowStyle(Component page, FilePath styleFile) throws IOException {
+		return writeFile(getPageDir(page), getStyleDir(), styleFile);
+	}
+
 	/**
 	 * Write script file using external references handler. References handler is used for resources processing. Returns URL
 	 * path of the written script file, relative to page location, ready to be inserted into page document. Stores target file

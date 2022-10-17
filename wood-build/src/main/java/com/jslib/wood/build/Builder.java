@@ -169,10 +169,11 @@ public class Builder implements IReferenceHandler {
 		// links order:
 		// 1. external links defined by project
 		// 2. external links defined by page
-		// 3. reset.css
-		// 4. fx.css
-		// 5. theme styles - theme styles are in no particular order since they are independent of each other
-		// 6. component styles - first use template and child component styles then parent component
+		// 3. var.css
+		// 4. default.css
+		// 5. fx.css
+		// 6. theme styles - theme styles are in no particular order since they are independent of each other
+		// 7. component styles - first use template and child component styles then parent component
 
 		for (ILinkDescriptor link : project.getLinkDescriptors()) {
 			pageDocument.addLink(link, exlambda(file -> buildFS.writeStyle(pageComponent, file, this)));
@@ -182,11 +183,14 @@ public class Builder implements IReferenceHandler {
 		}
 
 		ThemeStyles themeStyles = project.getThemeStyles();
-		if (themeStyles.getReset() != null) {
-			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getReset(), this));
+		if (themeStyles.getVariables() != null) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getVariables(), this));
 		}
-		if (themeStyles.getFx() != null) {
-			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getFx(), this));
+		if (themeStyles.getDefaultStyles() != null) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getDefaultStyles(), this));
+		}
+		if (themeStyles.getAnimations() != null) {
+			pageDocument.addStyle(buildFS.writeStyle(pageComponent, themeStyles.getAnimations(), this));
 		}
 		for (FilePath styleFile : themeStyles.getStyles()) {
 			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
@@ -247,7 +251,7 @@ public class Builder implements IReferenceHandler {
 		}
 
 		// here reference is a resource file
-		
+
 		FilePath resourceFile = project.getResourceFile(locale, reference, sourceFile);
 		if (resourceFile == null) {
 			throw new WoodException("Missing resource file for reference |%s:%s|.", sourceFile, reference);
@@ -277,6 +281,7 @@ public class Builder implements IReferenceHandler {
 
 		if (reference.isFontFile() && sourceFile.isStyle()) {
 			// font files can be referenced only from style files
+			// in this case resource file is the font file loaded from style file parent or from project assets
 			return buildFS.writeFontFile(resourceFile);
 		}
 
@@ -291,6 +296,10 @@ public class Builder implements IReferenceHandler {
 			default:
 				break;
 			}
+		}
+
+		if (reference.isStyleFile()) {
+			return buildFS.writeShadowStyle(currentComponent, resourceFile);
 		}
 
 		return null;
