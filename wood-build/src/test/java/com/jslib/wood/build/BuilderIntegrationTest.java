@@ -86,14 +86,15 @@ public class BuilderIntegrationTest {
 		assertThat(metas.item(4).getAttr("name"), equalTo("viewport"));
 
 		EList styles = doc.findByTag("link");
-		assertThat(styles.size(), equalTo(14));
+		assertThat(styles.size(), equalTo(15));
 
 		int index = 0;
 		assertStyle("manifest.json", styles, index++);
 		assertStyle("media/res-asset_favicon.ico", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Roboto", styles, index++);
 		assertStyle("http://fonts.googleapis.com/css?family=Great+Vibes", styles, index++);
-		assertStyle("style/res-theme_reset.css", styles, index++);
+		assertStyle("style/res-theme_var.css", styles, index++);
+		assertStyle("style/res-theme_default.css", styles, index++);
 		assertStyle("style/res-theme_fx.css", styles, index++);
 
 		// site styles order, beside reset and fx is not guaranteed

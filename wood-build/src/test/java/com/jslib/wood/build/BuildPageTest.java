@@ -99,11 +99,11 @@ public class BuildPageTest {
 		when(project.getScriptDescriptors()).thenReturn(projectScripts);
 
 		FilePath themeReset = Mockito.mock(FilePath.class);
-		when(theme.getReset()).thenReturn(themeReset);
+		when(theme.getDefaultStyles()).thenReturn(themeReset);
 		when(buildFS.writeStyle(any(Component.class), eq(themeReset), any(IReferenceHandler.class))).thenReturn("styles/reset.css");
 
 		FilePath themeFx = Mockito.mock(FilePath.class);
-		when(theme.getFx()).thenReturn(themeFx);
+		when(theme.getAnimations()).thenReturn(themeFx);
 		when(buildFS.writeStyle(any(Component.class), eq(themeFx), any(IReferenceHandler.class))).thenReturn("styles/fx.css");
 
 		FilePath themeStyle = Mockito.mock(FilePath.class);

@@ -159,34 +159,6 @@
     }
     </pre>
     <p>
-        WOOD supports styles mixin or inclusssion. Mixin allows for style reusing: declare generic style rules with a name in a styles variable XML file and insert where appropriate. In below example <code>window</code> style rules from <code>styles.xml</code> are inserted into <code>compo.css</code>.
-    </p>
-    <pre>
-    compo.css
-    header {
-        position: absolute;
-        {@literal @}style/window
-        text-align: center;
-    }
-    
-    styles.xml
-    &lt;window&gt;
-        &lt;background-color&gt;@color/page-header-bg&lt;/background-color&gt;
-        &lt;width&gt;50%&lt;/width&gt;
-        &lt;height&gt;@dimen/page-header-height&lt;/height&gt;
-    &lt;/window&gt;
-    </pre>
-    <p>After processing resulting style file will look like:</p>
-    <pre>
-    header {
-        position: absolute;
-        background-color: @color/page-header-bg;
-        width: 50%;
-        height: @dimen/page-header-height; 
-        text-align: center;
-    }
-    </pre>
-    <p>
         There is also support for responsive design, styles based on media queries - for now only viewport width. A style file can have variant, for example, <code>compo_w800.css</code>. When processed, content from that file is appended to base <code>page.css</code> in a media query block for <code>max-width</code> of 800px.
     </p>
     <p>In example, base style has center text align and styles for devices less than 800px uses left align.</p>

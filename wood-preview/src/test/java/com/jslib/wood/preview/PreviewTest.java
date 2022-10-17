@@ -71,11 +71,11 @@ public class PreviewTest {
 
 		FilePath themeReset = Mockito.mock(FilePath.class);
 		when(themeReset.value()).thenReturn("theme/reset.css");
-		when(theme.getReset()).thenReturn(themeReset);
+		when(theme.getDefaultStyles()).thenReturn(themeReset);
 
 		FilePath themeFx = Mockito.mock(FilePath.class);
 		when(themeFx.value()).thenReturn("theme/fx.css");
-		when(theme.getFx()).thenReturn(themeFx);
+		when(theme.getAnimations()).thenReturn(themeFx);
 
 		FilePath themeStyle = Mockito.mock(FilePath.class);
 		when(themeStyle.value()).thenReturn("theme/form.css");

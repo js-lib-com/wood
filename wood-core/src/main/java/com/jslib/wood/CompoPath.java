@@ -8,7 +8,7 @@ import com.jslib.util.Params;
 
 /**
  * 
- * Component path is the {@link DirPath} to the project directory where component files reside. Being a directory path is
+ * Component path is the {@link FilePath} to the project directory where component files reside. Being a file path is
  * relative to the project root; it is also a sequence of path segments but it has no trailing separator. Last path segment is
  * usually known as component name.
  * <p>
@@ -46,7 +46,7 @@ import com.jslib.util.Params;
  * <p>
  * Anyway, there are simplified components that have only layout. For example a select with options reused in multiple forms. In
  * this case component directory can miss and this component path points to layout file itself; need only to add layout
- * extension. This simplified component is named <code>inline component</code>.
+ * extension. This simplified component is named <code>widget</code>.
  * <p>
  * In ASCII diagram we have a sample project file system with couple components and relation between project directories
  * structure and components path. Component path <code>res/template/page</code> points to directory
@@ -62,18 +62,18 @@ import com.jslib.util.Params;
  *         / res /
  *         |     / template /
  *         |     |          / page /     --> res/template/page
- *         |     |          / select.htm --> res/template/select - inline component
+ *         |     |          / select.htm --> res/template/select - widget
  *         ~     ~
  *         |     / page /
  *         |     |      / index /        --> res/page/index
  * </pre>
  * <p>
  * This class provides convenient method to retrieve layout file path, see {@link #getLayoutPathEx()}. In above diagram it
- * returns <code>res/template/page/page.htm</code> for component path <code>res/template/page</code>. For inline component
+ * returns <code>res/template/page/page.htm</code> for component path <code>res/template/page</code>. For widget
  * <code>res/template/select</code> returned layout file path is <code>res/template/select.htm</code>.
  * <p>
- * Note that for a full component this component path points to an existing directory. By contrast, inline component path is
- * abstract, with no direct node associated on project file system.
+ * Note that for a full component this component path points to an existing directory. By contrast, widget path is abstract,
+ * with no direct node associated on project file system.
  * <p>
  * Component path has no mutable state and is thread safe.
  * 

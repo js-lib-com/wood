@@ -247,19 +247,19 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			return value != null ? value : reference.toString();
 		}
 
-		// discover media file and returns its absolute URL path
-		FilePath mediaFile = project.getResourceFile(previewLocale, reference, sourceFile);
-		if (mediaFile == null) {
-			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
+		// discover resource file and returns its absolute URL path
+		FilePath resourceFile = project.getResourceFile(previewLocale, reference, sourceFile);
+		if (resourceFile == null) {
+			throw new WoodException("Missing resource file for reference |%s| from source |%s|.", reference, sourceFile);
 		}
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(contextPath);
 		builder.append(FilePath.SEPARATOR_CHAR);
-		if (mediaFile.getParentDir() != null) {
-			builder.append(mediaFile.getParentDir().value());
+		if (resourceFile.getParentDir() != null) {
+			builder.append(resourceFile.getParentDir().value());
 		}
-		builder.append(mediaFile.getName());
+		builder.append(resourceFile.getName());
 		return builder.toString();
 	}
 

@@ -2,6 +2,8 @@
 <project>
 	<technology>js-lib</technology>
 	<package>com.jslib</package>
+	<asset-dir>res/asset</asset-dir>
+	<theme-dir>res/theme</theme-dir>
 	<build-dir>target/site</build-dir>
 	<exclude-dirs>src,fixture</exclude-dirs>
 

@@ -129,11 +129,14 @@ class Preview {
 		}
 
 		ThemeStyles themeStyles = project.getThemeStyles();
-		if (themeStyles.getReset() != null) {
-			addStyle(doc, urlAbsolutePath(themeStyles.getReset()));
+		if (themeStyles.getVariables() != null) {
+			addStyle(doc, urlAbsolutePath(themeStyles.getVariables()));
 		}
-		if (themeStyles.getFx() != null) {
-			addStyle(doc, urlAbsolutePath(themeStyles.getFx()));
+		if (themeStyles.getDefaultStyles() != null) {
+			addStyle(doc, urlAbsolutePath(themeStyles.getDefaultStyles()));
+		}
+		if (themeStyles.getAnimations() != null) {
+			addStyle(doc, urlAbsolutePath(themeStyles.getAnimations()));
 		}
 		for (FilePath style : themeStyles.getStyles()) {
 			addStyle(doc, urlAbsolutePath(style));
