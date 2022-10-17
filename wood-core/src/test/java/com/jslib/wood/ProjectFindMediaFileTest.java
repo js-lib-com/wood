@@ -77,7 +77,7 @@ public class ProjectFindMediaFileTest {
 		Locale locale = Locale.JAPANESE;
 
 		// when
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
 
 		// then
 		assertThat(mediaFile, notNullValue());
@@ -92,7 +92,7 @@ public class ProjectFindMediaFileTest {
 		Locale locale = null;
 
 		// when
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
 
 		// then
 		assertThat(mediaFile, notNullValue());
@@ -117,7 +117,7 @@ public class ProjectFindMediaFileTest {
 		sourceDirPath = new FilePath(project, sourceDir);
 
 		// when
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, null);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, null);
 
 		// then
 		assertThat(mediaFile, notNullValue());
@@ -132,7 +132,7 @@ public class ProjectFindMediaFileTest {
 		Locale locale = Locale.GERMANY;
 
 		// when
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
 
 		// then
 		assertThat(mediaFile, notNullValue());
@@ -154,7 +154,7 @@ public class ProjectFindMediaFileTest {
 		sourceDirPath = new FilePath(project, sourceDir);
 
 		// when
-		FilePath mediaFile = Project.findMediaFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
 
 		// then
 		assertThat(mediaFile, notNullValue());
@@ -179,7 +179,7 @@ public class ProjectFindMediaFileTest {
 		when(mediaDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundMediaFile = Project.findMediaFile(mediaDir, reference, null);
+		FilePath foundMediaFile = Project.findResourceFile(mediaDir, reference, null);
 
 		// then
 		assertThat(foundMediaFile, notNullValue());

@@ -382,64 +382,71 @@ public class Project {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// media files retrieving
+	// resource files retrieving
 
 	/**
-	 * Get the file path for project resource file referenced from given source file. This method tries to locate media file into
-	 * the parent of given source file and assets directories, in this order. If reference has path - see
-	 * {@link Reference#hasPath()}, attempt to find media file on source parent subdirectory. If source file is in project root,
-	 * e.g. manifest.json, source parent directory is null, in which case searches only asset directory.
+	 * Get the file path for project resource file referenced from given source file. This method tries to locate resource file
+	 * into the parent of given source file and assets directories, in this order. If reference has path - see
+	 * {@link Reference#hasPath()}, attempt to find resource file on source parent subdirectory. If source file is in project
+	 * root, e.g. manifest.json, source parent directory is null, in which case searches only asset directory.
 	 * <p>
-	 * When search for media file only base name and locale variant is considered, that is, no extension. Anyway, if locale
-	 * variant parameter is null searches only media files without variants at all.
+	 * When search for resource file, only base name and locale variant is considered, that is, no extension. Anyway, if locale
+	 * variant parameter is null searches only resource files without variants at all.
 	 * <p>
-	 * Returns null if media file is not found.
+	 * Returns null if resource file is not found.
 	 * 
 	 * @param locale locale variant, possible null.
-	 * @param reference media resource reference,
-	 * @param sourceFile source file using media resource.
-	 * @return media file or null.
+	 * @param reference resource file reference,
+	 * @param sourceFile source file using resource.
+	 * @return resource file or null.
 	 */
 	public FilePath getResourceFile(Locale locale, Reference reference, FilePath sourceFile) {
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
 
-		// search media files on source and asset directories, in this order
+		// search resource files on source and project assets directories, in this order
 		// if source file is in project root, e.g. manifest.json, source directory is null
-		// if this is the case search for media files only on asset directory
+		// if this is the case search for resource files only on project assets directory
 
 		FilePath sourceDir = sourceFile.getParentDir();
-		FilePath mediaFile = null;
+		FilePath resourceFile = null;
 		if (sourceDir != null) {
-			mediaFile = findMediaFile(sourceDir, reference, locale);
+			resourceFile = findResourceFile(sourceDir, reference, locale);
 		}
-		return mediaFile != null ? mediaFile : findMediaFile(assetDir, reference, locale);
+		return resourceFile != null ? resourceFile : findResourceFile(assetDir, reference, locale);
 	}
 
 	/**
-	 * Scan source directory for media files matching base name and locale variant. This helper method tries to locate file
+	 * Scan source directory for resource files matching base name and locale variant. This helper method tries to locate file
 	 * matching both base name and locale; extension is not considered. If not found try to return base variant, that is, file
 	 * that match only base name and has no locale. If still not found returns null.
 	 * 
 	 * @param sourceDir directory to scan for media files,
-	 * @param reference media file reference,
+	 * @param reference resource file reference,
 	 * @param locale locale variant, null for project default locale.
-	 * @return media file or null.
+	 * @return resource file or null.
 	 */
-	static FilePath findMediaFile(FilePath sourceDir, Reference reference, Locale locale) {
+	static FilePath findResourceFile(FilePath sourceDir, Reference reference, Locale locale) {
 		if (reference.hasPath()) {
 			sourceDir = sourceDir.getSubdirPath(reference.getPath());
 		}
-		FilePath mediaFile = null;
+		FilePath resourceFile = null;
 		if (locale != null) {
-			// scan directory for first media file with basename and locale variant
-			mediaFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+			// scan directory for first resource file with basename and locale variant
+			if (reference.isMediaFile()) {
+				resourceFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+			} else {
+				resourceFile = sourceDir.findFirst(file -> file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+			}
 		}
-		if (mediaFile != null) {
-			return mediaFile;
+		if (resourceFile != null) {
+			return resourceFile;
 		}
-		// scan directory for first media file with basename and no variants at all
-		return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
+		// scan directory for first resource file with basename and no variants at all
+		if (reference.isMediaFile()) {
+			return sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
+		}
+		return sourceDir.findFirst(file -> file.hasBaseName(reference.getName()) && file.getVariants().isEmpty());
 	}
 
 	// --------------------------------------------------------------------------------------------
