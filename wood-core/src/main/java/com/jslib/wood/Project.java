@@ -58,7 +58,7 @@ public class Project {
 	 * @param projectRoot project root directory.
 	 * @return project instance.
 	 */
-	public static Project create(File projectRoot, IReferenceHandler referenceHandler) {
+	public static Project create(File projectRoot) {
 		Project project = new Project(projectRoot);
 		project.create();
 		return project;

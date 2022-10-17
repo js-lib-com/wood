@@ -29,7 +29,7 @@ public class ComponentIntegrationTest {
 
 	@Before
 	public void beforeTest() {
-		project = Project.create(new File("src/test/resources/compo"), referenceHandler);
+		project = Project.create(new File("src/test/resources/compo"));
 
 		referenceHandler = new IReferenceHandler() {
 			@Override

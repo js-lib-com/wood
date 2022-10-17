@@ -131,7 +131,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
 		project = (Project) servletContext.getAttribute(Project.class.getName());
 		if (project == null) {
-			project = Project.create(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)), this);
+			project = Project.create(new File(servletContext.getInitParameter(PROJECT_DIR_PARAM)));
 			servletContext.setAttribute(Project.class.getName(), project);
 		}
 		variables = new VariablesCache(project);

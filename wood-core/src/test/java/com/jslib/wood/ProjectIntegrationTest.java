@@ -29,7 +29,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 	@Test
 	public void createProject() throws IOException {
 		File projectRoot = new File("src/test/resources/project");
-		project = Project.create(projectRoot, this);
+		project = Project.create(projectRoot);
 
 		assertThat(project, notNullValue());
 		assertThat(project.getProjectRoot(), equalTo(projectRoot));
