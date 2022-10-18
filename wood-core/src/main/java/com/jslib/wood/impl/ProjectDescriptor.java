@@ -227,7 +227,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * @return favicon path.
 	 */
 	public String getFavicon() {
-		return text("favicon", "favicon.ico");
+		return text("favicon", CT.DEF_FAVICON_FILE);
 	}
 
 	/**
@@ -237,11 +237,11 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * @return manifest path.
 	 */
 	public String getManifest() {
-		return text("manifest", "manifest.json");
+		return text("manifest", CT.DEF_MANIFEST_FILE);
 	}
 
 	public String getServiceWorker() {
-		return text("service-worker", "ServiceWorker.js");
+		return text("service-worker", CT.DEF_SERVICE_WORKER_FILE);
 	}
 
 	/**

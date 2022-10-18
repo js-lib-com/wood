@@ -39,7 +39,7 @@ public final class CT {
 	public static final String VAR_EXT = "var";
 
 	// ------------------------------------------------------
-	// Project directories relative to project root
+	// Project defaults
 
 	public static final String DEF_BUILD_DIR = "build/";
 
@@ -54,6 +54,12 @@ public final class CT {
 	 * default value; it can be overwritten by <code>theme.dir</code> property from project properties file.
 	 */
 	public static final String DEF_THEME_DIR = "theme/";
+
+	public static final String DEF_FAVICON_FILE = "favicon.ico";
+
+	public static final String DEF_MANIFEST_FILE = "manifest.json";
+
+	public static final String DEF_SERVICE_WORKER_FILE = "ServiceWorker.js";
 
 	// ------------------------------------------------------
 	// Dynamic generated files
