@@ -118,13 +118,16 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * The first declared locale is always the default one; this holds true even if there is a single locale declared. Note that
 	 * default locale is used for resources without locale variant.
 	 */
-	private final List<Locale> locales = new ArrayList<>();
+	private final List<Locale> locales;
 
-	/** Media query definitions. */
-	private final Set<MediaQueryDefinition> mediaQueries = new HashSet<>();
+	/** Optional media query definitions, defaults to empty list. */
+	private final Set<MediaQueryDefinition> mediaQueries;
 
 	public ProjectDescriptor(FilePath descriptorFile) {
 		super(descriptorFile, descriptorFile.exists() ? descriptorFile.getReader() : null);
+
+		this.locales = new ArrayList<>();
+		this.mediaQueries = new HashSet<>();
 
 		Strings.split(text("locale", "en"), ',', ' ').forEach(languageTag -> locales.add(locale(languageTag)));
 		if (locales.isEmpty()) {
@@ -138,14 +141,6 @@ public class ProjectDescriptor extends BaseDescriptor {
 			if (!mediaQueries.add(new MediaQueryDefinition(alias, expression, ++index))) {
 				throw new WoodException("Redefinition of the media query alias |%s|.", alias);
 			}
-		}
-
-		if (mediaQueries.isEmpty()) {
-			// default mobile first media queries
-			mediaQueries.add(new MediaQueryDefinition("smd", "min-width: 560px", 0));
-			mediaQueries.add(new MediaQueryDefinition("mdd", "min-width: 768px", 1));
-			mediaQueries.add(new MediaQueryDefinition("lgd", "min-width: 992px", 2));
-			mediaQueries.add(new MediaQueryDefinition("xld", "min-width: 1200px", 3));
 		}
 	}
 
@@ -259,16 +254,9 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
 	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
 	 * <p>
-	 * If no media query definition are declared on project descriptor uses next default values:
-	 * <ul>
-	 * <li>smd - min-width: 560px
-	 * <li>mdd - min-width: 768px
-	 * <li>lgd - min-width: 992px
-	 * <li>xld - min-width: 1200px
-	 * </ul>
-	 * Default values are the classic screen breakpoints used by <code>mobile first</code> layout styling.
+	 * If no media query definition are declared on project descriptor return empty collection.
 	 * 
-	 * @return unmodifiable collection of media query definitions declared on this descriptor, or default definitions.
+	 * @return unmodifiable collection of media query definitions declared on this descriptor, possible empty.
 	 */
 	public Collection<MediaQueryDefinition> getMediaQueryDefinitions() {
 		return Collections.unmodifiableCollection(mediaQueries);
