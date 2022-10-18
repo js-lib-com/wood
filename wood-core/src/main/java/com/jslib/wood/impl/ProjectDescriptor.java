@@ -231,17 +231,17 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	/**
-	 * Get manifest path, relative to project root, as defined by <code>manifest</code> element. Return default value
+	 * Get PWA manifest path, relative to project root, as defined by <code>pwa-manifest</code> element. Return default value
 	 * <code>manifest.json</code> if element is not defined on project descriptor.
 	 * 
 	 * @return manifest path.
 	 */
-	public String getManifest() {
-		return text("manifest", CT.DEF_MANIFEST_FILE);
+	public String getPwaManifest() {
+		return text("pwa-manifest", CT.DEF_PWA_MANIFEST_FILE);
 	}
 
-	public String getServiceWorker() {
-		return text("service-worker", CT.DEF_SERVICE_WORKER_FILE);
+	public String getPwaWorker() {
+		return text("pwa-worker", CT.DEF_PWA_WORKER_FILE);
 	}
 
 	/**

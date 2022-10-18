@@ -52,8 +52,8 @@ public class ProjectDescriptorTest {
 				"	<title>Project Display</title>" + //
 				"	<description>Project description.</description>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
-				"	<manifest>res/app-manifest.json</manifest>" + //
-				"	<service-worker>script/sw.js</service-worker>" + //
+				"	<pwa-manifest>res/app-manifest.json</pwa-manifest>" + //
+				"	<pwa-worker>script/sw.js</pwa-worker>" + //
 				"	<locale>en</locale>" + //
 				"</project>";
 
@@ -71,8 +71,8 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getTitle(null), equalTo("Project Display"));
 		assertThat(descriptor.getDescription(null), equalTo("Project description."));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
-		assertThat(descriptor.getManifest(), equalTo("res/app-manifest.json"));
-		assertThat(descriptor.getServiceWorker(), equalTo("script/sw.js"));
+		assertThat(descriptor.getPwaManifest(), equalTo("res/app-manifest.json"));
+		assertThat(descriptor.getPwaWorker(), equalTo("script/sw.js"));
 		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 
@@ -134,8 +134,8 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getTitle(null), nullValue());
 		assertThat(descriptor.getDescription(null), nullValue());
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
-		assertThat(descriptor.getManifest(), equalTo("manifest.json"));
-		assertThat(descriptor.getServiceWorker(), equalTo("ServiceWorker.js"));
+		assertThat(descriptor.getPwaManifest(), equalTo("manifest.json"));
+		assertThat(descriptor.getPwaWorker(), equalTo("worker.js"));
 		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
 	}
 

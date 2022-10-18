@@ -57,7 +57,7 @@ public class ProjectInitTest {
 		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(descriptor.getTitle(anyString())).thenReturn("Project Display");
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
-		when(descriptor.getServiceWorker()).thenReturn("sw.js");
+		when(descriptor.getPwaWorker()).thenReturn("sw.js");
 		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
 		when(descriptor.getExcludeDirs()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 

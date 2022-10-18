@@ -57,9 +57,9 @@ public final class CT {
 
 	public static final String DEF_FAVICON_FILE = "favicon.ico";
 
-	public static final String DEF_MANIFEST_FILE = "manifest.json";
+	public static final String DEF_PWA_MANIFEST_FILE = "manifest.json";
 
-	public static final String DEF_SERVICE_WORKER_FILE = "ServiceWorker.js";
+	public static final String DEF_PWA_WORKER_FILE = "worker.js";
 
 	// ------------------------------------------------------
 	// Dynamic generated files
