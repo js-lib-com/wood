@@ -154,9 +154,23 @@ public class Component {
 
 		this.baseLayoutPath = layoutPath;
 		this.name = layoutPath.getBasename();
-		this.title = descriptor.getTitle(Strings.concat(project.getTitle(), " / ", Strings.toTitleCase(name)));
-		this.description = descriptor.getDescription(this.title);
+		this.description = descriptor.getDescription();
 		this.resourcesGroup = descriptor.getResourcesGroup();
+
+		StringBuilder title = new StringBuilder();
+		if (project.getTitle() != null) {
+			title.append(project.getTitle());
+		}
+		if (descriptor.getTitle() != null) {
+			if(title.length() > 0) {
+				title.append(" - ");
+			}
+			title.append(descriptor.getTitle());
+		}
+		if (title.length() == 0) {
+			title.append(Strings.toTitleCase(project.getProjectRoot().getName()));
+		}
+		this.title = title.toString();
 
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
@@ -287,8 +301,8 @@ public class Component {
 
 		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
 		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
-		if(contentFragments.size()>1) {
-		//	throw new IllegalStateException();
+		if (contentFragments.size() > 1) {
+			// throw new IllegalStateException();
 		}
 		if (contentFragments.isEmpty()) {
 			// if there are no content fragments, currently loaded layout does not inherit from a template component

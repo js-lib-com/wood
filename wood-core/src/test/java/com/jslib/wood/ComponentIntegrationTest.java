@@ -154,10 +154,10 @@ public class ComponentIntegrationTest {
 			protected boolean matchesSafely(Component compo) {
 				assertThat(compo.getBaseLayoutPath().value(), equalTo("res/compo/compo.htm"));
 				assertThat(compo.getName(), equalTo("compo"));
-				assertThat(compo.getTitle(), equalTo("Page Compo"));
+				assertThat(compo.getTitle(), equalTo("Project - Page Compo"));
 				assertThat(compo.getDescription(), equalTo("Page description."));
 				assertThat(compo.getLayoutFileName(), equalTo("compo.htm"));
-				assertThat(compo.toString(), equalTo("Page Compo"));
+				assertThat(compo.toString(), equalTo("Project - Page Compo"));
 				assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 				assertThat(compo.getLinkDescriptors(), empty());
 				assertThat(compo.getMetaDescriptors(), empty());

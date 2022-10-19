@@ -147,8 +147,8 @@ public class Builder implements IReferenceHandler {
 		pageDocument.setLanguage(locale.toLanguageTag());
 		pageDocument.setContentType("text/html; charset=UTF-8");
 		pageDocument.setTitle(pageComponent.getTitle());
-		pageDocument.setAuthors(project.getAuthors());
 		pageDocument.setDescription(pageComponent.getDescription());
+		pageDocument.setAuthors(project.getAuthors());
 
 		for (IMetaDescriptor meta : project.getMetaDescriptors()) {
 			pageDocument.addMeta(meta);

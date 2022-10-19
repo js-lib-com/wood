@@ -88,7 +88,7 @@ class Preview {
 
 		head.addChild(doc.createElement("meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8"));
 		head.addText("\r\n");
-		head.addChild(doc.createElement("title").setText(compo.getTitle()));
+		head.addChild(doc.createElement("title").setText("Preview - " + compo.getTitle()));
 		head.addText("\r\n");
 		if (!project.getAuthors().isEmpty()) {
 			head.addChild(doc.createElement("meta", "name", "Author", "content", Strings.join(project.getAuthors(), ", ")));

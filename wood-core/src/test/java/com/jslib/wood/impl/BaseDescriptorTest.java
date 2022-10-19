@@ -33,23 +33,6 @@ public class BaseDescriptorTest {
 	}
 
 	@Test
-	public void GivenPropertiesAndDefaults_ThenGetProperties() {
-		// given
-		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
-				"<component>" + //
-				"	<title>Test Project</title>" + //
-				"	<description>Test project description.</description>" + //
-				"</component>";
-
-		// when
-		BaseDescriptor descriptor = descriptor(xml);
-
-		// then
-		assertThat(descriptor.getTitle("Display"), equalTo("Test Project"));
-		assertThat(descriptor.getDescription("Description"), equalTo("Test project description."));
-	}
-
-	@Test
 	public void GivenPropertiesAndNullDefaults_ThenGetProperties() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
@@ -62,23 +45,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getTitle(null), equalTo("Test Project"));
-		assertThat(descriptor.getDescription(null), equalTo("Test project description."));
-	}
-
-	@Test
-	public void GivenMissingPropertiesAndDefaults_ThenGetDefaults() {
-		// given
-		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
-				"<component>" + //
-				"</component>";
-
-		// when
-		BaseDescriptor descriptor = descriptor(xml);
-
-		// then
-		assertThat(descriptor.getTitle("Title"), equalTo("Title"));
-		assertThat(descriptor.getDescription("Description"), equalTo("Description"));
+		assertThat(descriptor.getTitle(), equalTo("Test Project"));
 	}
 
 	@Test
@@ -163,8 +130,7 @@ public class BaseDescriptorTest {
 		BaseDescriptor descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getTitle(null), nullValue());
-		assertThat(descriptor.getDescription(null), nullValue());
+		assertThat(descriptor.getTitle(), nullValue());
 		assertThat(descriptor.getMetaDescriptors(), emptyIterable());
 		assertThat(descriptor.getLinkDescriptors(), emptyIterable());
 		assertThat(descriptor.getScriptDescriptors(), emptyIterable());

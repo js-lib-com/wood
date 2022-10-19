@@ -139,13 +139,15 @@ class PageDocument {
 	 * Add page description meta element. Create meta element and append it to page head, with name <code>Description</code> and
 	 * provided description value as content.
 	 * 
-	 * @param description page description, null not accepted.
-	 * @throws IllegalArgumentException if description parameter is null or empty.
+	 * If description argument is null page meta description is not set.
+	 * 
+	 * @param description page description, null ignored.
 	 */
 	public void setDescription(String description) {
-		Params.notNullOrEmpty(description, "Description");
-		head.addChild(doc.createElement("meta", "name", "Description", "content", description));
-		head.addText("\r\n");
+		if (description != null) {
+			head.addChild(doc.createElement("meta", "name", "Description", "content", description));
+			head.addText("\r\n");
+		}
 	}
 
 	/**

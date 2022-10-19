@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -59,6 +60,7 @@ public class BuilderTest {
 
 	@Test
 	public void build() throws IOException, XPathExpressionException {
+		when(project.getProjectRoot()).thenReturn(new File("test"));
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
@@ -102,7 +104,7 @@ public class BuilderTest {
 
 		Element head = document.getByTag("head");
 		assertThat(head, notNullValue());
-		assertThat(head.getChildren().size(), equalTo(3));
+		assertThat(head.getChildren().size(), equalTo(2));
 
 		Element body = document.getByTag("body");
 		assertThat(body, notNullValue());

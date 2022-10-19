@@ -16,7 +16,6 @@ import com.jslib.api.dom.Element;
 import com.jslib.util.Classes;
 import com.jslib.util.Files;
 import com.jslib.util.Params;
-import com.jslib.util.Strings;
 import com.jslib.wood.impl.AttrOperatorsHandler;
 import com.jslib.wood.impl.DataAttrOperatorsHandler;
 import com.jslib.wood.impl.IOperatorsHandler;
@@ -233,12 +232,12 @@ public class Project {
 	}
 
 	/**
-	 * Return project name usable on page head title and user interfaces.
+	 * Return project name usable on page head title or null if not set.
 	 * 
-	 * @return project title.
+	 * @return project title, possible null.
 	 */
 	public String getTitle() {
-		return descriptor.getTitle(Strings.toTitleCase(this.projectRoot.getName()));
+		return descriptor.getTitle();
 	}
 
 	/**

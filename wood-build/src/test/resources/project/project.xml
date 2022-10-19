@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-	<name>project</name>
 	<operators>XMLNS</operators>
 	<asset-dir>res/asset</asset-dir>
 	<theme-dir>res/theme</theme-dir>
@@ -8,7 +7,7 @@
 	<exclude-dirs></exclude-dirs>
 	
 	<authors>j(s)-lib</authors>
-	<display>Test Project</display>
+	<title>Test Project</title>
 	<description>Project used as fixture for unit testing.</description>
 	<locale>en, de, fr, ro</locale>
 	<manifest>manifest.json</manifest>

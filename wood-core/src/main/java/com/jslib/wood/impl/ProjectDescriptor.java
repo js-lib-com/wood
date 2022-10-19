@@ -164,10 +164,6 @@ public class ProjectDescriptor extends BaseDescriptor {
 
 	// --------------------------------------------------------------------------------------------
 
-	public String getPackage() {
-		return text("package", "");
-	}
-
 	/**
 	 * Get naming strategy used to declare <em>WOOD</em> operators. Property name is <code>operators</code> and supported values
 	 * are defined by {@link OperatorsNaming} enumeration.

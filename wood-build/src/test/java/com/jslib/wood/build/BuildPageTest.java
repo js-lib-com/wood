@@ -158,8 +158,8 @@ public class BuildPageTest {
 		int index = 0;
 		assertHead(heads.item(index++), "meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8");
 		assertHead(heads.item(index++), "title", "Test Page");
-		assertHead(heads.item(index++), "meta", "name", "Author", "content", "Iulian Rotaru");
 		assertHead(heads.item(index++), "meta", "name", "Description", "content", "Test page description.");
+		assertHead(heads.item(index++), "meta", "name", "Author", "content", "Iulian Rotaru");
 		assertHead(heads.item(index++), "meta", "property", "og:url", "content", "http://kids-cademy.com");
 		assertHead(heads.item(index++), "meta", "property", "og:title", "content", "Test Page");
 		assertHead(heads.item(index++), "link", "rel", "manifest", "href", "manifest.json");

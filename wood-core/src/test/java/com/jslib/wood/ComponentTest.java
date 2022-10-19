@@ -80,10 +80,10 @@ public class ComponentTest {
 		assertThat(compo.getProject(), equalTo(project));
 		assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
 		assertThat(compo.getName(), equalTo("layout"));
-		assertThat(compo.getTitle(), equalTo("Components / Layout"));
-		assertThat(compo.getDescription(), equalTo("Components / Layout"));
+		assertThat(compo.getTitle(), equalTo("Components"));
+		assertThat(compo.getDescription(), nullValue());
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
-		assertThat(compo.toString(), equalTo("Components / Layout"));
+		assertThat(compo.toString(), equalTo("Components"));
 
 		assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 		assertThat(compo.getScriptDescriptors(), empty());
@@ -115,10 +115,10 @@ public class ComponentTest {
 		assertThat(compo.getProject(), equalTo(project));
 		assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
 		assertThat(compo.getName(), equalTo("layout"));
-		assertThat(compo.getTitle(), equalTo("Page Compo"));
+		assertThat(compo.getTitle(), equalTo("Components - Page Compo"));
 		assertThat(compo.getDescription(), equalTo("Page description."));
 		assertThat(compo.getLayoutFileName(), equalTo("layout.htm"));
-		assertThat(compo.toString(), equalTo("Page Compo"));
+		assertThat(compo.toString(), equalTo("Components - Page Compo"));
 
 		assertThat(compo.getScriptDescriptor(CT.PREVIEW_SCRIPT), nullValue());
 		assertThat(compo.getLinkDescriptors(), empty());

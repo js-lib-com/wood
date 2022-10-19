@@ -41,8 +41,6 @@ public class ProjectDescriptorTest {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<technology>w3c</technology>" + //
-				"	<package>com.kidscademy</package>" + //
 				"	<operators>XMLNS</operators>" + //
 				"	<build-dir>target/site</build-dir>" + //
 				"	<asset-dir>asset</asset-dir>" + //
@@ -50,7 +48,6 @@ public class ProjectDescriptorTest {
 				"	<exclude-dirs>page/about</exclude-dirs>" + //
 				"	<authors>Iulian Rotaru</authors>" + //
 				"	<title>Project Display</title>" + //
-				"	<description>Project description.</description>" + //
 				"	<favicon>res/app-icon.png</favicon>" + //
 				"	<pwa-manifest>res/app-manifest.json</pwa-manifest>" + //
 				"	<pwa-worker>script/sw.js</pwa-worker>" + //
@@ -61,15 +58,13 @@ public class ProjectDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getPackage(), equalTo("com.kidscademy"));
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.XMLNS));
 		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
 		assertThat(descriptor.getAssetDir(), equalTo("asset"));
 		assertThat(descriptor.getThemeDir(), equalTo("theme"));
 		assertThat(descriptor.getExcludeDirs(), equalTo(Arrays.asList("page/about")));
 		assertThat(descriptor.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru")));
-		assertThat(descriptor.getTitle(null), equalTo("Project Display"));
-		assertThat(descriptor.getDescription(null), equalTo("Project description."));
+		assertThat(descriptor.getTitle(), equalTo("Project Display"));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
 		assertThat(descriptor.getPwaManifest(), equalTo("res/app-manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("script/sw.js"));
@@ -124,15 +119,13 @@ public class ProjectDescriptorTest {
 		descriptor = descriptor(xml);
 
 		// then
-		assertThat(descriptor.getPackage(), equalTo(""));
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.DATA_ATTR));
 		assertThat(descriptor.getBuildDir(), equalTo(CT.DEF_BUILD_DIR));
 		assertThat(descriptor.getAssetDir(), equalTo(CT.DEF_ASSET_DIR));
 		assertThat(descriptor.getThemeDir(), equalTo(CT.DEF_THEME_DIR));
 		assertThat(descriptor.getExcludeDirs(), emptyIterable());
 		assertThat(descriptor.getAuthors().size(), equalTo(0));
-		assertThat(descriptor.getTitle(null), nullValue());
-		assertThat(descriptor.getDescription(null), nullValue());
+		assertThat(descriptor.getTitle(), nullValue());
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 		assertThat(descriptor.getPwaManifest(), equalTo("manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("worker.js"));

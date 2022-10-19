@@ -114,6 +114,16 @@ public class ComponentDescriptor extends BaseDescriptor {
 	}
 
 	/**
+	 * Get component description or null if description is missing. This property is loaded from <code>description</code>
+	 * element.
+	 * 
+	 * @return object description, possible null.
+	 */
+	public String getDescription() {
+		return text("description", null);
+	}
+
+	/**
 	 * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
 	 * in descriptor using <code>group</code> element.
 	 * <p>

@@ -69,19 +69,19 @@ public class BuilderIntegrationTest {
 	}
 
 	private static void assertPageDocument(Document doc) throws XPathExpressionException {
-		assertThat(doc.getByTag("title").getText(), equalTo("Index Page"));
+		assertThat(doc.getByTag("title").getText(), equalTo("Test Project - Index Page"));
 
 		EList metas = doc.findByTag("meta");
 		assertThat(metas.size(), equalTo(5));
 
-		assertThat(metas.item(0).getAttr("content"), equalTo("text/html; charset=UTF-8"));
 		assertThat(metas.item(0).getAttr("http-equiv"), equalTo("Content-Type"));
-		assertThat(metas.item(1).getAttr("content"), equalTo("j(s)-lib"));
-		assertThat(metas.item(1).getAttr("name"), equalTo("Author"));
-		assertThat(metas.item(2).getAttr("content"), equalTo("Index page description."));
-		assertThat(metas.item(2).getAttr("name"), equalTo("Description"));
-		assertThat(metas.item(3).getAttr("content"), equalTo("IE=9; IE=8; IE=7; IE=EDGE"));
+		assertThat(metas.item(0).getAttr("content"), equalTo("text/html; charset=UTF-8"));
+		assertThat(metas.item(1).getAttr("name"), equalTo("Description"));
+		assertThat(metas.item(1).getAttr("content"), equalTo("Index page description."));
+		assertThat(metas.item(2).getAttr("name"), equalTo("Author"));
+		assertThat(metas.item(2).getAttr("content"), equalTo("j(s)-lib"));
 		assertThat(metas.item(3).getAttr("http-equiv"), equalTo("X-UA-Compatible"));
+		assertThat(metas.item(3).getAttr("content"), equalTo("IE=9; IE=8; IE=7; IE=EDGE"));
 		assertThat(metas.item(4).getAttr("content"), equalTo("width=device-width, initial-scale=1.0, maximum-scale=1.0"));
 		assertThat(metas.item(4).getAttr("name"), equalTo("viewport"));
 
