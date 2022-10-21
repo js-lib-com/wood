@@ -256,7 +256,7 @@ public class Project {
 	 * @return PWA manifest file path.
 	 * @see ProjectDescriptor#getPwaManifest()
 	 */
-	public FilePath getManifest() {
+	public FilePath getPwaManifest() {
 		return createFilePath(CT.MANIFEST_FILE);
 	}
 
@@ -266,7 +266,7 @@ public class Project {
 	 * @return file path for PWA service worker script.
 	 * @see ProjectDescriptor#getPwaWorker()
 	 */
-	public FilePath getServiceWorker() {
+	public FilePath getPwaWorker() {
 		return createFilePath(descriptor.getPwaWorker());
 	}
 

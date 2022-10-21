@@ -122,30 +122,33 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
-	public String writeManifest(SourceReader manifestReader) throws IOException {
-		FilePath manifestFile = manifestReader.getSourceFile();
-		File targetFile = new File(getManifestDir(), manifestFile.getName());
+	public String writePwaManifest(SourceReader manifestReader) throws IOException {
+		File targetFile = new File(getManifestDir(), manifestReader.getSourceFile().getName());
 		if (!processedFiles.contains(targetFile)) {
-			char[] buffer = new char[1024];
-			try (Writer writer = new BufferedWriter(new FileWriter(targetFile))) {
-				int length;
-				while ((length = manifestReader.read(buffer, 0, 1024)) != -1) {
-					writer.write(buffer, 0, length);
-				}
-			}
+			copy(manifestReader, targetFile);
 			processedFiles.add(targetFile);
 		}
 		return Files.getRelativePath(getManifestDir(), targetFile, true);
 	}
 
-	public void writeServiceWorker(FilePath serviceWorker) throws IOException {
-		File targetFile = new File(buildDir, serviceWorker.getName());
+	public void writePwaWorker(SourceReader workerReader) throws IOException {
+		File targetFile = new File(buildDir, workerReader.getSourceFile().getName());
 		if (!processedFiles.contains(targetFile)) {
-			serviceWorker.copyTo(new FileOutputStream(targetFile));
+			copy(workerReader, targetFile);
 			processedFiles.add(targetFile);
 		}
 	}
 
+	private static void copy(SourceReader sourceReader, File targetFile) throws IOException {
+		char[] buffer = new char[1024];
+		try (Writer writer = new BufferedWriter(new FileWriter(targetFile))) {
+			int length;
+			while ((length = sourceReader.read(buffer, 0, 1024)) != -1) {
+				writer.write(buffer, 0, length);
+			}
+		}
+	}
+	
 	/**
 	 * Write media file referenced from site page. Target file name is the media file name formated by
 	 * {@link #formatMediaName(FilePath)}. Stores target file into {@link #processedFiles} in order to avoid multiple
@@ -254,6 +257,17 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
+	public String writeScript(Component page, SourceReader sourceReader) throws IOException {
+		File targetFile = new File(getScriptDir(), insertBuildNumber(formatScriptName(sourceReader.getSourceFile())));
+		targetFile.getParentFile().mkdirs();
+		if (!processedFiles.contains(targetFile)) {
+			Files.copy(sourceReader, new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
+			processedFiles.add(targetFile);
+		}
+		return Files.getRelativePath(getPageDir(page), targetFile, true);
+	}
+
+	
 	// ------------------------------------------------------
 	// Private helper methods
 

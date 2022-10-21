@@ -70,9 +70,9 @@ public class ProjectInitTest {
 		assertThat(project.getBuildDir().value(), equalTo("build/"));
 		assertThat(project.getAssetDir().value(), equalTo("res/asset/"));
 		assertThat(project.getThemeDir().value(), equalTo("res/theme/"));
-		assertThat(project.getManifest().value(), equalTo("manifest.json"));
+		assertThat(project.getPwaManifest().value(), equalTo("manifest.json"));
 		assertThat(project.getFavicon().value(), equalTo("favicon.ico"));
-		assertThat(project.getServiceWorker().value(), equalTo("sw.js"));
+		assertThat(project.getPwaWorker().value(), equalTo("sw.js"));
 
 		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
 		assertThat(project.getTitle(), nullValue());

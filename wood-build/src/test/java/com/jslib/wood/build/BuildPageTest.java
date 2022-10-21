@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,11 +67,11 @@ public class BuildPageTest {
 	@Before
 	public void beforeTest() throws IOException {
 		when(project.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
-		when(project.getManifest()).thenReturn(manifest);
+		when(project.getPwaManifest()).thenReturn(manifest);
 		when(project.getFavicon()).thenReturn(favicon);
 		when(project.getThemeStyles()).thenReturn(theme);
 
-		when(page.getProject()).thenReturn(project);
+		//when(page.getProject()).thenReturn(project);
 		when(page.getTitle()).thenReturn("Test Page");
 		when(page.getDescription()).thenReturn("Test page description.");
 
@@ -84,7 +85,7 @@ public class BuildPageTest {
 		when(manifest.exists()).thenReturn(true);
 		SourceReader reader = mock(SourceReader.class);
 		when(manifest.getReader()).thenReturn(reader);
-		when(buildFS.writeManifest(any(SourceReader.class))).thenReturn("manifest.json");
+		when(buildFS.writePwaManifest(any(SourceReader.class))).thenReturn("manifest.json");
 
 		when(favicon.exists()).thenReturn(true);
 		when(buildFS.writeFavicon(any(Component.class), eq(favicon))).thenReturn("favicon.ico");
@@ -97,6 +98,7 @@ public class BuildPageTest {
 
 		List<IScriptDescriptor> projectScripts = scripts("lib/js-lib.js");
 		when(project.getScriptDescriptors()).thenReturn(projectScripts);
+		when(buildFS.writeScript(any(Component.class), any(SourceReader.class))).thenReturn("script/js-lib.js");
 
 		FilePath themeReset = Mockito.mock(FilePath.class);
 		when(theme.getDefaultStyles()).thenReturn(themeReset);
@@ -170,7 +172,7 @@ public class BuildPageTest {
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/fx.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/form.css", "type", "text/css");
 		assertHead(heads.item(index++), "link", "rel", "stylesheet", "href", "styles/page.css", "type", "text/css");
-		assertHead(heads.item(index++), "script", "src", "scripts/js-lib.js", "type", "text/javascript");
+		assertHead(heads.item(index++), "script", "src", "script/js-lib.js", "type", "text/javascript");
 		assertHead(heads.item(index++), "script", "src", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", "type", "text/javascript");
 
 		Element body = document.getByTag("body");
@@ -186,9 +188,11 @@ public class BuildPageTest {
 			IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 			when(script.getSource()).thenReturn(source);
 			if (FilePath.accept(source)) {
-				FilePath path = new FilePath(project, source);
+				FilePath path = Mockito.mock(FilePath.class);
+				when(path.exists()).thenReturn(true);
+				Reader reader = Mockito.mock(Reader.class);
+				when(path.getReader()).thenReturn(reader);
 				when(project.createFilePath(source)).thenReturn(path);
-				when(buildFS.writeScript(any(Component.class), eq(path), any(IReferenceHandler.class))).thenReturn("scripts/" + path.getName());
 			}
 			scripts.add(script);
 		}

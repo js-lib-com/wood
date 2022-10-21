@@ -121,7 +121,7 @@ public class BuildFsTest {
 		when(reader.getSourceFile()).thenReturn(manifest);
 		when(reader.read(any(char[].class), eq(0), eq(1024))).thenReturn(-1);
 
-		assertThat(buildFS.writeManifest(reader), equalTo("manifest.json"));
+		assertThat(buildFS.writePwaManifest(reader), equalTo("manifest.json"));
 	}
 
 	@Test

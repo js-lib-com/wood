@@ -63,8 +63,8 @@ public class BuilderTest {
 		when(project.getProjectRoot()).thenReturn(new File("test"));
 		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
-		when(project.getManifest()).thenReturn(Mockito.mock(FilePath.class));
-		when(project.getServiceWorker()).thenReturn(Mockito.mock(FilePath.class));
+		when(project.getPwaManifest()).thenReturn(Mockito.mock(FilePath.class));
+		when(project.getPwaWorker()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getFavicon()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getThemeStyles()).thenReturn(Mockito.mock(ThemeStyles.class));
 

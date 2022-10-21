@@ -1,6 +1,5 @@
 package com.jslib.wood.build;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -8,6 +7,7 @@ import java.util.function.Function;
 
 import com.jslib.api.log.Log;
 import com.jslib.api.log.LogFactory;
+import com.jslib.util.Strings;
 import com.jslib.wood.CompoPath;
 import com.jslib.wood.Component;
 import com.jslib.wood.FilePath;
@@ -101,8 +101,10 @@ public class Builder implements IReferenceHandler {
 	 * @throws IOException for error related to underlying file system operations.
 	 */
 	public void build() throws IOException {
-		if (project.getServiceWorker().exists()) {
-			buildFS.writeServiceWorker(project.getServiceWorker());
+		if (project.getPwaWorker().exists()) {
+			try (SourceReader reader = new SourceReader(project.getPwaWorker(), this)) {
+				buildFS.writePwaWorker(reader);
+			}
 		}
 
 		for (Locale locale : project.getLocales()) {
@@ -157,10 +159,10 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addMeta(meta);
 		}
 
-		if (project.getManifest().exists()) {
-			FilePath manifestFile = project.getManifest();
-			BufferedReader reader = new BufferedReader(manifestFile.getReader());
-			pageDocument.addManifest(buildFS.writeManifest(new SourceReader(reader, manifestFile, this)));
+		if (project.getPwaManifest().exists()) {
+			try (SourceReader reader = new SourceReader(project.getPwaManifest(), this)) {
+				pageDocument.addPwaManifest(buildFS.writePwaManifest(reader));
+			}
 		}
 		if (project.getFavicon().exists()) {
 			pageDocument.addFavicon(buildFS.writeFavicon(pageComponent, project.getFavicon()));
@@ -201,20 +203,46 @@ public class Builder implements IReferenceHandler {
 		}
 
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
-			addScript(pageComponent, pageDocument, script);
+			if(!addScript(pageComponent, pageDocument, script)) {
+				throw new WoodException("Missing script %s declared by project descriptor.", script.getSource());
+			}
 		}
 		for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
-			addScript(pageComponent, pageDocument, script);
+			if(!addScript(pageComponent, pageDocument, script)) {
+				throw new WoodException("Missing script %s declared by descriptor for page component %s.", script.getSource(), pageComponent.getName());
+			}
 		}
 
 		buildFS.writePage(pageComponent, pageDocument.getDocument());
 	}
 
-	private void addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
+	private boolean addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
 		for (IScriptDescriptor dependency : project.getScriptDependencies(script.getSource())) {
-			addScript(pageComponent, pageDocument, dependency);
+			return addScript(pageComponent, pageDocument, dependency);
 		}
-		pageDocument.addScript(script, exlambda(file -> buildFS.writeScript(pageComponent, file, this)));
+
+		String src = script.getSource();
+		String text = null;
+		if (FilePath.accept(src)) {
+			// only local script
+			FilePath scriptFile = project.createFilePath(script.getSource());
+			if (!scriptFile.exists()) {
+				return false;
+			}
+			try (SourceReader reader = new SourceReader(scriptFile, this)) {
+				if (script.isEmbedded()) {
+					// src value does not mater if script is embedded
+					text = Strings.load(reader);
+				} else {
+					src = buildFS.writeScript(pageComponent, reader);
+					// text value remains null for linked script
+				}
+			}
+		}
+		// for third party script src remains as declared on script descriptor and text to null
+
+		pageDocument.addScript(script, src, text);
+		return true;
 	}
 
 	/**

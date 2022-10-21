@@ -42,8 +42,8 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 
 		assertThat(project.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru", "Lucian Rotaru")));
 		//assertThat(project.getTitle(), equalTo("Project"));
-		assertThat(project.getManifest().value(), equalTo("manifest.json"));
-		assertThat(project.getServiceWorker().value(), equalTo("worker.js"));
+		assertThat(project.getPwaManifest().value(), equalTo("manifest.json"));
+		assertThat(project.getPwaWorker().value(), equalTo("worker.js"));
 
 		List<Locale> locales = project.getLocales();
 		assertThat(locales, hasSize(2));
@@ -84,7 +84,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 	}
 
 	private void assertManifest() throws IOException {
-		FilePath manifestFile = project.getManifest();
+		FilePath manifestFile = project.getPwaManifest();
 		Reader reader = new SourceReader(manifestFile, this);
 		Writer writer = new StringWriter();
 		Files.copy(reader, writer);

@@ -164,7 +164,7 @@ class PageDocument {
 		head.addText("\r\n");
 	}
 
-	public void addManifest(String path) {
+	public void addPwaManifest(String path) {
 		Params.notNullOrEmpty(path, "Manifest path");
 		head.addChild(doc.createElement("link", "href", path, "rel", "manifest"));
 		head.addText("\r\n");
@@ -306,6 +306,53 @@ class PageDocument {
 
 		if (scriptDescriptor.isEmbedded()) {
 			scriptElement.setText(project.loadFile(src));
+		}
+
+		head.addChild(scriptElement);
+		head.addText("\r\n");
+	}
+
+	/**
+	 * 
+	 * @param scriptDescriptor
+	 * @param src
+	 * @param text optional script code, null only if script is embedded.
+	 * @throws IOException
+	 */
+	public void addScript(IScriptDescriptor scriptDescriptor, String src, String text) throws IOException {
+		Params.notNull(scriptDescriptor, "Script descriptor");
+		Params.notNull(scriptDescriptor.getSource(), "Script source");
+		Params.notNullOrEmpty(src, "Script source");
+
+		if (processedScripts.contains(scriptDescriptor.getSource())) {
+			return;
+		}
+		processedScripts.add(scriptDescriptor.getSource());
+
+		// dynamic scripts are not declared on page head; they are loaded by custom script loaders, e.g. ServiceLoader
+		if (scriptDescriptor.isDynamic()) {
+			return;
+		}
+
+		Element scriptElement = doc.createElement("script");
+		if (!scriptDescriptor.isEmbedded()) {
+			scriptElement.setAttr("src", src);
+		}
+
+		setAttr(scriptElement, "type", scriptDescriptor.getType(), "text/javascript");
+		setAttr(scriptElement, "async", scriptDescriptor.getAsync());
+		if (!scriptDescriptor.isEmbedded()) {
+			setAttr(scriptElement, "defer", scriptDescriptor.getDefer());
+		}
+		setAttr(scriptElement, "nomodule", scriptDescriptor.getNoModule());
+		setAttr(scriptElement, "nonce", scriptDescriptor.getNonce());
+		setAttr(scriptElement, "referrerpolicy", scriptDescriptor.getReferrerPolicy());
+		setAttr(scriptElement, "crossorigin", scriptDescriptor.getCrossOrigin());
+		setAttr(scriptElement, "integrity", scriptDescriptor.getIntegrity());
+
+		if (scriptDescriptor.isEmbedded()) {
+			assert text != null;
+			scriptElement.setText(text);
 		}
 
 		head.addChild(scriptElement);

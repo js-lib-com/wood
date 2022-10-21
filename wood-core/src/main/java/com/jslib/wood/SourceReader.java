@@ -1,5 +1,6 @@
 package com.jslib.wood;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -105,18 +106,23 @@ public class SourceReader extends Reader {
 	 * external defined resource references handler. For expression evaluations creates interpreter and references resolver
 	 * instances.
 	 * 
-	 * @param reader external defined reader,
+	 * @param sourceReader source file reader,
 	 * @param sourceFile source file used as scope for resource references,
 	 * @param referenceHandler external reference handler.
 	 */
-	public SourceReader(Reader reader, FilePath sourceFile, IReferenceHandler referenceHandler) {
+	public SourceReader(Reader sourceReader, FilePath sourceFile, IReferenceHandler referenceHandler) {
 		super();
-		Params.notNull(reader, "Reader");
+		Params.notNull(sourceReader, "Source reader");
 		Params.notNull(sourceFile, "Source file");
 		Params.isTrue(sourceFile.isSynthetic() || sourceFile.exists(), "Source file does not exist");
 		Params.notNull(referenceHandler, "Reference handler");
 
-		this.reader = sourceFile.isLayout() ? new LayoutReader(reader, sourceFile) : reader;
+		Reader reader = sourceFile.isLayout() ? new LayoutReader(sourceReader, sourceFile) : sourceReader;
+		if (!(reader instanceof BufferedReader)) {
+			reader = new BufferedReader(reader);
+		}
+		this.reader = reader;
+		
 		this.sourceFile = sourceFile;
 		this.referenceHandler = referenceHandler;
 		this.metaBuilder = new MetaBuilder(sourceFile);
