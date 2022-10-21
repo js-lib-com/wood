@@ -374,7 +374,7 @@ public class Variables {
 			switch (level) {
 			case 0:
 				referenceType = Reference.Type.getValueOf(qName);
-				if (referenceType == null) {
+				if (referenceType == Reference.Type.UNKNOWN) {
 					throw new NoVariablesDefinitionException();
 				}
 				builder = ValueBuilder.instance(referenceType);

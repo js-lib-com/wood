@@ -299,9 +299,11 @@ public class SourceReader extends Reader {
 
 		private final StringBuilder builder;
 
+		private Reference.Type referenceType;
+
 		/** Store reference separator index for reference instance creation, see {@link #getReference()}. */
 		private int separatorIndex;
-
+		
 		/** Flag true only is escape sequence (double <code>at</code> character) was discovered. */
 		private boolean escape;
 
@@ -313,6 +315,7 @@ public class SourceReader extends Reader {
 
 		public void reset() {
 			builder.setLength(0);
+			referenceType = null;
 			separatorIndex = 0;
 		}
 
@@ -339,7 +342,7 @@ public class SourceReader extends Reader {
 				builder.replace(0, builder.length(), "@");
 				return false;
 			}
-			if (c == -1 || !Reference.isChar(c)) {
+			if (c == -1 || (referenceType != null && !referenceType.isChar(c))) {
 				return false;
 			}
 
@@ -348,6 +351,7 @@ public class SourceReader extends Reader {
 			if (separatorIndex == 0) {
 				switch (c) {
 				case Reference.SEPARATOR:
+					referenceType = Reference.Type.getValueOf(builder.substring(1));
 					separatorIndex = builder.length();
 					break;
 				}
@@ -367,15 +371,11 @@ public class SourceReader extends Reader {
 		 * @return newly created reference instance or null.
 		 */
 		public Reference getReference() {
-			if (escape || separatorIndex == 0) {
-				return null;
-			}
-			Reference.Type type = Reference.Type.getValueOf(builder.substring(1, separatorIndex));
-			if (type == null) {
+			if (escape || separatorIndex == 0 || referenceType == Reference.Type.UNKNOWN) {
 				return null;
 			}
 			String name = builder.substring(separatorIndex + 1);
-			return new Reference(sourceFile, type, name);
+			return new Reference(sourceFile, referenceType, name);
 		}
 
 		@Override

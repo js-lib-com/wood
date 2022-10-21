@@ -171,7 +171,7 @@ public class VariablesTest {
 	@Test
 	public void GivenVariablesFileWithUnknownRoot_WhenLoad_ThenEmpty() {
 		// given
-		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+		String xml = "" + //
 				"<no-variables-definition>" + //
 				"	<title>content ignored</title>" + //
 				"</no-variables-definition>";

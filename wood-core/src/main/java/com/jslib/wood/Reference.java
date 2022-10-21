@@ -148,7 +148,7 @@ public class Reference {
 	 * @return true if this reference type is a variable.
 	 */
 	public boolean isVariable() {
-		return type == Type.STRING || type == Type.TEXT || type == Type.LINK || type == Type.TIP;
+		return type.isVariable();
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class Reference {
 	public boolean isStyleFile() {
 		return type == Type.STYLE;
 	}
-	
+
 	/**
 	 * Test if this reference type is a generic file.
 	 * 
@@ -181,17 +181,6 @@ public class Reference {
 	 */
 	public boolean isGenericFile() {
 		return type == Type.FILE;
-	}
-
-	/**
-	 * Test if character is valid for reference reference. Current reference implementation accept only US-ASCII alphanumeric
-	 * characters and dash (-), reference mark and separator - see {@link #MARK}, {@link #SEPARATOR}.
-	 * 
-	 * @param c character to test.
-	 * @return true if requested character is valid.
-	 */
-	public static boolean isChar(int c) {
-		return Character.isLetterOrDigit(c) || c == '-' || c == MARK || c == SEPARATOR;
 	}
 
 	@Override
@@ -280,28 +269,31 @@ public class Reference {
 
 		/** CSS style file usable, for example, by dynamic style loading. */
 		STYLE,
-		
+
 		/** Generic file, for example license text file. */
 		FILE,
 
 		// LAYOUT PARAMETERS
 
 		/** Layout parameter declared by child component and with value defined by parent. */
-		PARAM;
+		PARAM,
+
+		/** Unknown reference type. */
+		UNKNOWN;
 
 		/**
-		 * Create reference type enumeration from type value, not case sensitive. Returns null if given reference type parameter
-		 * does not denote an enumeration constant.
+		 * Create reference type enumeration from type value, not case sensitive. Returns {@link #UNKNOWN} if given reference
+		 * type parameter does not denote an enumeration constant.
 		 * 
 		 * @param type value of reference type.
-		 * @return reference type enumeration, possible null.
+		 * @return reference type enumeration, possible {@link #UNKNOWN}.
 		 */
 		public static Type getValueOf(String type) {
 			try {
 				return Type.valueOf(type.toUpperCase());
 			} catch (Exception unused) {
 			}
-			return null;
+			return UNKNOWN;
 		}
 
 		// WARN: keep variable names in sync with reference type constants
@@ -309,6 +301,28 @@ public class Reference {
 
 		public static String[] variables() {
 			return variables;
+		}
+
+		private Boolean variable;
+
+		public boolean isVariable() {
+			if (variable == null) {
+				variable = Boolean.valueOf(this == Type.STRING || this == Type.TEXT || this == Type.LINK || this == Type.TIP);
+			}
+			return variable;
+		}
+
+		/**
+		 * Test if character is valid for reference name for this particular reference type. Current reference implementation
+		 * accept only US-ASCII alphanumeric characters and dash (-), reference <code>mark</code> and <code>separator</code> -
+		 * see {@link #MARK}, {@link #SEPARATOR}. Note that <code>separator</code> is accepted only if this reference type is
+		 * not variable.
+		 * 
+		 * @param c character to test.
+		 * @return true if requested character is valid.
+		 */
+		public boolean isChar(int c) {
+			return Character.isLetterOrDigit(c) || c == '-' || c == MARK || (c == SEPARATOR && !isVariable());
 		}
 	}
 }

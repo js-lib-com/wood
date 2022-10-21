@@ -258,10 +258,6 @@ public class Builder implements IReferenceHandler {
 	 */
 	@Override
 	public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException, WoodException {
-		// if (locale == null) {
-		// throw new BugError("Builder locale not initialized.");
-		// }
-
 		if (reference.isVariable()) {
 			String value = null;
 			Variables dirVariables = project.getVariables(sourceFile.getParentDir());
