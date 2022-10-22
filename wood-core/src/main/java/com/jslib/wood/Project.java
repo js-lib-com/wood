@@ -190,6 +190,10 @@ public class Project {
 		return projectRoot;
 	}
 
+	public ProjectDescriptor getDescriptor() {
+		return descriptor;
+	}
+
 	/**
 	 * Get project build directory where site files are created.
 	 * 
@@ -570,10 +574,6 @@ public class Project {
 
 	void setAssetDir(FilePath assetDir) {
 		this.assetDir = assetDir;
-	}
-
-	ProjectDescriptor getDescriptor() {
-		return descriptor;
 	}
 
 	List<IFilePathVisitor> getFilePathVisitors() {

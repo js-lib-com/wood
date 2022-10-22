@@ -257,4 +257,8 @@ public class ProjectDescriptor extends BaseDescriptor {
 	public Collection<MediaQueryDefinition> getMediaQueryDefinitions() {
 		return Collections.unmodifiableCollection(mediaQueries);
 	}
+
+	public String getValue(String name) {
+		return text(name);
+	}
 }

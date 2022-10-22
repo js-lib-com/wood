@@ -362,7 +362,7 @@ public class FilePath implements Iterable<FilePath> {
 		return fileType == FileType.MEDIA;
 	}
 
-	public boolean isXML(String... roots) {
+	public boolean isXml(String... roots) {
 		if (fileType != FileType.XML) {
 			return false;
 		}
@@ -384,6 +384,10 @@ public class FilePath implements Iterable<FilePath> {
 		} catch (IOException ignore) {
 			return false;
 		}
+	}
+
+	public boolean isXmlLike() {
+		return fileType == FileType.XML || fileType == FileType.LAYOUT;
 	}
 
 	public boolean isManifest() {

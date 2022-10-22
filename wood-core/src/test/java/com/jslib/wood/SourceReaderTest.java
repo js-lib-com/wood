@@ -2,14 +2,10 @@ package com.jslib.wood;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -20,7 +16,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.util.Classes;
 import com.jslib.util.Files;
 import com.jslib.wood.impl.LayoutParameters;
 
@@ -39,40 +34,8 @@ public class SourceReaderTest {
 	}
 
 	@Test
-	public void fileConstructor() {
-		String source = "" + //
-				"<body>" + //
-				"	<h1>Title</h1>" + //
-				"</body>";
-		when(sourceFile.getReader()).thenReturn(new StringReader(source));
-		when(sourceFile.toString()).thenReturn("res/compo/compo.htm");
-
-		SourceReader reader = new SourceReader(sourceFile, handler);
-		assertReader(reader);
-	}
-
-	@Test
-	public void readerConstructor() throws FileNotFoundException {
-		when(sourceFile.toString()).thenReturn("res/compo/compo.htm");
-
-		Reader fileReader = new StringReader("");
-		SourceReader reader = new SourceReader(fileReader, sourceFile, handler);
-		assertReader(reader);
-	}
-
-	private void assertReader(SourceReader reader) {
-		assertThat(field(reader, "sourceFile").toString(), equalTo("res/compo/compo.htm"));
-		assertThat(field(reader, "referenceHandler"), equalTo(handler));
-		assertThat(field(reader, "reader"), notNullValue());
-		assertThat(field(reader, "metaBuilder"), notNullValue());
-		assertThat(field(reader, "state").toString(), equalTo("TEXT"));
-		assertThat(field(reader, "value"), nullValue());
-		assertThat((int) field(reader, "valueIndex"), equalTo(0));
-		assertThat((int) field(reader, "charAfterMeta"), equalTo(0));
-	}
-
-	@Test
-	public void referenceHandlerParameter() throws IOException {
+	public void GivenStringReference_WhenSourceRead_ThenReferenceHandlerParameters() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@string/title</h1>" + //
@@ -84,17 +47,19 @@ public class SourceReaderTest {
 		ArgumentCaptor<FilePath> sourceFileCaptor = ArgumentCaptor.forClass(FilePath.class);
 		when(handler.onResourceReference(referenceCaptor.capture(), sourceFileCaptor.capture())).thenReturn("Component Title");
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
 
+		// then
 		assertThat(referenceCaptor.getValue().getType(), equalTo(Reference.Type.STRING));
 		assertThat(referenceCaptor.getValue().getName(), equalTo("title"));
 		assertThat(sourceFileCaptor.getValue().value(), equalTo("res/compo/compo.htm"));
 	}
 
 	@Test
-	public void GivenLiteralAtMetaReference_WhenCopySource_ThenPreserveAtChar() throws IOException {
+	public void GivenLiteralAtMetaReference_WhenSourceRead_ThenPreserveAtChar() throws IOException {
 		// given
 		String source = "" + //
 				"<body>" + //
@@ -106,13 +71,14 @@ public class SourceReaderTest {
 		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
-		
+
 		// then
 		assertTrue(writer.toString().contains("<h1>@string/title</h1>"));
 	}
 
 	@Test
-	public void copy_StringResolve() throws IOException {
+	public void GivenStringReference_WhenSourceRead_ThenStringResolve() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@string/title</h1>" + //
@@ -121,14 +87,18 @@ public class SourceReaderTest {
 
 		when(handler.onResourceReference(new Reference(Reference.Type.STRING, "title"), sourceFile)).thenReturn("Component Title");
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
 		assertTrue(writer.toString().contains("<h1>Component Title</h1>"));
 	}
 
 	@Test
-	public void copy_StyleMedia() throws IOException {
+	public void GivenMediaQuery_WhenSourceRead_ThenPreserveMediaQuery() throws IOException {
+		// given
 		String source = "" + //
 				"@media all" + //
 				"body {" + //
@@ -136,15 +106,18 @@ public class SourceReaderTest {
 				"}";
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, handler);
-
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
 		assertTrue(writer.toString().contains("@media all"));
 	}
 
 	@Test
-	public void copy_ParamResolve() throws IOException {
+	public void GivenParamReference_WhenSourceRead_ThenParamResolve() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@param/title</h1>" + //
@@ -155,14 +128,18 @@ public class SourceReaderTest {
 		LayoutParameters parameters = new LayoutParameters();
 		parameters.reload("title:Component Parameter;");
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, parameters, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
 		assertTrue(writer.toString().contains("<h1>Component Parameter</h1>"));
 	}
 
 	@Test(expected = WoodException.class)
-	public void copy_ParamResolve_MissingParameter() throws IOException {
+	public void GiveParamReferenceOnMissingParameter_WhenSourceRead_ThenException() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@param/title</h1>" + //
@@ -170,15 +147,19 @@ public class SourceReaderTest {
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 		when(sourceFile.isLayout()).thenReturn(true);
 
-		LayoutParameters parameters = new LayoutParameters();
+		LayoutParameters parameters = new LayoutParameters(); // empty parameters
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, parameters, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
 	}
 
 	@Test(expected = WoodException.class)
-	public void copy_ParamResolve_NullLayoutParameters() throws IOException {
+	public void GivenParamReferenceAndNullLayoutParameters_WhenSourceRead_ThenException() throws IOException {
+		// given
 		String source = "" + //
 				"<body>" + //
 				"	<h1>@param/title</h1>" + //
@@ -186,13 +167,16 @@ public class SourceReaderTest {
 		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 		when(sourceFile.isLayout()).thenReturn(true);
 
+		// when
 		SourceReader reader = new SourceReader(sourceFile, null, handler);
 		StringWriter writer = new StringWriter();
 		Files.copy(reader, writer);
+
+		// then
 	}
 
 	@Test
-	public void GivenUnknownReferenceType_WhenSourceRead_ThenPreserveText() throws IOException {
+	public void GivenUnknownReference_WhenSourceRead_ThenPreserveText() throws IOException {
 		// given
 		String source = "" + //
 				"<body>" + //
@@ -209,10 +193,23 @@ public class SourceReaderTest {
 		assertTrue(writer.toString().contains("@strings/value"));
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Internal helpers
+	@Test
+	public void GivenProjectReference_WhenSourceRead_ThenProjectDescriptorValue() throws IOException {
+		// given
+		String source = "" + //
+				"<body>" + //
+				"	<h1>@project/authors</h1>" + //
+				"</body>";
+		when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
-	private static <T> T field(Object object, String field) {
-		return Classes.getFieldValue(object, field);
+		when(handler.onResourceReference(new Reference(Reference.Type.PROJECT, "authors"), sourceFile)).thenReturn("Iulian Rotaru&lt;mr.iulianrotaru@gmail.com&gt;");
+
+		// when
+		SourceReader reader = new SourceReader(sourceFile, handler);
+		StringWriter writer = new StringWriter();
+		Files.copy(reader, writer);
+
+		// then
+		assertTrue(writer.toString().contains("Iulian Rotaru&lt;mr.iulianrotaru@gmail.com&gt;"));
 	}
 }

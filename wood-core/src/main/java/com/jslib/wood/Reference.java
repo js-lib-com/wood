@@ -151,6 +151,10 @@ public class Reference {
 		return type.isVariable();
 	}
 
+	public boolean isProject() {
+		return type == Type.PROJECT;
+	}
+	
 	/**
 	 * Test if this reference type is a media file. Current implementation consider as media file next reference types:
 	 * {@link #IMAGE}, {@link #AUDIO} and {@link #VIDEO}.
@@ -253,6 +257,9 @@ public class Reference {
 		/** Tool-tip value, usually for elements supporting <code>title</code> attribute. */
 		TIP,
 
+		// PROJECT DESCRIPTOR
+		PROJECT,
+		
 		// RESOURCE FILES
 
 		/** Image file stored on server and linked via URLs from source files, be it layout, style or script. */

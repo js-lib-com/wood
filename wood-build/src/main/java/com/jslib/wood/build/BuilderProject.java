@@ -128,7 +128,7 @@ class BuilderProject extends Project {
 			}
 
 			// variables definition files are XML files with root element one of defined resource type variables
-			if (file.isXML(Reference.Type.variables())) {
+			if (file.isXml(Reference.Type.variables())) {
 				Variables parentDirVariables = variables.get(parentDir);
 				if (parentDirVariables == null) {
 					parentDirVariables = new Variables();
@@ -139,7 +139,7 @@ class BuilderProject extends Project {
 			}
 
 			// XML component descriptor for pages has root 'page'
-			if (file.hasBaseName(parentDir.getName()) && file.isXML("page")) {
+			if (file.hasBaseName(parentDir.getName()) && file.isXml("page")) {
 				pages.add(project.createCompoPath(parentDir.value()));
 				return;
 			}

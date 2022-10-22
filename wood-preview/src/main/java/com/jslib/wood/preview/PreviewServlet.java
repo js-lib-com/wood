@@ -246,6 +246,10 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 			String value = variables.get(previewLocale, reference, sourceFile, this);
 			return value != null ? value : reference.toString();
 		}
+		if(reference.isProject()) {
+			String value = project.getDescriptor().getValue(reference.getName());
+			return value != null ? value : reference.toString();
+		}
 
 		// discover resource file and returns its absolute URL path
 		FilePath resourceFile = project.getResourceFile(previewLocale, reference, sourceFile);

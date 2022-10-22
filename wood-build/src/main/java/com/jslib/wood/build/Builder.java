@@ -203,12 +203,12 @@ public class Builder implements IReferenceHandler {
 		}
 
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
-			if(!addScript(pageComponent, pageDocument, script)) {
+			if (!addScript(pageComponent, pageDocument, script)) {
 				throw new WoodException("Missing script %s declared by project descriptor.", script.getSource());
 			}
 		}
 		for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
-			if(!addScript(pageComponent, pageDocument, script)) {
+			if (!addScript(pageComponent, pageDocument, script)) {
 				throw new WoodException("Missing script %s declared by descriptor for page component %s.", script.getSource(), pageComponent.getName());
 			}
 		}
@@ -270,6 +270,14 @@ public class Builder implements IReferenceHandler {
 			}
 			if (value == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", sourceFile, reference);
+			}
+			return value;
+		}
+
+		if (reference.isProject()) {
+			String value = project.getDescriptor().getValue(reference.getName());
+			if (value == null) {
+				throw new WoodException("Missing project descriptor value for reference |%s:%s|.", sourceFile, reference);
 			}
 			return value;
 		}

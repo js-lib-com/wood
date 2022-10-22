@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import com.jslib.util.Params;
+import com.jslib.util.Strings;
 import com.jslib.wood.impl.LayoutParameters;
 import com.jslib.wood.impl.ReferencesResolver;
 
@@ -122,7 +123,7 @@ public class SourceReader extends Reader {
 			reader = new BufferedReader(reader);
 		}
 		this.reader = reader;
-		
+
 		this.sourceFile = sourceFile;
 		this.referenceHandler = referenceHandler;
 		this.metaBuilder = new MetaBuilder(sourceFile);
@@ -232,6 +233,9 @@ public class SourceReader extends Reader {
 					value = layoutParameters.getValue(sourceFile, reference.getName());
 				} else {
 					value = referenceHandler.onResourceReference(reference, sourceFile);
+					if (sourceFile.isXmlLike()) {
+						value = Strings.escapeXML(value);
+					}
 				}
 			} else {
 				// if built reference is not recognized sent it back to source stream unchanged since is valid to have reference
@@ -303,7 +307,7 @@ public class SourceReader extends Reader {
 
 		/** Store reference separator index for reference instance creation, see {@link #getReference()}. */
 		private int separatorIndex;
-		
+
 		/** Flag true only is escape sequence (double <code>at</code> character) was discovered. */
 		private boolean escape;
 

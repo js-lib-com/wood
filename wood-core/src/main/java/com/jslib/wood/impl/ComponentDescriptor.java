@@ -120,7 +120,7 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 * @return object description, possible null.
 	 */
 	public String getDescription() {
-		return text("description", null);
+		return text("description");
 	}
 
 	/**
@@ -133,6 +133,6 @@ public class ComponentDescriptor extends BaseDescriptor {
 	 * @return resources group or null if component is in global space.
 	 */
 	public String getResourcesGroup() {
-		return text("group", null);
+		return text("group");
 	}
 }

@@ -55,7 +55,7 @@ abstract class BaseDescriptor {
 	 * @return object title, possible null.
 	 */
 	public String getTitle() {
-		return text("title", null);
+		return text("title");
 	}
 
 	/**
@@ -146,6 +146,15 @@ abstract class BaseDescriptor {
 			return defaultValue;
 		}
 		String value = el.getText();
-		return !value.isEmpty() ? value : defaultValue;
+		return value.isEmpty() ? defaultValue : value;
+	}
+
+	protected String text(String tagName) {
+		Element el = doc.getByTag(tagName);
+		if (el == null) {
+			return null;
+		}
+		String value = el.getTextContent();
+		return value.isEmpty() ? null: value;
 	}
 }

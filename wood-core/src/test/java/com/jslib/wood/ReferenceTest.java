@@ -15,6 +15,7 @@ public class ReferenceTest {
 		assertThat(new Reference(Reference.Type.IMAGE, "image-value").toString(), equalTo("@image/image-value"));
 		assertThat(new Reference(Reference.Type.IMAGE, "ext/java").toString(), equalTo("@image/ext/java"));
 		assertThat(new Reference(Reference.Type.VIDEO, "video-value").toString(), equalTo("@video/video-value"));
+		assertThat(new Reference(Reference.Type.PROJECT, "value").toString(), equalTo("@project/value"));
 	}
 
 	@Test
