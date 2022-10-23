@@ -282,6 +282,10 @@ public class Builder implements IReferenceHandler {
 			return value;
 		}
 
+		if(reference.isLayoutFile()) {
+			return buildFS.getPageLayout(project.createCompoPath(reference.getValue()));
+		}
+
 		// here reference is a resource file
 
 		FilePath resourceFile = project.getResourceFile(locale, reference, sourceFile);

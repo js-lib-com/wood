@@ -14,6 +14,7 @@ import java.util.Locale;
 import com.jslib.api.dom.Document;
 import com.jslib.util.Files;
 import com.jslib.util.Params;
+import com.jslib.wood.CT;
 import com.jslib.wood.Component;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.IReferenceHandler;
@@ -101,6 +102,11 @@ public abstract class BuildFS {
 			document.serialize(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"), true);
 			processedFiles.add(targetFile);
 		}
+	}
+
+	public String getPageLayout(FilePath layoutFile) {
+		File targetFile = new File(getPageDir(null), insertBuildNumber(formatPageName(layoutFile.getName() + CT.DOT_LAYOUT_EXT)));
+		return Files.getRelativePath(getPageDir(null), targetFile, true);
 	}
 
 	/**

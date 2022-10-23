@@ -65,6 +65,8 @@ public class Reference {
 
 	/** Reference type. */
 	private final Type type;
+	
+	private final String value;
 
 	/** Optional path, for resource files only. Default to null. */
 	private final String path;
@@ -87,6 +89,7 @@ public class Reference {
 		Params.notNullOrEmpty(name, "Reference name");
 		this.sourceFile = sourceFile;
 		this.type = type;
+		this.value = name;
 
 		int pathSeparator = name.lastIndexOf(SEPARATOR);
 		if (pathSeparator == -1) {
@@ -141,6 +144,10 @@ public class Reference {
 		return path;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	/**
 	 * Test if this reference type is a variable. Current implementation consider as variable next reference types:
 	 * {@link #STRING}, {@link #TEXT}, {@link #STYLE}, {@link #LINK} and {@link #TIP}.
@@ -172,6 +179,10 @@ public class Reference {
 	 */
 	public boolean isFontFile() {
 		return type == Type.FONT;
+	}
+
+	public boolean isLayoutFile() {
+		return type == Type.LAYOUT;
 	}
 
 	public boolean isStyleFile() {
@@ -257,9 +268,10 @@ public class Reference {
 		/** Tool-tip value, usually for elements supporting <code>title</code> attribute. */
 		TIP,
 
-		// PROJECT DESCRIPTOR
+		// DESCRIPTORS
+
 		PROJECT,
-		
+
 		// RESOURCE FILES
 
 		/** Image file stored on server and linked via URLs from source files, be it layout, style or script. */
@@ -274,9 +286,6 @@ public class Reference {
 		/** Font family file loaded from server and declared by <code>@font-face</code> style rule. */
 		FONT,
 
-		/** CSS style file usable, for example, by dynamic style loading. */
-		STYLE,
-
 		/** Generic file, for example license text file. */
 		FILE,
 
@@ -284,6 +293,14 @@ public class Reference {
 
 		/** Layout parameter declared by child component and with value defined by parent. */
 		PARAM,
+		
+		// SITE FILES
+
+		/** HTML layout file, replace. */
+		LAYOUT, 
+		
+		/** CSS style file usable, for example, by dynamic style loading. EXPERIMENTAL */
+		STYLE,
 
 		/** Unknown reference type. */
 		UNKNOWN;
