@@ -167,6 +167,13 @@ public class ScriptDescriptor implements IScriptDescriptor {
 		return script;
 	}
 
+	public static ScriptDescriptor create(FilePath scriptFile, boolean embedded) {
+		ScriptDescriptor script = new ScriptDescriptor(scriptFile.value());
+		script.setType(DEF_SCRIPT_TYPE);
+		script.setEmbedded(embedded);
+		return script;
+	}
+
 	public static ScriptDescriptor create(Element scriptElement) {
 		final String src = scriptElement.getAttr("src");
 		assert src != null;

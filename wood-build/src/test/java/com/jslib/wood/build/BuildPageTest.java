@@ -51,9 +51,11 @@ public class BuildPageTest {
 	private BuildFS buildFS;
 
 	@Mock
-	private FilePath manifest;
+	private FilePath pwaManifest;
 	@Mock
-	private FilePath serviceWorker;
+	private FilePath pwaLoader;
+	@Mock
+	private FilePath pwaWorker;
 	@Mock
 	private FilePath favicon;
 	@Mock
@@ -67,7 +69,8 @@ public class BuildPageTest {
 	@Before
 	public void beforeTest() throws IOException {
 		when(project.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
-		when(project.getPwaManifest()).thenReturn(manifest);
+		when(project.getPwaManifest()).thenReturn(pwaManifest);
+		when(project.getPwaLoader()).thenReturn(pwaLoader);
 		when(project.getFavicon()).thenReturn(favicon);
 		when(project.getThemeStyles()).thenReturn(theme);
 
@@ -82,9 +85,9 @@ public class BuildPageTest {
 	public void buildPage() throws IOException, SAXException, XPathExpressionException {
 		// project fixture
 
-		when(manifest.exists()).thenReturn(true);
+		when(pwaManifest.exists()).thenReturn(true);
 		SourceReader reader = mock(SourceReader.class);
-		when(manifest.getReader()).thenReturn(reader);
+		when(pwaManifest.getReader()).thenReturn(reader);
 		when(buildFS.writePwaManifest(any(SourceReader.class))).thenReturn("manifest.json");
 
 		when(favicon.exists()).thenReturn(true);

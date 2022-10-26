@@ -59,6 +59,8 @@ public final class CT {
 
 	public static final String DEF_PWA_MANIFEST_FILE = "manifest.json";
 
+	public static final String DEF_PWA_LOADER_FILE = "loader.js";
+
 	public static final String DEF_PWA_WORKER_FILE = "worker.js";
 
 	// ------------------------------------------------------

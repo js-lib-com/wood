@@ -202,6 +202,10 @@ public class Builder implements IReferenceHandler {
 			pageDocument.addStyle(buildFS.writeStyle(pageComponent, styleFile, this));
 		}
 
+		FilePath pwaLoader = project.getPwaLoader();
+		if(pwaLoader.exists()) {
+			addScript(pageComponent, pageDocument, project.createScriptDescriptor(pwaLoader, true));
+		}
 		for (IScriptDescriptor script : project.getScriptDescriptors()) {
 			if (!addScript(pageComponent, pageDocument, script)) {
 				throw new WoodException("Missing script %s declared by project descriptor.", script.getSource());

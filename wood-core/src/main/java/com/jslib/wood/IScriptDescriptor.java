@@ -23,4 +23,5 @@ public interface IScriptDescriptor {
 	boolean isEmbedded();
 
 	boolean isDynamic();
+	
 }

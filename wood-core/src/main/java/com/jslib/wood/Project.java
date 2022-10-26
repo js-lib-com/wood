@@ -264,6 +264,10 @@ public class Project {
 		return createFilePath(CT.MANIFEST_FILE);
 	}
 
+	public FilePath getPwaLoader() {
+		return createFilePath(descriptor.getPwaLoader());
+	}
+
 	/**
 	 * Get file path for PWA service worker script, as defined on project descriptor.
 	 * 
@@ -475,6 +479,10 @@ public class Project {
 		return new Variables(dir);
 	}
 
+	public IScriptDescriptor createScriptDescriptor(FilePath scriptFile, boolean embedded) {
+		return ScriptDescriptor.create(scriptFile, embedded);
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// scanner for project file system
 

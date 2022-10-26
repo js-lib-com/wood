@@ -30,8 +30,7 @@ abstract class BaseDescriptor {
 	/** Empty XML document used when component descriptor file is missing. */
 	private static final Document EMPTY_DOC = DOC_BUILDER.createXML("compo");
 
-	/** Descriptor file, for logging purposes. */
-	private final String descriptorFile;
+	protected final FilePath descriptorFile;
 
 	/** Descriptor DOM document. */
 	protected final Document doc;
@@ -45,7 +44,7 @@ abstract class BaseDescriptor {
 				throw new WoodException("Fail to load document %s: %s: %s", descriptorFile, e.getClass(), e.getMessage());
 			}
 		}
-		this.descriptorFile = descriptorFile.value();
+		this.descriptorFile = descriptorFile;
 		this.doc = doc;
 	}
 

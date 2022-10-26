@@ -1,5 +1,6 @@
 package com.jslib.wood.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import com.jslib.api.dom.Element;
+import com.jslib.util.Classes;
 import com.jslib.util.Strings;
 import com.jslib.wood.CT;
 import com.jslib.wood.FilePath;
@@ -231,6 +233,22 @@ public class ProjectDescriptor extends BaseDescriptor {
 		return text("pwa-manifest", CT.DEF_PWA_MANIFEST_FILE);
 	}
 
+	/**
+	 * Get file path for PWA script loader, relative to project root, as defined by <code>pwa-loader</code> element. Return
+	 * default value <code>loader.js</code> if element is not defined on project descriptor.
+	 * 
+	 * @return PWA loader path.
+	 */
+	public String getPwaLoader() {
+		return text("pwa-laoder", CT.DEF_PWA_LOADER_FILE);
+	}
+
+	/**
+	 * Get file path for PWA worker script, relative to project root, as defined by <code>pwa-worker</code> element. Return
+	 * default value <code>worker.js</code> if element is not defined on project descriptor.
+	 * 
+	 * @return PWA worker path.
+	 */
 	public String getPwaWorker() {
 		return text("pwa-worker", CT.DEF_PWA_WORKER_FILE);
 	}
@@ -259,6 +277,22 @@ public class ProjectDescriptor extends BaseDescriptor {
 	}
 
 	public String getValue(String name) {
-		return text(name);
+		String value = text(name);
+		if (value != null) {
+			return value;
+		}
+
+		if (name.equals("title")) {
+			// getTitle returns null when title element is not defined but for PWA we need a value
+			// infer it from project root directory name
+			File projectRoot = descriptorFile.getProject().getProjectRoot();
+			return projectRoot != null ? Strings.toTitleCase(projectRoot.getName()) : null;
+		}
+
+		try {
+			return Classes.getGetter(getClass(), Strings.toMemberName(name)).invoke(this).toString();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

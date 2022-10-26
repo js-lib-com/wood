@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -19,10 +20,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.jslib.wood.CT;
 import com.jslib.wood.FilePath;
+import com.jslib.wood.Project;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectDescriptorTest {
@@ -130,6 +133,41 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getPwaManifest(), equalTo("manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("worker.js"));
 		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
+	}
+
+	@Test
+	public void GivenExistingProperty_WhenGetValue_ThenRetrieve() {
+		// given
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"	<title>Test Project</title>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
+		// when
+		String value = descriptor.getValue("title");
+
+		// then
+		assertThat(value, equalTo("Test Project"));
+	}
+
+	@Test
+	public void GivenNotExistingTitle_WhenGetValue_ThenRetrieveProjectDirName() {
+		// given
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<project>" + //
+				"</project>";
+		descriptor = descriptor(xml);
+
+		Project project = Mockito.mock(Project.class);
+		when(project.getProjectRoot()).thenReturn(new File("test-project"));
+		when(descriptorFile.getProject()).thenReturn(project);
+
+		// when
+		String value = descriptor.getValue("title");
+
+		// then
+		assertThat(value, equalTo("Test Project"));
 	}
 
 	// --------------------------------------------------------------------------------------------
