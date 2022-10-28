@@ -392,7 +392,7 @@ public class BuildFsTest {
 		}
 
 		@Override
-		protected File getManifestDir() {
+		protected File pwaDir() {
 			return buildDir;
 		}
 

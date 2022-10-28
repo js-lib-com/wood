@@ -101,16 +101,16 @@ public class Builder implements IReferenceHandler {
 	 * @throws IOException for error related to underlying file system operations.
 	 */
 	public void build() throws IOException {
-		if (project.getPwaWorker().exists()) {
-			try (SourceReader reader = new SourceReader(project.getPwaWorker(), this)) {
-				buildFS.writePwaWorker(reader);
-			}
-		}
-
 		for (Locale locale : project.getLocales()) {
 			this.locale = locale;
 			if (project.isMultiLocale()) {
 				buildFS.setLocale(locale);
+			}
+
+			if (project.getPwaWorker().exists()) {
+				try (SourceReader reader = new SourceReader(project.getPwaWorker(), this)) {
+					buildFS.writePwaWorker(reader);
+				}
 			}
 
 			for (CompoPath page : project.getPages()) {

@@ -129,16 +129,16 @@ public abstract class BuildFS {
 	}
 
 	public String writePwaManifest(SourceReader manifestReader) throws IOException {
-		File targetFile = new File(getManifestDir(), manifestReader.getSourceFile().getName());
+		File targetFile = new File(pwaDir(), manifestReader.getSourceFile().getName());
 		if (!processedFiles.contains(targetFile)) {
 			copy(manifestReader, targetFile);
 			processedFiles.add(targetFile);
 		}
-		return Files.getRelativePath(getManifestDir(), targetFile, true);
+		return Files.getRelativePath(pwaDir(), targetFile, true);
 	}
 
 	public void writePwaWorker(SourceReader workerReader) throws IOException {
-		File targetFile = new File(buildDir, workerReader.getSourceFile().getName());
+		File targetFile = new File(pwaDir(), workerReader.getSourceFile().getName());
 		if (!processedFiles.contains(targetFile)) {
 			copy(workerReader, targetFile);
 			processedFiles.add(targetFile);
@@ -154,7 +154,7 @@ public abstract class BuildFS {
 			}
 		}
 	}
-	
+
 	/**
 	 * Write media file referenced from site page. Target file name is the media file name formated by
 	 * {@link #formatMediaName(FilePath)}. Stores target file into {@link #processedFiles} in order to avoid multiple
@@ -192,7 +192,7 @@ public abstract class BuildFS {
 	}
 
 	public String writeManifestMedia(FilePath mediaFile) throws IOException {
-		return writeFile(getManifestDir(), getMediaDir(), mediaFile);
+		return writeFile(pwaDir(), getMediaDir(), mediaFile);
 	}
 
 	public String writeFontFile(FilePath fontFile) throws IOException {
@@ -273,7 +273,6 @@ public abstract class BuildFS {
 		return Files.getRelativePath(getPageDir(page), targetFile, true);
 	}
 
-	
 	// ------------------------------------------------------
 	// Private helper methods
 
@@ -334,7 +333,12 @@ public abstract class BuildFS {
 	 */
 	protected abstract File getMediaDir();
 
-	protected abstract File getManifestDir();
+	/**
+	 * Site directory storing PWA related files: manifest file and service worker script.
+	 * 
+	 * @return PWA directory.
+	 */
+	protected abstract File pwaDir();
 
 	/**
 	 * Get the directory that stores font files, if build file system implementation decides to keep them separated from style

@@ -88,17 +88,14 @@ class DefaultBuildFS extends BuildFS {
 		return createDirectory("script");
 	}
 
-	/**
-	 * All media files are stored in a single directory named <code>media</code>, relative to build root.
-	 */
 	@Override
 	protected File getMediaDir() {
 		return createDirectory("media");
 	}
 
 	@Override
-	protected File getManifestDir() {
-		return buildDir;
+	protected File pwaDir() {
+		return createDirectory(".");
 	}
 
 	@Override
