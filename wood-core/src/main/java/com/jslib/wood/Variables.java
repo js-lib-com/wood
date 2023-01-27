@@ -3,7 +3,6 @@ package com.jslib.wood;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 
@@ -27,12 +26,12 @@ import com.jslib.wood.impl.ReferencesResolver;
  * read, {@link SourceReader} discovers references and delegates reference handler. There are distinct reference handler
  * instances for build and preview processes but basically variables references are text replaces by their values; this class
  * provides getters just for that - see {@link #get(Reference, FilePath, IReferenceHandler)} and
- * {@link #get(Locale, Reference, FilePath, IReferenceHandler)}.
+ * {@link #get(String, Reference, FilePath, IReferenceHandler)}.
  * <p>
  * A variables has a scope; its name is private to a component. Is legal for variables from different component to have the same
  * name. Anyway, asset variables are global. Value retrieving logic from reference handler attempts first to get value from
- * component variables and only if value miss tries asset variables. Also, when locale is requested, attempt first to retrieve
- * that locale and if not found uses default.
+ * component variables and only if value miss tries asset variables. Also, when language is requested, attempt first to retrieve
+ * that language and if not found uses default.
  * 
  * @author Iulian Rotaru
  * @since 1.0
@@ -45,10 +44,11 @@ public class Variables {
 	private final ReferencesResolver referenceResolver;
 
 	/**
-	 * Variable values mapped to locale. Resources without locale variant are identified by null locale. Null locale values are
-	 * used when project is not multi-locale. Also used when a value for a given locale is missing.
+	 * Variable values mapped to language variant. Resources without language variant are identified by null language. Null
+	 * language values are used when project is not multi-language. Also used when a value for a given language variant is
+	 * missing.
 	 */
-	private final Map<Locale, Map<Reference, String>> localeValues = new HashMap<>();
+	private final Map<String, Map<Reference, String>> languageValueMaps = new HashMap<>();
 
 	/** XML stream parser for files containing variables definition. */
 	private final SAXParser saxParser;
@@ -101,7 +101,7 @@ public class Variables {
 	 * @see #loadDir(FilePath)
 	 */
 	public void reload(FilePath dir) {
-		localeValues.clear();
+		languageValueMaps.clear();
 		loadDir(dir);
 	}
 
@@ -143,9 +143,9 @@ public class Variables {
 	}
 
 	/**
-	 * Load variable values from a variables definition file. Values are stored in a dictionary using locale as key - see
-	 * {@link #localeValues}. Key locale are retrieved from given file variants; if file is not localized uses project default
-	 * locale.
+	 * Load variable values from a variables definition file. Values are stored in a dictionary using language as key - see
+	 * {@link #languageValueMaps}. Key language are retrieved from given file variants; if file is not localized uses project
+	 * default language.
 	 * <p>
 	 * Variables definition files are XML files and this worker method uses {@link #saxParser} with a new {@link SAXHandler}
 	 * instance to perform the actual parsing.
@@ -160,9 +160,9 @@ public class Variables {
 	 * @throws SAXException if XML parsing fails.
 	 */
 	private void _load(FilePath file) throws IOException, SAXException {
-		Locale locale = file.getVariants().getLocale();
-		// at this point locale can be null for files without locale variant
-		Map<Reference, String> values = localeValues.get(locale);
+		String language = file.getVariants().getLanguage();
+		// at this point language can be null for files without language variant
+		Map<Reference, String> values = languageValueMaps.get(language);
 		if (values == null) {
 			values = new HashMap<Reference, String>();
 		}
@@ -170,7 +170,7 @@ public class Variables {
 		SAXHandler saxHandler = new SAXHandler(file, values);
 		try (InputStream stream = new ReaderInputStream(file.getReader())) {
 			saxParser.parse(stream, saxHandler);
-			localeValues.put(locale, values);
+			languageValueMaps.put(language, values);
 		} catch (NoVariablesDefinitionException unused) {
 			// is a legal condition to have XML files that are not variables definition
 		}
@@ -180,7 +180,7 @@ public class Variables {
 	// Variable value retrieving with circular dependencies detection
 
 	/**
-	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when locale variant is not used.
+	 * Handy alternative for {@link #get(String, Reference, FilePath, IReferenceHandler)} when language variant is not used.
 	 * Returns null if value not found.
 	 * 
 	 * @param reference variable reference,
@@ -194,20 +194,20 @@ public class Variables {
 	}
 
 	/**
-	 * Get variable value for requested locale, taking care to resolve nested references. A nested reference is one used by a
+	 * Get variable value for requested language, taking care to resolve nested references. A nested reference is one used by a
 	 * variable definition, e.g.
 	 * 
 	 * <pre>
 	 * <description>This {@literal}string/app description.</description>
 	 * </pre>
 	 * 
-	 * If <code>locale</code> parameter is null uses project default one; default locale is that loaded from files without
-	 * explicit locale variant.
+	 * If <code>language</code> parameter is null uses project default one; default language is that loaded from files without
+	 * explicit language variant.
 	 * <p>
 	 * This method attempts to retrieve variable value using next heuristic:
 	 * <ol>
-	 * <li>attempt to get value from this variables instance, for requested locale,
-	 * <li>if not found try to get value for default locale,
+	 * <li>attempt to get value from this variables instance, for requested language,
+	 * <li>if not found try to get value for default language,
 	 * <li>if still value not found or if value is empty return null,
 	 * <li>if value found attempt to resolve nested references; guard resolver invocation against circular dependencies
 	 * </ol>
@@ -216,25 +216,25 @@ public class Variables {
 	 * it invokes {@link ReferencesResolver} with found value. There is a recursive chain of methods invoked till references
 	 * tree is completely resolved. See {@link SourceReader} for a discussion on references tree iteration.
 	 * 
-	 * @param locale optional locale, null for default,
+	 * @param language optional language variant, null for default,
 	 * @param reference variable reference,
 	 * @param source source file where reference is declared,
 	 * @param handler resource references handler.
 	 * @return variable value or null if variable not defined or if is empty.
 	 * @throws WoodException if circular dependency is detected on references resolver.
 	 */
-	public String get(Locale locale, Reference reference, FilePath source, IReferenceHandler handler) throws WoodException {
+	public String get(String language, Reference reference, FilePath source, IReferenceHandler handler) throws WoodException {
 		String value = null;
 
-		// 1. attempt to get value from this variables instance, for requested locale
-		Map<Reference, String> values = localeValues.get(locale);
+		// 1. attempt to get value from this variables instance, for requested language
+		Map<Reference, String> values = languageValueMaps.get(language);
 		if (values != null) {
 			value = values.get(reference);
 		}
 
-		// 2. if not found try to get value for default locale
+		// 2. if not found try to get value for default language
 		if (value == null) {
-			values = localeValues.get(null);
+			values = languageValueMaps.get(null);
 			if (values != null) {
 				value = values.get(reference);
 			}
@@ -563,8 +563,8 @@ public class Variables {
 	// --------------------------------------------------------------------------------------------
 	// Test support
 
-	Map<Locale, Map<Reference, String>> getLocaleValues() {
-		return localeValues;
+	Map<String, Map<Reference, String>> getLanguageValues() {
+		return languageValueMaps;
 	}
 
 }

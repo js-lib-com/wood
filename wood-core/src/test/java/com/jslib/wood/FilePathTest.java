@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -100,9 +99,9 @@ public class FilePathTest {
 		assertThat(p.getType(), equalTo(fileType));
 		assertThat(p.getVariants(), notNullValue());
 		if (language != null) {
-			assertThat(p.getVariants().getLocale(), equalTo(new Locale(language)));
+			assertThat(p.getVariants().getLanguage(), equalTo(language));
 		} else {
-			assertThat(p.getVariants().getLocale(), nullValue());
+			assertThat(p.getVariants().getLanguage(), nullValue());
 		}
 	}
 
@@ -161,7 +160,7 @@ public class FilePathTest {
 		assertThat(styleFile.isStyle(), equalTo(true));
 		assertThat(layoutFile.getBasename(), equalTo(styleFile.getBasename()));
 		assertThat(layoutFile.getParentDir(), equalTo(styleFile.getParentDir()));
-		assertThat(layoutFile.getVariants().getLocale(), equalTo(styleFile.getVariants().getLocale()));
+		assertThat(layoutFile.getVariants().getLanguage(), equalTo(styleFile.getVariants().getLanguage()));
 		assertThat(layoutFile.getVariants().getMediaQueries(), equalTo(styleFile.getVariants().getMediaQueries()));
 	}
 
@@ -234,30 +233,30 @@ public class FilePathTest {
 		assertThat(path.hasVariants(), equalTo(true));
 		Variants variants = path.getVariants();
 		assertThat(variants, notNullValue());
-		assertThat(variants.getLocale(), equalTo(new Locale("de")));
+		assertThat(variants.getLanguage(), equalTo("de"));
 		assertThat(variants.getMediaQueries().isEmpty(), is(true));
 
 		path = new FilePath(project, "res/compo/compo_w800.css");
 		variants = path.getVariants();
-		assertThat(variants.getLocale(), nullValue());
+		assertThat(variants.getLanguage(), nullValue());
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
 
 		path = new FilePath(project, "res/compo/compo_h800.css");
 		variants = path.getVariants();
-		assertThat(variants.getLocale(), nullValue());
+		assertThat(variants.getLanguage(), nullValue());
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-height: 800px )"));
 
 		path = new FilePath(project, "res/compo/colors_ro_w800.xml");
 		variants = path.getVariants();
-		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getLanguage(), equalTo("ro"));
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
 
 		path = new FilePath(project, "res/compo/colors_w800_ro.xml");
 		variants = path.getVariants();
-		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getLanguage(), equalTo("ro"));
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px )"));
 
@@ -268,7 +267,7 @@ public class FilePathTest {
 
 		path = new FilePath(project, "res/compo/colors_w800_portrait_ro.xml");
 		variants = path.getVariants();
-		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getLanguage(), equalTo("ro"));
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(2));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 800px ) and ( orientation: portrait )"));
 	}

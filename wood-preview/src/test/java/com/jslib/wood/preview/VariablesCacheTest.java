@@ -8,8 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Locale;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,15 +65,15 @@ public class VariablesCacheTest {
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
-		when(sourceVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Compo Title");
+		when(sourceVariables.get("en", reference, source, referenceHandler)).thenReturn("Compo Title");
 
 		// when
-		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
 		// then
 		assertThat(value, equalTo("Compo Title"));
-		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
-		verify(assetVariables, times(0)).get(Locale.ENGLISH, reference, source, referenceHandler);
+		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
+		verify(assetVariables, times(0)).get("en", reference, source, referenceHandler);
 	}
 
 	@Test
@@ -84,15 +82,15 @@ public class VariablesCacheTest {
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
-		when(assetVariables.get(Locale.ENGLISH, reference, source, referenceHandler)).thenReturn("Asset Title");
+		when(assetVariables.get("en", reference, source, referenceHandler)).thenReturn("Asset Title");
 
 		// when
-		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
 		// then
 		assertThat(value, equalTo("Asset Title"));
-		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
-		verify(assetVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
+		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
+		verify(assetVariables, times(1)).get("en", reference, source, referenceHandler);
 	}
 
 	@Test
@@ -103,11 +101,11 @@ public class VariablesCacheTest {
 		when(source.getParentDir()).thenReturn(sourceDir);
 
 		// when
-		String value = variablesCache.get(Locale.ENGLISH, reference, source, referenceHandler);
+		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
 		// then
 		assertThat(value, nullValue());
-		verify(sourceVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
-		verify(assetVariables, times(1)).get(Locale.ENGLISH, reference, source, referenceHandler);
+		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
+		verify(assetVariables, times(1)).get("en", reference, source, referenceHandler);
 	}
 }

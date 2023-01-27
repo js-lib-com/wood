@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +55,7 @@ public class ProjectGetMediaFileTest {
 		// given
 
 		// when
-		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -65,7 +64,7 @@ public class ProjectGetMediaFileTest {
 	}
 
 	@Test
-	public void GivenMediaFileInSourceDirAndNullLocale_ThenFoundAndDoNotSearchAsset() {
+	public void GivenMediaFileInSourceDirAndNullLanguage_ThenFoundAndDoNotSearchAsset() {
 		// given
 
 		// when
@@ -81,11 +80,11 @@ public class ProjectGetMediaFileTest {
 	public void GivenMediaFileInSourceDirAndReferenceWithPath_ThenFoundAndDoNotSearchAsset() {
 		// given
 		when(reference.hasPath()).thenReturn(true);
-		// return the same source directory since we actually need a not null path  
+		// return the same source directory since we actually need a not null path
 		when(sourceDir.getSubdirPath(null)).thenReturn(sourceDir);
-		
+
 		// when
-		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -95,7 +94,7 @@ public class ProjectGetMediaFileTest {
 
 	/**
 	 * Media file does not exist into source directory but do exist into assets. Searches twice on source directory - with given
-	 * locale and without locale, and once on asset where it is found.
+	 * language and without language, and once on asset where it is found.
 	 */
 	@Test
 	public void GivenMediaFileNotInSourceDir_ThenDoSearchSourceTwiceAndAssetOnce() {
@@ -104,7 +103,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -114,10 +113,10 @@ public class ProjectGetMediaFileTest {
 
 	/**
 	 * Same as {@link #GivenMediaFileNotInSourceDir_ThenDoSearchSourceTwiceAndAssetOnce()} but searches source directory only
-	 * once because locale are not provided - locale parameter is null.
+	 * once because language are not provided - language parameter is null.
 	 */
 	@Test
-	public void GivenMediaFileNotInSourceDirAndNullLocale_ThenDoSearchSourceOnceAndAssetOnce() {
+	public void GivenMediaFileNotInSourceDirAndNullLanguage_ThenDoSearchSourceOnceAndAssetOnce() {
 		// given
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
@@ -133,7 +132,7 @@ public class ProjectGetMediaFileTest {
 
 	/**
 	 * If media files does not exist either in source directory nor in assets returns null. Searches twice both source and asset
-	 * directories - with given locale and without locale.
+	 * directories - with given language and without language.
 	 */
 	@Test
 	public void GivenMissingMediaFile_ThenNull() {
@@ -142,7 +141,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(null);
 
 		// when
-		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
 		// then
 		assertThat(foundFile, nullValue());
@@ -152,10 +151,10 @@ public class ProjectGetMediaFileTest {
 
 	/**
 	 * If media files does not exist either in source directory nor in assets returns null. Searches only once both source and
-	 * asset directories because there are no locale provided - null locale parameter.
+	 * asset directories because there are no language provided - null language parameter.
 	 */
 	@Test
-	public void GivenMissingMediaFileAndNullLocale_ThenNull() {
+	public void GivenMissingMediaFileAndNullLanguage_ThenNull() {
 		// given
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(null);
@@ -176,7 +175,7 @@ public class ProjectGetMediaFileTest {
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
-		FilePath foundFile = project.getResourceFile(Locale.GERMAN, reference, sourceFile);
+		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
 		// then
 		assertThat(foundFile, equalTo(mediaFile));
@@ -185,7 +184,7 @@ public class ProjectGetMediaFileTest {
 	}
 
 	@Test
-	public void GivenExistingFileWithoutParentAndNullLocale_ThenSearchOnlyOnAssetDir() {
+	public void GivenExistingFileWithoutParentAndNullLanguage_ThenSearchOnlyOnAssetDir() {
 		// given
 		when(sourceFile.getParentDir()).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);

@@ -9,6 +9,6 @@
 	<authors>j(s)-lib</authors>
 	<title>Test Project</title>
 	<description>Project used as fixture for unit testing.</description>
-	<locale>en, de, fr, ro</locale>
+	<language>en, de, fr, ro</language>
 	<manifest>manifest.json</manifest>
 </project>

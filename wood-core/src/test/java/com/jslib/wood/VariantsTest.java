@@ -4,14 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,24 +31,24 @@ public class VariantsTest {
 	}
 
 	@Test
-	public void locale() {
-		Map<String, Locale> locales = new HashMap<>();
-		locales.put("en-US", Locale.US);
-		locales.put("en", Locale.ENGLISH);
-		locales.put("RO", new Locale("ro"));
-		locales.put("ro", new Locale("ro"));
-		locales.put("ro-md", new Locale("ro", "MD"));
-		locales.put("ro-MD", new Locale("ro", "MD"));
-		locales.put("RO-MD", new Locale("ro", "MD"));
+	public void language() {
+		List<String> languages = new ArrayList<>();
+		languages.add("en-US");
+		languages.add("en");
+		languages.add("RO");
+		languages.add("ro");
+		languages.add("ro-md");
+		languages.add("ro-MD");
+		languages.add("RO-MD");
 
-		for (String localePattern : locales.keySet()) {
-			Variants variants = new Variants(file, localePattern);
-			assertThat(variants.getLocale(), equalTo(locales.get(localePattern)));
+		for (String languagePattern : languages) {
+			Variants variants = new Variants(file, languagePattern);
+			assertThat(variants.getLanguage(), equalTo(languagePattern));
 		}
 	}
 
 	@Test(expected = WoodException.class)
-	public void locale_Multiple() {
+	public void language_Multiple() {
 		new Variants(file, "jp_ro");
 	}
 
@@ -98,12 +94,12 @@ public class VariantsTest {
 	}
 
 	@Test
-	public void locale_mediaQueries() {
+	public void language_mediaQueries() {
 		MediaQueryDefinition definition = new MediaQueryDefinition("w1200", "min-width: 1200px", 0);
 		when(project.getMediaQueryDefinition("w1200")).thenReturn(definition);
 
 		Variants variants = new Variants(file, "w1200_ro");
-		assertThat(variants.getLocale(), equalTo(new Locale("ro")));
+		assertThat(variants.getLanguage(), equalTo("ro"));
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 1200px )"));
 		assertThat(variants.getMediaQueries().getWeight(), equalTo(1L));
@@ -113,7 +109,6 @@ public class VariantsTest {
 	@Test
 	public void nullVariants() {
 		Variants variants = new Variants(file, null);
-		assertThat(variants.hasLocale(), is(false));
 		assertThat(variants.getMediaQueries().getQueries(), empty());
 	}
 }

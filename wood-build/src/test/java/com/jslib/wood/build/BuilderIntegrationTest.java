@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -58,8 +57,7 @@ public class BuilderIntegrationTest {
 		Builder builder = builder("project");
 		BuilderProject project = builder.getProject();
 
-		Locale locale = new Locale("en");
-		builder.setLocale(locale);
+		builder.setLanguage("en");
 
 		CompoPath indexPage = new CompoPath(project, "res/page/index");
 		builder.buildPage(new Component(indexPage, builder));

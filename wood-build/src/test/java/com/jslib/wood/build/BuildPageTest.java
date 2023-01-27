@@ -14,7 +14,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -139,7 +138,7 @@ public class BuildPageTest {
 
 		// exercise
 
-		builder.setLocale(Locale.ENGLISH);
+		builder.setLanguage("en");
 		builder.buildPage(page);
 
 		// assert results

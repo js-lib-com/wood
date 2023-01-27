@@ -3,58 +3,33 @@ package com.jslib.wood.impl;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import com.jslib.util.Strings;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.WoodException;
 
 /**
- * Variant is file name qualifier that create identically semantic files but differently presented. Is legal to have multiple
- * variants list to a file.
- * <p>
- * Variants are encoded into file name using underscore as separator. This is the reason for file names restriction to use
- * underscore. Current implementation supports next variants:
- * <ul>
- * <li>locale - select a file for inclusion into a particular locale build,
- * <li>viewport size - viewport maximum width or height used for styles based on max- media queries,
- * <li>orientation - device orientation, <code>landscape</code> or <code>portrait</code>,
- * </ul>
- * <p>
- * There are also couple experimental variants in analysis:
- * <ul>
- * <li>device class - experimental, the class of the device running web application like <code>mobile</code> or
- * <code>desktop</code>,
- * <li>site style - experimental, overall user interface style selects UI controls set, for example classic or flat style,
- * <li>site theme - experimental, site theme, mainly colors, used by current site style.
- * </ul>
- * <p>
- * Current syntax, including experimental features:
+ * Variants qualify file path so that one can create group of files with the same semantic content but differently presented,
+ * for example string variables for multi-language support.
  * 
- * <pre>
- * variants    = +variant                   ; one or more variants
- * variant     = V-SEP (locale / viewport / device / orientation / style / theme)
- * locale      = language ?('-' country)    ; locale variant has language and optional country separated by dash
- * language    = 2ALPHA                     ; lower case ISO 639 alpha-2 language code 
- * country     = 2ALPHA                     ; upper case ISO 3166 alpha-2 country code
- * viewport    = (V-CODE / H-CODE) 3*4DIGIT ; viewport maximum width or height variant
- * device      = MOBILE / DESKTOP / TV-SET  ; the class of the device running web application
- * orientation = PORTRAIT / LANDSCAPE       ; device orientation 
- * style       = 1*APLHA S-CODE             ; site style variant has an arbitrary name with "-style" suffix
- * theme       = 1*APLHA T-CODE             ; site theme variant has an arbitrary name with "-theme" suffix
+ * Variants are appended to file names, separated by underscore (_) character. Is legal to have multiple variants, but every
+ * variant preceded by its separator - underscore (_) character. Currently supported variants are language and media queries for
+ * style files.
+ *
+ * Language variants are used for projects with internationalization support. This should be declared on language property from
+ * {@link ProjectDescriptor}. A not declared language variant is ignored.
  * 
- * ; terminal symbols definition
- * V-SEP     = "_"                          ; variant separator is underscore that is not valid in names
- * V-CODE    = "w"                          ; variant code for viewport maximum width
- * H-CODE    = "h"                          ; variant code for viewport maximum height
- * S-CODE    = "-style"                     ; site style variant code act as suffix
- * T-CODE    = "-theme"                     ; site theme variant code act as suffix
- * MOBILE    = "mobile"                     ; mobile device variant
- * DESKTOP   = "desktop"                    ; desktop device variant
- * TV-SET    = "tv-set"                     ; television set variant 
- * PORTRAIT  = "portrait"                   ; device is used in portrait mode, that is, vertical
- * LANDSCAPE = "landscape"                  ; device is used in landscape mode
+ * Pattern for language variant has format similar to <code>Accept-Language</code> HTML header. Strictly speaking, language
+ * variant format is not identical with HTML header; it uses only 2 digit ISO 639 alpha-2 language code and additional
+ * information is always country code, into ISO 3166 alpha-2 format. Dash separator and country code are optional. For example,
+ * <code>ro</code> and <code>ro-RO</code> are both valid variants.
  * 
- * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
- * </pre>
- * <p>
+ * Media queries enable different styles based on device properties, for example screen width and height. On the other hand,
+ * WOOD allows to split media queries styles on style file variants with custom alias, for example
+ * page/index/index_portrait.css.
+ * 
+ * In order to use a media query file variant it should also be declared on project descriptor, media-query element; alias
+ * attribute is the file variant and expression attribute is media feature always related to screen media type.
+ * 
  * Variants instance has not mutable state, therefore is thread safe.
  * 
  * @author Iulian Rotaru
@@ -68,19 +43,19 @@ public class Variants {
 	private static final String SEPARATOR = "_";
 
 	/**
-	 * Pattern for locale variant in format similar to <code>Accept-Language</code> HTML header. Strictly, locale variant is not
-	 * identically HTML header format; it uses only 2 digit ISO 639 alpha-2 language code and additional information is always
-	 * country code, into ISO 3166 alpha-2 format. Dash separator and country code are optional. For example <code>en</code> and
-	 * <code>en-US</code> are both valid variants.
+	 * Pattern for language variant in format similar to <code>Accept-Language</code> HTML header. Strictly, language variant is
+	 * not identically HTML header format; it uses only 2 digit ISO 639 alpha-2 language code and additional information is
+	 * always country code, into ISO 3166 alpha-2 format. Dash separator and country code are optional. For example
+	 * <code>en</code> and <code>en-US</code> are both valid variants.
 	 * <p>
 	 * Language code has the same limitations regarding old code as {@link Locale} class as. It accepts new codes but always
-	 * generate old ones. For example an hebrew file can use both <code>iw</code> and <code>he</code> language code for locale
-	 * variant but generated build layout will always use <code>iw</code>.
+	 * generate old ones. For example an hebrew file can use both <code>iw</code> and <code>he</code> code language variant but
+	 * generated build layout will always use <code>iw</code>.
 	 */
-	public static final Pattern LOCALE = Pattern.compile("^([a-z]{2})(?:\\-([A-Z]{2}))?$", Pattern.CASE_INSENSITIVE);
+	public static final Pattern LANGUAGE_PATTERN = Pattern.compile("^([a-z]{2})(?:\\-([A-Z]{2}))?$", Pattern.CASE_INSENSITIVE);
 
-	/** Locale variant. This variant is null if not set. */
-	private final Locale locale;
+	/** Language variant. This variant is null if not set. */
+	private final String language;
 
 	private final MediaQueries mediaQueries;
 
@@ -113,23 +88,23 @@ public class Variants {
 			}
 		}
 
-		Locale locale = null;
+		String language = null;
 		this.mediaQueries = new MediaQueries(file.getProject());
 
 		Matcher matcher = new Matcher();
 		boolean empty = true;
 		for (String variant : split(variants)) {
 			empty = false;
-			if (matcher.match(LOCALE, variant)) {
-				// locale
-				if (locale != null) {
-					throw new WoodException("Invalid variants syntax |%s|. Multiple locale.", variants);
+			if (matcher.match(LANGUAGE_PATTERN, variant)) {
+				// language
+				if (language != null) {
+					throw new WoodException("Invalid variants syntax |%s|. Multiple language variants.", variants);
 				}
 				String country = matcher.group(2);
 				if (country == null) {
-					locale = new Locale(matcher.group(1));
+					language = matcher.group(1);
 				} else {
-					locale = new Locale(matcher.group(1), country);
+					language = Strings.concat(matcher.group(1), '-', country);
 				}
 
 			} else if (mediaQueries.add(variant)) {
@@ -140,7 +115,7 @@ public class Variants {
 			}
 		}
 
-		this.locale = locale;
+		this.language = language;
 		this.empty = empty;
 	}
 
@@ -161,13 +136,13 @@ public class Variants {
 	}
 
 	/**
-	 * Get locale variant value or null if locale variant is missing.
+	 * Get language variant value or null if language variant is missing.
 	 * 
-	 * @return locale value or null.
-	 * @see #locale
+	 * @return language value or null.
+	 * @see #language
 	 */
-	public Locale getLocale() {
-		return locale;
+	public String getLanguage() {
+		return language;
 	}
 
 	public boolean hasMediaQueries() {
@@ -186,21 +161,11 @@ public class Variants {
 	 * @return true if this variants has <code>language</code>.
 	 * @see #language
 	 */
-	public boolean hasLocale(Locale locale) {
-		if(this.locale == null) {
-			return locale == null;
+	public boolean hasLanguage(String language) {
+		if (this.language == null) {
+			return language == null;
 		}
-		return this.locale.equals(locale);
-	}
-
-	/**
-	 * Test if locale variant is present.
-	 * 
-	 * @return true if locale variant is present.
-	 * @see #locale
-	 */
-	public boolean hasLocale() {
-		return locale != null;
+		return this.language.equals(language);
 	}
 
 	/**

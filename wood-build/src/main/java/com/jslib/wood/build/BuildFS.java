@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import com.jslib.api.dom.Document;
 import com.jslib.util.Files;
@@ -30,9 +29,9 @@ import com.jslib.wood.WoodException;
  * are solved by subclasses, concrete implementations. All write methods take care to avoid multiple processing of the same
  * file. Also append build number to target file name, if {@link #buildNumber} is non zero.
  * <p>
- * If project is multi-locale, BuildFS is locale sensitive. There is optional {@link #setLocale(Locale)} that is used, for
- * multi-locale build, to store current processing locale. When compute paths insert locale language tag. Locale language tag is
- * BCP encoded: language is always lower case and country, if present, upper case separated by hyphen.
+ * If project is multi-language, BuildFS is language sensitive. There is optional {@link #setLanguage(String)} that is used, for
+ * multi-language build, to store current processing language; when compute paths insert the language too. Language is BCP
+ * encoded: language is always lower case and country, if present, upper case separated by hyphen.
  * <p>
  * Build file system implementations are not thread safe. Do not use BuildFS instances into a concurrent context.
  * 
@@ -55,10 +54,10 @@ public abstract class BuildFS {
 	private final List<File> processedFiles;
 
 	/**
-	 * Current processing locale for multi-locale build. Locale language tag is inserted into directory paths and URL absolute
-	 * paths. For projects without multi-locale support this field is always null.
+	 * Current processing language for multi-language build. Language is inserted into directory paths and URL absolute paths.
+	 * For projects without multi-language support this field is always null.
 	 */
-	private Locale locale;
+	private String language;
 
 	/**
 	 * Protected constructor.
@@ -76,15 +75,14 @@ public abstract class BuildFS {
 	}
 
 	/**
-	 * Set current processing locale for multi-locale build.
+	 * Set current processing language for multi-language build.
 	 * 
-	 * @param locale current processing locale.
-	 * @throws IllegalArgumentException if <code>locale</code> argument is null.
-	 * @see #locale
+	 * @param language current processing language.
+	 * @see #language
 	 */
-	public void setLocale(Locale locale) {
-		Params.notNull(locale, "Locale");
-		this.locale = locale;
+	public void setLanguage(String language) {
+		Params.notNullOrEmpty(language, "Language");
+		this.language = language;
 	}
 
 	/**
@@ -395,13 +393,12 @@ public abstract class BuildFS {
 	// Helper methods common to all build file system implementations
 
 	/**
-	 * Create named directory into site build. This factory method takes into account current processing locale, see
-	 * {@link #locale}. If project is multi-locale, this method prefixes directory name with locale language tag; if project is
-	 * single locale, locale sub-directory is not created.
+	 * Create named directory into site build. This factory method takes into account current processing language, see
+	 * {@link #language}. If project is multi-language, this method prefixes directory name with current language; if project is
+	 * single language, language sub-directory is not created.
 	 * <p>
-	 * Value returned by {@link Locale#toLanguageTag()} is encoded into BCP as requested by HTML <code>lang</code> attribute.
-	 * Both locale directory name and <code>lang</code> attribute has the same format; hence locale encoded into request path
-	 * has also the same format.
+	 * Both language directory name and <code>lang</code> attribute has the same format; hence language encoded into request
+	 * path has also the same format.
 	 * <p>
 	 * Create directory, if does not already exist.
 	 * 
@@ -412,9 +409,9 @@ public abstract class BuildFS {
 		// clone build directory since need to keep it unchanged
 		File dir = new File(buildDir.getPath());
 
-		// if project is multi-locale create a sub-directory with name equal with locale language tag
-		if (locale != null) {
-			dir = new File(dir, locale.toLanguageTag());
+		// if project is multi-language create a sub-directory with name equal with current language
+		if (language != null) {
+			dir = new File(dir, language);
 		}
 
 		if (!".".equals(dirName)) {

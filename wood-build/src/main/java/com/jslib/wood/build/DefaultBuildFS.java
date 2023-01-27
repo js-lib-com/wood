@@ -3,7 +3,6 @@ package com.jslib.wood.build;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import com.jslib.util.Strings;
 import com.jslib.wood.Component;
@@ -11,14 +10,13 @@ import com.jslib.wood.FilePath;
 
 /**
  * Default build file system implementation. This build file system uses separated directories for styles, scripts and media
- * files; all media files are stored in the same place. Pages are placed in build directory root. For multi-locale projects,
- * replicates single locale directories layout for every locale.
+ * files; all media files are stored in the same place. Pages are placed in build directory root. For multi-language projects,
+ * replicates single language directories layout for every language.
  * <p>
- * For multi-locale build uses locale language tag for locale directory name, see {@link Locale#toLanguageTag()}. Locale
- * language tag is BCP encoded: language encoded ISO 639 alpha-2 and is always lower case and country, if present, is encoded
- * ISO 3166 alpha-2 and is upper case, separated by hyphen.
+ * For multi-language build uses language for sub-directory name. Language is BCP encoded: language encoded ISO 639 alpha-2 and
+ * is always lower case and country, if present, is encoded ISO 3166 alpha-2 and is upper case, separated by hyphen.
  * <p>
- * Here is a build directory layout for both single and multi locale projects.
+ * Here is a build directory layout for both single and multi-language projects.
  * 
  * <pre>
  *  /                              /                  

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -279,22 +278,22 @@ public class Project {
 	}
 
 	/**
-	 * Get project supported locale settings as configured by project descriptor. Returned list is immutable.
+	 * Get project supported languages settings as configured by project descriptor. Returned list is immutable.
 	 * 
-	 * @return project locale.
-	 * @see ProjectDescriptor#getLocales()
+	 * @return project languages.
+	 * @see ProjectDescriptor#getLanguage()
 	 */
-	public List<Locale> getLocales() {
-		return Collections.unmodifiableList(descriptor.getLocales());
+	public List<String> getLanguages() {
+		return Collections.unmodifiableList(descriptor.getLanguage());
 	}
 
 	/**
-	 * Get project configured default locale. By convention default path locale is the first from descriptor locale list.
+	 * Get project default language. By convention default language is the first from descriptor language list.
 	 * 
-	 * @return default locale.
+	 * @return default language.
 	 */
-	public Locale getDefaultLocale() {
-		return descriptor.getLocales().get(0);
+	public String getDefaultLanguage() {
+		return descriptor.getLanguage().get(0);
 	}
 
 	/**
@@ -397,17 +396,17 @@ public class Project {
 	 * {@link Reference#hasPath()}, attempt to find resource file on source parent subdirectory. If source file is in project
 	 * root, e.g. manifest.json, source parent directory is null, in which case searches only asset directory.
 	 * <p>
-	 * When search for resource file, only base name and locale variant is considered, that is, no extension. Anyway, if locale
-	 * variant parameter is null searches only resource files without variants at all.
+	 * When search for resource file, only base name and language variant is considered, that is, no extension. Anyway, if
+	 * language variant parameter is null searches only resource files without variants at all.
 	 * <p>
 	 * Returns null if resource file is not found.
 	 * 
-	 * @param locale locale variant, possible null.
+	 * @param language language variant, possible null.
 	 * @param reference resource file reference,
 	 * @param sourceFile source file using resource.
 	 * @return resource file or null.
 	 */
-	public FilePath getResourceFile(Locale locale, Reference reference, FilePath sourceFile) {
+	public FilePath getResourceFile(String language, Reference reference, FilePath sourceFile) {
 		Params.notNull(reference, "Reference");
 		Params.notNull(sourceFile, "Source file");
 
@@ -418,32 +417,32 @@ public class Project {
 		FilePath sourceDir = sourceFile.getParentDir();
 		FilePath resourceFile = null;
 		if (sourceDir != null) {
-			resourceFile = findResourceFile(sourceDir, reference, locale);
+			resourceFile = findResourceFile(sourceDir, reference, language);
 		}
-		return resourceFile != null ? resourceFile : findResourceFile(assetDir, reference, locale);
+		return resourceFile != null ? resourceFile : findResourceFile(assetDir, reference, language);
 	}
 
 	/**
-	 * Scan source directory for resource files matching base name and locale variant. This helper method tries to locate file
-	 * matching both base name and locale; extension is not considered. If not found try to return base variant, that is, file
-	 * that match only base name and has no locale. If still not found returns null.
+	 * Scan source directory for resource files matching base name and language variant. This helper method tries to locate file
+	 * matching both base name and language; extension is not considered. If not found try to return base variant, that is, file
+	 * that match only base name and has no language. If still not found returns null.
 	 * 
 	 * @param sourceDir directory to scan for media files,
 	 * @param reference resource file reference,
-	 * @param locale locale variant, null for project default locale.
+	 * @param language language variant, null for project default language.
 	 * @return resource file or null.
 	 */
-	static FilePath findResourceFile(FilePath sourceDir, Reference reference, Locale locale) {
+	static FilePath findResourceFile(FilePath sourceDir, Reference reference, String language) {
 		if (reference.hasPath()) {
 			sourceDir = sourceDir.getSubdirPath(reference.getPath());
 		}
 		FilePath resourceFile = null;
-		if (locale != null) {
-			// scan directory for first resource file with basename and locale variant
+		if (language != null) {
+			// scan directory for first resource file with basename and language variant
 			if (reference.isMediaFile()) {
-				resourceFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+				resourceFile = sourceDir.findFirst(file -> file.isMedia() && file.hasBaseName(reference.getName()) && file.getVariants().hasLanguage(language));
 			} else {
-				resourceFile = sourceDir.findFirst(file -> file.hasBaseName(reference.getName()) && file.getVariants().hasLocale(locale));
+				resourceFile = sourceDir.findFirst(file -> file.hasBaseName(reference.getName()) && file.getVariants().hasLanguage(language));
 			}
 		}
 		if (resourceFile != null) {
@@ -482,7 +481,7 @@ public class Project {
 	public IScriptDescriptor createScriptDescriptor(FilePath scriptFile, boolean embedded) {
 		return ScriptDescriptor.create(scriptFile, embedded);
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// scanner for project file system
 

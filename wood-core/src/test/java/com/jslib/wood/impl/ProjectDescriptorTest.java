@@ -14,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +39,7 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void GivenPropertiesThenRetrieve() {
+	public void GivenProperties_WhenCreateInstance_ThenRetrieve() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
@@ -54,7 +53,7 @@ public class ProjectDescriptorTest {
 				"	<favicon>res/app-icon.png</favicon>" + //
 				"	<pwa-manifest>res/app-manifest.json</pwa-manifest>" + //
 				"	<pwa-worker>script/sw.js</pwa-worker>" + //
-				"	<locale>en</locale>" + //
+				"	<language>en</language>" + //
 				"</project>";
 
 		// when
@@ -71,29 +70,28 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
 		assertThat(descriptor.getPwaManifest(), equalTo("res/app-manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("script/sw.js"));
-		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
+		assertThat(descriptor.getLanguage(), equalTo(Arrays.asList("en")));
 	}
 
 	@Test
-	public void GivenMultipleLocale_ThenRetrieveAll() {
+	public void GivenMultipleLanguage_WhenGetLanguage_ThenRetrieveAll() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
-				"	<locale>en, de, fr, ro</locale>" + //
+				"	<language>en, de, fr, ro</language>" + //
 				"</project>";
 
 		// when
-		descriptor = descriptor(xml);
+		List<String> languages = descriptor(xml).getLanguage();
 
 		// then
-		List<Locale> locales = descriptor.getLocales();
-		assertThat(locales, notNullValue());
-		assertThat(locales, hasSize(4));
-		assertThat(locales, contains(new Locale("en"), new Locale("de"), new Locale("fr"), new Locale("ro")));
+		assertThat(languages, notNullValue());
+		assertThat(languages, hasSize(4));
+		assertThat(languages, contains("en", "de", "fr", "ro"));
 	}
 
 	@Test
-	public void GivenMultipleExcludeDirs_ThenRetrieveAll() {
+	public void GivenMultipleExcludeDirs_WheGetExcludeDirs_ThenRetrieveAll() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
@@ -101,10 +99,9 @@ public class ProjectDescriptorTest {
 				"</project>";
 
 		// when
-		descriptor = descriptor(xml);
+		List<String> excludes = descriptor(xml).getExcludeDirs();
 
 		// then
-		List<String> excludes = descriptor.getExcludeDirs();
 		assertThat(excludes, notNullValue());
 		assertThat(excludes, hasSize(2));
 		assertThat(excludes.get(0), equalTo("page/about"));
@@ -112,7 +109,7 @@ public class ProjectDescriptorTest {
 	}
 
 	@Test
-	public void GivenMissingProperties_ThenDefaults() {
+	public void GivenMissingProperties_WhenCreateInstance_ThenDefaults() {
 		// given
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
@@ -132,7 +129,7 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 		assertThat(descriptor.getPwaManifest(), equalTo("manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("worker.js"));
-		assertThat(descriptor.getLocales(), equalTo(Arrays.asList(Locale.ENGLISH)));
+		assertThat(descriptor.getLanguage(), equalTo(Arrays.asList("en")));
 	}
 
 	@Test

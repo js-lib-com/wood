@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +55,7 @@ public class ProjectFindMediaFileTest {
 				new XFile("icon.png"), //
 				new XFile("logo.png"), //
 				new XFile("logo_w800.png"), //
-				new XFile("logo_ja.png") });
+				new XFile("logo_jp.png") });
 
 		// findMediaFile is always used with verified reference and does not perform its own check
 		// therefore resource type can be anything, including null
@@ -72,41 +71,41 @@ public class ProjectFindMediaFileTest {
 	}
 
 	@Test
-	public void GivenExistingLocale_ThenFoundVariant() {
+	public void GivenExistingLanguage_ThenFoundVariant() {
 		// given
-		Locale locale = Locale.JAPANESE;
+		String language = "jp";
 
 		// when
-		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
 		// then
 		assertThat(mediaFile, notNullValue());
-		assertThat(mediaFile.value(), equalTo("logo_ja.png"));
+		assertThat(mediaFile.value(), equalTo("logo_jp.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
-		assertThat(mediaFile.getVariants().getLocale(), equalTo(Locale.JAPANESE));
+		assertThat(mediaFile.getVariants().getLanguage(), equalTo("jp"));
 	}
 
 	@Test
-	public void GivenNullLocale_ThenFoundDefault() {
+	public void GivenNullLanguage_ThenFoundDefault() {
 		// given
-		Locale locale = null;
+		String language = null;
 
 		// when
-		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
 		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
-		assertThat(mediaFile.getVariants().getLocale(), nullValue());
+		assertThat(mediaFile.getVariants().getLanguage(), nullValue());
 	}
 
 	/**
-	 * The same as {@link #GivenNullLocale_ThenFoundDefault()} but ensure that default locale media file is last in directory
+	 * The same as {@link #GivenNullLanguage_ThenFoundDefault()} but ensure that default language media file is last in directory
 	 * files list.
 	 */
 	@Test
-	public void GivenNullLocaleAndDefaultLast_ThenFoundDefault() {
+	public void GivenNullLanguageAndDefaultLast_ThenFoundDefault() {
 		// given
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
 				new XFile("page.htm"), //
@@ -123,28 +122,28 @@ public class ProjectFindMediaFileTest {
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
-		assertThat(mediaFile.getVariants().getLocale(), nullValue());
+		assertThat(mediaFile.getVariants().getLanguage(), nullValue());
 	}
 
 	@Test
-	public void GivenMissingLocale_ThenFoundDefault() {
+	public void GivenMissingLanguage_ThenFoundDefault() {
 		// given
-		Locale locale = Locale.GERMANY;
+		String language = "de";
 
 		// when
-		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
 		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
-		assertThat(mediaFile.getVariants().getLocale(), nullValue());
+		assertThat(mediaFile.getVariants().getLanguage(), nullValue());
 	}
 
 	@Test
-	public void GivenMissingLocaleAndDefaultLast_ThenFoundDefault() {
+	public void GivenMissingLanguageAndDefaultLast_ThenFoundDefault() {
 		// given
-		Locale locale = Locale.GERMANY;
+		String language = "de";
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
 				new XFile("page.htm"), //
 				new XFile("icon.png"), //
@@ -154,13 +153,13 @@ public class ProjectFindMediaFileTest {
 		sourceDirPath = new FilePath(project, sourceDir);
 
 		// when
-		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, locale);
+		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
 		// then
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
-		assertThat(mediaFile.getVariants().getLocale(), nullValue());
+		assertThat(mediaFile.getVariants().getLanguage(), nullValue());
 	}
 
 	@Test

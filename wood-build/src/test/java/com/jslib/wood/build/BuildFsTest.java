@@ -16,7 +16,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -94,11 +93,11 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePage_Locale() throws IOException, SAXException {
+	public void writePage_Language() throws IOException, SAXException {
 		Component compo = compo();
 		PageDocument page = new PageDocument(compo);
 
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 		buildFS.writePage(compo, page.getDocument());
 		assertTrue(buildFile("ro/htm/index.htm").exists());
 	}
@@ -141,9 +140,9 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writePageMedia_Locale() throws IOException {
+	public void writePageMedia_Language() throws IOException {
 		FilePath mediaFile = file("background.jpg");
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 
 		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
 		assertTrue(buildFile("ro/img/background.jpg").exists());
@@ -183,9 +182,9 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writeStyleMedia_Locale() throws IOException {
+	public void writeStyleMedia_Language() throws IOException {
 		FilePath mediaFile = file("background.jpg");
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 
 		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
 		assertTrue(buildFile("ro/img/background.jpg").exists());
@@ -230,14 +229,14 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writeStyle_Locale() throws IOException {
+	public void writeStyle_Language() throws IOException {
 		FilePath sourceDir = Mockito.mock(FilePath.class);
 		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
 
 		FilePath styleFile = file("style.css");
 		when(styleFile.getParentDir()).thenReturn(sourceDir);
 
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 
 		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style.css"));
 		assertTrue(buildFile("ro/css/style.css").exists());
@@ -277,9 +276,9 @@ public class BuildFsTest {
 	}
 
 	@Test
-	public void writeScript_Locale() throws IOException {
+	public void writeScript_Language() throws IOException {
 		FilePath scriptFile = file("Index.js");
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 
 		assertThat(buildFS.writeScript(null, scriptFile, referenceHandler), equalTo("../js/Index.js"));
 		assertTrue(buildFile("ro/js/Index.js").exists());
@@ -304,13 +303,13 @@ public class BuildFsTest {
 	@Test
 	public void dirFactory() throws Exception {
 		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/images"));
-		buildFS.setLocale(new Locale("ro"));
+		buildFS.setLanguage("ro");
 		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/ro/images"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void nullLocale() {
-		buildFS.setLocale(null);
+	public void nullLanguage() {
+		buildFS.setLanguage(null);
 	}
 
 	@Test(expected = WoodException.class)

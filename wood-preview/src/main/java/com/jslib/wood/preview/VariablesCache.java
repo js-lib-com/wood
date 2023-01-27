@@ -1,7 +1,6 @@
 package com.jslib.wood.preview;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import com.jslib.wood.FilePath;
@@ -50,17 +49,17 @@ class VariablesCache {
 	 * <p>
 	 * Return null if variable not found or if is empty.
 	 * 
-	 * @param local current locale,
+	 * @param language currently processing language,
 	 * @param reference variable reference to resolve,
 	 * @param sourceFile source file containing the variable reference,
 	 * @param handler variable reference handler for specific processing.
 	 * @return variable value or null if variable not defined or if is empty.
 	 */
-	public String get(Locale locale, Reference reference, FilePath sourceFile, IReferenceHandler handler) {
+	public String get(String language, Reference reference, FilePath sourceFile, IReferenceHandler handler) {
 		// if source file is in project root there is no parent directory in which case search on asset variables
 		FilePath sourceDir = sourceFile.getParentDir();
 		if (sourceDir == null) {
-			return assetVariables.get(locale, reference, sourceFile, handler);
+			return assetVariables.get(language, reference, sourceFile, handler);
 		}
 
 		Variables sourceVariables = sourceVariablesMap.get(sourceDir);
@@ -73,9 +72,9 @@ class VariablesCache {
 			}
 		}
 
-		String value = sourceVariables.get(locale, reference, sourceFile, handler);
+		String value = sourceVariables.get(language, reference, sourceFile, handler);
 		if (value == null) {
-			value = assetVariables.get(locale, reference, sourceFile, handler);
+			value = assetVariables.get(language, reference, sourceFile, handler);
 		}
 		return value;
 	}

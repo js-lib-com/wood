@@ -2,7 +2,6 @@ package com.jslib.wood.build;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.function.Function;
 
 import com.jslib.api.log.Log;
@@ -61,8 +60,8 @@ public class Builder implements IReferenceHandler {
 	/** Current processing component. */
 	private Component currentComponent;
 
-	/** Current processing locale variant. */
-	private Locale locale;
+	/** Current processing language variant. */
+	private String language;
 
 	/**
 	 * Construct builder instance. Create {@link Project} instance with given project root directory. Scan for project layout
@@ -95,16 +94,16 @@ public class Builder implements IReferenceHandler {
 	}
 
 	/**
-	 * Run project building process. Uses project detected locale(s) to initialize current processing {@link #locale} then
+	 * Run project building process. Uses project detected languages to initialize current processing {@link #language} then
 	 * delegates {@link #buildPage(CompoPath)} for every discovered page, see {@link #pages}.
 	 * 
 	 * @throws IOException for error related to underlying file system operations.
 	 */
 	public void build() throws IOException {
-		for (Locale locale : project.getLocales()) {
-			this.locale = locale;
-			if (project.isMultiLocale()) {
-				buildFS.setLocale(locale);
+		for (String language : project.getLanguages()) {
+			this.language = language;
+			if (project.isMultiLanguage()) {
+				buildFS.setLanguage(language);
 			}
 
 			if (project.getPwaWorker().exists()) {
@@ -136,7 +135,7 @@ public class Builder implements IReferenceHandler {
 	 * <li>serialize document to build page directory.
 	 * </ul>
 	 * <p>
-	 * Be aware that {@link #locale} should be properly initialized before calling this method, if project has multi-locale
+	 * Be aware that {@link #language} should be properly initialized before calling this method, if project has multi-language
 	 * support.
 	 * 
 	 * @param compoPath page component path.
@@ -146,7 +145,7 @@ public class Builder implements IReferenceHandler {
 		log.debug("Build page |%s|.", pageComponent);
 
 		PageDocument pageDocument = new PageDocument(pageComponent);
-		pageDocument.setLanguage(locale.toLanguageTag());
+		pageDocument.setLanguage(language);
 		pageDocument.setContentType("text/html; charset=UTF-8");
 		pageDocument.setTitle(pageComponent.getTitle());
 		pageDocument.setDescription(pageComponent.getDescription());
@@ -267,10 +266,10 @@ public class Builder implements IReferenceHandler {
 			Variables dirVariables = project.getVariables(sourceFile.getParentDir());
 			// source parent directory can be null in which case dirVariables also null
 			if (dirVariables != null) {
-				value = dirVariables.get(locale, reference, sourceFile, this);
+				value = dirVariables.get(language, reference, sourceFile, this);
 			}
 			if (value == null) {
-				value = project.getAssetVariables().get(locale, reference, sourceFile, this);
+				value = project.getAssetVariables().get(language, reference, sourceFile, this);
 			}
 			if (value == null) {
 				throw new WoodException("Missing variable value for reference |%s:%s|.", sourceFile, reference);
@@ -292,7 +291,7 @@ public class Builder implements IReferenceHandler {
 
 		// here reference is a resource file
 
-		FilePath resourceFile = project.getResourceFile(locale, reference, sourceFile);
+		FilePath resourceFile = project.getResourceFile(language, reference, sourceFile);
 		if (resourceFile == null) {
 			throw new WoodException("Missing resource file for reference |%s:%s|.", sourceFile, reference);
 		}
@@ -381,7 +380,7 @@ public class Builder implements IReferenceHandler {
 		return buildFS;
 	}
 
-	void setLocale(Locale locale) {
-		this.locale = locale;
+	void setLanguage(String language) {
+		this.language = language;
 	}
 }

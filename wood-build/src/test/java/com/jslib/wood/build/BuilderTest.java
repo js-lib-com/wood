@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -55,13 +54,13 @@ public class BuilderTest {
 		when(project.getAssetVariables()).thenReturn(assetVariables);
 
 		builder = new Builder(project, buildFS);
-		builder.setLocale(Locale.ENGLISH);
+		builder.setLanguage("en");
 	}
 
 	@Test
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getProjectRoot()).thenReturn(new File("test"));
-		when(project.getLocales()).thenReturn(Arrays.asList(Locale.ENGLISH));
+		when(project.getLanguages()).thenReturn(Arrays.asList("en"));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getPwaManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getPwaLoader()).thenReturn(Mockito.mock(FilePath.class));
@@ -86,7 +85,7 @@ public class BuilderTest {
 
 		builder.build();
 
-		when(project.isMultiLocale()).thenReturn(true);
+		when(project.isMultiLanguage()).thenReturn(true);
 		when(layoutPath.getReader()).thenReturn(new StringReader("<body><h1>Test Page</h1></body>"));
 		builder.build();
 
@@ -116,7 +115,7 @@ public class BuilderTest {
 	public void onResourceReference_DirVariables() throws IOException {
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = Mockito.mock(FilePath.class);
-		when(dirVariables.get(Locale.ENGLISH, reference, source, builder)).thenReturn("Page Title");
+		when(dirVariables.get("en", reference, source, builder)).thenReturn("Page Title");
 
 		String value = builder.onResourceReference(reference, source);
 		assertThat(value, notNullValue());
@@ -127,7 +126,7 @@ public class BuilderTest {
 	public void onResourceReference_AssetVariables() throws IOException {
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = Mockito.mock(FilePath.class);
-		when(assetVariables.get(Locale.ENGLISH, reference, source, builder)).thenReturn("Project Title");
+		when(assetVariables.get("en", reference, source, builder)).thenReturn("Project Title");
 
 		String value = builder.onResourceReference(reference, source);
 		assertThat(value, notNullValue());
@@ -148,7 +147,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.LAYOUT);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile("en", reference, source)).thenReturn(mediaFile);
 		when(buildFS.writePageMedia(null, mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);
@@ -163,7 +162,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.STYLE);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile("en", reference, source)).thenReturn(mediaFile);
 		when(buildFS.writeStyleMedia(mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);
@@ -178,7 +177,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.XML);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile("en", reference, source)).thenReturn(mediaFile);
 
 		assertThat(builder.onResourceReference(reference, source), nullValue());
 	}
@@ -190,7 +189,7 @@ public class BuilderTest {
 		when(source.getType()).thenReturn(FileType.SCRIPT);
 
 		FilePath mediaFile = Mockito.mock(FilePath.class);
-		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(mediaFile);
+		when(project.getResourceFile("en", reference, source)).thenReturn(mediaFile);
 		when(buildFS.writeScriptMedia(mediaFile)).thenReturn("../media/icon.png");
 
 		String value = builder.onResourceReference(reference, source);

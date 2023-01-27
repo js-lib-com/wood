@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -80,7 +79,7 @@ public class PreviewServletTest {
 
 	@Before
 	public void beforeTest() throws IOException, ServletException {
-		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
+		when(project.getDefaultLanguage()).thenReturn("en");
 		when(project.getThemeStyles()).thenReturn(mock(ThemeStyles.class));
 
 		when(servletContext.getContextPath()).thenReturn("/test-preview");
@@ -279,7 +278,7 @@ public class PreviewServletTest {
 	public void onResourceReference_Variable() {
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
-		when(variables.get(Locale.ENGLISH, reference, source, servlet)).thenReturn("Compo Title");
+		when(variables.get("en", reference, source, servlet)).thenReturn("Compo Title");
 		assertThat(servlet.onResourceReference(reference, source), equalTo("Compo Title"));
 	}
 
@@ -301,7 +300,7 @@ public class PreviewServletTest {
 		FilePath media = mock(FilePath.class);
 		when(media.getParentDir()).thenReturn(mediaDir);
 		when(media.getName()).thenReturn("logo.png");
-		when(project.getResourceFile(Locale.ENGLISH, reference, source)).thenReturn(media);
+		when(project.getResourceFile("en", reference, source)).thenReturn(media);
 
 		assertThat(servlet.onResourceReference(reference, source), equalTo("/test-preview/res/asset/logo.png"));
 	}

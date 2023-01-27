@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
-import java.util.Locale;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -42,7 +41,7 @@ public class ComponentIntegrationTest {
 						throw new IllegalStateException(e);
 					}
 				}
-				return variables.get(new Locale("en"), reference, sourcePath, this);
+				return variables.get("en", reference, sourcePath, this);
 			}
 		};
 	}

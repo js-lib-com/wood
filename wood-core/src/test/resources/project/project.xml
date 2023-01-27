@@ -8,11 +8,11 @@
 	<exclude-dirs>src,fixture</exclude-dirs>
 
 	<authors>Iulian Rotaru, Lucian Rotaru</authors>
-	<title>@string/app-name</title>
+	<title>Project</title>
 	<manifest>manifest.json</manifest>
 	<service-worker>worker.js</service-worker>
 	<favicon>res/asset/favicon.ico</favicon>
-	<locale>en, ro</locale>
+	<language>en, ro</language>
 
 	<media-queries>
 		<media-query alias="portrait" expression="orientation: portrait" />

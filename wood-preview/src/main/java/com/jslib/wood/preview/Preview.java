@@ -79,7 +79,7 @@ class Preview {
 		Document doc = builder.createHTML();
 
 		Element html = doc.getRoot();
-		html.setAttr("lang", project.getDefaultLocale().toLanguageTag());
+		html.setAttr("lang", project.getDefaultLanguage());
 
 		Element head = doc.createElement("head");
 		Element body = doc.createElement("body");

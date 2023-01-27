@@ -88,12 +88,12 @@ class BuilderProject extends Project {
 	}
 
 	/**
-	 * Return true if this project has support for multiple locale settings.
+	 * Return true if this project has support for multiple languages.
 	 * 
-	 * @return true if project is multi-locale.
+	 * @return true if project is multi-language.
 	 */
-	public boolean isMultiLocale() {
-		return getLocales().size() > 1;
+	public boolean isMultiLanguage() {
+		return getLanguages().size() > 1;
 	}
 
 	/**

@@ -14,7 +14,6 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
@@ -41,14 +40,14 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 		assertManifest();
 
 		assertThat(project.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru", "Lucian Rotaru")));
-		//assertThat(project.getTitle(), equalTo("Project"));
+		assertThat(project.getTitle(), equalTo("Project"));
 		assertThat(project.getPwaManifest().value(), equalTo("manifest.json"));
 		assertThat(project.getPwaWorker().value(), equalTo("worker.js"));
 
-		List<Locale> locales = project.getLocales();
-		assertThat(locales, hasSize(2));
-		assertThat(locales.get(0), equalTo(Locale.forLanguageTag("en")));
-		assertThat(locales.get(1), equalTo(Locale.forLanguageTag("ro")));
+		List<String> languages = project.getLanguages();
+		assertThat(languages, hasSize(2));
+		assertThat(languages.get(0), equalTo("en"));
+		assertThat(languages.get(1), equalTo("ro"));
 
 		assertThat(project.getMediaQueryDefinition("portrait"), notNullValue());
 		assertThat(project.getMediaQueryDefinition("portrait").getExpression(), equalTo("orientation: portrait"));
@@ -101,7 +100,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 
 	@Override
 	public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException, WoodException {
-		Locale locale = new Locale("en");
+		String language = "en";
 		if (reference.isVariable()) {
 			String value = VARIABLES.get(reference);
 			if (value == null) {
@@ -111,7 +110,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
 		}
 
 		// discover media file and returns its absolute URL path
-		FilePath mediaFile = sourceFile.getProject().getResourceFile(locale, reference, sourceFile);
+		FilePath mediaFile = sourceFile.getProject().getResourceFile(language, reference, sourceFile);
 		if (mediaFile == null) {
 			throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
 		}

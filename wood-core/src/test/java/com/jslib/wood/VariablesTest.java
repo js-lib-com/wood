@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -60,11 +59,11 @@ public class VariablesTest {
 		Variables variables = new Variables(dir);
 
 		// then
-		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
-		assertThat(localeValues, notNullValue());
-		assertThat(localeValues, aMapWithSize(1));
+		Map<String, Map<Reference, String>> languageValues = variables.getLanguageValues();
+		assertThat(languageValues, notNullValue());
+		assertThat(languageValues, aMapWithSize(1));
 
-		Map<Reference, String> values = localeValues.get(null);
+		Map<Reference, String> values = languageValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
 		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));
@@ -86,11 +85,11 @@ public class VariablesTest {
 		variables.load(file);
 
 		// then
-		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
-		assertThat(localeValues, notNullValue());
-		assertThat(localeValues, aMapWithSize(1));
+		Map<String, Map<Reference, String>> languageValues = variables.getLanguageValues();
+		assertThat(languageValues, notNullValue());
+		assertThat(languageValues, aMapWithSize(1));
 
-		Map<Reference, String> values = localeValues.get(null);
+		Map<Reference, String> values = languageValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
 		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));
@@ -98,10 +97,9 @@ public class VariablesTest {
 	}
 
 	@Test
-	public void GivenVariablesFileWithLocale_WhenLoad_ThenGetLocalizedValue() {
+	public void GivenVariablesFileWithlanguage_WhenLoad_ThenGetLocalizedValue() {
 		// given
-		// when(project.getDefaultLocale()).thenReturn(Locale.US);
-		when(variants.getLocale()).thenReturn(Locale.US);
+		when(variants.getLanguage()).thenReturn("en-US");
 
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<string>" + //
@@ -116,7 +114,7 @@ public class VariablesTest {
 
 		// then
 		IReferenceHandler handler = mock(IReferenceHandler.class);
-		String value = variables.get(Locale.US, new Reference(Reference.Type.STRING, "title"), file, handler);
+		String value = variables.get("en-US", new Reference(Reference.Type.STRING, "title"), file, handler);
 		assertThat(value, notNullValue());
 		assertThat(value, equalTo("Title"));
 	}
@@ -157,11 +155,11 @@ public class VariablesTest {
 		variables.load(file);
 
 		// then
-		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
-		assertThat(localeValues, notNullValue());
-		assertThat(localeValues, aMapWithSize(1));
+		Map<String, Map<Reference, String>> languageValues = variables.getLanguageValues();
+		assertThat(languageValues, notNullValue());
+		assertThat(languageValues, aMapWithSize(1));
 
-		Map<Reference, String> values = localeValues.get(null);
+		Map<Reference, String> values = languageValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
 		assertThat(values.keySet(), contains(new Reference(Reference.Type.TEXT, "title")));
@@ -183,9 +181,9 @@ public class VariablesTest {
 		variables.load(file);
 
 		// then
-		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
-		assertThat(localeValues, notNullValue());
-		assertThat(localeValues, aMapWithSize(0));
+		Map<String, Map<Reference, String>> languageValues = variables.getLanguageValues();
+		assertThat(languageValues, notNullValue());
+		assertThat(languageValues, aMapWithSize(0));
 	}
 
 	@Test(expected = WoodException.class)
@@ -216,11 +214,11 @@ public class VariablesTest {
 		Variables variables = new Variables();
 		variables.reload(dir);
 
-		Map<Locale, Map<Reference, String>> localeValues = variables.getLocaleValues();
-		assertThat(localeValues, notNullValue());
-		assertThat(localeValues, aMapWithSize(1));
+		Map<String, Map<Reference, String>> languageValues = variables.getLanguageValues();
+		assertThat(languageValues, notNullValue());
+		assertThat(languageValues, aMapWithSize(1));
 
-		Map<Reference, String> values = localeValues.get(null);
+		Map<Reference, String> values = languageValues.get(null);
 		assertThat(values, notNullValue());
 		assertThat(values, aMapWithSize(1));
 		assertThat(values.keySet(), contains(new Reference(Reference.Type.STRING, "title")));

@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +55,7 @@ public class ProjectInitTest {
 		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getPwaWorker()).thenReturn("sw.js");
-		when(descriptor.getLocales()).thenReturn(Arrays.asList(Locale.FRANCE, Locale.GERMAN));
+		when(descriptor.getLanguage()).thenReturn(Arrays.asList("fr","de"));
 		when(descriptor.getExcludeDirs()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 
 		// when
@@ -77,9 +76,9 @@ public class ProjectInitTest {
 		assertThat(project.getAuthors(), contains("Iulian Rotaru"));
 		assertThat(project.getTitle(), nullValue());
 
-		assertThat(project.getLocales(), hasSize(2));
-		assertThat(project.getLocales(), contains(Locale.FRANCE, Locale.GERMAN));
-		assertThat(project.getDefaultLocale(), equalTo(Locale.FRANCE));
+		assertThat(project.getLanguages(), hasSize(2));
+		assertThat(project.getLanguages(), contains("fr", "de"));
+		assertThat(project.getDefaultLanguage(), equalTo("fr"));
 
 		assertThat(project.getExcludes(), hasSize(3));
 		assertTrue(project.getExcludes().contains(new File(projectRoot, "res/page/trivia/")));

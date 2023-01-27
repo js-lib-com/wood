@@ -31,9 +31,9 @@ import com.jslib.wood.impl.Variants;
  * File path identify project files, usually component files like layout, styles and scripts. A file path is a standard Java
  * file with couple syntax constrains: it always uses slash (/) for file separator, directory path is optional and file name
  * supports variants. Variants qualify file path so that one can create group of files with the same semantic content but
- * differently presented, e.g. string variables for multi-locale support.
+ * differently presented, e.g. string variables for multi-language support.
  * <p>
- * Currently supported variants are locale and media queries for style files. See {@link Variants} class.
+ * Currently supported variants are language and media queries for style files. See {@link Variants} class.
  * <p>
  * Characters used by path segments and file base name are US-ASCII alphanumeric characters, dash and dot. Dot is allowed for
  * file names with version, for example <code>js-lib-1.2.3.js</code>. Last dot is for extension. Underscore is reserved for

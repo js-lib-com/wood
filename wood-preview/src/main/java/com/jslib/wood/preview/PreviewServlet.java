@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jslib.api.json.Json;
@@ -241,9 +240,9 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 	 */
 	@Override
 	public String onResourceReference(Reference reference, FilePath sourceFile) {
-		Locale previewLocale = new Locale("en");
+		String previewLanguage = "en";
 		if (reference.isVariable()) {
-			String value = variables.get(previewLocale, reference, sourceFile, this);
+			String value = variables.get(previewLanguage, reference, sourceFile, this);
 			return value != null ? value : reference.toString();
 		}
 		if(reference.isProject()) {
@@ -252,7 +251,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 		}
 
 		// discover resource file and returns its absolute URL path
-		FilePath resourceFile = project.getResourceFile(previewLocale, reference, sourceFile);
+		FilePath resourceFile = project.getResourceFile(previewLanguage, reference, sourceFile);
 		if (resourceFile == null) {
 			throw new WoodException("Missing resource file for reference |%s| from source |%s|.", reference, sourceFile);
 		}

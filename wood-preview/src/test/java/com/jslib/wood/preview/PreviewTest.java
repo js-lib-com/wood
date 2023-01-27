@@ -11,7 +11,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -56,7 +55,7 @@ public class PreviewTest {
 	public void serialize() throws IOException, SAXException, XPathExpressionException {
 		// project fixture
 
-		when(project.getDefaultLocale()).thenReturn(Locale.ENGLISH);
+		when(project.getDefaultLanguage()).thenReturn("en");
 		when(project.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
 		when(project.getThemeStyles()).thenReturn(theme);
 
