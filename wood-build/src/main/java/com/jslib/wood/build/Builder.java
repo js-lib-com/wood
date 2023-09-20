@@ -93,6 +93,10 @@ public class Builder implements IReferenceHandler {
 		this.buildFS = buildFS;
 	}
 
+	public FilePath getBuildDir() {
+		return project.getBuildDir();
+	}
+
 	/**
 	 * Run project building process. Uses project detected languages to initialize current processing {@link #language} then
 	 * delegates {@link #buildPage(CompoPath)} for every discovered page, see {@link #pages}.
