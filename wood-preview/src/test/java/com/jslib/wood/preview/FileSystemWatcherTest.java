@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -116,7 +117,7 @@ public class FileSystemWatcherTest {
 		Path path = mock(Path.class);
 		when(dir.resolve(dir)).thenReturn(path);
 		when(path.getFileSystem()).thenReturn(fileSystem);
-		when(provider.readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS)).thenReturn(attributes);
+		lenient().when(provider.readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS)).thenReturn(attributes);
 		watcher.getKeyPaths().put(watchKey, dir);
 
 		// reset running flag after first take() to force running loop end

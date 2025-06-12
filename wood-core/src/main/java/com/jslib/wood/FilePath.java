@@ -247,6 +247,10 @@ public class FilePath implements Iterable<FilePath> {
 		return parentPath.isEmpty() ? null : new FilePath(project, parentPath);
 	}
 
+	public String getParentPath() {
+		return parentPath;
+	}
+
 	/**
 	 * Get base name, that is, the file name without extension and variants.
 	 * 

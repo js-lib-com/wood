@@ -224,11 +224,18 @@ public class Component {
 		// widget path element is part of base component and contains the widget path
 		// it acts as insertion point; is where widget layout is inserted
 		for (Element compoPathElement : getCompoPathElements(layout)) {
-
+			String path = operators.getOperand(compoPathElement, Operator.COMPO);
+			if(path.endsWith("/")) {
+				path = path.substring(0, path.length() - 1);
+			}
+			if(!path.contains("/")) {
+				path = layoutPath.getParentPath() + path;
+			}
+			
 			// widget layout is the root of widget layout definition
 			// it is loaded recursively in depth-first order so that when a widget level is returned all its
 			// descendants are guaranteed to be resolved
-			CompoPath compoPath = project.createCompoPath(operators.getOperand(compoPathElement, Operator.COMPO));
+			CompoPath compoPath = project.createCompoPath(path);
 
 			FilePath childLayoutPath = compoPath.getLayoutPath();
 			if (!childLayoutPath.exists()) {
