@@ -1,3 +1,0 @@
-- [Preface](manual/preface.md)
-- [Overview](manual/overview.md)
-- [Component](manual/component.md)
