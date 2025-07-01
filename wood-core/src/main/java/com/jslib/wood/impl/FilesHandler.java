@@ -3,9 +3,7 @@ package com.jslib.wood.impl;
 import com.jslib.wood.FilePath;
 
 /**
- * Abstract handler for directory files iteration. This class is designed to be used in conjunction with
- * {@link DirPath#files(FilesHandler)} class. Create an anonymous subclass and overwrite methods of interest, see
- * samples below.
+ * Abstract handler for directory files iteration.
  * <p>
  * Here is an example for listing all files, direct child, from a directory.
  * 

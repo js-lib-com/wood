@@ -34,8 +34,6 @@ class VariablesCache {
 
 	/**
 	 * Initialize variables cache by cleaning component variables hash and rescanning assets and site styles directories.
-	 * 
-	 * @param project parent project.
 	 */
 	public synchronized void update() {
 		assetVariables.reload(project.getAssetDir());

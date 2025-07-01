@@ -19,21 +19,9 @@
 			<version>${revision}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-json-api</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<dependency>
 			<groupId>jakarta.platform</groupId>
 			<artifactId>jakarta.jakartaee-api</artifactId>
 			<version>9.1.0</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-json</artifactId>
-			<version>2.1.0</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

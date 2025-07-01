@@ -1,6 +1,6 @@
 package com.jslib.wood;
 
-import com.jslib.util.Strings;
+import com.jslib.wood.util.StringsUtil;
 
 /**
  * Thrown whenever building or preview process fails to complete.
@@ -21,7 +21,7 @@ public class WoodException extends RuntimeException
    */
   public WoodException(String message, Object... args)
   {
-    super(Strings.format(message, args));
+    super(StringsUtil.format(message, args));
   }
 
   /**

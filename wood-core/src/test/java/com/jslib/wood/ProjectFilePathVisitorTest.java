@@ -22,117 +22,114 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectFilePathVisitorTest {
-	@Mock
-	private Project project;
-	@Mock
-	private FilePath file;
+    @Mock
+    private Project project;
+    @Mock
+    private FilePath file;
 
-	private Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
+    private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
 
-	private Project.IFilePathVisitor visitor;
+    private Project.IFilePathVisitor visitor;
 
-	@Before
-	public void beforeTest() {
-		when(file.isComponentDescriptor()).thenReturn(true);
+    @Before
+    public void beforeTest() {
+        when(file.isComponentDescriptor()).thenReturn(true);
 
-		visitor = new Project.FilePathVisitor(scriptDependencies);
-	}
+        visitor = new Project.FilePathVisitor(scriptDependencies);
+    }
 
-	@Test
-	public void GivenFileIsComponentDescriptor_ThenCollectTagCompoPath() throws Exception {
-		// given
-		FilePath parentDir = mock(FilePath.class);
+    @Test
+    public void GivenFileIsComponentDescriptor_ThenCollectTagCompoPath() throws Exception {
+        // given
+        FilePath parentDir = mock(FilePath.class);
 
-		// when
-		visitor.visitFile(project, parentDir);
+        // when
+        visitor.visitFile(project, parentDir);
 
-		// then
-	}
+        // then
+    }
 
-	@Test
-	public void GivenScriptWithDependency_ThenCollectDependency() throws Exception {
-		// given
-		when(file.isComponentDescriptor()).thenReturn(true);
+    @Test
+    public void GivenScriptWithDependency_ThenCollectDependency() throws Exception {
+        // given
+        when(file.isComponentDescriptor()).thenReturn(true);
 
-		String document = "" + //
-				"<compo>" + //
-				"	<script src='lib/geo-map'>" + //
-				"		<dependency src='lib/js-lib/js-lib.js'></dependency>" + //
-				"	</script>" + //
-				"</compo>";
-		when(file.getReader()).thenReturn(new StringReader(document));
+        String document = "<compo>" + //
+                "	<script src='lib/geo-map'>" + //
+                "		<dependency src='lib/js-lib/js-lib.js'></dependency>" + //
+                "	</script>" + //
+                "</compo>";
+        when(file.getReader()).thenReturn(new StringReader(document));
 
-		// when
-		visitor.visitFile(project, file);
+        // when
+        visitor.visitFile(project, file);
 
-		// then
-		assertThat(scriptDependencies.keySet(), hasSize(1));
-		assertTrue(scriptDependencies.containsKey("lib/geo-map"));
+        // then
+        assertThat(scriptDependencies.keySet(), hasSize(1));
+        assertTrue(scriptDependencies.containsKey("lib/geo-map"));
 
-		List<IScriptDescriptor> dependencies = scriptDependencies.get("lib/geo-map");
-		assertThat(dependencies, notNullValue());
-		assertThat(dependencies.get(0), notNullValue());
-		assertThat(dependencies.get(0).getSource(), equalTo("lib/js-lib/js-lib.js"));
-	}
+        List<IScriptDescriptor> dependencies = scriptDependencies.get("lib/geo-map");
+        assertThat(dependencies, notNullValue());
+        assertThat(dependencies.get(0), notNullValue());
+        assertThat(dependencies.get(0).getSource(), equalTo("lib/js-lib/js-lib.js"));
+    }
 
-	@Test
-	public void GivenRegisteredScriptWithDependency_ThenCollectDependency() throws Exception {
-		// given
-		scriptDependencies.put("lib/geo-map", new ArrayList<>());
-		when(file.isComponentDescriptor()).thenReturn(true);
+    @Test
+    public void GivenRegisteredScriptWithDependency_ThenCollectDependency() throws Exception {
+        // given
+        scriptDependencies.put("lib/geo-map", new ArrayList<>());
+        when(file.isComponentDescriptor()).thenReturn(true);
 
-		String document = "" + //
-				"<compo>" + //
-				"	<script src='lib/geo-map'>" + //
-				"		<dependency src='lib/js-lib/js-lib.js'></dependency>" + //
-				"	</script>" + //
-				"</compo>";
-		when(file.getReader()).thenReturn(new StringReader(document));
+        String document = "<compo>" + //
+                "	<script src='lib/geo-map'>" + //
+                "		<dependency src='lib/js-lib/js-lib.js'></dependency>" + //
+                "	</script>" + //
+                "</compo>";
+        when(file.getReader()).thenReturn(new StringReader(document));
 
-		// when
-		visitor.visitFile(project, file);
+        // when
+        visitor.visitFile(project, file);
 
-		// then
-		assertThat(scriptDependencies.keySet(), hasSize(1));
-		assertTrue(scriptDependencies.containsKey("lib/geo-map"));
+        // then
+        assertThat(scriptDependencies.keySet(), hasSize(1));
+        assertTrue(scriptDependencies.containsKey("lib/geo-map"));
 
-		List<IScriptDescriptor> dependencies = scriptDependencies.get("lib/geo-map");
-		assertThat(dependencies, notNullValue());
-		assertThat(dependencies.get(0), notNullValue());
-		assertThat(dependencies.get(0).getSource(), equalTo("lib/js-lib/js-lib.js"));
-	}
+        List<IScriptDescriptor> dependencies = scriptDependencies.get("lib/geo-map");
+        assertThat(dependencies, notNullValue());
+        assertThat(dependencies.get(0), notNullValue());
+        assertThat(dependencies.get(0).getSource(), equalTo("lib/js-lib/js-lib.js"));
+    }
 
-	@Test
-	public void GivenFileNotDescriptor_ThenEmptyTagCompoPaths() throws Exception {
-		// given
-		when(file.isComponentDescriptor()).thenReturn(false);
+    @Test
+    public void GivenFileNotDescriptor_ThenEmptyTagCompoPaths() throws Exception {
+        // given
+        when(file.isComponentDescriptor()).thenReturn(false);
 
-		// when
-		visitor.visitFile(project, file);
+        // when
+        visitor.visitFile(project, file);
 
-		// then
-	}
+        // then
+    }
 
-	@Test
-	public void GivenDescriptorNotCompo_ThenEmptyTagCompoPaths() throws Exception {
-		// given
-		when(file.getReader()).thenReturn(new StringReader("<template></template>"));
+    @Test
+    public void GivenDescriptorNotCompo_ThenEmptyTagCompoPaths() throws Exception {
+        // given
+        when(file.getReader()).thenReturn(new StringReader("<template></template>"));
 
-		// when
-		visitor.visitFile(project, file);
+        // when
+        visitor.visitFile(project, file);
 
-		// then
-	}
+        // then
+    }
 
-	@Test
-	public void GivenFileWithoutParent_ThenEmptyTagCompoPaths() throws Exception {
-		// given
-		when(file.getParentDir()).thenReturn(null);
-		when(file.getReader()).thenReturn(new StringReader("<compo></compo>"));
+    @Test
+    public void GivenFileWithoutParent_ThenEmptyTagCompoPaths() throws Exception {
+        // given
+        when(file.getReader()).thenReturn(new StringReader("<compo></compo>"));
 
-		// when
-		visitor.visitFile(project, file);
+        // when
+        visitor.visitFile(project, file);
 
-		// then
-	}
+        // then
+    }
 }

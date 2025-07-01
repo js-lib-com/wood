@@ -87,14 +87,14 @@ public class MatchersTest {
 		assertFalse(matchers.match("anything"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void GivenNullParameter_ThenIllegalArgument() {
+	@Test(expected = AssertionError.class)
+	public void GivenNullParameter_ThenAssertionError() {
 		matchers.addPattern("abc");
 		matchers.match(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void GivenEmptyStringParameter_ThenIllegalArgument() {
+	@Test(expected = AssertionError.class)
+	public void GivenEmptyStringParameter_ThenAssertionError() {
 		matchers.addPattern("abc");
 		matchers.match("");
 	}

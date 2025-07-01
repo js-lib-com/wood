@@ -1,33 +1,20 @@
 package com.jslib.wood.preview;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-
+import com.jslib.wood.lang.Event;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.lang.BugError;
-import com.jslib.lang.Event;
-import com.jslib.lang.KeepAliveEvent;
+import java.util.concurrent.BlockingQueue;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventsManagerTest {
-	@Mock
-	private Map<Integer, BlockingQueue<Event>> queues;
-
 	private EventsManager manager;
 
 	@Before
@@ -50,7 +37,7 @@ public class EventsManagerTest {
 		assertThat(manager.getQueues().get(1), equalTo(queue));
 	}
 
-	@Test(expected = BugError.class)
+	@Test(expected = IllegalStateException.class)
 	public void acquireQueue_AlreadyCreated() {
 		@SuppressWarnings("unchecked")
 		BlockingQueue<Event> queue = mock(BlockingQueue.class);
@@ -69,7 +56,7 @@ public class EventsManagerTest {
 		assertThat(manager.getQueues().get(1), nullValue());
 	}
 
-	@Test(expected = BugError.class)
+	@Test(expected = IllegalStateException.class)
 	public void releaseQueue_Missing() {
 		manager.releaseQueue(1);
 	}

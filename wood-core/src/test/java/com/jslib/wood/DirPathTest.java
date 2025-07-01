@@ -65,7 +65,7 @@ public class DirPathTest {
 		assertFalse(dirPath.isComponent());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = WoodException.class)
 	public void GivenValidEmptyPath_WhenConstructor_ThenException() {
 		new FilePath(project, "");
 	}
@@ -95,7 +95,7 @@ public class DirPathTest {
 		FilePath dirPath = new FilePath(project, "res/page");
 		
 		// when
-		FilePath subdirPath = dirPath.getSubdirPath("media");
+		FilePath subdirPath = dirPath.getSubDirectoryPath("media");
 		
 		// then
 		assertThat(subdirPath, notNullValue());
@@ -108,7 +108,7 @@ public class DirPathTest {
 		when(project.createFilePath("res/page/media/")).thenReturn(subdirPath);
 
 		FilePath dirPath = new FilePath(project, "res/page/");
-		subdirPath = dirPath.getSubdirPath("media/");
+		subdirPath = dirPath.getSubDirectoryPath("media/");
 		assertThat(subdirPath, notNullValue());
 		assertThat(subdirPath.value(), equalTo("res/page/media/"));
 	}
@@ -142,12 +142,12 @@ public class DirPathTest {
 	@Test
 	public void GivenDirWithFiles_WhenLoopForEach_ThenCollectAllFiles() {
 		// given
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 		FilePath dirPath = new FilePath(project, directory(sources));
 
 		// when
-		List<String> files = new ArrayList<String>();
+		List<String> files = new ArrayList<>();
 		for (FilePath file : dirPath) {
 			files.add(file.value());
 		}
@@ -159,7 +159,7 @@ public class DirPathTest {
 
 	@Test
 	public void iterable_Subdirectories() {
-		File[] sources = new File[] { new SourceDirectory("res/compo") };
+		File[] sources = new File[] { new SourceDirectoryTest("res/compo") };
 		FilePath dirPath = new FilePath(project, directory(sources));
 
 		final List<String> files = new ArrayList<>();
@@ -178,7 +178,7 @@ public class DirPathTest {
 
 		FilePath dirPath = new FilePath(project, dir);
 
-		List<String> files = new ArrayList<String>();
+		List<String> files = new ArrayList<>();
 		for (FilePath file : dirPath) {
 			files.add(file.value());
 		}
@@ -190,7 +190,7 @@ public class DirPathTest {
 	public void iterable_NullListFiles() {
 		FilePath dirPath = new FilePath(project, directory(null));
 
-		List<String> files = new ArrayList<String>();
+		List<String> files = new ArrayList<>();
 		for (FilePath file : dirPath) {
 			files.add(file.value());
 		}
@@ -206,10 +206,10 @@ public class DirPathTest {
 
 	@Test
 	public void filter() {
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 		FilePath dirPath = new FilePath(project, directory(sources));
-		List<FilePath> files = dirPath.filter(filePath -> filePath.isStyle());
+		List<FilePath> files = dirPath.filter(FilePath::isStyle);
 
 		assertThat(files, hasSize(1));
 		assertThat(files.get(0).value(), equalTo("compo.css"));
@@ -217,26 +217,26 @@ public class DirPathTest {
 
 	@Test
 	public void findFirst() {
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 		FilePath dirPath = new FilePath(project, directory(sources));
 
-		FilePath file = dirPath.findFirst(filePath -> filePath.isStyle());
+		FilePath file = dirPath.findFirst(FilePath::isStyle);
 		assertThat(file, notNullValue());
 		assertThat(file.value(), equalTo("compo.css"));
 	}
 
 	@Test
 	public void findFirst_NotFound() {
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 		FilePath dirPath = new FilePath(project, directory(sources));
-		assertThat(dirPath.findFirst(filePath -> filePath.isScript()), nullValue());
+		assertThat(dirPath.findFirst(FilePath::isScript), nullValue());
 	}
 
 	@Test
 	public void files() {
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		FilePath[] paths = initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
@@ -252,7 +252,7 @@ public class DirPathTest {
 
 	@Test
 	public void files_RootDirectory() {
-		File[] sources = new File[] { new SourceFile("project.xml") };
+		File[] sources = new File[] { new SourceFileTest("project.xml") };
 		FilePath[] paths = initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
@@ -268,11 +268,11 @@ public class DirPathTest {
 
 	@Test
 	public void files_Accept() {
-		File[] sources = new File[] { new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
-		final List<String> files = new ArrayList<String>();
+		final List<String> files = new ArrayList<>();
 		dirPath.files(new FilesHandler() {
 			@Override
 			public boolean accept(FilePath file) {
@@ -291,7 +291,7 @@ public class DirPathTest {
 
 	@Test
 	public void files_HiddenFile() {
-		File[] sources = new File[] { new SourceFile(".gitignore"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceFileTest(".gitignore"), new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		FilePath[] paths = initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
@@ -308,7 +308,7 @@ public class DirPathTest {
 
 	@Test
 	public void files_Subdir() {
-		File[] sources = new File[] { new SourceDirectory("media") };
+		File[] sources = new File[] { new SourceDirectoryTest("media") };
 
 		FilePath subdir = new FilePath(project, "media/");
 		when(project.createFilePath(sources[0])).thenReturn(subdir);
@@ -324,7 +324,7 @@ public class DirPathTest {
 
 	@Test
 	public void files_Subdir_TrailingSeparator() {
-		File[] sources = new File[] { new SourceDirectory("media/") };
+		File[] sources = new File[] { new SourceDirectoryTest("media/") };
 		FilePath[] paths = initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
@@ -338,12 +338,12 @@ public class DirPathTest {
 
 	@Test
 	public void files_SubdirAndFiles() {
-		File[] sources = new File[] { new SourceDirectory("media"), new SourceFile("compo.htm"), new SourceFile("compo.css") };
+		File[] sources = new File[] { new SourceDirectoryTest("media"), new SourceFileTest("compo.htm"), new SourceFileTest("compo.css") };
 		initSources(sources);
 
 		FilePath dirPath = new FilePath(project, directory(sources));
 
-		final List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<>();
 		dirPath.files(new FilesHandler() {
 			@Override
 			public void onDirectory(FilePath dir) {
@@ -371,7 +371,7 @@ public class DirPathTest {
 	}
 
 	@Test(expected = WoodException.class)
-	public void files_NulllistFiles() {
+	public void files_NullListFiles() {
 		FilePath dirPath = new FilePath(project, directory(null));
 		dirPath.files(null);
 	}
@@ -387,10 +387,10 @@ public class DirPathTest {
 
 	// --------------------------------------------------------------------------------------------
 
-	private static class SourceFile extends File {
+	private static class SourceFileTest extends File {
 		private static final long serialVersionUID = -5975578621510948684L;
 
-		public SourceFile(String pathname) {
+		public SourceFileTest(String pathname) {
 			super(pathname);
 		}
 
@@ -400,10 +400,10 @@ public class DirPathTest {
 		}
 	}
 
-	private static class SourceDirectory extends File {
+	private static class SourceDirectoryTest extends File {
 		private static final long serialVersionUID = 962174848140145344L;
 
-		public SourceDirectory(String pathname) {
+		public SourceDirectoryTest(String pathname) {
 			super(pathname);
 		}
 
@@ -423,17 +423,17 @@ public class DirPathTest {
 
 	private FilePath[] initSources(File[] files) {
 		List<FilePath> paths = new ArrayList<>();
-		for (int i = 0; i < files.length; ++i) {
-			if (files[i] instanceof SourceDirectory) {
-				FilePath path = new FilePath(project, files[i]);
-				when(project.createFilePath(files[i])).thenReturn(path);
-				paths.add(path);
-			} else if (files[i] instanceof SourceFile) {
-				FilePath path = new FilePath(project, files[i]);
-				when(project.createFilePath(files[i])).thenReturn(path);
-				paths.add(path);
-			}
-		}
+        for (File file : files) {
+            if (file instanceof SourceDirectoryTest) {
+                FilePath path = new FilePath(project, file);
+                when(project.createFilePath(file)).thenReturn(path);
+                paths.add(path);
+            } else if (file instanceof SourceFileTest) {
+                FilePath path = new FilePath(project, file);
+                when(project.createFilePath(file)).thenReturn(path);
+                paths.add(path);
+            }
+        }
 		return paths.toArray(new FilePath[0]);
 	}
 }

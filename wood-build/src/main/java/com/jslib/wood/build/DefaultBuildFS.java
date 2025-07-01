@@ -4,16 +4,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jslib.util.Strings;
 import com.jslib.wood.Component;
 import com.jslib.wood.FilePath;
+import com.jslib.wood.util.StringsUtil;
 
 /**
  * Default build file system implementation. This build file system uses separated directories for styles, scripts and media
  * files; all media files are stored in the same place. Pages are placed in build directory root. For multi-language projects,
  * replicates single language directories layout for every language.
  * <p>
- * For multi-language build uses language for sub-directory name. Language is BCP encoded: language encoded ISO 639 alpha-2 and
+ * For multi-language build uses language for subdirectory name. Language is BCP encoded: language encoded ISO 639 alpha-2 and
  * is always lower case and country, if present, is encoded ISO 3166 alpha-2 and is upper case, separated by hyphen.
  * <p>
  * Here is a build directory layout for both single and multi-language projects.
@@ -40,8 +40,8 @@ class DefaultBuildFS extends BuildFS {
 	/**
 	 * Create default build file system instance for given project.
 	 * 
-	 * @param project project reference.
-	 * @param buildNumber
+	 * @param buildDir project directory.
+	 * @param buildNumber build number.
 	 */
 	public DefaultBuildFS(File buildDir, int buildNumber) {
 		super(buildDir, buildNumber);
@@ -49,13 +49,13 @@ class DefaultBuildFS extends BuildFS {
 
 	/**
 	 * Usually page layout files are stored on the root of the build file system. Anyway, if component has
-	 * <code>security-role</code> uses it to create role specific sub-directory where to store layout files. Takes care to
-	 * create directories path. For <code>security-role</code> description see {@link Component#getSecurityRole()}.
+	 * <code>group</code> uses it to create resources groups specific subdirectory where to store layout files. Takes care to
+	 * create directories path.
 	 */
 	@Override
 	protected File getPageDir(Component page) {
 		if (page != null) {
-			// uses resources group declared on page component to create specific sub-directory, where to store layout files
+			// uses resources group declared on page component descriptor to create specific subdirectory, where to store layout files
 			String directory = page.getResourcesGroup();
 			if (directory != null) {
 				if (!directory.startsWith("/")) {
@@ -120,7 +120,7 @@ class DefaultBuildFS extends BuildFS {
 	/**
 	 * Return qualified style file guaranteed to be unique in order to avoid name collision. Returned file name contains both
 	 * path directories and file name separated by underscore (_). Directory names are separated by dash (-). Do not include
-	 * last directory if has the same name as script file basename.
+	 * last directory if it has the same name as script file basename.
 	 * <p>
 	 * For your convenience here are couple examples.
 	 * <table border="1" style="border-collapse:collapse;">
@@ -144,16 +144,16 @@ class DefaultBuildFS extends BuildFS {
 	@Override
 	protected String formatStyleName(FilePath styleFile) {
 		FilePath dir = styleFile.getParentDir();
-		List<String> segments = dir != null ? new ArrayList<String>(dir.getPathSegments()) : new ArrayList<>();
+		List<String> segments = dir != null ? new ArrayList<>(dir.getPathSegments()) : new ArrayList<>();
 		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(styleFile.getBasename())) {
 			segments.remove(segments.size() - 1);
 		}
 		// see #formatMediaName(FilePath) comment
-		return Strings.concat(Strings.join(segments, '-'), '_', styleFile.getName());
+		return StringsUtil.concat(StringsUtil.join(segments, '-'), '_', styleFile.getName());
 	}
 
 	/**
-	 * Return qualified file name separated by dot. Do not include last directory if has the same name as script file basename.
+	 * Return qualified file name separated by dot. Do not include last directory if it has the same name as script file basename.
 	 * <p>
 	 * For your convenience here are couple examples.
 	 * <table border="1" style="border-collapse:collapse;">
@@ -183,12 +183,12 @@ class DefaultBuildFS extends BuildFS {
 	@Override
 	protected String formatScriptName(FilePath scriptFile) {
 		FilePath dir = scriptFile.getParentDir();
-		List<String> segments = dir != null ? new ArrayList<String>(dir.getPathSegments()) : new ArrayList<>();
+		List<String> segments = dir != null ? new ArrayList<>(dir.getPathSegments()) : new ArrayList<>();
 		if (!segments.isEmpty() && segments.get(segments.size() - 1).equals(scriptFile.getBasename())) {
 			segments.remove(segments.size() - 1);
 		}
 		segments.add(scriptFile.getName());
-		return Strings.join(segments, '.');
+		return StringsUtil.join(segments, '.');
 	}
 
 	/**
@@ -224,9 +224,9 @@ class DefaultBuildFS extends BuildFS {
 	protected String formatMediaName(FilePath mediaFile) {
 		FilePath dir = mediaFile.getParentDir();
 		List<String> segments = dir != null ? dir.getPathSegments() : new ArrayList<>();
-		// uses underscore to separated directories path from file name in order to avoid name collision on sub-directories:
+		// uses underscore to separated directories path from file name in order to avoid name collision on subdirectories:
 		// res/template/page/icon-logo.png -> res/template-page_icon-logo.png
 		// res/template/page/icon/logo.png -> res/template-page-icon_logo.png
-		return Strings.concat(Strings.join(segments, '-'), '_', mediaFile.getName());
+		return StringsUtil.concat(StringsUtil.join(segments, '-'), '_', mediaFile.getName());
 	}
 }

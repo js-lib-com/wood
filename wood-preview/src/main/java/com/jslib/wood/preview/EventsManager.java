@@ -1,14 +1,15 @@
 package com.jslib.wood.preview;
 
+import com.jslib.wood.lang.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import com.jslib.api.log.Log;
-import com.jslib.api.log.LogFactory;
-import com.jslib.lang.BugError;
-import com.jslib.lang.Event;
+import static com.jslib.wood.util.StringsUtil.format;
 
 /**
  * For every connected client there is a blocking events queue; {@link EventsServlet} read it and push events to client. This
@@ -18,91 +19,77 @@ import com.jslib.lang.Event;
  * There is also a method to push events to all queues - see {@link #pushEvent(Event)}. If there are no connected clients event
  * is lost.
  * <p>
- * Since events manager is designed to work in a multi-threaded environment all its methods are synchronized.
- * 
+ * Since events manager is designed to work in a multithreaded environment all its methods are synchronized.
+ *
  * @author Iulian Rotaru
  * @since 1.0
  */
 public class EventsManager {
-	/** Class logger. */
-	private static final Log log = LogFactory.getLog(EventsManager.class);
+    private static final Logger log = LoggerFactory.getLogger(EventsManager.class);
 
-	/** Mutex for singleton pattern implemented by {@link #instance()} method. */
-	private static final Object mutex = new Object();
-	/** Events manager instance, a single one per class loader. */
-	private static EventsManager instance;
+    private static final class InstanceHolder {
+        static final EventsManager instance = new EventsManager();
+    }
 
-	/**
-	 * Get events manager singleton. Instance is created on the fly at first invocation.
-	 * 
-	 * @return events manager singleton.
-	 */
-	public static EventsManager instance() {
-		if (instance == null) {
-			synchronized (mutex) {
-				if (instance == null) {
-					instance = new EventsManager();
-				}
-			}
-		}
-		return instance;
-	}
+    public static EventsManager instance() {
+        return InstanceHolder.instance;
+    }
 
-	/**
-	 * Clients blocking event queues. This dictionary is live, it is updated on every new client connection creation and close.
-	 * Dictionary key is the client ID.
-	 */
-	private final Map<Integer, BlockingQueue<Event>> queues = new HashMap<>();
+    /**
+     * Clients blocking event queues. This dictionary is live, it is updated on every new client connection creation and close.
+     * Dictionary key is the client ID.
+     */
+    private final Map<Integer, BlockingQueue<Event>> queues = new HashMap<>();
 
-	/**
-	 * Create a new blocking event queue for client identified by given ID.
-	 * 
-	 * @param clientID client ID.
-	 * @return client blocking event queue.
-	 * @throws BugError if client already has an events queue.
-	 */
-	public synchronized BlockingQueue<Event> acquireQueue(Integer clientID) {
-		if (queues.get(clientID) != null) {
-			throw new BugError("Events queue for client |%d| already created.", clientID);
-		}
-		BlockingQueue<Event> queue = new LinkedBlockingDeque<>();
-		queues.put(clientID, queue);
-		log.debug("Acquired events queue |%d|.", clientID);
-		return queue;
-	}
+    /**
+     * Create a new blocking event queue for client identified by given ID.
+     *
+     * @param clientID client ID.
+     * @return client blocking event queue.
+     * @throws IllegalStateException if client already has an events queue.
+     */
+    public synchronized BlockingQueue<Event> acquireQueue(Integer clientID) {
+        if (queues.get(clientID) != null) {
+            throw new IllegalStateException(format("Events queue for client |%d| already created.", clientID));
+        }
+        BlockingQueue<Event> queue = new LinkedBlockingDeque<>();
+        queues.put(clientID, queue);
+        log.debug("Acquired events queue {}.", clientID);
+        return queue;
+    }
 
-	/**
-	 * Release client events queue.
-	 * 
-	 * @param clientID client ID.
-	 * @throws BugError if there is no events queue for requested client.
-	 */
-	public synchronized void releaseQueue(Integer clientID) {
-		if (queues.get(clientID) == null) {
-			throw new BugError("Missing queue for client |%d|.", clientID);
-		}
-		queues.remove(clientID);
-		log.debug("Released events queue |%d|.", clientID);
-	}
+    /**
+     * Release client events queue.
+     *
+     * @param clientID client ID.
+     * @throws IllegalStateException if there is no events queue for requested client.
+     */
+    public synchronized void releaseQueue(Integer clientID) {
+        if (queues.get(clientID) == null) {
+            throw new IllegalStateException(format("Missing queue for client |%d|.", clientID));
+        }
+        queues.remove(clientID);
+        log.debug("Released events queue {}.", clientID);
+    }
 
-	/**
-	 * Push event to registered events queues. If there are no clients connected this method is NOP and given event is lost.
-	 * Also event is lost if events queue is full.
-	 * 
-	 * @param event event to push to connected clients.
-	 */
-	public synchronized void pushEvent(Event event) {
-		for (Map.Entry<Integer, BlockingQueue<Event>> entry : queues.entrySet()) {
-			if (!entry.getValue().offer(event)) {
-				log.error("Events queue |%d| is full. Event |%s| lost.", entry.getKey(), event);
-			}
-		}
-	}
-	
-	// --------------------------------------------------------------------------------------------
-	// Test support
+    /**
+     * Push event to registered events queues. If there are no clients connected this method is NOP and given event is lost.
+     * Also, event is lost if events queue is full.
+     *
+     * @param event event to push to connected clients.
+     */
+    public synchronized void pushEvent(Event event) {
+        for (Map.Entry<Integer, BlockingQueue<Event>> entry : queues.entrySet()) {
+            if (!entry.getValue().offer(event)) {
+                log.error("Events queue {} is full. Event {} lost.", entry.getKey(), event);
+            }
+        }
+    }
 
-	Map<Integer, BlockingQueue<Event>> getQueues() {
-		return queues;
-	}
+    // --------------------------------------------------------------------------------------------
+    // Test support
+
+    Map<Integer, BlockingQueue<Event>> getQueues() {
+        return queues;
+    }
 }

@@ -1,6 +1,6 @@
 package com.jslib.wood.preview;
 
-import com.jslib.lang.Event;
+import com.jslib.wood.lang.Event;
 
 /**
  * File system event pushed by {@link EventsServlet} when {@link FileSystemWatcher} discover a change on a file from the

@@ -1,11 +1,11 @@
 package com.jslib.wood.impl;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.EList;
-import com.jslib.api.dom.Element;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.EList;
+import com.jslib.wood.dom.Element;
 
 /**
- * WOOD operators handler. This interface supplies methods for WOOD operators handling. An operator is a standard
+ * WOOD operators' handler. This interface supplies methods for WOOD operators handling. An operator is a standard
  * element attribute with predefined name, see {@link Operator} for supported operators. At its core operators handling
  * is attribute searching, value retrieval and removing.
  * 

@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -64,13 +65,13 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
 		assertThat(descriptor.getAssetDir(), equalTo("asset"));
 		assertThat(descriptor.getThemeDir(), equalTo("theme"));
-		assertThat(descriptor.getExcludeDirs(), equalTo(Arrays.asList("page/about")));
-		assertThat(descriptor.getAuthors(), equalTo(Arrays.asList("Iulian Rotaru")));
+		assertThat(descriptor.getExcludeDirs(), equalTo(Collections.singletonList("page/about")));
+		assertThat(descriptor.getAuthors(), equalTo(Collections.singletonList("Iulian Rotaru")));
 		assertThat(descriptor.getTitle(), equalTo("Project Display"));
 		assertThat(descriptor.getFavicon(), equalTo("res/app-icon.png"));
 		assertThat(descriptor.getPwaManifest(), equalTo("res/app-manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("script/sw.js"));
-		assertThat(descriptor.getLanguage(), equalTo(Arrays.asList("en")));
+		assertThat(descriptor.getLanguage(), equalTo(Collections.singletonList("en")));
 	}
 
 	@Test
@@ -129,7 +130,7 @@ public class ProjectDescriptorTest {
 		assertThat(descriptor.getFavicon(), equalTo("favicon.ico"));
 		assertThat(descriptor.getPwaManifest(), equalTo("manifest.json"));
 		assertThat(descriptor.getPwaWorker(), equalTo("worker.js"));
-		assertThat(descriptor.getLanguage(), equalTo(Arrays.asList("en")));
+		assertThat(descriptor.getLanguage(), equalTo(Collections.singletonList("en")));
 	}
 
 	@Test

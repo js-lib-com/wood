@@ -1,12 +1,10 @@
 package com.jslib.wood.impl;
 
-import javax.xml.xpath.XPathExpressionException;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.EList;
+import com.jslib.wood.dom.Element;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.EList;
-import com.jslib.api.dom.Element;
-import com.jslib.lang.BugError;
-import com.jslib.util.Params;
+import javax.xml.xpath.XPathExpressionException;
 
 /**
  * Operators handler implementation for operators with simple attribute name.
@@ -16,68 +14,68 @@ import com.jslib.util.Params;
 public class AttrOperatorsHandler implements IOperatorsHandler {
 	@Override
 	public EList findByOperator(Document document, Operator operator) {
-		Params.notNull(document, "Layout document");
+		assert document != null: "Layout document argument is null";
 		try {
 			return document.findByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
-			throw new BugError(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public EList findByOperator(Element element, Operator operator) {
-		Params.notNull(element, "Layout element");
+		assert element != null: "Layout element argument is null";
 		try {
 			return element.findByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
-			throw new BugError(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public Element getByOperator(Document document, Operator operator) {
-		Params.notNull(document, "Layout document");
+		assert document != null: "Layout document argument is null";
 		try {
 			return document.getByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
-			throw new BugError(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public Element getByOperator(Element element, Operator operator) {
-		Params.notNull(element, "Layout element");
+		assert element != null: "Layout element argument is null";
 		try {
 			return element.getByXPath(buildXPath(operator));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
-			throw new BugError(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public Element getByOperator(Document document, Operator operator, String operand) {
-		Params.notNull(document, "Layout document");
+		assert document != null: "Layout document argument is null";
 		try {
 			return document.getByXPath(buildXPath(operator, operand));
 		} catch (XPathExpressionException e) {
 			// XPath expression is hard coded
-			throw new BugError(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public String getOperand(Element element, Operator operator) {
-		Params.notNull(element, "Layout element");
+		assert element != null: "Layout element argument is null";
 		return element.getAttr(operator.value());
 	}
 
 	@Override
 	public void removeOperator(Element element, Operator operator) {
-		Params.notNull(element, "Layout element");
+		assert element != null: "Layout element argument is null";
 		element.removeAttr(operator.value());
 	}
 

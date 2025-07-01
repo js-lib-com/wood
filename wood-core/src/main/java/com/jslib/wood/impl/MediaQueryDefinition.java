@@ -1,13 +1,11 @@
 package com.jslib.wood.impl;
 
-import com.jslib.util.Params;
-
 /**
  * Media query definition from project descriptor. The definition for a media query has an alias used to represent the media
  * query as file path variant. It also has media query expression that is used literally on style files, {@literal}media rule,
  * and a weight that determine media sections order.
  * <p>
- * Alias is also used as unique key for media query definition. Two instances are considered equal if have the same alias.
+ * Alias is also used as unique key for media query definition. Two instances are considered equal if you have the same alias.
  * <p>
  * Media query definition has no mutable state and is thread safe.
  * 
@@ -19,9 +17,9 @@ public class MediaQueryDefinition {
 	private final int weight;
 
 	public MediaQueryDefinition(String alias, String expression, int index) {
-		Params.notNullOrEmpty(alias, "Alias");
-		Params.notNullOrEmpty(alias, "Expression");
-		Params.positive(index, "Index");
+		assert alias != null && !alias.isEmpty(): "Alias argument is null or empty";
+		assert expression != null && !expression.isEmpty(): "Expression argument is null or empty";
+		assert index >= 0: "Index argument is negative";
 
 		this.alias = alias;
 		this.expression = expression;
@@ -58,10 +56,7 @@ public class MediaQueryDefinition {
 			return false;
 		MediaQueryDefinition other = (MediaQueryDefinition) obj;
 		if (alias == null) {
-			if (other.alias != null)
-				return false;
-		} else if (!alias.equals(other.alias))
-			return false;
-		return true;
-	}
+            return other.alias == null;
+		} else return alias.equals(other.alias);
+    }
 }

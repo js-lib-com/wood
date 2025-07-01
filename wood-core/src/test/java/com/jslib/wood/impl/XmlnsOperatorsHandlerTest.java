@@ -7,15 +7,14 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.DocumentBuilder;
+import com.jslib.wood.dom.EList;
+import com.jslib.wood.dom.Element;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.api.dom.EList;
-import com.jslib.api.dom.Element;
-import com.jslib.util.Classes;
 import com.jslib.wood.WOOD;
 
 public class XmlnsOperatorsHandlerTest {
@@ -24,7 +23,7 @@ public class XmlnsOperatorsHandlerTest {
 
 	@Before
 	public void beforeTest() {
-		builder = Classes.loadService(DocumentBuilder.class);
+		builder = DocumentBuilder.getInstance();
 		operators = new XmlnsOperatorsHandler();
 	}
 

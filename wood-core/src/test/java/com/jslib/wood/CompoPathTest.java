@@ -3,8 +3,7 @@ package com.jslib.wood;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +97,7 @@ public class CompoPathTest {
 		final String path = "res/compo/video-player/";
 		FilePath dirPath = new FilePath(project, path);
 		FilePath compoPath = new CompoPath(project, path);
-		assertTrue(dirPath.equals(compoPath));
+        assertEquals(dirPath, compoPath);
 	}
 
 	@Test

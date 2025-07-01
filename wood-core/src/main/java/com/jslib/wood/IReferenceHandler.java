@@ -17,7 +17,7 @@ public interface IReferenceHandler
   /**
    * Handler invoked when a resource reference is discovered. A resource reference is private to a scope defined by
    * source file where reference is declared. This handler process the reference and returns a value meant to replace
-   * reference into declaring source file. Note that <code>reference</code> parameter is guaranteed to be valid.
+   * reference into declaring source file. Note that <code>reference</code> parameter is expected to be valid.
    * <p>
    * Returned value is mandatory to be not null and not empty. If this handler is not able to process the reference it
    * should rise exception.
@@ -25,7 +25,7 @@ public interface IReferenceHandler
    * It is expected that handler implementation to perform IO operation; for this reason handler is allowed to throw
    * {@link IOException}.
    * 
-   * @param reference resource reference, guaranteed to be valid,
+   * @param reference resource reference, expected to be valid,
    * @param sourceFile source file path acting as reference scope.
    * @return not null and not empty reference value.
    * @throws IOException if handler IO operations fail.

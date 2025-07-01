@@ -1,13 +1,13 @@
 package com.jslib.wood;
 
+import com.jslib.wood.util.StringsUtil;
+
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-
-import com.jslib.util.Params;
-import com.jslib.util.Strings;
 
 /**
  * Style file reader adds style variants, as media queries sections, to given base style file. This class is used in conjunction
@@ -49,10 +49,10 @@ import com.jslib.util.Strings;
  */
 public class StyleReader extends Reader {
 	/** Media section header. */
-	private static final String HEADER = Strings.concat(System.getProperty("line.separator"), "@media screen and %s {", System.getProperty("line.separator"), System.getProperty("line.separator"));
+	private static final String HEADER = StringsUtil.concat(System.lineSeparator(), "@media screen and %s {", System.lineSeparator(), System.lineSeparator());
 
 	/** Media section footer. */
-	private static final String FOOTER = Strings.concat(System.getProperty("line.separator"), "}", System.getProperty("line.separator"));
+	private static final String FOOTER = StringsUtil.concat(System.lineSeparator(), "}", System.lineSeparator());
 
 	/** Media expressions list mapped to style files, possible empty. */
 	private final List<FilePath> variants;
@@ -78,19 +78,15 @@ public class StyleReader extends Reader {
 	 * @param styleFile base style file.
 	 */
 	public StyleReader(FilePath styleFile) {
-		Params.isFalse(styleFile.hasVariants(), "Style reader decorates a base style file and supplied file is a variant.");
+		assert !styleFile.hasVariants(): "Style reader decorates a base style file and supplied file is a variant.";
 		this.reader = styleFile.getReader();
 		this.state = State.BASE_CONTENT;
 
 		final String basename = styleFile.getBasename();
 		FilePath parentDir = styleFile.getParentDir();
-		this.variants = parentDir == null ? Collections.emptyList() : parentDir.filter(filePath -> {
-			return filePath.getBasename().equals(basename) && filePath.getVariants().hasMediaQueries();
-		});
+		this.variants = parentDir == null ? new ArrayList<>() : parentDir.filter(filePath -> filePath.getBasename().equals(basename) && filePath.getVariants().hasMediaQueries());
 
-		Collections.sort(variants, (filePath1, filePath2) -> {
-			return filePath1.getVariants().getMediaQueries().compareTo(filePath2.getVariants().getMediaQueries());
-		});
+		variants.sort(Comparator.comparing(filePath -> filePath.getVariants().getMediaQueries()));
 
 		variantsIterator = variants.iterator();
 	}
@@ -166,7 +162,6 @@ public class StyleReader extends Reader {
 				}
 				state = State.NEXT_VARIANT;
 				// goto NEXT_VARIANT state via for loop continue
-				continue;
 			}
 		}
 
@@ -178,7 +173,7 @@ public class StyleReader extends Reader {
 	 * that source string. This implies is possible this method to be invoked multiple times, for a given source. In order to
 	 * keep track of source characters position uses {@link #sourceIndex} that is properly initialized before first invocation.
 	 * <p>
-	 * Returns the number of characters actually copied or {@link CT#EOF} on source end.
+	 * Returns the number of characters actually copied or EOF on source end.
 	 * 
 	 * @param buffer target buffer,
 	 * @param offset target buffer offset,
@@ -211,7 +206,7 @@ public class StyleReader extends Reader {
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
-	private static enum State {
+	private enum State {
 		/** Base style file content is processed. */
 		BASE_CONTENT,
 
@@ -225,7 +220,7 @@ public class StyleReader extends Reader {
 		VARIANT_CONTENT,
 
 		/** Copy footer for current variant. On completion go back to {@link #NEXT_VARIANT}. */
-		VARIANT_FOOTER;
+		VARIANT_FOOTER
 	}
 
 	// --------------------------------------------------------------------------------------------

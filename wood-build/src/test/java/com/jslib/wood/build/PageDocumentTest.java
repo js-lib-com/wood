@@ -1,16 +1,8 @@
 package com.jslib.wood.build;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Arrays;
-
-import javax.xml.xpath.XPathExpressionException;
-
+import com.jslib.wood.*;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.DocumentBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,14 +11,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.SAXException;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.util.Classes;
-import com.jslib.wood.Component;
-import com.jslib.wood.FilePath;
-import com.jslib.wood.ILinkDescriptor;
-import com.jslib.wood.IMetaDescriptor;
-import com.jslib.wood.IScriptDescriptor;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PageDocumentTest {
@@ -38,8 +30,8 @@ public class PageDocumentTest {
 	private PageDocument page;
 
 	@Before
-	public void beforeTest() throws IOException, SAXException {
-		DocumentBuilder builder = Classes.loadService(DocumentBuilder.class);
+	public void beforeTest() throws SAXException {
+		DocumentBuilder builder = DocumentBuilder.getInstance();
 		when(compo.getProject()).thenReturn(project);
 		when(compo.getLayout()).thenReturn(builder.parseXML("<body><h1>page</h1></body>").getRoot());
 
@@ -47,7 +39,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void setters() throws IOException, XPathExpressionException {
+	public void setters() throws IOException {
 		IMetaDescriptor meta = Mockito.mock(IMetaDescriptor.class);
 		when(meta.getHttpEquiv()).thenReturn("X-UA-Compatible");
 		when(meta.getContent()).thenReturn("IE=9; IE=8; IE=7; IE=EDGE");
@@ -64,13 +56,13 @@ public class PageDocumentTest {
 		page.setLanguage("ro-RO");
 		page.setContentType("text/html; charset=UTF-8");
 		page.setTitle("title");
-		page.setAuthors(Arrays.asList("author"));
+		page.setAuthors(Collections.singletonList("author"));
 		page.setDescription("description");
 		page.addMeta(meta);
 		page.addFavicon("media/favicon.ico");
-		page.addLink(link, filePath -> filePath.value());
+		page.addLink(link, FilePath::value);
 		page.addStyle("style/index.css");
-		page.addScript(script, filePath -> filePath.value());
+		page.addScript(script, FilePath::value);
 
 		String[] doc = stringify(page.getDocument()).split("\r\n");
 
@@ -91,7 +83,7 @@ public class PageDocumentTest {
 		assertThat(doc[index++], equalTo("\t<BODY>"));
 		assertThat(doc[index++], equalTo("\t\t<H1>page</H1>"));
 		assertThat(doc[index++], equalTo("\t</BODY>"));
-		assertThat(doc[index++], equalTo("</HTML>"));
+		assertThat(doc[index], equalTo("</HTML>"));
 	}
 
 	@Test
@@ -105,7 +97,7 @@ public class PageDocumentTest {
 		assertThat(doc, containsString("<META content=\"kids (a)cademy\" property=\"og:title\" />"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void addMeta_NullMetaReference() {
 		page.addMeta(null);
 	}
@@ -115,30 +107,30 @@ public class PageDocumentTest {
 		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn("http://js-lib.com/styles/reset.css");
 
-		page.addLink(link, filePath -> filePath.value());
+		page.addLink(link, FilePath::value);
 		String doc = stringify(page.getDocument());
 		assertThat(doc, containsString("<LINK href=\"http://js-lib.com/styles/reset.css\" rel=\"stylesheet\" type=\"text/css\" />"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void addLink_NullLinkReference() {
-		page.addLink(null, filePath -> filePath.value());
+		page.addLink(null, FilePath::value);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addLink_MissingHref() throws IOException {
+	@Test(expected = AssertionError.class)
+	public void addLink_MissingHref() {
 		ILinkDescriptor link = Mockito.mock(ILinkDescriptor.class);
 		when(link.getHref()).thenReturn(null);
-		page.addLink(link, filePath -> filePath.value());
+		page.addLink(link, FilePath::value);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void addStyle_NullHref() {
 		page.addStyle(null);
 	}
 
 	@Test
-	public void addScript_Defer() throws IOException, XPathExpressionException {
+	public void addScript_Defer() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		when(script.getDefer()).thenReturn("true");
@@ -146,13 +138,13 @@ public class PageDocumentTest {
 		FilePath scriptPath = new FilePath(project, script.getSource());
 		when(project.createFilePath(script.getSource())).thenReturn(scriptPath);
 
-		page.addScript(script, filePath -> filePath.value());
+		page.addScript(script, FilePath::value);
 		String doc = stringify(page.getDocument());
 		assertThat(doc, containsString("<SCRIPT defer=\"true\" src=\"script/index.js\" type=\"text/javascript\"></SCRIPT>"));
 	}
 
 	@Test
-	public void addScript_Embedded() throws IOException, XPathExpressionException {
+	public void addScript_Embedded() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.isEmbedded()).thenReturn(true).thenReturn(true);
 		when(script.getSource()).thenReturn("lib/sdk/analytics.js");
@@ -165,7 +157,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_External() throws IOException, XPathExpressionException {
+	public void addScript_External() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("http://js-lib.com/sdk/analytics.js");
 
@@ -175,7 +167,7 @@ public class PageDocumentTest {
 	}
 
 	@Test
-	public void addScript_UrlAbsolutePath() throws IOException, XPathExpressionException {
+	public void addScript_UrlAbsolutePath() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 
@@ -187,19 +179,19 @@ public class PageDocumentTest {
 		assertThat(doc, containsString("<SCRIPT src=\"/context/script/index.js\" type=\"text/javascript\"></SCRIPT>"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addScript_NullScriptReference() throws IOException, XPathExpressionException {
+	@Test(expected = AssertionError.class)
+	public void addScript_NullScriptReference() throws IOException {
 		page.addScript(null, filePath -> null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addScript_MissingSource() throws IOException, XPathExpressionException {
+	@Test(expected = AssertionError.class)
+	public void addScript_MissingSource() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		page.addScript(script, filePath -> null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addScript_NullHandler() throws IOException, XPathExpressionException {
+	@Test(expected = AssertionError.class)
+	public void addScript_NullHandler() throws IOException {
 		IScriptDescriptor script = Mockito.mock(IScriptDescriptor.class);
 		when(script.getSource()).thenReturn("script/index.js");
 		page.addScript(script, null);

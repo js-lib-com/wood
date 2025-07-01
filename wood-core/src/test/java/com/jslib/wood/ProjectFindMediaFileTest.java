@@ -1,25 +1,22 @@
 package com.jslib.wood;
 
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.util.Arrays;
-
+import com.jslib.wood.impl.MediaQueryDefinition;
+import com.jslib.wood.impl.ProjectDescriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.wood.impl.MediaQueryDefinition;
-import com.jslib.wood.impl.ProjectDescriptor;
+import java.io.File;
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectFindMediaFileTest {
@@ -27,22 +24,16 @@ public class ProjectFindMediaFileTest {
 	private ProjectDescriptor descriptor;
 
 	@Mock
-	private IReferenceHandler referenceHandler;
-	@Mock
 	private File sourceDir;
-	@Mock
-	private FilePath sourceFile;
 	@Mock
 	private Reference reference;
 
-	private Directory projectRoot;
-
-	private Project project;
+    private Project project;
 	private FilePath sourceDirPath;
 
 	@Before
 	public void beforeTest() throws Exception {
-		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
+		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
 
 		when(descriptor.getBuildDir()).thenReturn("build");
 		when(descriptor.getAssetDir()).thenReturn("res/asset");
@@ -51,11 +42,11 @@ public class ProjectFindMediaFileTest {
 		when(sourceDir.getPath()).thenReturn("res/page/");
 		when(sourceDir.exists()).thenReturn(true);
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFile("page.htm"), //
-				new XFile("icon.png"), //
-				new XFile("logo.png"), //
-				new XFile("logo_w800.png"), //
-				new XFile("logo_jp.png") });
+				new XFileTest("page.htm"), //
+				new XFileTest("icon.png"), //
+				new XFileTest("logo.png"), //
+				new XFileTest("logo_w800.png"), //
+				new XFileTest("logo_jp.png") });
 
 		// findMediaFile is always used with verified reference and does not perform its own check
 		// therefore resource type can be anything, including null
@@ -64,7 +55,7 @@ public class ProjectFindMediaFileTest {
 
 		when(reference.getName()).thenReturn("logo");
 
-		projectRoot = new Directory(".");
+        DirectoryTest projectRoot = new DirectoryTest(".");
 		project = new Project(projectRoot, descriptor);
 
 		sourceDirPath = new FilePath(project, sourceDir);
@@ -85,6 +76,7 @@ public class ProjectFindMediaFileTest {
 		assertThat(mediaFile.getVariants().getLanguage(), equalTo("jp"));
 	}
 
+	@SuppressWarnings("all")
 	@Test
 	public void GivenNullLanguage_ThenFoundDefault() {
 		// given
@@ -108,11 +100,11 @@ public class ProjectFindMediaFileTest {
 	public void GivenNullLanguageAndDefaultLast_ThenFoundDefault() {
 		// given
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFile("page.htm"), //
-				new XFile("icon.png"), //
-				new XFile("logo_w800.png"), //
-				new XFile("logo_ja.png"), //
-				new XFile("logo.png") });
+				new XFileTest("page.htm"), //
+				new XFileTest("icon.png"), //
+				new XFileTest("logo_w800.png"), //
+				new XFileTest("logo_ja.png"), //
+				new XFileTest("logo.png") });
 		sourceDirPath = new FilePath(project, sourceDir);
 
 		// when
@@ -145,11 +137,11 @@ public class ProjectFindMediaFileTest {
 		// given
 		String language = "de";
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFile("page.htm"), //
-				new XFile("icon.png"), //
-				new XFile("logo_w800.png"), //
-				new XFile("logo_ja.png"), //
-				new XFile("logo.png") });
+				new XFileTest("page.htm"), //
+				new XFileTest("icon.png"), //
+				new XFileTest("logo_w800.png"), //
+				new XFileTest("logo_ja.png"), //
+				new XFileTest("logo.png") });
 		sourceDirPath = new FilePath(project, sourceDir);
 
 		// when
@@ -174,7 +166,7 @@ public class ProjectFindMediaFileTest {
 		when(mediaFile.getBasename()).thenReturn("logo");
 
 		FilePath mediaDir = mock(FilePath.class);
-		when(mediaDir.getSubdirPath("icon")).thenReturn(mediaDir);
+		when(mediaDir.getSubDirectoryPath("icon")).thenReturn(mediaDir);
 		when(mediaDir.findFirst(any())).thenReturn(mediaFile);
 
 		// when
@@ -188,10 +180,10 @@ public class ProjectFindMediaFileTest {
 
 	// --------------------------------------------------------------------------------------------
 
-	private static class Directory extends File {
+	private static class DirectoryTest extends File {
 		private static final long serialVersionUID = -4499496665524589579L;
 
-		public Directory(String path) {
+		public DirectoryTest(String path) {
 			super(path);
 		}
 
@@ -201,10 +193,10 @@ public class ProjectFindMediaFileTest {
 		}
 	}
 
-	private static class XFile extends File {
+	private static class XFileTest extends File {
 		private static final long serialVersionUID = -5975578621510948684L;
 
-		public XFile(String pathname) {
+		public XFileTest(String pathname) {
 			super(pathname);
 		}
 

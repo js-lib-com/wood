@@ -1,21 +1,15 @@
 package com.jslib.wood.impl;
 
+import com.jslib.wood.*;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.DocumentBuilder;
+import com.jslib.wood.dom.Element;
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.xml.sax.SAXException;
-
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.api.dom.Element;
-import com.jslib.util.Classes;
-import com.jslib.wood.FilePath;
-import com.jslib.wood.ILinkDescriptor;
-import com.jslib.wood.IMetaDescriptor;
-import com.jslib.wood.IScriptDescriptor;
-import com.jslib.wood.WoodException;
 
 /**
  * Common logic for both project and component descriptors.
@@ -25,7 +19,7 @@ import com.jslib.wood.WoodException;
  */
 abstract class BaseDescriptor {
 	/** Descriptor document builder. */
-	private static DocumentBuilder DOC_BUILDER = Classes.loadService(DocumentBuilder.class);
+	private static final DocumentBuilder DOC_BUILDER = DocumentBuilder.getInstance();
 
 	/** Empty XML document used when component descriptor file is missing. */
 	private static final Document EMPTY_DOC = DOC_BUILDER.createXML("compo");
@@ -98,10 +92,8 @@ abstract class BaseDescriptor {
 	 * and/or relative paths in the order and in format defined into descriptor. There is no attempt to check path validity; it
 	 * is developer responsibility to ensure URLs and paths are correct and inclusion order is proper.
 	 * <p>
-	 * Note that local paths are used only if project script dependency strategy is {@link ScriptDependencyStrategy#DESCRIPTOR}.
-	 * <p>
 	 * Here is expected scripts descriptor format.
-	 * 
+	 *
 	 * <pre>
 	 * &lt;scripts&gt;
 	 *    &lt;script append-to-head="true"&gt;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&lt;/script&gt;
@@ -111,10 +103,7 @@ abstract class BaseDescriptor {
 	 *    &lt;script&gt;script/com/kidscademy/admin/FormPage.js&lt;/script&gt;
 	 * &lt;/scripts&gt;
 	 * </pre>
-	 * <p>
-	 * If optional attribute <code>append-to-head</code> is present into <code>script</code> element enable
-	 * {@link ScriptDescriptor#appendToHead}.
-	 * 
+	 *
 	 * @return scripts declared by this component descriptor.
 	 */
 	public List<IScriptDescriptor> getScriptDescriptors() {

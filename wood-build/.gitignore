@@ -3,3 +3,4 @@
 /.classpath
 /.project
 /.flattened-pom.xml
+/src/test/resources/project/build/

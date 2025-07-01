@@ -1,23 +1,8 @@
 package com.jslib.wood.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.jslib.wood.Project;
+import com.jslib.wood.WoodException;
+import com.jslib.wood.util.StringsUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,9 +10,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.util.Strings;
-import com.jslib.wood.Project;
-import com.jslib.wood.WoodException;
+import java.util.*;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MediaQueriesTest {
@@ -65,12 +54,12 @@ public class MediaQueriesTest {
 		mediaQueries.add("xsd");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void add_Empty() {
 		mediaQueries.add("");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void add_Null() {
 		mediaQueries.add(null);
 	}
@@ -92,18 +81,13 @@ public class MediaQueriesTest {
 		List<MediaQueries> definitions = new ArrayList<>();
 		for (String pattern : patterns) {
 			MediaQueries mediaQueries = new MediaQueries(project);
-			for (String variant : Strings.split(pattern, '_')) {
+			for (String variant : StringsUtil.split(pattern, '_')) {
 				assertTrue("Variant not defined: " + variant, mediaQueries.add(variant));
 			}
 			definitions.add(mediaQueries);
 		}
 
-		Collections.sort(definitions, new Comparator<MediaQueries>() {
-			@Override
-			public int compare(MediaQueries o1, MediaQueries o2) {
-				return o1.compareTo(o2);
-			}
-		});
+		definitions.sort(MediaQueries::compareTo);
 
 		int index = 0;
 		assertThat(definitions.get(index++).getExpression(), equalTo("( min-width: 560px )"));
@@ -125,17 +109,17 @@ public class MediaQueriesTest {
 		assertThat(definitions.get(index++).getExpression(), equalTo("( min-width: 672px ) and ( orientation: landscape ) and ( min-height: 800px )"));
 		assertThat(definitions.get(index++).getExpression(), equalTo("( min-width: 800px ) and ( orientation: landscape ) and ( min-height: 800px )"));
 		assertThat(definitions.get(index++).getExpression(), equalTo("( min-width: 960px ) and ( orientation: landscape ) and ( min-height: 800px )"));
-		assertThat(definitions.get(index++).getExpression(), equalTo("( min-width: 1200px ) and ( orientation: landscape ) and ( min-height: 800px )"));
+		assertThat(definitions.get(index).getExpression(), equalTo("( min-width: 1200px ) and ( orientation: landscape ) and ( min-height: 800px )"));
 	}
 
 	@Test
-	public void getWeight_Uniqueness() throws Exception {
+	public void getWeight_Uniqueness() {
 		String[] patterns = new String[] { "lgd", "nod", "mdd", "smd", "xsd", "lgd_portrait", "nod_portrait", "mdd_portrait", "smd_portrait", "xsd_portrait", "lgd_landscape", "nod_landscape", "mdd_landscape", "smd_landscape", "xsd_landscape", "lgd_landscape_h800", "nod_landscape_h800", "mdd_landscape_h800", "smd_landscape_h800", "xsd_landscape_h800" };
 
 		Set<Long> weights = new HashSet<>();
 		for (String pattern : patterns) {
 			mediaQueries = new MediaQueries(project);
-			for (String variant : Strings.split(pattern, '_')) {
+			for (String variant : StringsUtil.split(pattern, '_')) {
 				assertTrue("Variant not defined: " + variant, mediaQueries.add(variant));
 			}
 			Long weight = mediaQueries.getWeight();
@@ -145,11 +129,12 @@ public class MediaQueriesTest {
 		}
 	}
 
+	@SuppressWarnings("all")
 	@Test
-	public void getWeight_Order() throws Exception {
+	public void getWeight_Order() {
 		class Item {
-			String pattern;
-			Long weight;
+			final String pattern;
+			final Long weight;
 
 			public Item(String pattern, Long weight) {
 				this.pattern = pattern;
@@ -162,7 +147,7 @@ public class MediaQueriesTest {
 		List<Item> items = new ArrayList<>();
 		for (String pattern : patterns) {
 			mediaQueries = new MediaQueries(project);
-			for (String variant : Strings.split(pattern, '_')) {
+			for (String variant : StringsUtil.split(pattern, '_')) {
 				assertTrue("Variant not defined: " + variant, mediaQueries.add(variant));
 			}
 			Long weight = mediaQueries.getWeight();
@@ -171,12 +156,7 @@ public class MediaQueriesTest {
 			}
 		}
 
-		items.sort(new Comparator<Item>() {
-			@Override
-			public int compare(Item o1, Item o2) {
-				return o1.weight.compareTo(o2.weight);
-			}
-		});
+		items.sort(Comparator.comparing(o -> o.weight));
 
 		int index = 0;
 		assertThat(items.get(index++).pattern, equalTo("xsd"));
@@ -198,7 +178,7 @@ public class MediaQueriesTest {
 		assertThat(items.get(index++).pattern, equalTo("smd_landscape_h800"));
 		assertThat(items.get(index++).pattern, equalTo("mdd_landscape_h800"));
 		assertThat(items.get(index++).pattern, equalTo("nod_landscape_h800"));
-		assertThat(items.get(index++).pattern, equalTo("lgd_landscape_h800"));
+		assertThat(items.get(index).pattern, equalTo("lgd_landscape_h800"));
 	}
 
 	private static Map<String, MediaQueryDefinition> definitions() {

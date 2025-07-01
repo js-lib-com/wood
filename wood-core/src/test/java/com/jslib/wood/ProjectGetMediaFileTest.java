@@ -76,12 +76,13 @@ public class ProjectGetMediaFileTest {
 		verify(assetDir, times(0)).findFirst(any());
 	}
 
+	@SuppressWarnings("all")
 	@Test
 	public void GivenMediaFileInSourceDirAndReferenceWithPath_ThenFoundAndDoNotSearchAsset() {
 		// given
 		when(reference.hasPath()).thenReturn(true);
 		// return the same source directory since we actually need a not null path
-		when(sourceDir.getSubdirPath(null)).thenReturn(sourceDir);
+		when(sourceDir.getSubDirectoryPath(null)).thenReturn(sourceDir);
 
 		// when
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);

@@ -1,21 +1,7 @@
 package com.jslib.wood;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.List;
-
+import com.jslib.wood.impl.MediaQueryDefinition;
+import com.jslib.wood.impl.ProjectDescriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,20 +9,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.wood.impl.MediaQueryDefinition;
-import com.jslib.wood.impl.ProjectDescriptor;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectInitTest {
 	@Mock
 	private ProjectDescriptor descriptor;
-
-	@Mock
-	private FilePath assetDir;
-	@Mock
-	private FilePath themeDir;
-	@Mock
-	private IReferenceHandler referenceHandler;
 
 	@Before
 	public void beforeTest() throws Exception {
@@ -50,9 +36,9 @@ public class ProjectInitTest {
 	}
 
 	@Test
-	public void GivenNonEmptyDescriptor_WhenConstrutor_ThenStateInitialized() throws FileNotFoundException {
+	public void GivenNonEmptyDescriptor_WhenConstructor_ThenStateInitialized() {
 		// given
-		when(descriptor.getAuthors()).thenReturn(Arrays.asList("Iulian Rotaru"));
+		when(descriptor.getAuthors()).thenReturn(Collections.singletonList("Iulian Rotaru"));
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getPwaWorker()).thenReturn("sw.js");
 		when(descriptor.getLanguage()).thenReturn(Arrays.asList("fr","de"));
@@ -89,7 +75,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenMediaQueryOnDescriptor_WhenGetMediaQueryDefinition_ThenNotNull() {
 		// given
-		when(descriptor.getMediaQueryDefinitions()).thenReturn(Arrays.asList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
+		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
 
 		// when
 		MediaQueryDefinition query = project().getMediaQueryDefinition("w800");
@@ -115,7 +101,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenMetasOnDescriptor_WhenGetMetaDescriptors_ThenNotEmpty() {
 		// given
-		when(descriptor.getMetaDescriptors()).thenReturn(Arrays.asList(Mockito.mock(IMetaDescriptor.class)));
+		when(descriptor.getMetaDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(IMetaDescriptor.class)));
 
 		// when
 		List<IMetaDescriptor> metas = project().getMetaDescriptors();
@@ -143,7 +129,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenLinksOnDescriptor_WhenGetLinkDescriptors_ThenNotEmpty() {
 		// given
-		when(descriptor.getLinkDescriptors()).thenReturn(Arrays.asList(Mockito.mock(ILinkDescriptor.class)));
+		when(descriptor.getLinkDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(ILinkDescriptor.class)));
 
 		// when
 		List<ILinkDescriptor> links = project().getLinkDescriptors();
@@ -171,7 +157,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenScriptsOnDescriptor_WhenGetScriptDescriptors_ThenNotEmpty() {
 		// given
-		when(descriptor.getScriptDescriptors()).thenReturn(Arrays.asList(Mockito.mock(IScriptDescriptor.class)));
+		when(descriptor.getScriptDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(IScriptDescriptor.class)));
 
 		// when
 		List<IScriptDescriptor> scripts = project().getScriptDescriptors();
@@ -195,7 +181,7 @@ public class ProjectInitTest {
 	public void GivenScriptWithDependencies_WhenGetScriptDependencies_ThenRetrieve() {
 		// given
 		Project project = project();
-		List<IScriptDescriptor> dependencies = Arrays.asList((IScriptDescriptor) null);
+		List<IScriptDescriptor> dependencies = Collections.singletonList(null);
 		project.getScriptDependencies().put("sw.js", dependencies);
 
 		// when

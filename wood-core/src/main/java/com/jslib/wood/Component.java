@@ -1,30 +1,13 @@
 package com.jslib.wood;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.jslib.wood.dom.*;
+import com.jslib.wood.impl.*;
+import com.jslib.wood.util.StringsUtil;
 import org.xml.sax.SAXException;
 
-import com.jslib.api.dom.Attr;
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.api.dom.EList;
-import com.jslib.api.dom.Element;
-import com.jslib.util.Classes;
-import com.jslib.util.Strings;
-import com.jslib.wood.impl.ComponentDescriptor;
-import com.jslib.wood.impl.FileType;
-import com.jslib.wood.impl.IOperatorsHandler;
-import com.jslib.wood.impl.LayoutParameters;
-import com.jslib.wood.impl.Operator;
-import com.jslib.wood.impl.ScriptDescriptor;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.*;
 
 /**
  * Meta-data about component consolidated instance. Component is a piece of user interface designed to interconnect with another
@@ -42,7 +25,7 @@ import com.jslib.wood.impl.ScriptDescriptor;
  * process media files. Resources processing is externalized because build and preview processes have different needs.
  * <p>
  * Implementation note. Resource references handling is performed on source file reading, on the fly. Component needs to load
- * its layout and all depending layout documents from file; while layout file is reading {@link #referenceHandler} resolve
+ * its layout and all depend on layout documents from file; while layout file is reading {@link #referenceHandler} resolve
  * variables and copy media files. The point is, after layout loaded, media files are already present into build directory and
  * loaded document has references resolved.
  * 
@@ -110,8 +93,10 @@ public class Component {
 	 */
 	private final List<IScriptDescriptor> scriptDescriptors = new ArrayList<>();
 
+	private ComponentDescriptor descriptor;
+
 	/**
-	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also
+	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also,
 	 * references are resolved, that is, references replaced with variables values and media URL paths.
 	 */
 	private Element layout;
@@ -142,7 +127,7 @@ public class Component {
 		if (!layoutPath.exists()) {
 			throw new WoodException("Missing component layout |%s|.", layoutPath);
 		}
-		this.documentBuilder = Classes.loadService(DocumentBuilder.class);
+		this.documentBuilder = DocumentBuilder.getInstance();
 
 		this.project = layoutPath.getProject();
 		this.operators = this.project.getOperatorsHandler();
@@ -150,7 +135,7 @@ public class Component {
 		this.referenceHandler = referenceHandler;
 
 		FilePath descriptorFile = layoutPath.cloneTo(FileType.XML);
-		ComponentDescriptor descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
+		this.descriptor = new ComponentDescriptor(descriptorFile, referenceHandler);
 
 		this.baseLayoutPath = layoutPath;
 		this.name = layoutPath.getBasename();
@@ -168,17 +153,24 @@ public class Component {
 			title.append(descriptor.getTitle());
 		}
 		if (title.length() == 0) {
-			title.append(Strings.toTitleCase(project.getProjectRoot().getName()));
+			title.append(StringsUtil.toTitleCase(project.getProjectRoot().getName()));
 		}
 		this.title = title.toString();
+	}
 
+	public Component(CompoPath compoPath, IReferenceHandler referenceHandler, boolean autoScan) {
+		this(compoPath, referenceHandler);
+		if(autoScan) {
+			scan();
+		}
+	}
+
+	public void scan() {
 		// consolidate component layout from its templates and widgets
 		// update internal styles list with components related style file
 		layout = scanComponentsTree(baseLayoutPath, 0);
 		mergeDescriptor(descriptor);
-	}
 
-	public void clean() {
 		// templates realization is optional; remove empty editable elements
 		for (Element editable : operators.findByOperator(layout, Operator.EDITABLE)) {
 			assert editable.isEmpty();
@@ -195,7 +187,7 @@ public class Component {
 	 * child widgets tree. Templates hierarchy processing is delegated to {@link #loadLayoutDocument(FilePath, int)} whereas
 	 * widgets tree is handled by this method logic.
 	 * <p>
-	 * Widgets are processed in the order from this parent layout, self-invoking this method recursively. This way an widget may
+	 * Widgets are processed in the order from this parent layout, self-invoking this method recursively. This way a widget may
 	 * have other child widgets creating a not restricted complex widgets tree.
 	 * <p>
 	 * Note that the actual HTML document file reading is performed by {@link SourceReader} that detects resource references and
@@ -211,7 +203,7 @@ public class Component {
 			throw new WoodException("Circular compo references suspicion. Too many nesting levels on |%s|. Please check wood:widget attributes!", layoutPath);
 		}
 
-		// components tree scanning is an recursive process that happens in two steps:
+		// components tree scanning is a recursive process that happens in two steps:
 		// 1. getLayoutDocument() takes care to process component templates hierarchy, if this base component uses
 		// 2. this method logic scans recursively for and insert widget components - for short widgets
 
@@ -246,7 +238,7 @@ public class Component {
 
 			// widget path element may have invocation parameters for widget layout customization
 			// load parameters, if any, and on loadLayoutDocument passes them to source reader
-			// source reader takes care to inject parameter values into widget layout
+			//  takes care to inject parameter values into widget layout
 			layoutParameters.reload(operators.getOperand(compoPathElement, Operator.PARAM));
 			operators.removeOperator(compoPathElement, Operator.PARAM);
 			Element widgetLayout = scanComponentsTree(childLayoutPath, guardCount);
@@ -278,7 +270,7 @@ public class Component {
 	 * Document file is loaded using {@link SourceReader} decorator. Source reader detects resource references and invoke
 	 * {@link #referenceHandler} that handle variables replacement and media files processing.
 	 * <p>
-	 * This method insert the related style file into {@link #styleReferences} list. By convention layout and style files have
+	 * This method insert the related style file into styles list. By convention layout and style files have
 	 * the same name; anyway, style file is not mandatory. Also takes care to insert style file path in the proper order,
 	 * suitable for page header inclusion.
 	 * 
@@ -308,16 +300,14 @@ public class Component {
 
 		// use 'template' operator to scan for content fragments; 'template' operator is mandatory on content fragment root
 		EList contentFragments = operators.findByOperator(layoutDoc, Operator.TEMPLATE);
-		if (contentFragments.size() > 1) {
-			// throw new IllegalStateException();
-		}
-		if (contentFragments.isEmpty()) {
+        contentFragments.size();// throw new IllegalStateException();
+        if (contentFragments.isEmpty()) {
 			// if there are no content fragments, currently loaded layout does not inherit from a template component
 			return layoutDoc;
 		}
 
-		// if content fragment is the document root we have a stand alone content component
-		// it is not allowed to have multiple content fragments in a stand alone content component
+		// if content fragment is the document root we have a stand-alone content component
+		// it is not allowed to have multiple content fragments in a stand-alone content component
 		ContentFragment contentFragment = new ContentFragment(operators, contentFragments.item(0));
 		if (contentFragment.hasParent()) {
 			for (int i = 1; i < contentFragments.size(); ++i) {
@@ -406,9 +396,11 @@ public class Component {
 			editables.remove();
 		}
 		if (contentFragment.isShortTemplateNotation()) {
-			addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
+            assert templateDoc != null;
+            addAttrs(templateDoc.getRoot(), contentFragment.getRoot().getAttrs(), true);
 		}
-		operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
+        assert templateDoc != null;
+        operators.removeOperator(templateDoc.getRoot(), Operator.TEMPLATE);
 		return templateDoc;
 	}
 
@@ -426,7 +418,7 @@ public class Component {
 	 * Return resources group this component belongs or null if component is in global space. This property has meaning only on
 	 * page components.
 	 * <p>
-	 * Resources group is declared on page components and is used by site builder to create specific sub-directories where to
+	 * Resources group is declared on page components and is used by site builder to create specific subdirectories where to
 	 * store group related resources.
 	 * 
 	 * @return resources group or null if component is in global space.
@@ -531,10 +523,9 @@ public class Component {
 	}
 
 	/**
-	 * Return this component {@link #display}, that is used also as string representation.
+	 * Return this component string representation, that is used also as string representation.
 	 * 
 	 * @return component display.
-	 * @see #display
 	 */
 	@Override
 	public String toString() {
@@ -546,10 +537,9 @@ public class Component {
 
 	/**
 	 * Collect style file related to given source file, be it layout or script file. A component layout or script file may have
-	 * a related style. A related style file have the same base name as source file but with style extension. This method uses
-	 * {@link FilePath#cloneToStyle()} to get related style file.
+	 * a related style. A related style file have the same base name as source file but with style extension.
 	 * <p>
-	 * If related style file exists add it to this component used style files list, see {@link #styleReferences}. Takes care to
+	 * If related style file exists add it to this component used style files list. Takes care to
 	 * keep styles proper order for page document and preview inclusion.
 	 * 
 	 * @param sourceFile source file.
@@ -575,9 +565,9 @@ public class Component {
 	private static final Element[] EMPTY_ARRAY = new Element[0];
 
 	/**
-	 * An compo path is a reference to a child component; this method returns defined compo paths. Returns a newly created array
+	 * A compo path is a reference to a child component; this method returns defined compo paths. Returns a newly created array
 	 * with all compo path elements found in given layout document. This method creates a new array because {@link EList} is
-	 * live and we need to remove compo paths while iterating. Returns empty array if no compo found.
+	 * live, and we need to remove compo paths while iterating. Returns empty array if no compo found.
 	 * <p>
 	 * Compo path element is identified by attribute with name <code>wood:compo</code>.
 	 * 
@@ -628,31 +618,27 @@ public class Component {
 	 */
 	private static void addAttrs(Element element, Iterable<Attr> attrs, boolean... overrides) {
 		for (Attr attr : attrs) {
-			switch (attr.getName()) {
-			case "class":
-				Set<String> classes = new HashSet<>();
-				classes.addAll(Strings.split(attr.getValue(), ' '));
-				String elementClass = element.getAttr("class");
-				if (elementClass != null) {
-					classes.addAll(Strings.split(elementClass, ' '));
-				}
-				element.setAttr("class", Strings.join(classes, ' '));
-				break;
-
-			default:
-				boolean override = overrides.length == 1 ? overrides[0] : false;
-				String namespaceURI = attr.getNamespaceURI();
-				if (namespaceURI != null) {
-					if (override || !element.hasAttrNS(namespaceURI, attr.getName())) {
-						element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
-					}
-				} else {
-					if (override || !element.hasAttr(attr.getName())) {
-						String[] names = attr.getName().split(":");
-						element.setAttr(names[0], attr.getValue());
-					}
-				}
-			}
+            if (attr.getName().equals("class")) {
+                Set<String> classes = new HashSet<>(StringsUtil.split(attr.getValue(), ' '));
+                String elementClass = element.getAttr("class");
+                if (elementClass != null) {
+                    classes.addAll(StringsUtil.split(elementClass, ' '));
+                }
+                element.setAttr("class", StringsUtil.join(classes, ' '));
+            } else {
+                boolean override = overrides.length == 1 && overrides[0];
+                String namespaceURI = attr.getNamespaceURI();
+                if (namespaceURI != null) {
+                    if (override || !element.hasAttrNS(namespaceURI, attr.getName())) {
+                        element.setAttrNS(namespaceURI, attr.getName(), attr.getValue());
+                    }
+                } else {
+                    if (override || !element.hasAttr(attr.getName())) {
+                        String[] names = attr.getName().split(":");
+                        element.setAttr(names[0], attr.getValue());
+                    }
+                }
+            }
 		}
 	}
 
@@ -780,11 +766,6 @@ public class Component {
 			return templatePath;
 		}
 
-		/**
-		 * 
-		 * @param contentElement content element from this content fragment.
-		 * @return
-		 */
 		public String getEditableName(Element contentElement) {
 			// load editable name from 'content' operator; if missing we should have editable name in the template operator
 			String editableName = operators.getOperand(contentElement, Operator.CONTENT);

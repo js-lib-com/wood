@@ -143,7 +143,7 @@ public class BaseDescriptorTest {
 		return new TestDescriptor(descriptorFile);
 	}
 
-	private class TestDescriptor extends BaseDescriptor {
+	private static class TestDescriptor extends BaseDescriptor {
 		public TestDescriptor(FilePath descriptorFile) {
 			super(descriptorFile, descriptorFile.exists() ? descriptorFile.getReader() : null);
 		}

@@ -1,20 +1,10 @@
 package com.jslib.wood.build;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-
-import javax.xml.xpath.XPathExpressionException;
-
+import com.jslib.wood.*;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.Element;
+import com.jslib.wood.impl.FileType;
+import com.jslib.wood.impl.XmlnsOperatorsHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,17 +13,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.Element;
-import com.jslib.wood.CompoPath;
-import com.jslib.wood.Component;
-import com.jslib.wood.FilePath;
-import com.jslib.wood.Reference;
-import com.jslib.wood.ThemeStyles;
-import com.jslib.wood.Variables;
-import com.jslib.wood.WoodException;
-import com.jslib.wood.impl.FileType;
-import com.jslib.wood.impl.XmlnsOperatorsHandler;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuilderTest {
@@ -49,7 +37,7 @@ public class BuilderTest {
 	private Builder builder;
 
 	@Before
-	public void beforeTest() throws IOException {
+	public void beforeTest() {
 		when(project.getVariables(null)).thenReturn(dirVariables);
 		when(project.getAssetVariables()).thenReturn(assetVariables);
 
@@ -60,7 +48,7 @@ public class BuilderTest {
 	@Test
 	public void build() throws IOException, XPathExpressionException {
 		when(project.getProjectRoot()).thenReturn(new File("test"));
-		when(project.getLanguages()).thenReturn(Arrays.asList("en"));
+		when(project.getLanguages()).thenReturn(Collections.singletonList("en"));
 		when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
 		when(project.getPwaManifest()).thenReturn(Mockito.mock(FilePath.class));
 		when(project.getPwaLoader()).thenReturn(Mockito.mock(FilePath.class));
@@ -80,7 +68,7 @@ public class BuilderTest {
 		when(layoutPath.getReader()).thenReturn(new StringReader("<body><h1>Test Page</h1></body>"));
 
 		CompoPath compoPath = Mockito.mock(CompoPath.class);
-		when(project.getPages()).thenReturn(Arrays.asList(compoPath));
+		when(project.getPages()).thenReturn(Collections.singletonList(compoPath));
 		when(compoPath.getLayoutPath()).thenReturn(layoutPath);
 
 		builder.build();

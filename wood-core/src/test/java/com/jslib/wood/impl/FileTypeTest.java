@@ -20,14 +20,15 @@ public class FileTypeTest {
 		assertThat(FileType.forExtension("avi"), equalTo(FileType.MEDIA));
 	}
 
-	/** Not recognized extensions are considered media file. Also if extension is null or empty. */
+	/** Not recognized extensions are considered media file. Also, if extension is null or empty. */
 	@Test
 	public void forExtension_BadExtension() {
 		assertThat(FileType.forExtension("fake"), equalTo(FileType.MEDIA));
 		assertThat(FileType.forExtension(""), equalTo(FileType.MEDIA));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("all")
+	@Test(expected = AssertionError.class)
 	public void forExtension_NullExtension() {
 		FileType.forExtension(null);
 	}
@@ -43,7 +44,7 @@ public class FileTypeTest {
 		assertThat(FileType.forFile(new File("path/file.avi")), equalTo(FileType.MEDIA));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void forFile_NullFile() {
 		FileType.forFile(null);
 	}

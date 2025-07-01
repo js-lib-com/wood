@@ -1,9 +1,8 @@
 package com.jslib.wood.impl;
 
-import com.jslib.api.dom.Element;
-import com.jslib.util.Params;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.IScriptDescriptor;
+import com.jslib.wood.dom.Element;
 
 /**
  * Descriptor for page script element. This class is loaded from <code>script</code> element of project or page descriptor. All
@@ -28,7 +27,7 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	private boolean dynamic;
 
 	private ScriptDescriptor(String source) {
-		Params.notNull(source, "Script source");
+		assert source != null: "Script source argument is null";
 		this.source = source;
 	}
 
@@ -131,7 +130,7 @@ public class ScriptDescriptor implements IScriptDescriptor {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + source.hashCode();
 		return result;
 	}
 
@@ -144,13 +143,8 @@ public class ScriptDescriptor implements IScriptDescriptor {
 		if (getClass() != obj.getClass())
 			return false;
 		ScriptDescriptor other = (ScriptDescriptor) obj;
-		if (source == null) {
-			if (other.source != null)
-				return false;
-		} else if (!source.equals(other.source))
-			return false;
-		return true;
-	}
+        return source.equals(other.source);
+    }
 
 	@Override
 	public String toString() {

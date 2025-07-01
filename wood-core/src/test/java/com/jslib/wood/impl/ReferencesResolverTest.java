@@ -1,20 +1,15 @@
 package com.jslib.wood.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import com.jslib.wood.FilePath;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.wood.FilePath;
-import com.jslib.wood.IReferenceHandler;
-import com.jslib.wood.Reference;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferencesResolverTest {
@@ -36,17 +31,12 @@ public class ReferencesResolverTest {
 	public void parse() {
 		String value = "<h1>@string/title</h1>";
 
-		value = resolver.parse(value, sourceFile, new IReferenceHandler() {
-			@Override
-			public String onResourceReference(Reference reference, FilePath sourceFile) throws IOException {
-				return "resource value";
-			}
-		});
+		value = resolver.parse(value, sourceFile, (reference, sourceFile) -> "resource value");
 
 		assertThat(value, equalTo("<h1>resource value</h1>"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void nullValue() {
 		resolver.parse(null, sourceFile, null);
 	}

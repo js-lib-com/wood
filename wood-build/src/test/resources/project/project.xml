@@ -4,7 +4,7 @@
 	<asset-dir>res/asset</asset-dir>
 	<theme-dir>res/theme</theme-dir>
 	<build-dir>build</build-dir>
-	<exclude-dirs></exclude-dirs>
+	<exclude-dirs />
 	
 	<authors>j(s)-lib</authors>
 	<title>Test Project</title>

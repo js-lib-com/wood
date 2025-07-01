@@ -3,9 +3,9 @@ package com.jslib.wood.impl;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import com.jslib.util.Strings;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.WoodException;
+import com.jslib.wood.util.StringsUtil;
 
 /**
  * Variants qualify file path so that one can create group of files with the same semantic content but differently presented,
@@ -104,7 +104,7 @@ public class Variants {
 				if (country == null) {
 					language = matcher.group(1);
 				} else {
-					language = Strings.concat(matcher.group(1), '-', country);
+					language = StringsUtil.concat(matcher.group(1), '-', country);
 				}
 
 			} else if (mediaQueries.add(variant)) {

@@ -34,7 +34,7 @@ import com.jslib.wood.SourceReader;
  * <tr>
  * <td>path
  * <td>directories path to store page layout into; build file system insert this directories path just before layout file
- * <td>useable for role based security supplied by servlet container
+ * <td>usable for role based security supplied by servlet container
  * <td>/admin/
  * <tr>
  * <td>scripts
@@ -49,7 +49,7 @@ import com.jslib.wood.SourceReader;
  * <p>
  * Third party scripts are usually linked at the page bottom, just before closing page body. Anyway, <code>script</code> element
  * has an optional boolean attribute, <code>append-to-head</code> to force including script link at the end of the page header.
- * 
+ *
  * <pre>
  *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  *  &lt;page&gt;
@@ -58,19 +58,20 @@ import com.jslib.wood.SourceReader;
  *      &lt;description&gt;Index page description.&lt;/description&gt;
  *      &lt;path&gt;/admin/&lt;/path&gt;
  *      &lt;scripts&gt;
- *          &lt;script append-to-head="true"&gt;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&lt;/script&gt;
+ *          &lt;script&gt;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&lt;/script&gt;
  *          &lt;script&gt;http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js&lt;/script&gt;
  *      &lt;/scripts&gt;
  *  &lt;/page&gt;
  * </pre>
- * 
+ *
  * <p>
- * Directories path for page layout files is described by <code>path</code> element. Usually page layout files are stored in a
- * directory configured by build file system implementation, see {@link BuildFS#getPageDir()}. For example, in default file
- * system pages are stored into build root. If <code>path</code> element is specified, given path is used to stored page layout
- * file. In example below, <code>user-manager.htm</code> page is stored under <code>admin</code> directory. This facility is
- * usable for role based security; it allows to group pages under given path and configure security constrains base on that
- * path.
+ * The <code>path</code> element defines the directory path where page layout files are stored. By default, these files
+ * are placed in a directory determined by the build file system implementation — for instance, the default file system
+ * stores them in the build root.
+ * However, if a <code>path</code> element is specified, the provided path will override the default location. For example,
+ * in the following case, the <code>user-manager.htm</code> page is saved in the <code>admin</code> directory.
+ * This feature is particularly useful for role-based security, as it enables grouping pages under specific paths, allowing
+ * security constraints to be configured based on directory structure.
  *
  * <pre>
  *  /
@@ -79,7 +80,7 @@ import com.jslib.wood.SourceReader;
  *        ~
  *  /info/
  *        +-log.viewer.htm
- *        ~                          
+ *        ~
  *  /media/
  *  /script/
  *  /style/
@@ -87,52 +88,54 @@ import com.jslib.wood.SourceReader;
  *  ~
  * </pre>
  * <p>
- * Component descriptor instance has not mutable state, therefore is thread safe.
- * 
+ * Component descriptor instance has no mutable state, therefore is thread safe.
+ *
  * @author Iulian Rotaru
  * @version final
  * @see ProjectDescriptor
  */
 public class ComponentDescriptor extends BaseDescriptor {
-	/** File path for component descriptor. It has owning component name and XML extension. */
-	private final FilePath descriptorFile;
+    /**
+     * File path for component descriptor. It has owning component name and XML extension.
+     */
+    private final FilePath descriptorFile;
 
-	/**
-	 * Create component descriptor instance and initialize it from given file. Values defined by descriptor may contain resource
-	 * references that need to be resolved. This descriptor uses external defined references handler just for that.
-	 * 
-	 * @param descriptorFile descriptor file path,
-	 * @param referenceHandler resource references handler.
-	 */
-	public ComponentDescriptor(FilePath descriptorFile, IReferenceHandler referenceHandler) {
-		super(descriptorFile, descriptorFile.exists() ? new SourceReader(descriptorFile, referenceHandler) : null);
-		this.descriptorFile = descriptorFile;
-	}
+    /**
+     * Create component descriptor instance and initialize it from given file. Values defined by descriptor may contain resource
+     * references that need to be resolved. This descriptor uses external defined references handler just for that.
+     *
+     * @param descriptorFile   descriptor file path,
+     * @param referenceHandler resource references handler.
+     */
+    public ComponentDescriptor(FilePath descriptorFile, IReferenceHandler referenceHandler) {
+        super(descriptorFile, descriptorFile.exists() ? new SourceReader(descriptorFile, referenceHandler) : null);
+        this.descriptorFile = descriptorFile;
+    }
 
-	public FilePath getDescriptorFile() {
-		return descriptorFile;
-	}
+    public FilePath getDescriptorFile() {
+        return descriptorFile;
+    }
 
-	/**
-	 * Get component description or null if description is missing. This property is loaded from <code>description</code>
-	 * element.
-	 * 
-	 * @return object description, possible null.
-	 */
-	public String getDescription() {
-		return text("description");
-	}
+    /**
+     * Get component description or null if description is missing. This property is loaded from <code>description</code>
+     * element.
+     *
+     * @return object description, possible null.
+     */
+    public String getDescription() {
+        return text("description");
+    }
 
-	/**
-	 * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
-	 * in descriptor using <code>group</code> element.
-	 * <p>
-	 * Components can be declared on named resources groups. Build tool uses this group name as context path. For example, login
-	 * page can be declared on <code>WEB-INF</code> group so that it becomes private.
-	 * 
-	 * @return resources group or null if component is in global space.
-	 */
-	public String getResourcesGroup() {
-		return text("group");
-	}
+    /**
+     * Get resources group on which this component belongs or null if component is in global space. Resources group is declared
+     * in descriptor using <code>group</code> element.
+     * <p>
+     * Components can be declared on named resources groups. Build tool uses this group name as context path. For example, login
+     * page can be declared on <code>WEB-INF</code> group so that it becomes private.
+     *
+     * @return resources group or null if component is in global space.
+     */
+    public String getResourcesGroup() {
+        return text("group");
+    }
 }

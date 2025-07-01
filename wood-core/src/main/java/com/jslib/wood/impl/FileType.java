@@ -2,10 +2,10 @@ package com.jslib.wood.impl;
 
 import java.io.File;
 
-import com.jslib.lang.BugError;
-import com.jslib.util.Files;
-import com.jslib.util.Params;
 import com.jslib.wood.CT;
+import com.jslib.wood.util.FilesUtil;
+
+import static com.jslib.wood.util.StringsUtil.format;
 
 /**
  * Project recognized file types, based on file extension. By convention a component has next file types: layout (HTM), style
@@ -53,7 +53,7 @@ public enum FileType {
 			return CT.VAR_EXT;
 
 		default:
-			throw new BugError("Attempt to got extension for file type |%s|.", this);
+			throw new IllegalStateException(format("Attempt to got extension for file type |%s|.", this));
 		}
 	}
 
@@ -66,8 +66,8 @@ public enum FileType {
 	 * @throws IllegalArgumentException if file parameter is null.
 	 */
 	public static FileType forFile(File file) {
-		Params.notNull(file, "File");
-		return forExtension(Files.getExtension(file));
+		assert file != null: "File argument is null";
+		return forExtension(FilesUtil.getExtension(file));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public enum FileType {
 	 * @throws IllegalArgumentException if file extension parameter is null.
 	 */
 	public static FileType forExtension(String extension) {
-		Params.notNull(extension, "File extension");
+		assert extension !=null: "File extension argument is null";
 		switch (extension.toLowerCase()) {
 		case CT.LAYOUT_EXT:
 			return FileType.LAYOUT;

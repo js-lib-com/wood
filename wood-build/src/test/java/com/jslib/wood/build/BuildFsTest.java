@@ -1,22 +1,9 @@
 package com.jslib.wood.build;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.Arrays;
-
+import com.jslib.wood.*;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.DocumentBuilder;
+import com.jslib.wood.util.FilesUtil;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -26,20 +13,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.xml.sax.SAXException;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.util.Classes;
-import com.jslib.util.Files;
-import com.jslib.wood.Component;
-import com.jslib.wood.FilePath;
-import com.jslib.wood.IReferenceHandler;
-import com.jslib.wood.SourceReader;
-import com.jslib.wood.WoodException;
+import java.io.*;
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildFsTest {
@@ -55,7 +42,7 @@ public class BuildFsTest {
 
 	@Before
 	public void beforeTest() {
-		documentBuilder = Classes.loadService(DocumentBuilder.class);
+		documentBuilder = DocumentBuilder.getInstance();
 
 		File projectRoot = new File("src/test/resources/build-fs");
 		buildDir = new File(projectRoot, "site");
@@ -65,7 +52,7 @@ public class BuildFsTest {
 	@After
 	public void afterTest() throws IOException {
 		if (buildDir.exists()) {
-			Files.removeFilesHierarchy(buildDir);
+			FilesUtil.removeFilesHierarchy(buildDir);
 		}
 	}
 
@@ -85,7 +72,7 @@ public class BuildFsTest {
 
 		buildFS.writePage(compo, page.getDocument());
 		assertTrue(buildFile("htm/index.htm").exists());
-		buildFile("htm/index.htm").delete();
+		assertTrue(buildFile("htm/index.htm").delete());
 
 		// second attempt to write page in the same build FS instance is ignored
 		buildFS.writePage(compo, page.getDocument());
@@ -162,14 +149,11 @@ public class BuildFsTest {
 		FilePath mediaFile = file("background.jpg");
 
 		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				OutputStream stream = invocation.getArgument(0);
-				stream.close();
-				throw new IOException();
-			}
-		}).when(mediaFile).copyTo(any(OutputStream.class));
+		doAnswer((Answer<Void>) invocation -> {
+            OutputStream stream = invocation.getArgument(0);
+            stream.close();
+            throw new IOException();
+        }).when(mediaFile).copyTo(any(OutputStream.class));
 
 		buildFS.writePageMedia(null, mediaFile);
 	}
@@ -204,14 +188,11 @@ public class BuildFsTest {
 		FilePath mediaFile = file("background.jpg");
 
 		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				OutputStream stream = invocation.getArgument(0);
-				stream.close();
-				throw new IOException();
-			}
-		}).when(mediaFile).copyTo(any(OutputStream.class));
+		doAnswer((Answer<Void>) invocation -> {
+            OutputStream stream = invocation.getArgument(0);
+            stream.close();
+            throw new IOException();
+        }).when(mediaFile).copyTo(any(OutputStream.class));
 
 		buildFS.writeStyleMedia(mediaFile);
 	}
@@ -219,7 +200,7 @@ public class BuildFsTest {
 	@Test
 	public void writeStyle() throws IOException {
 		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
+		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
 		FilePath styleFile = file("style.css");
 		when(styleFile.getParentDir()).thenReturn(sourceDir);
@@ -231,7 +212,7 @@ public class BuildFsTest {
 	@Test
 	public void writeStyle_Language() throws IOException {
 		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
+		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
 		FilePath styleFile = file("style.css");
 		when(styleFile.getParentDir()).thenReturn(sourceDir);
@@ -245,7 +226,7 @@ public class BuildFsTest {
 	@Test
 	public void writeStyle_BuildNumber() throws IOException {
 		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
+		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
 		FilePath styleFile = file("style.css");
 		when(styleFile.getParentDir()).thenReturn(sourceDir);
@@ -258,11 +239,11 @@ public class BuildFsTest {
 	@Test(expected = IOException.class)
 	public void writeStyle_IOException() throws IOException {
 		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Arrays.asList());
+		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
 		FilePath styleFile = file("style.css");
 		when(styleFile.getParentDir()).thenReturn(sourceDir);
-		when(styleFile.getReader()).thenReturn(new ExceptionalReader());
+		when(styleFile.getReader()).thenReturn(new ExceptionalReaderTest());
 
 		buildFS.writeStyle(null, styleFile, referenceHandler);
 	}
@@ -296,18 +277,18 @@ public class BuildFsTest {
 	@Test(expected = IOException.class)
 	public void writeScript_IOException() throws IOException {
 		FilePath scriptFile = file("Index.js");
-		when(scriptFile.getReader()).thenReturn(new ExceptionalReader());
+		when(scriptFile.getReader()).thenReturn(new ExceptionalReaderTest());
 		buildFS.writeScript(null, scriptFile, referenceHandler);
 	}
 
 	@Test
-	public void dirFactory() throws Exception {
+	public void dirFactory() {
 		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/images"));
 		buildFS.setLanguage("ro");
 		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/ro/images"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void nullLanguage() {
 		buildFS.setLanguage(null);
 	}
@@ -339,14 +320,11 @@ public class BuildFsTest {
 		when(file.getReader()).thenReturn(new StringReader("CONTENT"));
 
 		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				OutputStream stream = invocation.getArgument(0);
-				stream.close();
-				return null;
-			}
-		}).when(file).copyTo(any(OutputStream.class));
+		doAnswer((Answer<Void>) invocation -> {
+            OutputStream stream = invocation.getArgument(0);
+            stream.close();
+            return null;
+        }).when(file).copyTo(any(OutputStream.class));
 
 		return file;
 	}
@@ -426,7 +404,7 @@ public class BuildFsTest {
 		}
 	}
 
-	private static class ExceptionalReader extends Reader {
+	private static class ExceptionalReaderTest extends Reader {
 		@Override
 		public int read(char[] cbuf, int off, int len) throws IOException {
 			throw new IOException();

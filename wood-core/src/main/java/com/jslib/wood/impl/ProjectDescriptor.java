@@ -7,21 +7,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.jslib.api.dom.Element;
-import com.jslib.util.Classes;
-import com.jslib.util.Strings;
 import com.jslib.wood.CT;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.WoodException;
+import com.jslib.wood.dom.Element;
+import com.jslib.wood.util.ClassesUtil;
+import com.jslib.wood.util.StringsUtil;
 
 /**
- * Project descriptor is a XML file that contains global project properties similar in structure with
+ * Project descriptor is an XML file that contains global project properties similar in structure with
  * {@link ComponentDescriptor} . In fact there may be properties present on both project and component descriptor, in which case
  * component takes precedence.
- * 
+ * <p>
  * Project descriptor file is located into project root directory with the name <code>project.xml</code>. Since there are
  * sensible default value for all configurations this file is optional.
- * 
+ * <p>
  * Project descriptor instance has not mutable state, therefore is thread safe.
  * 
  * @author Iulian Rotaru
@@ -32,11 +32,11 @@ public class ProjectDescriptor extends BaseDescriptor {
 	/**
 	 * Mandatory project language(s) list. Although this property is mandatory the underlying <code>language</code> element is
 	 * not - if is missing uses <code>en</code> as default language.
-	 * 
+	 * <p>
 	 * The first declared language is the default one; this holds true even if there is a single language declared. Note that
 	 * default language is used for resources without language variant.
 	 */
-	private final List<String> laguages;
+	private final List<String> languages;
 
 	/** Optional media query definitions, defaults to empty list. */
 	private final Set<MediaQueryDefinition> mediaQueries;
@@ -44,8 +44,8 @@ public class ProjectDescriptor extends BaseDescriptor {
 	public ProjectDescriptor(FilePath descriptorFile) {
 		super(descriptorFile, descriptorFile.exists() ? descriptorFile.getReader() : null);
 
-		this.laguages = Strings.split(text("language", "en"), ',', ' ');
-		if (laguages.isEmpty()) {
+		this.languages = StringsUtil.split(text("language", "en"), ',', ' ');
+		if (languages.isEmpty()) {
 			throw new WoodException("Invalid project descriptor. Empty <language> element.");
 		}
 
@@ -98,7 +98,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 		if (el == null) {
 			return Collections.emptyList();
 		}
-		return Collections.unmodifiableList(Strings.split(el.getText(), ',', ' '));
+		return Collections.unmodifiableList(StringsUtil.split(el.getText(), ',', ' '));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * @return project authors list, possible empty.
 	 */
 	public List<String> getAuthors() {
-		return Strings.split(text("authors", ""), ',');
+		return StringsUtil.split(text("authors", ""), ',');
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * @return PWA loader path.
 	 */
 	public String getPwaLoader() {
-		return text("pwa-laoder", CT.DEF_PWA_LOADER_FILE);
+		return text("pwa-loader", CT.DEF_PWA_LOADER_FILE);
 	}
 
 	/**
@@ -155,15 +155,15 @@ public class ProjectDescriptor extends BaseDescriptor {
 	 * missing from project configuration file. See {@link #languages} for details. Returned list is immutable.
 	 * 
 	 * @return unmodifiable list of project languages.
-	 * @see #laguages
+	 * @see #languages
 	 */
 	public List<String> getLanguage() {
-		return Collections.unmodifiableList(laguages);
+		return Collections.unmodifiableList(languages);
 	}
 
 	/**
 	 * Get the media query definitions declared on this project descriptor or the default ones. Returned collection does not
-	 * guarantees the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
+	 * guarantee the order from descriptor but {@link MediaQueryDefinition} has its own weight derived from declaration order.
 	 * <p>
 	 * If no media query definition are declared on project descriptor return empty collection.
 	 * 
@@ -183,11 +183,11 @@ public class ProjectDescriptor extends BaseDescriptor {
 			// getTitle returns null when title element is not defined but for PWA we need a value
 			// infer it from project root directory name
 			File projectRoot = descriptorFile.getProject().getProjectRoot();
-			return projectRoot != null ? Strings.toTitleCase(projectRoot.getName()) : null;
+			return projectRoot != null ? StringsUtil.toTitleCase(projectRoot.getName()) : null;
 		}
 
 		try {
-			return Classes.getGetter(getClass(), Strings.toMemberName(name)).invoke(this).toString();
+			return ClassesUtil.getGetter(getClass(), StringsUtil.toMemberName(name)).invoke(this).toString();
 		} catch (Exception e) {
 			return null;
 		}

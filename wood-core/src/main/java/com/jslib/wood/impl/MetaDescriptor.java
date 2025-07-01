@@ -1,7 +1,7 @@
 package com.jslib.wood.impl;
 
-import com.jslib.api.dom.Element;
 import com.jslib.wood.IMetaDescriptor;
+import com.jslib.wood.dom.Element;
 
 /**
  * Descriptor for page meta element. This class is loaded from <code>meta</code> element of project or page descriptor. All
@@ -92,12 +92,9 @@ class MetaDescriptor implements IMetaDescriptor {
 		} else if (!content.equals(other.content))
 			return false;
 		if (property == null) {
-			if (other.property != null)
-				return false;
-		} else if (!property.equals(other.property))
-			return false;
-		return true;
-	}
+            return other.property == null;
+		} else return property.equals(other.property);
+    }
 
 	@Override
 	public String toString() {

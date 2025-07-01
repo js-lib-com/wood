@@ -1,10 +1,10 @@
 package com.jslib.wood;
 
+import org.junit.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-
-import org.junit.Test;
+import static org.junit.Assert.assertNotSame;
 
 public class ReferenceTest {
 	@Test
@@ -34,21 +34,21 @@ public class ReferenceTest {
 	public void equals() {
 		Reference r1 = new Reference(Reference.Type.STRING, "string-value");
 		Reference r2 = new Reference(Reference.Type.STRING, "string-value");
-		assertFalse(r1 == r2);
+        assertNotSame(r1, r2);
 		assertThat(r1, equalTo(r2));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void nullResourceType() {
 		new Reference(null, "value");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void nullResourceName() {
 		new Reference(Reference.Type.STRING, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	public void emptyResourceName() {
 		new Reference(Reference.Type.STRING, "");
 	}

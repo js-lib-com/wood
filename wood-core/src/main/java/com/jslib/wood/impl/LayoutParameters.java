@@ -3,11 +3,11 @@ package com.jslib.wood.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jslib.lang.Pair;
-import com.jslib.util.Strings;
 import com.jslib.wood.FilePath;
 import com.jslib.wood.SourceReader;
 import com.jslib.wood.WoodException;
+import com.jslib.wood.lang.Pair;
+import com.jslib.wood.util.StringsUtil;
 
 /**
  * Template and child component layout parameters.Layout parameters are a mean to customize a reusable component. Parameters are
@@ -66,8 +66,8 @@ public class LayoutParameters {
 			return;
 		}
 		parameters.clear();
-		for (Pair pair : Strings.splitPairs(parametersDefintion, ';', ':')) {
-			parameters.put(pair.first(), Strings.escapeXML(pair.second()));
+		for (Pair pair : StringsUtil.splitPairs(parametersDefintion, ';', ':')) {
+			parameters.put(pair.first(), StringsUtil.escapeXML(pair.second()));
 		}
 	}
 

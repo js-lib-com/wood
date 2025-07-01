@@ -1,28 +1,14 @@
 package com.jslib.wood;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.jslib.wood.dom.Document;
+import com.jslib.wood.dom.DocumentBuilder;
+import com.jslib.wood.dom.Element;
+import com.jslib.wood.impl.*;
+import com.jslib.wood.util.FilesUtil;
 
-import com.jslib.api.dom.Document;
-import com.jslib.api.dom.DocumentBuilder;
-import com.jslib.api.dom.Element;
-import com.jslib.util.Classes;
-import com.jslib.util.Files;
-import com.jslib.util.Params;
-import com.jslib.wood.impl.AttrOperatorsHandler;
-import com.jslib.wood.impl.DataAttrOperatorsHandler;
-import com.jslib.wood.impl.IOperatorsHandler;
-import com.jslib.wood.impl.MediaQueryDefinition;
-import com.jslib.wood.impl.OperatorsNaming;
-import com.jslib.wood.impl.ProjectDescriptor;
-import com.jslib.wood.impl.ScriptDescriptor;
-import com.jslib.wood.impl.XmlnsOperatorsHandler;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A WOOD project is a collection of loosely coupled components. It has a root directory and all paths are relative to this
@@ -47,7 +33,7 @@ import com.jslib.wood.impl.XmlnsOperatorsHandler;
 public class Project {
 	/**
 	 * Create project instance for a given project root directory. Project root should point to a valid WOOD project; current
-	 * implementation requires only project properties file - see {@link ProjectProperties#PROPERTIES_FILE}.
+	 * implementation requires only project properties file.
 	 * <p>
 	 * Implementation note: project creation occurs in two steps: instance creation and post create initialization. On instance
 	 * creation constructor takes care to registers file system visitor; the actual file system traversal and visitors
@@ -68,23 +54,21 @@ public class Project {
 	private final Map<String, List<IScriptDescriptor>> scriptDependencies = new HashMap<>();
 
 	/**
-	 * File path visitors for project file system scanning. This visitors are registered by
-	 * {@link #registerVisitor(IFilePathVisitor)} on constructors, both this class and subclasses, and invoked on file system
-	 * scanning performed on {@link #configure(ProjectDescriptor)}.
+	 * File path visitors for project file system scanning.
 	 */
 	private final List<IFilePathVisitor> filePathVisitors = new ArrayList<>();
 
 	/** Project root directory. All project file are included here, no external references allowed. */
-	private File projectRoot;
+	private final File projectRoot;
 
 	/**
 	 * Project configuration loaded from <code>project.xml</code> file. It is allowed for project descriptor to be missing in
 	 * which case there are sensible default values.
 	 */
-	private ProjectDescriptor descriptor;
+	private final ProjectDescriptor descriptor;
 
 	/** Build directory where site files are created. Configured on project properties, <code>build.dir</code> property. */
-	private FilePath buildDir;
+	private final FilePath buildDir;
 
 	/**
 	 * Assets are variables and media files used in common by all components. Do not abuse it since it breaks component
@@ -96,7 +80,7 @@ public class Project {
 	 * Contains site styles for UI primitive elements and theme variables. This directory content describe overall site design -
 	 * for example flat design, and is usually imported. Theme directory is optional.
 	 */
-	private FilePath themeDir;
+	private final FilePath themeDir;
 
 	/**
 	 * Project operator handler based on project selected naming strategy. Default naming strategy is
@@ -119,7 +103,7 @@ public class Project {
 		this.assetDir = createFilePath(descriptor.getAssetDir());
 		this.themeDir = createFilePath(descriptor.getThemeDir());
 
-		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(this::file).collect(Collectors.toSet());
 		this.excludeDirs.add(file(descriptor.getBuildDir()));
 
 		registerVisitor(new FilePathVisitor(scriptDependencies));
@@ -143,13 +127,12 @@ public class Project {
 		this.assetDir = createFilePath(descriptor.getAssetDir());
 		this.themeDir = createFilePath(descriptor.getThemeDir());
 
-		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(exclude -> file(exclude)).collect(Collectors.toSet());
+		this.excludeDirs = this.descriptor.getExcludeDirs().stream().map(this::file).collect(Collectors.toSet());
 		this.excludeDirs.add(file(descriptor.getBuildDir()));
 	}
 
 	/**
-	 * Register file system visitor. This method is called from project - and its subclasses, constructor. All registered
-	 * visitors are invoked on {@link #configure(ProjectDescriptor)} when file system scanning occurs.
+	 * Register file system visitor. This method is called from project - and its subclasses, constructor.
 	 * 
 	 * @param visitor file system visitor.
 	 * @see #filePathVisitors
@@ -325,7 +308,6 @@ public class Project {
 	 * Return empty list if there are no link descriptors declared on project descriptor. Returned list is not modifiable.
 	 * 
 	 * @return Immutable list of link descriptors, possible empty.
-	 * @see {@link ProjectDescriptor#getLinkDescriptors()}
 	 */
 	public List<ILinkDescriptor> getLinkDescriptors() {
 		return Collections.unmodifiableList(descriptor.getLinkDescriptors());
@@ -345,7 +327,7 @@ public class Project {
 
 	/**
 	 * Get dependencies for requested script file or empty list if none declared. Script dependencies are declared on component
-	 * descriptors and initialized on file system scanning, performed on {@link #configure(ProjectDescriptor)}.
+	 * descriptors and initialized on file system scanning.
 	 * 
 	 * @param source script file path.
 	 * @return script dependencies list, possible empty.
@@ -363,10 +345,6 @@ public class Project {
 	 */
 	public ThemeStyles getThemeStyles() {
 		return new ThemeStyles(getThemeDir());
-	}
-
-	public OperatorsNaming getOperatorsNaming() {
-		return descriptor.getOperatorsNaming();
 	}
 
 	/**
@@ -407,8 +385,8 @@ public class Project {
 	 * @return resource file or null.
 	 */
 	public FilePath getResourceFile(String language, Reference reference, FilePath sourceFile) {
-		Params.notNull(reference, "Reference");
-		Params.notNull(sourceFile, "Source file");
+		assert reference != null: "Reference argument is null";
+		assert sourceFile != null: "Source file argument is null";
 
 		// search resource files on source and project assets directories, in this order
 		// if source file is in project root, e.g. manifest.json, source directory is null
@@ -434,7 +412,7 @@ public class Project {
 	 */
 	static FilePath findResourceFile(FilePath sourceDir, Reference reference, String language) {
 		if (reference.hasPath()) {
-			sourceDir = sourceDir.getSubdirPath(reference.getPath());
+			sourceDir = sourceDir.getSubDirectoryPath(reference.getPath());
 		}
 		FilePath resourceFile = null;
 		if (language != null) {
@@ -463,7 +441,7 @@ public class Project {
 	}
 
 	public FilePath createFilePath(File file) {
-		return new FilePath(this, Files.getRelativePath(projectRoot, file, true));
+		return new FilePath(this, FilesUtil.getRelativePath(projectRoot, file, true));
 	}
 
 	public CompoPath createCompoPath(String path) {
@@ -488,17 +466,14 @@ public class Project {
 	/**
 	 * Recursively traverse project file system and invoke visitors for every file found. Visitors are invoked in provided
 	 * order.
-	 * <p>
-	 * This method is executed on {@link #configure(ProjectDescriptor)}. Walking process is started with project root and
-	 * recursively invoked it self till all project files are visited.
-	 * 
+	 *
 	 * @param project master project,
 	 * @param dir current visited directory,
 	 * @param visitors visitors list.
 	 * @throws WoodException if fail to list directory or there is an error on visitor execution.
 	 */
 	static void walkFileTree(Project project, File dir, List<IFilePathVisitor> visitors) throws WoodException {
-		Params.isDirectory(dir, "Directory");
+		assert dir.isDirectory(): "Directory argument is not an existing directory";
 
 		File[] files = dir.listFiles();
 		if (files == null) {
@@ -541,7 +516,7 @@ public class Project {
 	 * @since 1.0
 	 */
 	static class FilePathVisitor implements IFilePathVisitor {
-		private static final DocumentBuilder documentBuilder = Classes.loadService(DocumentBuilder.class);
+		private static final DocumentBuilder documentBuilder = DocumentBuilder.getInstance();
 
 		private final Map<String, List<IScriptDescriptor>> scriptDependencies;
 
@@ -560,18 +535,9 @@ public class Project {
 			for (Element scriptElement : document.findByXPath("//script")) {
 				for (Element dependencyElement : scriptElement.getChildren()) {
 					String scriptSource = scriptElement.getAttr("src");
-					List<IScriptDescriptor> dependencies = scriptDependencies.get(scriptSource);
-					if (dependencies == null) {
-						dependencies = new ArrayList<>();
-						scriptDependencies.put(scriptSource, dependencies);
-					}
-					dependencies.add(ScriptDescriptor.create(dependencyElement));
+                    List<IScriptDescriptor> dependencies = scriptDependencies.computeIfAbsent(scriptSource, k -> new ArrayList<>());
+                    dependencies.add(ScriptDescriptor.create(dependencyElement));
 				}
-			}
-
-			FilePath parentDir = file.getParentDir();
-			if (parentDir == null) {
-				return;
 			}
 		}
 	}

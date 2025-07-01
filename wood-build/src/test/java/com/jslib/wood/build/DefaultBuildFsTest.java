@@ -1,19 +1,20 @@
 package com.jslib.wood.build;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.when;
+import com.jslib.wood.Component;
+import com.jslib.wood.FilePath;
+import com.jslib.wood.util.FilesUtil;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import com.jslib.util.Files;
-import com.jslib.wood.Component;
-import com.jslib.wood.FilePath;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DefaultBuildFsTest {
 	private BuilderProject project;
@@ -21,12 +22,12 @@ public class DefaultBuildFsTest {
 	private BuildFS buildFS;
 
 	@Before
-	public void beforeTest() throws Exception {
+	public void beforeTest() {
 		File projectRoot = new File("src/test/resources/build-fs");
 		buildDir = new File(projectRoot, "site");
 		if (buildDir.exists()) {
 			try {
-				Files.removeFilesHierarchy(buildDir);
+				FilesUtil.removeFilesHierarchy(buildDir);
 			} catch (IOException ignore) {
 			}
 		}
@@ -37,13 +38,13 @@ public class DefaultBuildFsTest {
 
 	@Test
 	public void getPageDir() {
-		Component page = Mockito.mock(Component.class);
+		Component page = mock(Component.class);
 		assertThat(buildFS.getPageDir(page), equalTo(buildDir));
 	}
 
 	@Test
 	public void getPageDir_getResourcesGroup() {
-		Component page = Mockito.mock(Component.class);
+		Component page = mock(Component.class);
 		when(page.getResourcesGroup()).thenReturn("admin");
 		assertThat(buildFS.getPageDir(page), equalTo(new File(buildDir, "admin")));
 	}
@@ -103,6 +104,26 @@ public class DefaultBuildFsTest {
 		assertThat(buildFS.formatMediaName(path("res/asset/background.png")), equalTo("res-asset_background.png"));
 		assertThat(buildFS.formatMediaName(path("script/js/wood/player/background.png")), equalTo("script-js-wood-player_background.png"));
 		assertThat(buildFS.formatMediaName(path("lib/paging/background.png")), equalTo("lib-paging_background.png"));
+	}
+
+	@Test
+	public void GivenResourceGroup_WhenWritePageMedia_ThenRelativePath() throws IOException {
+		// GIVEN
+		Component component = mock(Component.class);
+		when(component.getResourcesGroup()).thenReturn("admin");
+
+		FilePath resourceFile = mock(FilePath.class);
+		FilePath parentDir = mock(FilePath.class);
+		when(parentDir.getPathSegments()).thenReturn(Collections.singletonList("asset"));
+		when(resourceFile.getParentDir()).thenReturn(parentDir);
+		when(resourceFile.getName()).thenReturn("icon.png");
+
+		// WHEN
+		String path = buildFS.writePageMedia(component, resourceFile);
+
+		// THEN
+		assertThat(path, notNullValue());
+		assertThat(path, equalTo("../media/asset_icon.png"));
 	}
 
 	private FilePath path(String path) {

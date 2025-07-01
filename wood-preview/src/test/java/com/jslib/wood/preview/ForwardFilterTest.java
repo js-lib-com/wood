@@ -47,7 +47,7 @@ public class ForwardFilterTest {
 	}
 
 	@Test
-	public void GivenInitParameter_WhenInit_ThenSetInternalState() throws ServletException {
+	public void GivenInitParameter_WhenInit_ThenSetInternalState() {
 		// given
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getServletContext()).thenReturn(servletContext);
@@ -69,7 +69,7 @@ public class ForwardFilterTest {
 	}
 
 	@Test
-	public void GivenUrlPatternsInitParameter_WhenInit_ThenRequestPathMatches() throws ServletException {
+	public void GivenUrlPatternsInitParameter_WhenInit_ThenRequestPathMatches() {
 		// given
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getServletContext()).thenReturn(servletContext);

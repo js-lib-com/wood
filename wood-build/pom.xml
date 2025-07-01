@@ -18,22 +18,5 @@
 			<artifactId>wood-core</artifactId>
 			<version>${revision}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-json-api</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-dom-api</artifactId>
-			<version>1.2</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.js-lib</groupId>
-			<artifactId>js-json</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jslib.util.Params;
-import com.jslib.util.Strings;
 import com.jslib.wood.Project;
 import com.jslib.wood.WoodException;
+import com.jslib.wood.util.StringsUtil;
 
 public class MediaQueries implements Comparable<MediaQueries> {
 	private final Project project;
@@ -18,7 +17,7 @@ public class MediaQueries implements Comparable<MediaQueries> {
 	}
 
 	public boolean add(String alias) {
-		Params.notNullOrEmpty(alias, "Alias");
+		assert alias != null && !alias.isEmpty(): "Alias argument is null or empty";
 		MediaQueryDefinition query = project.getMediaQueryDefinition(alias);
 		if (query == null) {
 			return false;
@@ -35,8 +34,8 @@ public class MediaQueries implements Comparable<MediaQueries> {
 	}
 
 	public String getExpression() {
-		List<String> expressions = queries.stream().map(query -> Strings.concat("( ", query.getExpression(), " )")).collect(Collectors.toList());
-		return Strings.join(expressions, " and ");
+		List<String> expressions = queries.stream().map(query -> StringsUtil.concat("( ", query.getExpression(), " )")).collect(Collectors.toList());
+		return StringsUtil.join(expressions, " and ");
 	}
 
 	public List<MediaQueryDefinition> getQueries() {

@@ -3,8 +3,6 @@ package com.jslib.wood.preview;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jslib.util.Params;
-
 /**
  * Test a given string against a list of patterns. Matchers register a list of patterns, see {@link #addPattern(String...)} and
  * test a given string value in pattern declaration order till found first match. If no pattern match string value is rejected.
@@ -57,7 +55,7 @@ class Matchers {
 	 * @return true if string value match a pattern.
 	 */
 	public boolean match(String string) {
-		Params.notNullOrEmpty(string, "String to match");
+		assert string != null && !string.isEmpty(): "String to match argument is null or empty";
 		for (IMatcher matcher : matchers) {
 			if (matcher.match(string)) {
 				return true;
@@ -90,7 +88,7 @@ class Matchers {
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
-	private class StartsWith implements IMatcher {
+	private static class StartsWith implements IMatcher {
 		private final String pattern;
 
 		public StartsWith(String pattern) {
@@ -109,7 +107,7 @@ class Matchers {
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
-	private class EndsWith implements IMatcher {
+	private static class EndsWith implements IMatcher {
 		private final String pattern;
 
 		public EndsWith(String pattern) {
@@ -128,7 +126,7 @@ class Matchers {
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
-	private class Contains implements IMatcher {
+	private static class Contains implements IMatcher {
 		private final String pattern;
 
 		public Contains(String pattern) {
@@ -147,7 +145,7 @@ class Matchers {
 	 * @author Iulian Rotaru
 	 * @since 1.0
 	 */
-	private class Equals implements IMatcher {
+	private static class Equals implements IMatcher {
 		private final String pattern;
 
 		public Equals(String pattern) {
