@@ -68,7 +68,7 @@ public class BuilderIntegrationTest {
         assertThat(doc.getByTag("title").getText(), equalTo("Test Project - Index Page"));
 
         EList metas = doc.findByTag("meta");
-        assertThat(metas.size(), equalTo(3));
+        assertThat(metas.size(), equalTo(5));
 
         assertThat(metas.item(0).getAttr("http-equiv"), equalTo("Content-Type"));
         assertThat(metas.item(0).getAttr("content"), equalTo("text/html; charset=UTF-8"));
@@ -79,10 +79,13 @@ public class BuilderIntegrationTest {
 
         EList headerLinks = doc.findByTag("link");
         doc.dump();
-        assertThat(headerLinks.size(), equalTo(10));
+        assertThat(headerLinks.size(), equalTo(14));
 
         int index = 0;
         assertHeaderLink("manifest.json", headerLinks, index++);
+        assertHeaderLink("media/res-asset_favicon.ico", headerLinks, index++);
+        assertHeaderLink("http://fonts.googleapis.com/css?family=Roboto", headerLinks, index++);
+        assertHeaderLink("http://fonts.googleapis.com/css?family=Great+Vibes", headerLinks, index++);
         assertHeaderLink("style/res-theme_var.css", headerLinks, index++);
         assertHeaderLink("style/res-theme_default.css", headerLinks, index++);
         assertHeaderLink("style/res-theme_fx.css", headerLinks, index++);
@@ -94,15 +97,15 @@ public class BuilderIntegrationTest {
         index += 2; // skip form.css and fx.css
         assertHeaderLink("style/lib_paging.css", headerLinks, index++);
         assertHeaderLink("style/lib_list-view.css", headerLinks, index++);
-        assertHeaderLink("style/res-template_sidebar-page.css", headerLinks, index++);
-        assertHeaderLink("style/res-page_index.css", headerLinks, index);
+        assertHeaderLink("style/res-template_page.css", headerLinks, index++);
+        assertHeaderLink("style/res-template_sidebar-page.css", headerLinks, index);
 
         EList elist = doc.findByTag("script");
         List<String> scripts = new ArrayList<>();
         for (int i = 0; i < elist.size(); ++i) {
             scripts.add(elist.item(i).getAttr("src"));
         }
-        assertThat(scripts, hasSize(9));
+        assertThat(scripts, hasSize(10));
 
         assertTrue(scripts.indexOf("script/script.hc.page.Index.js") > scripts.indexOf("script/lib.js-lib.js"));
         assertTrue(scripts.indexOf("script/script.hc.view.DiscographyView.js") > scripts.indexOf("script/lib.js-lib.js"));
