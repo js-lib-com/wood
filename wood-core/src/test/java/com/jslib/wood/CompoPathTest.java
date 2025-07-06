@@ -28,14 +28,14 @@ public class CompoPathTest {
 
 	@Test
 	public void GivenValidPath_WhenConstructor_ThenInitInternalState() {
-		// given
+		// GIVEN
 		File path = Mockito.mock(File.class);
 		when(path.getPath()).thenReturn("res/page");
 
-		// when
+		// WHEN
 		CompoPath compoPath = new CompoPath(project, path);
 
-		// then
+		// THEN
 		assertThat(compoPath.value(), equalTo("res/page/"));
 	}
 
@@ -51,7 +51,7 @@ public class CompoPathTest {
 
 	@Test
 	public void GivenCompoDirWithExistingLayout_WhenGetLayoutPath_ThenHtmlFile() {
-		// given
+		// GIVEN
 		FilePath layoutPath = mock(FilePath.class);
 		when(layoutPath.value()).thenReturn("res/page/page.htm");
 		when(project.createFilePath("res/page/page.htm")).thenReturn(layoutPath);
@@ -62,10 +62,10 @@ public class CompoPathTest {
 
 		CompoPath compo = new CompoPath(project, path);
 
-		// when
+		// WHEN
 		FilePath compoLayoutPath = compo.getLayoutPath();
 
-		// then
+		// THEN
 		assertThat(compoLayoutPath.value(), equalTo("res/page/page.htm"));
 	}
 
@@ -75,7 +75,7 @@ public class CompoPathTest {
 	 */
 	@Test
 	public void GivenInlineCompoWithMissingLayout_WhenGetLayoutPath_ThenReturnLayout() {
-		// given
+		// GIVEN
 		FilePath layoutPath = mock(FilePath.class);
 		when(project.createFilePath("res/page.htm")).thenReturn(layoutPath);
 
@@ -84,19 +84,24 @@ public class CompoPathTest {
 
 		CompoPath compo = new CompoPath(project, path);
 		
-		// when
+		// WHEN
 		FilePath compoLayoutPath = compo.getLayoutPath();
 		
-		// then
+		// THEN
 		assertThat(compoLayoutPath, notNullValue());
 		assertFalse(compoLayoutPath.exists());
 	}
 
 	@Test
-	public void GivenDirAndCompoPaths_WhenTestEqual_ThenTrue() {
+	public void GivenSamePath_WhenCreateDirAndCompoPaths_ThenEquals() {
+		// GIVEN
 		final String path = "res/compo/video-player/";
+
+		// WHEN
 		FilePath dirPath = new FilePath(project, path);
 		FilePath compoPath = new CompoPath(project, path);
+
+		// THEN
         assertEquals(dirPath, compoPath);
 	}
 

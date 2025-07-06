@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ComponentTest {
+public class ComponentCreateTest {
     @Mock
     private Project project;
     @Mock
@@ -63,12 +63,15 @@ public class ComponentTest {
     }
 
     @Test
-    public void constructor() {
+    public void GivenNoCompoDescriptor_ThenDefaultProperties() {
+        // GIVEN
         String htm = "<h1>Compo</h1>";
         when(layoutPath.getReader()).thenReturn(new StringReader(htm));
 
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
 
+        // THEN
         assertThat(compo.getProject(), equalTo(project));
         assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
         assertThat(compo.getName(), equalTo("layout"));
@@ -86,7 +89,8 @@ public class ComponentTest {
     }
 
     @Test
-    public void descriptor() {
+    public void GivenCompoDescriptor_ThenDescriptorPropertiesLoaded() {
+        // GIVEN
         String descriptor = "<compo>" + //
                 "<title>Page Compo</title>" + //
                 "<description>Page description.</description>" + //
@@ -102,8 +106,10 @@ public class ComponentTest {
         String layout = "<h1>Compo</h1>";
         when(layoutPath.getReader()).thenReturn(new StringReader(layout));
 
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
 
+        // THEN
         assertThat(compo.getProject(), equalTo(project));
         assertThat(compo.getBaseLayoutPath(), equalTo(layoutPath));
         assertThat(compo.getName(), equalTo("layout"));
@@ -124,14 +130,17 @@ public class ComponentTest {
     }
 
     @Test
-    public void standalone() {
+    public void GivenStandalonePage_ThenBodyLayoutCreated() {
+        // GIVEN
         String htm = "<body>" + //
                 "	<h1>Simple Layout</h1>" + //
                 "</body>";
         when(layoutPath.getReader()).thenReturn(new StringReader(htm));
 
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
 
+        // THEN
         Element layout = compo.getLayout();
         assertThat(layout, notNullValue());
         assertThat(layout.getTag(), equalTo("body"));
@@ -139,8 +148,13 @@ public class ComponentTest {
     }
 
     @Test(expected = WoodException.class)
-    public void missingLayoutFile() {
+    public void GivenMissingLayoutFile_ThenWoodException() {
+        // GIVEN
         when(compoPath.getLayoutPath()).thenThrow(WoodException.class);
-        new Component(compoPath, referenceHandler);
+
+        // WHEN
+        new Component(compoPath, referenceHandler, true);
+
+        // THEN
     }
 }

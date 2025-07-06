@@ -37,10 +37,14 @@ public class ComponentIntegrationTest {
     }
 
     @Test
-    public void createComponent() {
-        Component compo = new Component(new CompoPath(project, "res/compo"), referenceHandler, true);
-        Element layout = compo.getLayout();
+    public void GivenProjectFileSystem_WhenCreateComponent_ThenLayoutCreated() {
+        // GIVEN
 
+        // WHEN
+        Component compo = new Component(new CompoPath(project, "res/compo"), referenceHandler, true);
+
+        // THEN
+        Element layout = compo.getLayout();
         assertThat(layout, notNullValue());
         assertThat(layout.getTag(), equalTo("body"));
         assertThat(compo.getProject(), equalTo(project));

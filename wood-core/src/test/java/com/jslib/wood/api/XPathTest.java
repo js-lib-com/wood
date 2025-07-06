@@ -22,7 +22,7 @@ public class XPathTest {
     }
 
     @Test
-    public void findByAttr_OnDocument() throws SAXException, XPathExpressionException {
+    public void  GivenDocument_WhenFindAnywhereByAttr_ThenElementsFound() throws SAXException, XPathExpressionException {
         String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
                 "<body xmlns:w='js-lib.com/wood'>" + //
                 "	<section w:editable='section-1'></section>" + //
@@ -41,7 +41,7 @@ public class XPathTest {
     }
 
     @Test
-    public void findByAttr_OnRootElement() throws SAXException, XPathExpressionException {
+    public void GivenRootElement_WhenFindByAttr_ThenElementsFound() throws SAXException, XPathExpressionException {
         String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
                 "<body xmlns:w='js-lib.com/wood'>" + //
                 "	<section w:editable='section-1'></section>" + //

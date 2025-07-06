@@ -83,7 +83,7 @@ public class ComponentAggregationTest {
      */
     @Test
     public void GivenSimpleAggregation_ThenIncludeChildLayout() {
-        // given
+        // GIVEN
         String childHTML = "<div>" + //
                 "	<h1>Child</h1>" + //
                 "</div>";
@@ -96,11 +96,11 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         EList headings = layout.findByTag("h1");
         assertThat(headings.size(), equalTo(2));
         assertThat(headings.item(0).getText(), equalTo("Component"));
@@ -109,7 +109,7 @@ public class ComponentAggregationTest {
 
     @Test
     public void GivenSimpleAggregationAndAttributeCollision_ThenParentTakesPrecedence() {
-        // given
+        // GIVEN
         String childHTML = "<div id='child'></div>";
         when(childLayout.getReader()).thenReturn(new StringReader(childHTML));
 
@@ -119,17 +119,17 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         assertThat(layout.getByTag("div").getAttr("id"), equalTo("parent"));
     }
 
     @Test
     public void GivenSimpleAggregationAndChildTagNameWithDash_ThenIncludeChildLayout() {
-        // given
+        // GIVEN
         String childHTML = "<x-div>" + //
                 "	<h1>Child</h1>" + //
                 "</x-div>";
@@ -142,11 +142,11 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         EList headings = layout.findByTag("h1");
         assertThat(headings.size(), equalTo(2));
         assertThat(headings.item(0).getText(), equalTo("Component"));
@@ -158,7 +158,7 @@ public class ComponentAggregationTest {
      */
     @Test
     public void GivenSimpleAggregation_ThenEraseOperators() throws XPathExpressionException {
-        // given
+        // GIVEN
         String childHTML = "<div>" + //
                 "	<h1>@param/title</h1>" + //
                 "</div>";
@@ -171,18 +171,18 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:compo]"), nullValue());
         assertThat(layout.getByXPathNS(WOOD.NS, "//*[@w:param]"), nullValue());
     }
 
     @Test
     public void GivenAggregationOnStandaloneTemplate_ThenIncludeResolvedTemplate() {
-        // given
+        // GIVEN
         FilePath templateLayout = Mockito.mock(FilePath.class);
         when(templateLayout.exists()).thenReturn(true);
         when(templateLayout.isLayout()).thenReturn(true);
@@ -217,11 +217,11 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         assertThat(layout.getTag(), equalTo("body"));
 
         assertThat(layout.getByTag("article"), notNullValue());
@@ -239,7 +239,7 @@ public class ComponentAggregationTest {
 
     @Test
     public void GivenAggregationOnStandaloneTemplate_ThenMergeAttributes() {
-        // given
+        // GIVEN
         FilePath templateLayout = Mockito.mock(FilePath.class);
         when(templateLayout.exists()).thenReturn(true);
         when(templateLayout.isLayout()).thenReturn(true);
@@ -269,11 +269,11 @@ public class ComponentAggregationTest {
         when(compoLayout.getReader()).thenReturn(new StringReader(compoHTML));
         when(project.createCompoPath("res/child")).thenReturn(childPath);
 
-        // when
+        // WHEN
         Component compo = new Component(compoPath, referenceHandler, true);
         Element layout = compo.getLayout();
 
-        // then
+        // THEN
         Element article = layout.getByTag("article");
         assertThat(article.getAttr("id"), equalTo("component"));
         assertThat(article.getAttr("name"), equalTo("child"));
