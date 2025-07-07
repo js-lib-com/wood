@@ -49,17 +49,6 @@ public class XmlnsOperatorsHandler implements IOperatorsHandler {
     }
 
     @Override
-    public Element getByOperator(Document document, Operator operator) {
-        assert document != null : "Layout document argument is null";
-        try {
-            return document.getByXPathNS(namespaceContext, buildXPath(operator));
-        } catch (XPathExpressionException e) {
-            // XPath expression is hard coded
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public Element getByOperator(Element element, Operator operator) {
         assert element != null : "Layout element argument is null";
         try {

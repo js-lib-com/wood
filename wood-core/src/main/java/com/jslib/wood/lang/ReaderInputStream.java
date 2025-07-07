@@ -143,7 +143,7 @@ public class ReaderInputStream extends InputStream
 
   /**
    * Reads the next byte of data from the input stream. If internal stream buffer contains at least one byte just return
-   * it. Otherwise delegates {@link #fillBytesBuffer()} to add more bytes, bytes that are in the end read and encoded
+   * it. Otherwise, delegates {@link #fillBytesBuffer()} to add more bytes, bytes that are in the end read and encoded
    * from source reader.
    * 
    * @return either the byte read or <code>-1</code> if the end of the stream has been reached.

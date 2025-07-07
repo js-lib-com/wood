@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 /**
  * Component path is the {@link FilePath} to the project directory where component files reside. Being a file path is
- * relative to the project root; it is also a sequence of path segments but it has no trailing separator. Last path segment is
+ * relative to the project root; it is also a sequence of path segments, but it has no trailing separator. Last path segment is
  * usually known as component name.
  * <p>
  * Component paths are used on layout files to declare inheritance and composition. Here is a sample usage for component paths.
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * </pre>
  * <p>
  * Below is the component path syntax. Component path is a sequence of path segments, the last segment being called component
- * name. Both path segment and component names uses US-ASCII alphanumeric characters and dash (-). Note that underscore (_) is
+ * name. Both paths segment and component names uses US-ASCII alphanumeric characters and dash (-). Note that underscore (_) is
  * not supported since is used for variants separator.
  *
  * <pre>
@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * ; ALPHA and DIGIT are described by RFC5234, Appendix B.1
  * </pre>
  * <p>
- * A component always has a layout file. It is a HTML file with basename equal to parent directory name and this path instance
+ * A component always has a layout file. It is an HTML file with basename equal to parent directory name and this path instance
  * points to component directory. In this case component directory contains, beside layout, couple related files: styles,
  * scripts, media files, variables and descriptor.
  * <p>

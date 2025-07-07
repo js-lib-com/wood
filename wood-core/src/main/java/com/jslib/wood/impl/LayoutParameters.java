@@ -18,7 +18,7 @@ import com.jslib.wood.util.StringsUtil;
  * reference acts as a placeholder that is replaced with parameter value.
  * <p>
  * Below is an example child component layout with <code>caption</code> parameter. The number of parameter references is not
- * limited but all should be defined when declare the child component. Also a parameter references can be used multiple times in
+ * limited but all should be defined when declare the child component. Also, a parameter references can be used multiple times in
  * a given layout. Because parameter references is text replaced with string value, it can appear into layout anywhere a string
  * is valid.
  * 
@@ -51,7 +51,7 @@ import com.jslib.wood.util.StringsUtil;
  */
 public class LayoutParameters {
 	/** Parameters storage. */
-	private final Map<String, String> parameters = new HashMap<String, String>();
+	private final Map<String, String> parameters = new HashMap<>();
 
 	/**
 	 * Reload layout parameters from parameters definition, possible null. If <code>parameters</code> argument is null this
@@ -59,14 +59,14 @@ public class LayoutParameters {
 	 * <p>
 	 * Note that current parameters, if any, are lost. This method perform clean up before parameters loading.
 	 * 
-	 * @param parametersDefintion layout parameters definition, null accepted.
+	 * @param parametersDefinition layout parameters definition, null accepted.
 	 */
-	public void reload(String parametersDefintion) {
-		if (parametersDefintion == null) {
+	public void reload(String parametersDefinition) {
+		if (parametersDefinition == null) {
 			return;
 		}
 		parameters.clear();
-		for (Pair pair : StringsUtil.splitPairs(parametersDefintion, ';', ':')) {
+		for (Pair pair : StringsUtil.splitPairs(parametersDefinition, ';', ':')) {
 			parameters.put(pair.first(), StringsUtil.escapeXML(pair.second()));
 		}
 	}

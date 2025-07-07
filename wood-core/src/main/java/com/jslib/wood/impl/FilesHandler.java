@@ -17,7 +17,7 @@ import com.jslib.wood.FilePath;
  * });
  * </pre>
  * <p>
- * Note that above snippet traverses only direct child files. To scan entire files hierarchy one may use an recursive
+ * Note that above snippet traverses only direct child files. To scan entire files hierarchy one may use a recursive
  * approach.
  * 
  * <pre>
@@ -45,9 +45,9 @@ import com.jslib.wood.FilePath;
 public abstract class FilesHandler
 {
   /**
-   * Sub-directory handler. Invoked when a sub-directory is found.
+   * Subdirectory handler. Invoked when a subdirectory is found.
    * 
-   * @param dir sub-directory.
+   * @param dir subdirectory.
    */
   public void onDirectory(FilePath dir)
   {

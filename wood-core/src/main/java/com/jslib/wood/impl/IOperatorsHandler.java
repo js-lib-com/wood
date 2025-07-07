@@ -33,8 +33,6 @@ public interface IOperatorsHandler
    */
   EList findByOperator(Element element, Operator operator);
 
-  Element getByOperator(Document document, Operator operator);
-
   /**
    * Get the first descendant element possessing requested operator.
    * 

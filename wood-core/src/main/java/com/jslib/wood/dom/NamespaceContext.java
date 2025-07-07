@@ -6,7 +6,7 @@ import java.util.Iterator;
  * Abstract implementation for Java XML name space context. This class implements null methods and allows to override only the
  * actual needed ones.
  * <p>
- * XML name space context is used in conjunction with XPath evaluation when expression contains name space prefixes. A XML
+ * XML name space context is used in conjunction with XPath evaluation when expression contains name space prefixes. An XML
  * document may contain multiple name spaces and is possible to have XPath expression with multiple prefixes, for example
  * <code>books:booklist/science:book</code>. On the other hand evaluation process needs the name space URI that is the only way
  * to identify the name space since the prefix is document / user specific. This class is uses to resolve name space prefixes to

@@ -35,17 +35,6 @@ public class AttrOperatorsHandler implements IOperatorsHandler {
 	}
 
 	@Override
-	public Element getByOperator(Document document, Operator operator) {
-		assert document != null: "Layout document argument is null";
-		try {
-			return document.getByXPath(buildXPath(operator));
-		} catch (XPathExpressionException e) {
-			// XPath expression is hard coded
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@Override
 	public Element getByOperator(Element element, Operator operator) {
 		assert element != null: "Layout element argument is null";
 		try {

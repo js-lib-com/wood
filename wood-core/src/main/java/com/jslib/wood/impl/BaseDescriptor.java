@@ -87,6 +87,7 @@ abstract class BaseDescriptor {
 		return descriptors;
 	}
 
+	@SuppressWarnings("all")
 	/**
 	 * Get scripts defined by this component descriptor, both third party and local scripts. Returns a list of absolute URLs
 	 * and/or relative paths in the order and in format defined into descriptor. There is no attempt to check path validity; it

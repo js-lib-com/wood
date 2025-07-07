@@ -105,10 +105,10 @@ public interface Document {
 
     /**
      * Find elements by tag. Return all elements from this document having specified tag name. Returns empty list if there
-     * is not element with requested tag name. Note that wild card asterisk (*) for tag name matches all tags in which
+     * is no element with requested tag name. Note that wild card asterisk (*) for tag name matches all tags in which
      * case all elements are returned.
      * <p>
-     * On XML documents tag name is case-sensitive whereas in HTML is not. For consistency sake is recommended to always
+     * On XML documents tag name is case-sensitive whereas in HTML is not. For consistency’s sake is recommended to always
      * consider tags name as case-sensitive. If document contains namespaces but is parsed without namespace support, tag
      * name for namespace elements should use namespace prefix.
      *
@@ -119,7 +119,7 @@ public interface Document {
 
     /**
      * Get element by XPath. Evaluate XPath expression and return first element found. Returns null if XPath evaluation
-     * has no results. Note that XPath expression is case sensitive; this is especially relevant for HTML documents, that
+     * has no results. Note that XPath expression is case-sensitive; this is especially relevant for HTML documents, that
      * uses upper case for tag names.
      * <p>
      * XPath expression <code>xpath</code> can be formatted as supported by {@link String#format} in which case
@@ -134,7 +134,7 @@ public interface Document {
 
     /**
      * Evaluate XPath expression with namespace prefixes and return first element found. Returns null if XPath evaluation
-     * has no results. Note that XPath expression is case sensitive; this is especially relevant for HTML documents that
+     * has no results. Note that XPath expression is case-sensitive; this is especially relevant for HTML documents that
      * uses upper case for tag names.
      * <p>
      * Name space context maps prefixes to namespace URI. See {@link NamespaceContext} for a discussion about expressions
@@ -153,7 +153,7 @@ public interface Document {
 
     /**
      * Evaluate XPath expression and return the list of found elements. Returns empty list if XPath evaluation has no
-     * results. Note that XPath expression is case sensitive; this is especially relevant for HTML documents that uses
+     * results. Note that XPath expression is case-sensitive; this is especially relevant for HTML documents that uses
      * upper case for tag names.
      * <p>
      * XPath expression <code>xpath</code> can be formatted as supported by {@link String#format} in which case
@@ -168,7 +168,7 @@ public interface Document {
 
     /**
      * Evaluate XPath expression with namespace prefixes and return the list of found elements. Returns empty list if
-     * XPath evaluation has no results. Note that XPath expression is case sensitive; this is especially relevant for HTML
+     * XPath evaluation has no results. Note that XPath expression is case-sensitive; this is especially relevant for HTML
      * documents that uses upper case for tag names.
      * <p>
      * Name space context maps prefixes to namespace URI. See {@link NamespaceContext} for a discussion about expressions
@@ -204,26 +204,6 @@ public interface Document {
     EList findByCssClass(String cssClass);
 
     /**
-     * Get element by attribute name and optional value. Retrieve first element possessing requested attribute. Returns
-     * null if there is no element with requested attribute name and value, if present.
-     *
-     * @param name  attribute name,
-     * @param value optional attribute value.
-     * @return found element or null.
-     */
-    Element getByAttr(String name, String... value);
-
-    /**
-     * Get the list of document elements having requested attribute. Requested attribute is identified by its name and
-     * optional by its value. Returns empty list if there is no element with requested attribute.
-     *
-     * @param name  attribute name,
-     * @param value optional attribute value.
-     * @return found element or null.
-     */
-    EList findByAttr(String name, String... value);
-
-    /**
      * Serialize this document to standard output. Mainly for quick debugging.
      */
     void dump();
@@ -249,12 +229,12 @@ public interface Document {
     void serialize(Writer writer, Object... flags) throws IOException;
 
     /**
-     * Remove namespace declaration for requested namespace URI. Usually there is a single namespace declaration on a XML
-     * document. Anyway, if there are multiple declarations for the same namesapce URI this method remove them all. This
+     * Remove namespace declaration for requested namespace URI. Usually there is a single namespace declaration on an XML
+     * document. Anyway, if there are multiple declarations for the same namespace URI this method remove them all. This
      * method has effect only on documents with support for namespace.
      * <p>
      * Namespace declaration is an element attribute with special syntax:
-     * <code>xmlns-litteral:user-defined-prefix="namespace-uri"</code>, where xmlns-litteral is the reserved keyword
+     * <code>xmlns-literal:user-defined-prefix="namespace-uri"</code>, where xmlns-literal is the reserved keyword
      * <code>xmlns</code> plus prefix that is user defined. Namespace declaration creates a bound between prefix and
      * namespace URI. Although on XML source author uses prefix for brevity on for element and attribute names, internally
      * DOM keeps the namespace URI to avoid dependency on user defined prefix.

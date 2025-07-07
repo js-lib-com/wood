@@ -23,7 +23,7 @@ public class MediaQueries implements Comparable<MediaQueries> {
 			return false;
 		}
 		if(queries.contains(query)) {
-			throw new WoodException("Media query defintion override for alias |%s|.", alias);
+			throw new WoodException("Media query definition override for alias %s", alias);
 		}
 		queries.add(query);
 		return true;
@@ -55,7 +55,7 @@ public class MediaQueries implements Comparable<MediaQueries> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((queries == null) ? 0 : queries.hashCode());
+		result = prime * result + queries.hashCode();
 		return result;
 	}
 
@@ -68,11 +68,6 @@ public class MediaQueries implements Comparable<MediaQueries> {
 		if (getClass() != obj.getClass())
 			return false;
 		MediaQueries other = (MediaQueries) obj;
-		if (queries == null) {
-			if (other.queries != null)
-				return false;
-		} else if (!queries.equals(other.queries))
-			return false;
-		return true;
-	}
+        return queries.equals(other.queries);
+    }
 }

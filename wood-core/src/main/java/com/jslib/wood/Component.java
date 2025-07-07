@@ -93,7 +93,7 @@ public class Component {
 	 */
 	private final List<IScriptDescriptor> scriptDescriptors = new ArrayList<>();
 
-	private ComponentDescriptor descriptor;
+	private final ComponentDescriptor descriptor;
 
 	/**
 	 * Consolidated layout for this component instance. It contains layouts from templates hierarchy and widgets tree. Also,

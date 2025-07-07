@@ -48,15 +48,7 @@ final class XPATH {
      * @return XPath expression.
      */
     static String getElementsByClassName(String className) {
-        StringBuilder xpath = new StringBuilder();
-        xpath.append("descendant-or-self::node()");
-        xpath.append("[contains(");
-        xpath.append("concat(' ', normalize-space(@class), ' '),");
-        xpath.append("' ");
-        xpath.append(className);
-        xpath.append(" '");
-        xpath.append(")]");
-        return xpath.toString();
+        return "descendant-or-self::node()[contains(concat(' ', normalize-space(@class), ' '),' " + className + " ')]";
     }
 
     /**

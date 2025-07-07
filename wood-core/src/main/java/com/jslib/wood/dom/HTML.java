@@ -11,10 +11,8 @@ import java.util.Map;
  * @author Iulian Rotaru
  */
 public final class HTML {
-	public static final String TAG = "html";
-
 	/** HTML tags declared without content. */
-	public static final Collection<String> EMPTY_TAGS = new ArrayList<String>();
+	public static final Collection<String> EMPTY_TAGS = new ArrayList<>();
 	static {
 		EMPTY_TAGS.add("area");
 		EMPTY_TAGS.add("base");
@@ -29,7 +27,7 @@ public final class HTML {
 		EMPTY_TAGS.add("link");
 		EMPTY_TAGS.add("meta");
 		EMPTY_TAGS.add("param");
-	};
+	}
 
 	/** Default attributes value. */
 	public static final Map<String, String> DEFAULT_ATTRS = new HashMap<>();
@@ -40,7 +38,7 @@ public final class HTML {
 		DEFAULT_ATTRS.put("xml:space", "preserve");
 		DEFAULT_ATTRS.put("shape", "rect");
 		DEFAULT_ATTRS.put("valuetype", "data");
-	};
+	}
 
 	/** HTML elements with text nodes serialized with no escape. */
 	public static final Collection<String> RAW_TAGS = new ArrayList<>();

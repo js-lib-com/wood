@@ -9,7 +9,7 @@ import static com.jslib.wood.util.StringsUtil.format;
 
 /**
  * Project recognized file types, based on file extension. By convention a component has next file types: layout (HTM), style
- * (CSS), script (JS) and variables and descriptor (XML). All other are considered media files, mostly support images.
+ * (CSS), script (JS) and variables and descriptor (XML). All other types are considered media files, mostly support images.
  * 
  * @author Iulian Rotaru
  * @since 1.0

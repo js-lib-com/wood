@@ -1,9 +1,11 @@
 package com.jslib.wood.util;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -45,7 +47,7 @@ public class FilesUtil {
      * @throws IOException           if copy operation fails, including if <code>target</code> is a directory.
      */
     public static long copy(File source, File target) throws FileNotFoundException, IOException {
-        return copy(new FileInputStream(source), new FileOutputStream(target));
+        return copy(Files.newInputStream(source.toPath()), Files.newOutputStream(target.toPath()));
     }
 
     /**
@@ -61,7 +63,7 @@ public class FilesUtil {
      */
     public static long copy(File file, OutputStream outputStream) throws IOException {
         assert file != null : "Input file argument is null";
-        return copy(new FileInputStream(file), outputStream);
+        return copy(Files.newInputStream(file.toPath()), outputStream);
     }
 
     /**
@@ -226,23 +228,7 @@ public class FilesUtil {
         if (extensionDotIndex == 0) {
             extensionDotIndex = path.length();
         }
-        StringBuilder sb = new StringBuilder(path.length());
-        sb.append(path.substring(0, extensionDotIndex));
-        sb.append(newExtension);
-        return sb.toString();
-    }
-
-    /**
-     * Replace extension on given file and return resulting file.
-     *
-     * @param file         file to replace extension,
-     * @param newExtension newly extension.
-     * @return newly created file.
-     * @throws IllegalArgumentException if file parameter is null.
-     */
-    public static File replaceExtension(File file, String newExtension) throws IllegalArgumentException {
-        assert file != null : "File argument is null";
-        return new File(replaceExtension(file.getPath(), newExtension));
+        return path.substring(0, extensionDotIndex) + newExtension;
     }
 
     /**
@@ -328,15 +314,13 @@ public class FilesUtil {
      * {@link File#delete()} method, like <code>Files.removeFilesHierarchy(dir).delete();</code>.
      *
      * @param baseDir existing, not null, base directory to clean-up.
-     * @return base directory argument for method chaining, mainly for {@link File#delete()}.
      * @throws IllegalArgumentException if base directory argument is null or is not an existing directory.
      * @throws IOException              if remove operation fails.
      */
-    public static File removeFilesHierarchy(File baseDir) throws IOException {
+    public static void removeFilesHierarchy(File baseDir) throws IOException {
         assert baseDir != null : "Base directory argument is null";
         assert baseDir.isDirectory() : "Base directory argument is not a directory";
         removeDirectory(baseDir);
-        return baseDir;
     }
 
     /**
@@ -353,7 +337,7 @@ public class FilesUtil {
      */
     private static void removeDirectory(File directory) throws IOException {
         // File.listFiles() may return null is file is not a directory condition already tested before entering this method
-        for (File file : directory.listFiles()) {
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
             if (file.isDirectory()) {
                 removeDirectory(file);
             }

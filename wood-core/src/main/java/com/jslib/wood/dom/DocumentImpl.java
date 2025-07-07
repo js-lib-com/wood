@@ -1,16 +1,15 @@
 package com.jslib.wood.dom;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.html.dom.HTMLDocumentImpl;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -200,28 +199,6 @@ final class DocumentImpl implements Document {
     }
 
     @Override
-    public Element getByAttr(String name, String... value) {
-        assert name != null && !name.isEmpty() : "Attribute name argument is null or empty";
-        try {
-            return getByXPath(XPATH.getElementsByAttrNameValue(name, value));
-        } catch (XPathExpressionException e) {
-            // XPath expression is build internally and cannot fail
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public EList findByAttr(String name, String... value) {
-        assert name != null && !name.isEmpty() : "Attribute name argument is null or empty";
-        try {
-            return findByXPath(XPATH.getElementsByAttrNameValue(name, value));
-        } catch (XPathExpressionException e) {
-            // XPath expression is build internally and cannot fail
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void dump() {
         try {
             Serializer serializer = new Serializer(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
@@ -272,7 +249,7 @@ final class DocumentImpl implements Document {
         for (int i = 0; i < attributes.getLength(); ++i) {
             final Node attribute = attributes.item(i);
             final String name = attribute.getNodeName();
-            if (name != null && namespaceURI.equals(attribute.getNodeValue()) && name.startsWith("xmlns:")) {
+            if (namespaceURI.equals(attribute.getNodeValue()) && name.startsWith("xmlns:")) {
                 // an element can have only one declaration for specific namespace URI
                 element.removeAttribute(name);
                 break;

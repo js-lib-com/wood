@@ -368,6 +368,7 @@ public interface Element {
      * @return this object.
      * @throws IllegalArgumentException if attempt to create new attribute with missing prefix.
      */
+    @SuppressWarnings("UnusedReturnValue")
     Element setAttrNS(String namespaceURI, String name, String value) throws IllegalArgumentException;
 
     /**
@@ -433,6 +434,7 @@ public interface Element {
      * @param name         attribute name.
      * @return this object.
      */
+    @SuppressWarnings("UnusedReturnValue")
     Element removeAttrNS(String namespaceURI, String name);
 
     /**

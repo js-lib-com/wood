@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 final class Serializer
 {
   /** Serializer writer. */
-  private BufferedWriter writer;
+  private final BufferedWriter writer;
 
   /**
    * Is XML escape disabled. There are HTML tags, like <code>script</code>, that need to serialize their text nodes with
@@ -42,7 +42,7 @@ final class Serializer
 
   private int indentationLevel;
 
-  private Stack<Short> nodeTypes = new Stack<>();
+  private final Stack<Short> nodeTypes = new Stack<>();
 
   /**
    * Create serializer instance using given writer for IO operations. This constructor takes care to use
@@ -196,7 +196,7 @@ final class Serializer
 
   private short nodeType()
   {
-    if(nodeTypes.size() < 1) {
+    if(nodeTypes.isEmpty()) {
       return 0;
     }
     return nodeTypes.get(nodeTypes.size() - 1);

@@ -80,9 +80,6 @@ final class EListImpl implements EList {
          * Test if this iterator has more nodes.
          */
         public boolean hasNext() {
-            if (nodeList == null) {
-                return false;
-            }
             if (index == nodeList.getLength()) {
                 return false;
             }
@@ -90,10 +87,7 @@ final class EListImpl implements EList {
             // there are obscure conditions when node can be null at this point
             // discovered when running on real life documents but not understood
             // is like node list can hold null nodes...
-            if (node == null) {
-                return false;
-            }
-            return true;
+            return node != null;
         }
 
         /**

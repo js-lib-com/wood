@@ -11,9 +11,9 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.validation.Schema;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import static com.jslib.wood.util.StringsUtil.format;
 
@@ -46,10 +46,6 @@ final class DocumentBuilderImpl implements DocumentBuilder {
      * XML parser feature for schema validation.
      */
     private static final String FEAT_SCHEMA_VALIDATION = "http://apache.org/xml/features/validation/schema";
-    /**
-     * XML parser feature for DOCTYPE disable.
-     */
-    private static final String FEAT_DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
 
     private DocumentBuilderImpl() {
         log.trace("DocumentBuilderImpl()");
@@ -57,19 +53,8 @@ final class DocumentBuilderImpl implements DocumentBuilder {
 
     @Override
     public Document createXML(String root) {
-        return createXML(root, false);
-    }
-
-    /**
-     * Helper method for XML document creation.
-     *
-     * @param root         name of the root element,
-     * @param useNamespace flag to control name space awareness.
-     * @return newly create document.
-     */
-    private static Document createXML(String root, boolean useNamespace) {
         assert root != null && !root.isEmpty() : "Root element argument is null or empty";
-        org.w3c.dom.Document doc = getDocumentBuilder(null, useNamespace).newDocument();
+        org.w3c.dom.Document doc = getDocumentBuilder(false).newDocument();
         doc.appendChild(doc.createElement(root));
         return new DocumentImpl(doc);
     }
@@ -133,7 +118,7 @@ final class DocumentBuilderImpl implements DocumentBuilder {
      */
     private static Document loadXML(InputSource source, boolean useNamespace) throws IOException, SAXException {
         try {
-            org.w3c.dom.Document doc = getDocumentBuilder(null, useNamespace).parse(source);
+            org.w3c.dom.Document doc = getDocumentBuilder(useNamespace).parse(source);
             return new DocumentImpl(doc);
         } finally {
             close(source);
@@ -159,7 +144,7 @@ final class DocumentBuilderImpl implements DocumentBuilder {
     public Document loadHTML(File file) throws IOException, SAXException {
         assert file != null : "Source file argument is null";
         assert !file.isDirectory() : format("Source file argument |%s| is a directory.", file);
-        return loadHTML(new FileInputStream(file));
+        return loadHTML(Files.newInputStream(file.toPath()));
     }
 
     @Override
@@ -180,7 +165,7 @@ final class DocumentBuilderImpl implements DocumentBuilder {
         assert encoding != null && !encoding.isEmpty() : "Character encoding argument is null or empty";
         source.setEncoding(encoding);
         try {
-            return loadHTML(source, false);
+            return loadHTML(source);
         } finally {
             close(source);
         }
@@ -189,17 +174,16 @@ final class DocumentBuilderImpl implements DocumentBuilder {
     /**
      * Utility method for loading HTML document from input source.
      *
-     * @param source       input source,
-     * @param useNamespace flag set to true if document should be name space aware.
+     * @param source input source,
      * @return newly created HTML document.
      * @throws IOException  if reading from input stream fails.
      * @throws SAXException if input source is not valid HTML.
      */
-    private static Document loadHTML(InputSource source, boolean useNamespace) throws IOException, SAXException {
+    private static Document loadHTML(InputSource source) throws IOException, SAXException {
         assert source != null : "Source argument is null";
         DOMParser parser = new DOMParser();
         // source http://nekohtml.sourceforge.net/faq.html#hierarchy
-        parser.setFeature(FEAT_NAMESPACES, useNamespace);
+        parser.setFeature(FEAT_NAMESPACES, false);
         parser.parse(source);
         return new DocumentImpl(parser.getDocument());
     }
@@ -264,42 +248,20 @@ final class DocumentBuilderImpl implements DocumentBuilder {
     /**
      * Get XML document builder.
      *
-     * @param schema       XML schema,
      * @param useNamespace flag to use name space.
      * @return XML document builder.
      */
-    private static javax.xml.parsers.DocumentBuilder getDocumentBuilder(Schema schema, boolean useNamespace) {
+    private static javax.xml.parsers.DocumentBuilder getDocumentBuilder(boolean useNamespace) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setIgnoringComments(true);
         dbf.setIgnoringElementContentWhitespace(true);
         dbf.setCoalescing(true);
 
         try {
-            if (schema != null) {
-                // because schema is used throws fatal error if XML document contains DOCTYPE declaration
-                dbf.setFeature(FEAT_DOCTYPE_DECL, true);
-
-                // excerpt from document builder factory api:
-                // Note that "the validation" here means a validating parser as defined in the XML recommendation. In other
-                // words,
-                // it essentially just controls the DTD validation.
-                // To use modern schema languages such as W3C XML Schema or RELAX NG instead of DTD, you can configure your
-                // parser
-                // to be a non-validating parser by leaving the setValidating(boolean) method false, then use the
-                // setSchema(Schema)
-                // method to associate a schema to a parser.
-                dbf.setValidating(false);
-
-                // XML schema validation requires namespace support
-                dbf.setFeature(FEAT_SCHEMA_VALIDATION, true);
-                dbf.setNamespaceAware(true);
-                dbf.setSchema(schema);
-            } else {
-                // disable parser XML schema support; it is enabled by default
-                dbf.setFeature(FEAT_SCHEMA_VALIDATION, false);
-                dbf.setValidating(false);
-                dbf.setNamespaceAware(useNamespace);
-            }
+            // disable parser XML schema support; it is enabled by default
+            dbf.setFeature(FEAT_SCHEMA_VALIDATION, false);
+            dbf.setValidating(false);
+            dbf.setNamespaceAware(useNamespace);
 
             javax.xml.parsers.DocumentBuilder db = dbf.newDocumentBuilder();
             db.setEntityResolver(new EntityResolverImpl());

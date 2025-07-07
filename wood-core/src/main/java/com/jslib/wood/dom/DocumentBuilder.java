@@ -105,7 +105,7 @@ public interface DocumentBuilder {
     Document parseHTML(String string) throws SAXException;
 
     /**
-     * Load HTML document from source file using UTF-8 encoding. Returned document has not support for name space.
+     * Load HTML document from source file using UTF-8 encoding. Returned document has no support for name space.
      *
      * @param file not null, ordinary, source file.
      * @return newly created HTML document.
@@ -121,8 +121,8 @@ public interface DocumentBuilder {
      * @param stream input bytes stream.
      * @return newly created HTML document.
      * @throws IllegalArgumentException if <code>stream</code> is null.
-     * @throws SAXException
-     * @throws IOException
+     * @throws SAXException if XML stream parsing fails.
+     * @throws IOException if stream reading fails.
      */
     Document loadHTML(InputStream stream) throws IOException, SAXException;
 
@@ -134,8 +134,8 @@ public interface DocumentBuilder {
      * @return newly created HTML document.
      * @throws IllegalArgumentException if <code>stream</code> is null.
      * @throws IllegalArgumentException if <code>encoding</code> is null or empty.
-     * @throws SAXException
-     * @throws IOException
+     * @throws SAXException if XML stream parsing fails.
+     * @throws IOException if stream reading fails.
      */
     Document loadHTML(InputStream stream, String encoding) throws IOException, SAXException;
 
