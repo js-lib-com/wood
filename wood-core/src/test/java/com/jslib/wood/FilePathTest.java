@@ -106,50 +106,50 @@ public class FilePathTest {
 
     @Test
     public void GivenValidDirectory_WhenGetBaseName_ThenExpectedValue() {
-        // given
+        // GIVEN
         FilePath path = new FilePath(project, "res/page/about/");
 
-        // when
+        // WHEN
         String basename = path.getBasename();
 
-        // then
+        // THEN
         assertThat(basename, equalTo("about"));
     }
 
     @Test
     public void GivenValidFile_WhenGetBaseName_ThenExpectedValue() {
-        // given
+        // GIVEN
         FilePath path = new FilePath(project, "res/compo/compo.css");
 
-        // when
+        // WHEN
         String basename = path.getBasename();
 
-        // then
+        // THEN
         assertThat(basename, equalTo("compo"));
     }
 
     @Test
     public void GivenValidFileWithVariant_WhenGetBaseName_ThenExpectedValue() {
-        // given
+        // GIVEN
         FilePath path = new FilePath(project, "res/compo/strings_de.xml");
 
-        // when
+        // WHEN
         String basename = path.getBasename();
 
-        // then
+        // THEN
         assertThat(basename, equalTo("strings"));
     }
 
     @Test
     public void GivenLayoutFileWithVariants_WhenCloneToStyle_ThenPreserveState() {
-        // given
+        // GIVEN
         when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "x", 0));
         FilePath layoutFile = new FilePath(project, "res/compo/compo_w800.htm");
 
-        // when
+        // WHEN
         FilePath styleFile = layoutFile.cloneTo(FileType.STYLE);
 
-        // then
+        // THEN
         assertThat(layoutFile.isLayout(), equalTo(true));
         assertThat(styleFile.isStyle(), equalTo(true));
         assertThat(layoutFile.getBasename(), equalTo(styleFile.getBasename()));
@@ -160,25 +160,25 @@ public class FilePathTest {
 
     @Test
     public void GivenFilePath_WhenGetParentDir_ThenExpectedValue() {
-        // given
+        // GIVEN
         FilePath path = new FilePath(project, "res/asset/background.jpg");
 
-        // when
+        // WHEN
         FilePath parentDir = path.getParentDir();
 
-        // then
+        // THEN
         assertThat(parentDir.value(), equalTo("res/asset/"));
     }
 
     @Test
     public void GivenDirectoryPath_WhenGetParentDir_ThenExpectedValue() {
-        // given
+        // GIVEN
         FilePath path = new FilePath(project, "res/asset/icons");
 
-        // when
+        // WHEN
         FilePath parentDir = path.getParentDir();
 
-        // then
+        // THEN
         assertThat(parentDir.value(), equalTo("res/asset/"));
     }
 
