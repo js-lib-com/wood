@@ -32,7 +32,7 @@ public class ThemeStyles {
 				break;
 
 			default:
-				if (file.isStyle()) {
+				if (file.isStyle() && !file.hasVariants()) {
 					this.styles.add(file);
 				}
 			}

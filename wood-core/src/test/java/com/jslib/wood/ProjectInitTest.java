@@ -75,7 +75,7 @@ public class ProjectInitTest {
 	@Test
 	public void GivenMediaQueryOnDescriptor_WhenGetMediaQueryDefinition_ThenNotNull() {
 		// GIVEN
-		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
+		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800","screen", "min-width: 800px")));
 
 		// WHEN
 		MediaQueryDefinition query = project().getMediaQueryDefinition("w800");
@@ -84,7 +84,6 @@ public class ProjectInitTest {
 		assertThat(query, notNullValue());
 		assertThat(query.getAlias(), equalTo("w800"));
 		assertThat(query.getExpression(), equalTo("min-width: 800px"));
-		assertThat(query.getWeight(), equalTo(1));
 	}
 
 	@Test

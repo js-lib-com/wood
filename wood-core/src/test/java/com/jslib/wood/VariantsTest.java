@@ -60,12 +60,12 @@ public class VariantsTest {
 	public void GivenSingleMediaQueryDefinition_ThenVariantsWithMediaQuery() {
 		// GIVEN
 		List<MediaQueryDefinition> definitions = new ArrayList<>();
-		definitions.add(new MediaQueryDefinition("w1200", "min-width: 1200px", 0));
-		definitions.add(new MediaQueryDefinition("W992", "max-width: 992px", 0));
-		definitions.add(new MediaQueryDefinition("h560", "min-height: 560px", 0));
-		definitions.add(new MediaQueryDefinition("H1234", "max-height: 1234px", 0));
-		definitions.add(new MediaQueryDefinition("landscape", "orientation: landscape", 0));
-		definitions.add(new MediaQueryDefinition("portrait", "orientation: portrait", 0));
+		definitions.add(new MediaQueryDefinition("w1200","screen", "min-width: 1200px"));
+		definitions.add(new MediaQueryDefinition("W992","screen", "max-width: 992px"));
+		definitions.add(new MediaQueryDefinition("h560","screen", "min-height: 560px"));
+		definitions.add(new MediaQueryDefinition("H1234","screen", "max-height: 1234px"));
+		definitions.add(new MediaQueryDefinition("landscape","screen", "orientation: landscape"));
+		definitions.add(new MediaQueryDefinition("portrait","screen", "orientation: portrait"));
 
 		for (MediaQueryDefinition definition : definitions) {
 			when(project.getMediaQueryDefinition(definition.getAlias())).thenReturn(definition);
@@ -84,9 +84,9 @@ public class VariantsTest {
 	public void GivenMultipleMediaQueryDefinitions_ThenVariantsWithAllMediaQueries() {
 		// GIVEN
 		List<MediaQueryDefinition> definitions = new ArrayList<>();
-		definitions.add(new MediaQueryDefinition("w1200", "min-width: 1200px", 0));
-		definitions.add(new MediaQueryDefinition("landscape", "orientation: landscape", 1));
-		definitions.add(new MediaQueryDefinition("r300", "resolution: 300dpi", 2));
+		definitions.add(new MediaQueryDefinition("w1200","screen", "min-width: 1200px"));
+		definitions.add(new MediaQueryDefinition("landscape","screen", "orientation: landscape"));
+		definitions.add(new MediaQueryDefinition("r300","screen", "resolution: 300dpi"));
 
 		when(project.getMediaQueryDefinition("w1200")).thenReturn(definitions.get(0));
 		when(project.getMediaQueryDefinition("landscape")).thenReturn(definitions.get(1));
@@ -98,7 +98,6 @@ public class VariantsTest {
 		// THEN
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(3));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 1200px ) and ( orientation: landscape ) and ( resolution: 300dpi )"));
-		assertThat(variants.getMediaQueries().getWeight(), equalTo(6L));
 	}
 
 	@Test(expected = WoodException.class)
@@ -109,7 +108,7 @@ public class VariantsTest {
 	@Test
 	public void GivenMediaQueryDefinitionAndLanguage_ThenLanguageAndMediaQueryIncluded() {
 		// GIVEN
-		MediaQueryDefinition definition = new MediaQueryDefinition("w1200", "min-width: 1200px", 0);
+		MediaQueryDefinition definition = new MediaQueryDefinition("w1200","screen", "min-width: 1200px");
 		when(project.getMediaQueryDefinition("w1200")).thenReturn(definition);
 
 		// WHEN
@@ -119,7 +118,6 @@ public class VariantsTest {
 		assertThat(variants.getLanguage(), equalTo("ro"));
 		assertThat(variants.getMediaQueries().getQueries(), hasSize(1));
 		assertThat(variants.getMediaQueries().getExpression(), equalTo("( min-width: 1200px )"));
-		assertThat(variants.getMediaQueries().getWeight(), equalTo(1L));
 	}
 
 	/** Null variants parameter on constructor should create empty variants instance. */

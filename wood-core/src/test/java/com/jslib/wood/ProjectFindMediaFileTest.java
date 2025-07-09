@@ -34,7 +34,7 @@ public class ProjectFindMediaFileTest {
 
 	@Before
 	public void beforeTest() throws Exception {
-		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
+		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800","screen", "min-width: 800px")));
 
 		when(descriptor.getBuildDir()).thenReturn("build");
 		when(descriptor.getAssetDir()).thenReturn("res/asset");

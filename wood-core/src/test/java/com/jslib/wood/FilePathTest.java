@@ -143,7 +143,7 @@ public class FilePathTest {
     @Test
     public void GivenLayoutFileWithVariants_WhenCloneToStyle_ThenPreserveState() {
         // GIVEN
-        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "x", 0));
+        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "screen", "x"));
         FilePath layoutFile = new FilePath(project, "res/compo/compo_w800.htm");
 
         // WHEN
@@ -218,10 +218,10 @@ public class FilePathTest {
 
     @Test
     public void GivenProjectWithMediaQuery_WhenGetVariants_ThenNotNullValue() {
-        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "min-width: 800px", 0));
-        when(project.getMediaQueryDefinition("h800")).thenReturn(new MediaQueryDefinition("h800", "min-height: 800px", 1));
-        when(project.getMediaQueryDefinition("lgd")).thenReturn(new MediaQueryDefinition("lgd", "min-width: 992px", 1));
-        when(project.getMediaQueryDefinition("portrait")).thenReturn(new MediaQueryDefinition("portrait", "orientation: portrait", 1));
+        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800","screen", "min-width: 800px"));
+        when(project.getMediaQueryDefinition("h800")).thenReturn(new MediaQueryDefinition("h800","screen", "min-height: 800px"));
+        when(project.getMediaQueryDefinition("lgd")).thenReturn(new MediaQueryDefinition("lgd","screen", "min-width: 992px"));
+        when(project.getMediaQueryDefinition("portrait")).thenReturn(new MediaQueryDefinition("portrait","screen", "orientation: portrait"));
 
         FilePath path = new FilePath(project, "res/compo/strings_de.xml");
         assertThat(path.hasVariants(), equalTo(true));

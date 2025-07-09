@@ -347,7 +347,7 @@ public class StringsUtil {
     }
 
     /**
-     * Join collection of objects, converted to string, using specified string separator.Concatenates strings from
+     * Join collection of objects, converted to string, using specified string separator. Concatenates strings from
      * collection converted to string but take care to avoid null items. Uses given separator between strings. Returns
      * null if given objects array is null and empty if empty. If separator is null uses space string instead, like
      * invoking {@link StringsUtil#join(Iterable)}. Null objects or empty strings from given <code>objects</code> parameter

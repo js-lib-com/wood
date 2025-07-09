@@ -48,16 +48,16 @@ public class StyleReaderTest {
         }
 
         when(project.getProjectRoot()).thenReturn(new File("."));
-        when(project.getMediaQueryDefinition("h600")).thenReturn(new MediaQueryDefinition("h600", "min-height: 600px", 0));
-        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800", "min-width: 800px", 0));
-        when(project.getMediaQueryDefinition("w1200")).thenReturn(new MediaQueryDefinition("w1200", "min-width: 1200px", 0));
-        when(project.getMediaQueryDefinition("xsd")).thenReturn(new MediaQueryDefinition("xsd", "min-height: 560px", 0));
-        when(project.getMediaQueryDefinition("smd")).thenReturn(new MediaQueryDefinition("smd", "min-height: 560px", 0));
-        when(project.getMediaQueryDefinition("nod")).thenReturn(new MediaQueryDefinition("nod", "min-height: 560px", 0));
-        when(project.getMediaQueryDefinition("mdd")).thenReturn(new MediaQueryDefinition("mdd", "min-height: 768px", 0));
-        when(project.getMediaQueryDefinition("lgd")).thenReturn(new MediaQueryDefinition("lgd", "min-height: 992px", 0));
-        when(project.getMediaQueryDefinition("landscape")).thenReturn(new MediaQueryDefinition("landscape", "orientation: landscape", 0));
-        when(project.getMediaQueryDefinition("portrait")).thenReturn(new MediaQueryDefinition("portrait", "orientation: portrait", 0));
+        when(project.getMediaQueryDefinition("h600")).thenReturn(new MediaQueryDefinition("h600","screen", "min-height: 600px"));
+        when(project.getMediaQueryDefinition("w800")).thenReturn(new MediaQueryDefinition("w800","screen", "min-width: 800px"));
+        when(project.getMediaQueryDefinition("w1200")).thenReturn(new MediaQueryDefinition("w1200","screen", "min-width: 1200px"));
+        when(project.getMediaQueryDefinition("xsd")).thenReturn(new MediaQueryDefinition("xsd","screen", "min-height: 560px"));
+        when(project.getMediaQueryDefinition("smd")).thenReturn(new MediaQueryDefinition("smd","screen", "min-height: 560px"));
+        when(project.getMediaQueryDefinition("nod")).thenReturn(new MediaQueryDefinition("nod","screen", "min-height: 560px"));
+        when(project.getMediaQueryDefinition("mdd")).thenReturn(new MediaQueryDefinition("mdd","screen", "min-height: 768px"));
+        when(project.getMediaQueryDefinition("lgd")).thenReturn(new MediaQueryDefinition("lgd","screen", "min-height: 992px"));
+        when(project.getMediaQueryDefinition("landscape")).thenReturn(new MediaQueryDefinition("landscape","screen", "orientation: landscape"));
+        when(project.getMediaQueryDefinition("portrait")).thenReturn(new MediaQueryDefinition("portrait","screen", "orientation: portrait"));
 
         File[] styleFiles = new File[]{ //
                 new XFile("res/page/page_lgd.css"), //
@@ -139,6 +139,7 @@ public class StyleReaderTest {
 
             Mock(String expression, String content) {
                 MediaQueries mediaQueries = Mockito.mock(MediaQueries.class);
+                when(mediaQueries.getMedia()).thenReturn("screen");
                 when(mediaQueries.getExpression()).thenReturn(expression);
 
                 Variants variants = Mockito.mock(Variants.class);
