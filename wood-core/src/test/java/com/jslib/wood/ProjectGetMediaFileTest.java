@@ -52,12 +52,12 @@ public class ProjectGetMediaFileTest {
 
 	@Test
 	public void GivenMediaFileInSourceDir_ThenFoundAndDoNotSearchAsset() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(1)).findFirst(any());
 		verify(assetDir, times(0)).findFirst(any());
@@ -65,12 +65,12 @@ public class ProjectGetMediaFileTest {
 
 	@Test
 	public void GivenMediaFileInSourceDirAndNullLanguage_ThenFoundAndDoNotSearchAsset() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(1)).findFirst(any());
 		verify(assetDir, times(0)).findFirst(any());
@@ -79,15 +79,15 @@ public class ProjectGetMediaFileTest {
 	@SuppressWarnings("all")
 	@Test
 	public void GivenMediaFileInSourceDirAndReferenceWithPath_ThenFoundAndDoNotSearchAsset() {
-		// given
+		// GIVEN
 		when(reference.hasPath()).thenReturn(true);
 		// return the same source directory since we actually need a not null path
 		when(sourceDir.getSubDirectoryPath(null)).thenReturn(sourceDir);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(1)).findFirst(any());
 		verify(assetDir, times(0)).findFirst(any());
@@ -99,14 +99,14 @@ public class ProjectGetMediaFileTest {
 	 */
 	@Test
 	public void GivenMediaFileNotInSourceDir_ThenDoSearchSourceTwiceAndAssetOnce() {
-		// given
+		// GIVEN
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(2)).findFirst(any());
 		verify(assetDir, times(1)).findFirst(any());
@@ -118,14 +118,14 @@ public class ProjectGetMediaFileTest {
 	 */
 	@Test
 	public void GivenMediaFileNotInSourceDirAndNullLanguage_ThenDoSearchSourceOnceAndAssetOnce() {
-		// given
+		// GIVEN
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(1)).findFirst(any());
 		verify(assetDir, times(1)).findFirst(any());
@@ -137,14 +137,14 @@ public class ProjectGetMediaFileTest {
 	 */
 	@Test
 	public void GivenMissingMediaFile_ThenNull() {
-		// given
+		// GIVEN
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(null);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, nullValue());
 		verify(sourceDir, times(2)).findFirst(any());
 		verify(assetDir, times(2)).findFirst(any());
@@ -156,14 +156,14 @@ public class ProjectGetMediaFileTest {
 	 */
 	@Test
 	public void GivenMissingMediaFileAndNullLanguage_ThenNull() {
-		// given
+		// GIVEN
 		when(sourceDir.findFirst(any())).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(null);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, nullValue());
 		verify(sourceDir, times(1)).findFirst(any());
 		verify(assetDir, times(1)).findFirst(any());
@@ -171,14 +171,14 @@ public class ProjectGetMediaFileTest {
 
 	@Test
 	public void GivenExistingFileWithoutParent_ThenSearchOnlyOnAssetDir() {
-		// given
+		// GIVEN
 		when(sourceFile.getParentDir()).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile("de", reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(0)).findFirst(any());
 		verify(assetDir, times(1)).findFirst(any());
@@ -186,14 +186,14 @@ public class ProjectGetMediaFileTest {
 
 	@Test
 	public void GivenExistingFileWithoutParentAndNullLanguage_ThenSearchOnlyOnAssetDir() {
-		// given
+		// GIVEN
 		when(sourceFile.getParentDir()).thenReturn(null);
 		when(assetDir.findFirst(any())).thenReturn(mediaFile);
 
-		// when
+		// WHEN
 		FilePath foundFile = project.getResourceFile(null, reference, sourceFile);
 
-		// then
+		// THEN
 		assertThat(foundFile, equalTo(mediaFile));
 		verify(sourceDir, times(0)).findFirst(any());
 		verify(assetDir, times(1)).findFirst(any());

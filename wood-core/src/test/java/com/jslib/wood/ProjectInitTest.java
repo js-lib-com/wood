@@ -37,18 +37,18 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenNonEmptyDescriptor_WhenConstructor_ThenStateInitialized() {
-		// given
+		// GIVEN
 		when(descriptor.getAuthors()).thenReturn(Collections.singletonList("Iulian Rotaru"));
 		when(descriptor.getFavicon()).thenReturn("favicon.ico");
 		when(descriptor.getPwaWorker()).thenReturn("sw.js");
 		when(descriptor.getLanguage()).thenReturn(Arrays.asList("fr","de"));
 		when(descriptor.getExcludeDirs()).thenReturn(Arrays.asList("res/page/trivia/", "res/page/experiment/"));
 
-		// when
+		// WHEN
 		File projectRoot = new File("root/path/project");
 		Project project = new Project(projectRoot, descriptor);
 
-		// then
+		// THEN
 		assertThat(project.getProjectRoot(), equalTo(new File("root/path/project")));
 		assertThat(project.getDescriptor(), equalTo(descriptor));
 
@@ -74,13 +74,13 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenMediaQueryOnDescriptor_WhenGetMediaQueryDefinition_ThenNotNull() {
-		// given
+		// GIVEN
 		when(descriptor.getMediaQueryDefinitions()).thenReturn(Collections.singletonList(new MediaQueryDefinition("w800", "min-width: 800px", 0)));
 
-		// when
+		// WHEN
 		MediaQueryDefinition query = project().getMediaQueryDefinition("w800");
 
-		// then
+		// THEN
 		assertThat(query, notNullValue());
 		assertThat(query.getAlias(), equalTo("w800"));
 		assertThat(query.getExpression(), equalTo("min-width: 800px"));
@@ -89,35 +89,35 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenNoMediaQueryOnDescriptor_WhenGetMediaQueryDefinition_ThenNull() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		MediaQueryDefinition query = project().getMediaQueryDefinition("w800");
 
-		// then
+		// THEN
 		assertThat(query, nullValue());
 	}
 
 	@Test
 	public void GivenMetasOnDescriptor_WhenGetMetaDescriptors_ThenNotEmpty() {
-		// given
+		// GIVEN
 		when(descriptor.getMetaDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(IMetaDescriptor.class)));
 
-		// when
+		// WHEN
 		List<IMetaDescriptor> metas = project().getMetaDescriptors();
 
-		// then
+		// THEN
 		assertThat(metas, hasSize(1));
 	}
 
 	@Test
 	public void GivenNoMetasOnDescriptor_WhenGetMetaDescriptors_ThenEmpty() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		List<IMetaDescriptor> metas = project().getMetaDescriptors();
 
-		// then
+		// THEN
 		assertThat(metas, empty());
 	}
 
@@ -128,24 +128,24 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenLinksOnDescriptor_WhenGetLinkDescriptors_ThenNotEmpty() {
-		// given
+		// GIVEN
 		when(descriptor.getLinkDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(ILinkDescriptor.class)));
 
-		// when
+		// WHEN
 		List<ILinkDescriptor> links = project().getLinkDescriptors();
 
-		// then
+		// THEN
 		assertThat(links, hasSize(1));
 	}
 
 	@Test
 	public void GivenNoLinksOnDescriptor_WhenGetLinkDescriptors_ThenEmpty() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		List<ILinkDescriptor> links = project().getLinkDescriptors();
 
-		// then
+		// THEN
 		assertThat(links, empty());
 	}
 
@@ -156,38 +156,38 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenScriptsOnDescriptor_WhenGetScriptDescriptors_ThenNotEmpty() {
-		// given
+		// GIVEN
 		when(descriptor.getScriptDescriptors()).thenReturn(Collections.singletonList(Mockito.mock(IScriptDescriptor.class)));
 
-		// when
+		// WHEN
 		List<IScriptDescriptor> scripts = project().getScriptDescriptors();
 
-		// then
+		// THEN
 		assertThat(scripts, hasSize(1));
 	}
 
 	@Test
 	public void GivenNoScriptsOnDescriptor_WhenGetScriptDescriptors_ThenEmpty() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		List<IScriptDescriptor> scripts = project().getScriptDescriptors();
 
-		// then
+		// THEN
 		assertThat(scripts, empty());
 	}
 
 	@Test
 	public void GivenScriptWithDependencies_WhenGetScriptDependencies_ThenRetrieve() {
-		// given
+		// GIVEN
 		Project project = project();
 		List<IScriptDescriptor> dependencies = Collections.singletonList(null);
 		project.getScriptDependencies().put("sw.js", dependencies);
 
-		// when
+		// WHEN
 		List<IScriptDescriptor> scripts = project.getScriptDependencies("sw.js");
 
-		// then
+		// THEN
 		assertThat(scripts, not(empty()));
 	}
 
@@ -198,12 +198,12 @@ public class ProjectInitTest {
 
 	@Test
 	public void GivenEmptyThemeDir_WhenGetThemeStyles_ThenNotNull() {
-		// given
+		// GIVEN
 
-		// when
+		// WHEN
 		ThemeStyles styles = project().getThemeStyles();
 
-		// then
+		// THEN
 		assertThat(styles, notNullValue());
 	}
 }

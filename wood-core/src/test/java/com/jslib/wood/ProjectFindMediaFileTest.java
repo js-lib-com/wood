@@ -1,8 +1,9 @@
 package com.jslib.wood;
 
-
 import com.jslib.wood.impl.MediaQueryDefinition;
 import com.jslib.wood.impl.ProjectDescriptor;
+import com.jslib.wood.test.TestDirectory;
+import com.jslib.wood.test.TestFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,50 +43,49 @@ public class ProjectFindMediaFileTest {
 		when(sourceDir.getPath()).thenReturn("res/page/");
 		when(sourceDir.exists()).thenReturn(true);
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFileTest("page.htm"), //
-				new XFileTest("icon.png"), //
-				new XFileTest("logo.png"), //
-				new XFileTest("logo_w800.png"), //
-				new XFileTest("logo_jp.png") });
-
-		// findMediaFile is always used with verified reference and does not perform its own check
-		// therefore resource type can be anything, including null
-		// as a consequence next Mockito line is not necessary and is commented out
-		// when(reference.getResourceType()).thenReturn(ResourceType.IMAGE);
+				new TestFile("page.htm"), //
+				new TestFile("logo.css"), //
+				new TestFile("logo_jp.css"), //
+				new TestFile("icon.png"), //
+				new TestFile("logo.png"), //
+				new TestFile("logo_w800.png"), //
+				new TestFile("logo_jp.png") });
 
 		when(reference.getName()).thenReturn("logo");
+		// test cases focus only on media files
+		when(reference.isMediaFile()).thenReturn(true);
 
-        DirectoryTest projectRoot = new DirectoryTest(".");
+        TestDirectory projectRoot = new TestDirectory(".");
 		project = new Project(projectRoot, descriptor);
 
 		sourceDirPath = new FilePath(project, sourceDir);
 	}
 
 	@Test
-	public void GivenExistingLanguage_ThenFoundVariant() {
-		// given
+	public void GivenExistingLanguage_ThenFoundMediaFileWithVariant() {
+		// GIVEN
 		String language = "jp";
 
-		// when
+		// WHEN
 		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
-		// then
+		// THEN
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo_jp.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
 		assertThat(mediaFile.getVariants().getLanguage(), equalTo("jp"));
 	}
 
-	@SuppressWarnings("all")
 	@Test
-	public void GivenNullLanguage_ThenFoundDefault() {
-		// given
+	public void GivenNullLanguage_ThenFoundDefaultMediaFile() {
+		// GIVEN
 		String language = null;
 
-		// when
+		// WHEN
+		@SuppressWarnings("ConstantConditions")
 		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
-		// then
+		// THEN
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -93,24 +93,26 @@ public class ProjectFindMediaFileTest {
 	}
 
 	/**
-	 * The same as {@link #GivenNullLanguage_ThenFoundDefault()} but ensure that default language media file is last in directory
+	 * The same as {@link #GivenNullLanguage_ThenFoundDefaultMediaFile()} but ensure that default language media file is last in directory
 	 * files list.
 	 */
 	@Test
-	public void GivenNullLanguageAndDefaultLast_ThenFoundDefault() {
-		// given
+	public void GivenNullLanguageAndDefaultLast_ThenFoundDefaultMediaFile() {
+		// GIVEN
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFileTest("page.htm"), //
-				new XFileTest("icon.png"), //
-				new XFileTest("logo_w800.png"), //
-				new XFileTest("logo_ja.png"), //
-				new XFileTest("logo.png") });
+				new TestFile("page.htm"), //
+				new TestFile("logo.css"), //
+				new TestFile("logo_jp.css"), //
+				new TestFile("icon.png"), //
+				new TestFile("logo_w800.png"), //
+				new TestFile("logo_ja.png"), //
+				new TestFile("logo.png") });
 		sourceDirPath = new FilePath(project, sourceDir);
 
-		// when
+		// WHEN
 		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, null);
 
-		// then
+		// THEN
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -118,14 +120,14 @@ public class ProjectFindMediaFileTest {
 	}
 
 	@Test
-	public void GivenMissingLanguage_ThenFoundDefault() {
-		// given
+	public void GivenMissingLanguage_ThenFoundDefaultMediaFile() {
+		// GIVEN
 		String language = "de";
 
-		// when
+		// WHEN
 		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
-		// then
+		// THEN
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -133,21 +135,23 @@ public class ProjectFindMediaFileTest {
 	}
 
 	@Test
-	public void GivenMissingLanguageAndDefaultLast_ThenFoundDefault() {
-		// given
+	public void GivenMissingLanguageAndDefaultLast_ThenFoundDefaultMediaFile() {
+		// GIVEN
 		String language = "de";
 		when(sourceDir.listFiles()).thenReturn(new File[] { //
-				new XFileTest("page.htm"), //
-				new XFileTest("icon.png"), //
-				new XFileTest("logo_w800.png"), //
-				new XFileTest("logo_ja.png"), //
-				new XFileTest("logo.png") });
+				new TestFile("page.htm"), //
+				new TestFile("logo.css"), //
+				new TestFile("logo_jp.css"), //
+				new TestFile("icon.png"), //
+				new TestFile("logo_w800.png"), //
+				new TestFile("logo_ja.png"), //
+				new TestFile("logo.png") });
 		sourceDirPath = new FilePath(project, sourceDir);
 
-		// when
+		// WHEN
 		FilePath mediaFile = Project.findResourceFile(sourceDirPath, reference, language);
 
-		// then
+		// THEN
 		assertThat(mediaFile, notNullValue());
 		assertThat(mediaFile.value(), equalTo("logo.png"));
 		assertThat(mediaFile.getBasename(), equalTo("logo"));
@@ -155,8 +159,8 @@ public class ProjectFindMediaFileTest {
 	}
 
 	@Test
-	public void GivenReferenceWithSubdir_ThenFound() {
-		// given
+	public void GivenReferenceWithSubdir_ThenMediaFileFound() {
+		// GIVEN
 		Reference reference = mock(Reference.class);
 		when(reference.hasPath()).thenReturn(true);
 		when(reference.getPath()).thenReturn("icon");
@@ -169,40 +173,12 @@ public class ProjectFindMediaFileTest {
 		when(mediaDir.getSubDirectoryPath("icon")).thenReturn(mediaDir);
 		when(mediaDir.findFirst(any())).thenReturn(mediaFile);
 
-		// when
+		// WHEN
 		FilePath foundMediaFile = Project.findResourceFile(mediaDir, reference, null);
 
-		// then
+		// THEN
 		assertThat(foundMediaFile, notNullValue());
 		assertThat(foundMediaFile.value(), equalTo("logo.png"));
 		assertThat(foundMediaFile.getBasename(), equalTo("logo"));
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	private static class DirectoryTest extends File {
-		private static final long serialVersionUID = -4499496665524589579L;
-
-		public DirectoryTest(String path) {
-			super(path);
-		}
-
-		@Override
-		public boolean isDirectory() {
-			return true;
-		}
-	}
-
-	private static class XFileTest extends File {
-		private static final long serialVersionUID = -5975578621510948684L;
-
-		public XFileTest(String pathname) {
-			super(pathname);
-		}
-
-		@Override
-		public boolean isFile() {
-			return true;
-		}
 	}
 }

@@ -32,7 +32,8 @@ public class StyleReaderTest {
     private FilePath styleFile;
 
     @Test
-    public void constructor() throws IOException {
+    public void GivenStyleFilesAndMediaQueries_WhenStyleConstructor_ThenInternalStateInitialized() throws IOException {
+        // GIVEN
         class XFile extends File {
             private static final long serialVersionUID = -5975578621510948684L;
 
@@ -94,9 +95,11 @@ public class StyleReaderTest {
         String source = "body { width: 960px; }";
         when(styleFile.getReader()).thenReturn(new StringReader(source));
 
+        // WHEN
         StyleReader reader = new StyleReader(styleFile);
         reader.close();
 
+        // THEN
         assertNotNull(reader.getReader());
         assertThat(reader.getState(), equalTo("BASE_CONTENT"));
 
@@ -129,7 +132,8 @@ public class StyleReaderTest {
     }
 
     @Test
-    public void processing() throws IOException {
+    public void GivenMediaQueryStyleFiles_WhenCopyStyleFile_ThenMediaQueriesIncluded() throws IOException {
+        // GIVEN
         class Mock {
             final FilePath file;
 
@@ -164,9 +168,11 @@ public class StyleReaderTest {
 
         StyleReader reader = new StyleReader(styleFile);
 
+        // WHEN
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
+        // THEN
         String expected = "body { width: 560px; }\r\n" + //
                 "@media screen and min-width: 680px {\r\n" + //
                 "\r\n" + //

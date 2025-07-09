@@ -1,6 +1,8 @@
 package com.jslib.wood;
 
 import com.jslib.wood.impl.FilesHandler;
+import com.jslib.wood.test.TestDirectory;
+import com.jslib.wood.test.TestFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -151,7 +153,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenLoopForEach_ThenCollectAllFiles() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -235,7 +237,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenFilterByStyle_ThenFoundStyle() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -250,7 +252,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenFindFirstByStyle_ThenFoundStyle() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -265,7 +267,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenFindFirstByNotExisting_ThenNull() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -279,7 +281,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenFilesHandler_ThenAllFilesProcessed() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         FilePath[] paths = initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -298,7 +300,7 @@ public class DirPathTest {
     @Test
     public void GivenRootDir_WhenFilesHandler_ThenProcessProjectDescriptor() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("project.xml")};
+        File[] sources = new File[]{new TestFile("project.xml")};
         FilePath[] paths = initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -317,7 +319,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithFiles_WhenFilesHandlerAccept_ThenProcessOnlyAccepted() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -343,7 +345,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithHiddenFile_WhenFilesHandler_ThenDoNotProcessHiddenFile() {
         // GIVEN
-        File[] sources = new File[]{new SourceFile(".gitignore"), new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestFile(".gitignore"), new TestFile("compo.htm"), new TestFile("compo.css")};
         FilePath[] paths = initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -363,7 +365,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithSubdir_WhenFilesHandler_ThenSubdirProcessed() {
         // GIVEN
-        File[] sources = new File[]{new SourceDirectory("media")};
+        File[] sources = new File[]{new TestDirectory("media")};
         FilePath subdir = new FilePath(project, "media/");
         when(project.createFilePath(sources[0])).thenReturn(subdir);
         FilePath dirPath = new FilePath(project, directory(sources));
@@ -381,7 +383,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithSubdirWithTrailingSeparator_WhenFilesHandler_ThenTrailingSeparatorPreserved() {
         // GIVEN
-        File[] sources = new File[]{new SourceDirectory("media/")};
+        File[] sources = new File[]{new TestDirectory("media/")};
         FilePath[] paths = initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -398,7 +400,7 @@ public class DirPathTest {
     @Test
     public void GivenDirWithSubdirAndFiles_WhenFilesHandle_ThenProcessSubdirAndFiles() {
         // GIVEN
-        File[] sources = new File[]{new SourceDirectory("media"), new SourceFile("compo.htm"), new SourceFile("compo.css")};
+        File[] sources = new File[]{new TestDirectory("media"), new TestFile("compo.htm"), new TestFile("compo.css")};
         initSources(sources);
         FilePath dirPath = new FilePath(project, directory(sources));
 
@@ -475,34 +477,6 @@ public class DirPathTest {
 
     // --------------------------------------------------------------------------------------------
 
-    @SuppressWarnings("all")
-    private static class SourceFile extends File {
-        private static final long serialVersionUID = -5975578621510948684L;
-
-        public SourceFile(String pathname) {
-            super(pathname);
-        }
-
-        @Override
-        public boolean isFile() {
-            return true;
-        }
-    }
-
-    @SuppressWarnings("all")
-    private static class SourceDirectory extends File {
-        private static final long serialVersionUID = 962174848140145344L;
-
-        public SourceDirectory(String pathname) {
-            super(pathname);
-        }
-
-        @Override
-        public boolean isDirectory() {
-            return true;
-        }
-    }
-
     private File directory(File[] files) {
         File dir = Mockito.mock(File.class);
         when(dir.getPath()).thenReturn(".");
@@ -514,11 +488,11 @@ public class DirPathTest {
     private FilePath[] initSources(File[] files) {
         List<FilePath> paths = new ArrayList<>();
         for (File file : files) {
-            if (file instanceof SourceDirectory) {
+            if (file instanceof TestDirectory) {
                 FilePath path = new FilePath(project, file);
                 when(project.createFilePath(file)).thenReturn(path);
                 paths.add(path);
-            } else if (file instanceof SourceFile) {
+            } else if (file instanceof TestFile) {
                 FilePath path = new FilePath(project, file);
                 when(project.createFilePath(file)).thenReturn(path);
                 paths.add(path);

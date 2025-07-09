@@ -33,7 +33,7 @@ public class SourceReaderTest {
 
     @Test
     public void GivenStringReference_WhenSourceRead_ThenReferenceHandlerParameters() throws IOException {
-        // given
+        // GIVEN
         String source = "<body>" + //
                 "	<h1>@string/title</h1>" + //
                 "</body>";
@@ -44,12 +44,12 @@ public class SourceReaderTest {
         ArgumentCaptor<FilePath> sourceFileCaptor = ArgumentCaptor.forClass(FilePath.class);
         when(handler.onResourceReference(referenceCaptor.capture(), sourceFileCaptor.capture())).thenReturn("Component Title");
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertThat(referenceCaptor.getValue().getType(), equalTo(Reference.Type.STRING));
         assertThat(referenceCaptor.getValue().getName(), equalTo("title"));
         assertThat(sourceFileCaptor.getValue().value(), equalTo("res/compo/compo.htm"));
@@ -57,24 +57,24 @@ public class SourceReaderTest {
 
     @Test
     public void GivenLiteralAtMetaReference_WhenSourceRead_ThenPreserveAtChar() throws IOException {
-        // given
+        // GIVEN
         String source = "<body>" + //
                 "	<h1>@@string/title</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("<h1>@string/title</h1>"));
     }
 
     @Test
     public void GivenStringReference_WhenSourceRead_ThenStringResolve() throws IOException {
-        // given
+        // GIVEN
         String source = "<body>" + //
                 "	<h1>@string/title</h1>" + //
                 "</body>";
@@ -82,38 +82,37 @@ public class SourceReaderTest {
 
         when(handler.onResourceReference(new Reference(Reference.Type.STRING, "title"), sourceFile)).thenReturn("Component Title");
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("<h1>Component Title</h1>"));
     }
 
     @Test
     public void GivenMediaQuery_WhenSourceRead_ThenPreserveMediaQuery() throws IOException {
-        // given
+        // GIVEN
         String source = "@media all" + //
                 "body {" + //
                 "	width: 800px" + //
                 "}";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("@media all"));
     }
 
     @Test
     public void GivenParamReference_WhenSourceRead_ThenParamResolve() throws IOException {
-        // given
-        String source = "" + //
-                "<body>" + //
+        // GIVEN
+        String source = "<body>" + //
                 "	<h1>@param/title</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
@@ -122,20 +121,19 @@ public class SourceReaderTest {
         LayoutParameters parameters = new LayoutParameters();
         parameters.reload("title:Component Parameter;");
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, parameters, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("<h1>Component Parameter</h1>"));
     }
 
     @Test(expected = WoodException.class)
     public void GiveParamReferenceOnMissingParameter_WhenSourceRead_ThenException() throws IOException {
-        // given
-        String source = "" + //
-                "<body>" + //
+        // GIVEN
+        String source = "<body>" + //
                 "	<h1>@param/title</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
@@ -143,67 +141,64 @@ public class SourceReaderTest {
 
         LayoutParameters parameters = new LayoutParameters(); // empty parameters
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, parameters, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
     }
 
     @Test(expected = WoodException.class)
     public void GivenParamReferenceAndNullLayoutParameters_WhenSourceRead_ThenException() throws IOException {
-        // given
-        String source = "" + //
-                "<body>" + //
+        // GIVEN
+        String source = "<body>" + //
                 "	<h1>@param/title</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
         when(sourceFile.isLayout()).thenReturn(true);
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, null, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
     }
 
     @Test
     public void GivenUnknownReference_WhenSourceRead_ThenPreserveText() throws IOException {
-        // given
-        String source = "" + //
-                "<body>" + //
+        // GIVEN
+        String source = "<body>" + //
                 "	<h1>@strings/value</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("@strings/value"));
     }
 
     @Test
     public void GivenProjectReference_WhenSourceRead_ThenProjectDescriptorValue() throws IOException {
-        // given
-        String source = "" + //
-                "<body>" + //
+        // GIVEN
+        String source = "<body>" + //
                 "	<h1>@project/authors</h1>" + //
                 "</body>";
         when(sourceFile.getReader()).thenReturn(new StringReader(source));
 
         when(handler.onResourceReference(new Reference(Reference.Type.PROJECT, "authors"), sourceFile)).thenReturn("Iulian Rotaru&lt;mr.iulianrotaru@gmail.com&gt;");
 
-        // when
+        // WHEN
         SourceReader reader = new SourceReader(sourceFile, handler);
         StringWriter writer = new StringWriter();
         FilesUtil.copy(reader, writer);
 
-        // then
+        // THEN
         assertTrue(writer.toString().contains("Iulian Rotaru&lt;mr.iulianrotaru@gmail.com&gt;"));
     }
 }
