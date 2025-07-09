@@ -41,7 +41,7 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void GivenProperties_WhenCreateInstance_ThenRetrieve() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<operators>XMLNS</operators>" + //
@@ -57,10 +57,10 @@ public class ProjectDescriptorTest {
 				"	<language>en</language>" + //
 				"</project>";
 
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.XMLNS));
 		assertThat(descriptor.getBuildDir(), equalTo("target/site"));
 		assertThat(descriptor.getAssetDir(), equalTo("asset"));
@@ -76,16 +76,16 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void GivenMultipleLanguage_WhenGetLanguage_ThenRetrieveAll() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<language>en, de, fr, ro</language>" + //
 				"</project>";
 
-		// when
+		// WHEN
 		List<String> languages = descriptor(xml).getLanguage();
 
-		// then
+		// THEN
 		assertThat(languages, notNullValue());
 		assertThat(languages, hasSize(4));
 		assertThat(languages, contains("en", "de", "fr", "ro"));
@@ -93,16 +93,16 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void GivenMultipleExcludeDirs_WheGetExcludeDirs_ThenRetrieveAll() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<exclude-dirs>page/about, page/contact</exclude-dirs>" + //
 				"</project>";
 
-		// when
+		// WHEN
 		List<String> excludes = descriptor(xml).getExcludeDirs();
 
-		// then
+		// THEN
 		assertThat(excludes, notNullValue());
 		assertThat(excludes, hasSize(2));
 		assertThat(excludes.get(0), equalTo("page/about"));
@@ -111,15 +111,15 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void GivenMissingProperties_WhenCreateInstance_ThenDefaults() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"</project>";
 
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getOperatorsNaming(), equalTo(OperatorsNaming.DATA_ATTR));
 		assertThat(descriptor.getBuildDir(), equalTo(CT.DEF_BUILD_DIR));
 		assertThat(descriptor.getAssetDir(), equalTo(CT.DEF_ASSET_DIR));
@@ -135,23 +135,23 @@ public class ProjectDescriptorTest {
 
 	@Test
 	public void GivenExistingProperty_WhenGetValue_ThenRetrieve() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"	<title>Test Project</title>" + //
 				"</project>";
 		descriptor = descriptor(xml);
 
-		// when
+		// WHEN
 		String value = descriptor.getValue("title");
 
-		// then
+		// THEN
 		assertThat(value, equalTo("Test Project"));
 	}
 
 	@Test
 	public void GivenNotExistingTitle_WhenGetValue_ThenRetrieveProjectDirName() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<project>" + //
 				"</project>";
@@ -161,10 +161,10 @@ public class ProjectDescriptorTest {
 		when(project.getProjectRoot()).thenReturn(new File("test-project"));
 		when(descriptorFile.getProject()).thenReturn(project);
 
-		// when
+		// WHEN
 		String value = descriptor.getValue("title");
 
-		// then
+		// THEN
 		assertThat(value, equalTo("Test Project"));
 	}
 

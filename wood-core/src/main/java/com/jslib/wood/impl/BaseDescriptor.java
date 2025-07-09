@@ -17,7 +17,7 @@ import java.util.List;
  * @author Iulian Rotaru
  * @since 1.0
  */
-abstract class BaseDescriptor {
+public abstract class BaseDescriptor {
 	/** Descriptor document builder. */
 	private static final DocumentBuilder DOC_BUILDER = DocumentBuilder.getInstance();
 

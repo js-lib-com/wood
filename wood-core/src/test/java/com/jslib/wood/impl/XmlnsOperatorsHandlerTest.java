@@ -28,7 +28,8 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_Document() throws SAXException {
+	public void GivenTemplateDocument_WhenDocumentFindByEditable_ThenEditablesList() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -36,7 +37,10 @@ public class XmlnsOperatorsHandlerTest {
 				"</body>";
 		Document doc = builder.parseXMLNS(xml);
 
+		// WHEN
 		EList elist = operators.findByOperator(doc, Operator.EDITABLE);
+
+		// THEN
 		assertThat(elist, notNullValue());
 		assertThat(elist.size(), equalTo(2));
 		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-1"));
@@ -44,7 +48,8 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_Element() throws SAXException {
+	public void GivenTemplateDocument_WhenRootElementFindByEditable_ThenEditablesList() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -53,7 +58,10 @@ public class XmlnsOperatorsHandlerTest {
 		Document doc = builder.parseXMLNS(xml);
 		Element body = doc.getRoot();
 
+		// WHEN
 		EList elist = operators.findByOperator(body, Operator.EDITABLE);
+
+		// THEN
 		assertThat(elist, notNullValue());
 		assertThat(elist.size(), equalTo(2));
 		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-1"));
@@ -61,7 +69,8 @@ public class XmlnsOperatorsHandlerTest {
 	}
 
 	@Test
-	public void findByOperator_NotRootElement() throws SAXException {
+	public void GivenTemplateDocument_WhenNotRootElementFindByEditable_ThenEditable() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -72,14 +81,18 @@ public class XmlnsOperatorsHandlerTest {
 		Document doc = builder.parseXMLNS(xml);
 		Element div = doc.getByTag("div");
 
+		// WHEN
 		EList elist = operators.findByOperator(div, Operator.EDITABLE);
+
+		// THEN
 		assertThat(elist, notNullValue());
 		assertThat(elist.size(), equalTo(1));
 		assertThat(elist.item(0).getAttr("w:editable"), equalTo("section-2"));
 	}
 
 	@Test
-	public void getByOperator_Document() throws SAXException {
+	public void GivenTemplateDocument_WhenDocumentGetByEditable_ThenEditable() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -87,13 +100,17 @@ public class XmlnsOperatorsHandlerTest {
 				"</body>";
 		Document doc = builder.parseXMLNS(xml);
 
+		// WHEN
 		Element section = operators.getByOperator(doc, Operator.EDITABLE, "section-2");
+
+		// THEN
 		assertThat(section, notNullValue());
 		assertThat(section.getAttr("w:editable"), equalTo("section-2"));
 	}
 
 	@Test
-	public void getByOperator_Element() throws SAXException {
+	public void GivenTemplateDocument_WhenRootElementGetByEditable_ThenEditable() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section-1'></section>" + //
@@ -102,43 +119,51 @@ public class XmlnsOperatorsHandlerTest {
 		Document doc = builder.parseXMLNS(xml);
 		Element body = doc.getRoot();
 
+		// WHEN
 		Element section = operators.getByOperator(body, Operator.EDITABLE);
+
+		//THEN
 		assertThat(section, notNullValue());
 		assertThat(section.getAttr("w:editable"), equalTo("section-1"));
 	}
 
 	@Test
-	public void getOperand_Editable() throws SAXException {
+	public void GivenTemplateDocument_WhenGetExistingOperand_ThenValue() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<section w:editable='section'></section>" + //
 				"</body>";
 		Document doc = builder.parseXMLNS(xml);
-
-		Element body = doc.getByTag("body");
-		assertThat(operators.getOperand(body, Operator.EDITABLE), nullValue());
-
 		Element section = doc.getByTag("section");
-		assertThat(operators.getOperand(section, Operator.EDITABLE), equalTo("section"));
+
+		// WHEN
+		String operand = operators.getOperand(section, Operator.EDITABLE);
+
+		// THEN
+		assertThat(operand, equalTo("section"));
 	}
 
 	@Test
-	public void getOperand_Compo() throws SAXException {
+	public void GivenTemplateDocument_WhenGetMissingOperand_ThenNull() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
-				"	<div w:compo='res/dialog'></div>" + //
+				"	<section w:editable='section'></section>" + //
 				"</body>";
 		Document doc = builder.parseXMLNS(xml);
-
 		Element body = doc.getByTag("body");
-		assertThat(operators.getOperand(body, Operator.COMPO), nullValue());
 
-		Element div = doc.getByTag("div");
-		assertThat(operators.getOperand(div, Operator.COMPO), equalTo("res/dialog"));
+		// WHEN
+		String operand = operators.getOperand(body, Operator.EDITABLE);
+
+		// THEN
+		assertThat(operand, nullValue());
 	}
 
 	@Test
-	public void removeOperator() throws SAXException {
+	public void GivenCompoDocument_WhenExistingGetOperand_ThenValue() throws SAXException {
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<body xmlns:w='js-lib.com/wood'>" + //
 				"	<div w:compo='res/dialog'></div>" + //
@@ -146,8 +171,45 @@ public class XmlnsOperatorsHandlerTest {
 		Document doc = builder.parseXMLNS(xml);
 		Element div = doc.getByTag("div");
 
+		// WHEN
+		String operator = operators.getOperand(div, Operator.COMPO);
+
+		// THEN
+		assertThat(operator, equalTo("res/dialog"));
+	}
+
+	@Test
+	public void GivenCompoDocument_WhenMissingGetOperand_ThenNull() throws SAXException {
+		// GIVEN
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<div w:compo='res/dialog'></div>" + //
+				"</body>";
+		Document doc = builder.parseXMLNS(xml);
+		Element body = doc.getByTag("body");
+
+		// WHEN
+		String operand = operators.getOperand(body, Operator.COMPO);
+
+		// THEN
+		assertThat(operand, nullValue());
+	}
+
+	@Test
+	public void GivenCompoDocument_WhenRemoveOperator_ThenOperatorNotLongerExisting() throws SAXException {
+		// GIVEN
+		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
+				"<body xmlns:w='js-lib.com/wood'>" + //
+				"	<div w:compo='res/dialog'></div>" + //
+				"</body>";
+		Document doc = builder.parseXMLNS(xml);
+		Element div = doc.getByTag("div");
 		assertTrue(div.hasAttrNS(WOOD.NS, "compo"));
+
+		// WHEN
 		operators.removeOperator(div, Operator.COMPO);
+
+		// THEN
 		assertFalse(div.hasAttrNS(WOOD.NS, "compo"));
 	}
 }

@@ -28,16 +28,19 @@ public class ReferencesResolverTest {
 	}
 
 	@Test
-	public void parse() {
+	public void GivenStringReference_WhenParse_ThenValueInjected() {
+		// GIVEN
 		String value = "<h1>@string/title</h1>";
 
+		// WHEN
 		value = resolver.parse(value, sourceFile, (reference, sourceFile) -> "resource value");
 
+		// THEN
 		assertThat(value, equalTo("<h1>resource value</h1>"));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void nullValue() {
+	public void GivenNullValue_WhenParse_ThenAssertionError() {
 		resolver.parse(null, sourceFile, null);
 	}
 }

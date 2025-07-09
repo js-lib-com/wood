@@ -1,6 +1,5 @@
 package com.jslib.wood.impl;
 
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -37,63 +36,63 @@ public class ComponentDescriptorTest {
 
 	@Test
 	public void GivenProperties_ThenRetrieve() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"	<group>admin</group>" + //
 				"</component>";
 		
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getDescriptorFile(), equalTo(descriptorFile));
 		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
 	@Test
 	public void GivenPropertyWithVariable_ThenResolve() throws IOException {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"	<group>@string/role</group>" + //
 				"</component>";
 		when(referenceHandler.onResourceReference(eq(new Reference(Reference.Type.STRING, "role")), any(FilePath.class))).thenReturn("admin");
 
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getResourcesGroup(), equalTo("admin"));
 	}
 
 	@Test
 	public void GivenMissingProperty_ThenNull() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"</component>";
 		
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
 	@Test
 	public void GivenEmptyProperty_ThenNull() {
-		// given
+		// GIVEN
 		String xml = "<?xml version='1.0' encoding='UTF-8'?>" + //
 				"<component>" + //
 				"	<version></version>" + //
 				"	<group></group>" + //
 				"</component>";
 		
-		// when
+		// WHEN
 		descriptor = descriptor(xml);
 
-		// then
+		// THEN
 		assertThat(descriptor.getResourcesGroup(), nullValue());
 	}
 
