@@ -34,16 +34,22 @@ package com.jslib.wood.impl;
 public enum OperatorsNaming
 {
   /** Simple attribute name. Does not use prefix name and is prone to name collision but is simple to use. */
-  ATTR,
+  ATTR(new AttrOperatorsHandler()),
   /**
    * HTML custom attribute name, that is, prefixed with <code>data-</code>. This naming convention is a trade-off
    * between simplicity to use and avoiding name collisions.
    */
-  DATA_ATTR,
+  DATA_ATTR(new DataAttrOperatorsHandler()),
   /**
    * XML name space names. This is default naming strategy and offer a clear separation for WOOD operator name space.
    * Anyway, add complexity because name space should be declared with WOOD URI:
    * <code>xmlns:wood="js-lib.com/wood"</code>.
    */
-  XMLNS
+  XMLNS(new XmlnsOperatorsHandler());
+
+  public final IOperatorsHandler operatorsHandler;
+
+  OperatorsNaming(IOperatorsHandler operatorsHandler) {
+    this.operatorsHandler = operatorsHandler;
+  }
 }

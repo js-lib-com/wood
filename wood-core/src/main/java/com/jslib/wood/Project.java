@@ -149,23 +149,7 @@ public class Project {
 
     public final void create() {
         walkFileTree(this, projectRoot, filePathVisitors);
-
-        switch (descriptor.getOperatorsNaming()) {
-            case XMLNS:
-                this.operatorsHandler = new XmlnsOperatorsHandler();
-                break;
-
-            case DATA_ATTR:
-                this.operatorsHandler = new DataAttrOperatorsHandler();
-                break;
-
-            case ATTR:
-                this.operatorsHandler = new AttrOperatorsHandler();
-                break;
-
-            default:
-                this.operatorsHandler = null;
-        }
+        operatorsHandler = descriptor.getOperatorsNaming().operatorsHandler;
     }
 
     /**
