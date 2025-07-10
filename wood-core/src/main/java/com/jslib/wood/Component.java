@@ -199,7 +199,7 @@ public class Component {
 	 * @return component layout with templates hierarchy and widgets tree resolved.
 	 */
 	private Element scanComponentsTree(FilePath layoutPath, int guardCount) {
-		if (guardCount++ == 8) {
+		if (guardCount++ == MAX_NESTING_LEVELS) {
 			throw new WoodException("Circular compo references suspicion. Too many nesting levels on |%s|. Please check wood:widget attributes!", layoutPath);
 		}
 
