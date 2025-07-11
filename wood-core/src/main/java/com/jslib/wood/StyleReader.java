@@ -76,6 +76,11 @@ public class StyleReader extends Reader {
     private State state;
 
     /**
+     * Remember last character from read buffer. Used to check, and correct, if base style file is not ended with new line.
+     */
+    private char lastProcessedChar;
+
+    /**
      * Create reader instance for given style file. Style file parameter should be a base style file, that is, it should have no
      * variants.
      *
@@ -109,9 +114,18 @@ public class StyleReader extends Reader {
         if (state == State.BASE_CONTENT) {
             int readCount = reader.read(buffer, offset, length);
             if (readCount != -1) {
+                lastProcessedChar = buffer[readCount - 1];
                 return readCount;
             }
+            // end of stream (EOS) on base content reading
             state = State.NEXT_VARIANT;
+            if (lastProcessedChar != '\n') {
+                // inject line separator if base style file is not properly ended with new line
+                char[] lineSeparator = System.lineSeparator().toCharArray();
+                assert lineSeparator.length < length : "Line separator length smaller than style reader buffer size";
+                System.arraycopy(lineSeparator, 0, buffer, offset, lineSeparator.length);
+                return lineSeparator.length;
+            }
         }
 
         int readCount = -1;
@@ -212,9 +226,15 @@ public class StyleReader extends Reader {
      */
     private enum State {
         /**
-         * Base style file content is processed.
+         * Base style file content is in processing.
          */
         BASE_CONTENT,
+
+        /**
+         * Base style file finished to process. Use this style to add new line if source file is not properly ended
+         * with new line.
+         */
+        BASE_CONTENT_END,
 
         /**
          * Select next variant, if any.
@@ -242,7 +262,7 @@ public class StyleReader extends Reader {
      */
     private static String HEADER(String media, String expression) {
         assert media != null && !media.isEmpty() : "Media argument is null or empty";
-        assert expression != null: "Expression argument is null";
+        assert expression != null : "Expression argument is null";
         StringBuilder header = new StringBuilder();
         header.append(System.lineSeparator());
         header.append("@media ");
@@ -252,7 +272,6 @@ public class StyleReader extends Reader {
             header.append(expression);
         }
         header.append(" {");
-        header.append(System.lineSeparator());
         header.append(System.lineSeparator());
         return header.toString();
     }
