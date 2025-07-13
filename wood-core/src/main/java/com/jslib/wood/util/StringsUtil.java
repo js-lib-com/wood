@@ -239,6 +239,16 @@ public class StringsUtil {
         return writer.toString();
     }
 
+    public static String loadResource(String resource) throws IOException {
+        try (InputStream stream = StringsUtil.class.getResourceAsStream(resource)) {
+            if (stream == null) {
+                return null;
+            }
+            Reader reader = new InputStreamReader(stream);
+            return load(reader);
+        }
+    }
+
     /**
      * Process formatted string with arguments transform and no illegal format exception. Java string format throws
      * unchecked {@link IllegalFormatException} if given string is not well formatted. This method catches it and return

@@ -136,7 +136,7 @@ public class PreviewServletTest {
         when(stylePath.getParentDir()).thenReturn(mock(FilePath.class));
 
         servlet.service(httpRequest, httpResponse);
-        assertThat(responseWriter.toString(), equalTo("body { width: 1200px; }"));
+        assertThat(responseWriter.toString(), equalTo("body { width: 1200px; }" + System.lineSeparator()));
         assertThat(responseStatus, equalTo(200));
         assertThat(responseContentType, equalTo("text/css;charset=UTF-8"));
     }

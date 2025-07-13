@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<HTML lang="en">
+	<HEAD>
+		<META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+		<TITLE>Test Page</TITLE>
+		<META content="Test page description." name="Description" />
+		<META content="Iulian Rotaru" name="Author" />
+		<META content="http://kids-cademy.com" property="og:url" />
+		<META content="Test Page" property="og:title" />
+		<LINK href="manifest.json" rel="manifest" />
+		<LINK href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+		<LINK href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		<LINK href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
+		<LINK href="styles/reset.css" rel="stylesheet" type="text/css" />
+		<LINK href="styles/fx.css" rel="stylesheet" type="text/css" />
+		<LINK href="styles/form.css" rel="stylesheet" type="text/css" />
+		<LINK href="styles/page.css" rel="stylesheet" type="text/css" />
+		<SCRIPT src="script/js-lib.js" type="text/javascript"></SCRIPT>
+		<SCRIPT src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" type="text/javascript"></SCRIPT>
+	</HEAD>
+	<HTML>
+		<HEAD></HEAD>
+		<BODY>
+			<H1>Test Page</H1>
+		</BODY>
+	</HTML>
+</HTML>

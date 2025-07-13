@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<HTML lang="en">
+	<HEAD>
+		<META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+		<TITLE>Test</TITLE>
+		<SCRIPT type="text/javascript">navigator.serviceWorker.register('worker.js');</SCRIPT>
+	</HEAD>
+	<BODY>
+		<H1>Test Page</H1>
+	</BODY>
+</HTML>

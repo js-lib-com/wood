@@ -3,8 +3,7 @@ package com.jslib.wood.build;
 import com.jslib.wood.*;
 import com.jslib.wood.dom.Document;
 import com.jslib.wood.dom.DocumentBuilder;
-import com.jslib.wood.dom.EList;
-import com.jslib.wood.dom.Element;
+import com.jslib.wood.util.StringsUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +21,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -63,7 +61,9 @@ public class BuildPageTest {
     }
 
     @Test
-    public void buildPage() throws IOException, SAXException {
+    public void GivenProjectAndPageComponent_WhenBuildPage_ThenExpectedHtmlGenerated() throws IOException, SAXException {
+        // GIVEN
+
         // project fixture
 
         when(pwaManifest.exists()).thenReturn(true);
@@ -117,67 +117,15 @@ public class BuildPageTest {
         DocumentBuilder documentBuilder = DocumentBuilder.getInstance();
         when(page.getLayout()).thenReturn(documentBuilder.parseHTML(layout).getRoot());
 
-        // exercise
-
+        // WHEN
         builder.setLanguage("en");
         builder.buildPage(page);
 
-        // assert results
-
-        ArgumentCaptor<Component> componentArgument = ArgumentCaptor.forClass(Component.class);
+        // THEN
         ArgumentCaptor<Document> documentArgument = ArgumentCaptor.forClass(Document.class);
-        verify(buildFS).writePage(componentArgument.capture(), documentArgument.capture());
-
-        Component component = componentArgument.getValue();
-        assertThat(component, notNullValue());
+        verify(buildFS).writePage(any(), documentArgument.capture());
         Document document = documentArgument.getValue();
-        assertThat(document, notNullValue());
-
-        Element html = document.getByTag("html");
-        assertThat(html, notNullValue());
-        assertThat(html.getAttr("lang"), equalTo("en"));
-
-        Element head = document.getByTag("head");
-        head.getDocument().dump();
-        assertThat(head, notNullValue());
-        EList heads = head.getChildren();
-        int index = 0;
-        // <META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-        assertHead(heads.item(index++), "meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8");
-        // <TITLE>Test Page</TITLE>
-        assertHead(heads.item(index++));
-        // <META content="Test page description." name="Description" />
-        assertHead(heads.item(index++), "meta", "name", "Description", "content", "Test page description.");
-        // <META content="Iulian Rotaru" name="Author" />
-        assertHead(heads.item(index++), "meta", "name", "Author", "content", "Iulian Rotaru");
-        // <META content="http://kids-cademy.com" property="og:url" />
-        assertHead(heads.item(index++), "meta", "property", "og:url", "content", "http://kids-cademy.com");
-        // <META content="Test Page" property="og:title" />
-        assertHead(heads.item(index++), "meta", "property", "og:title", "content", "Test Page");
-        // <LINK href="manifest.json" rel="manifest" />
-        assertHead(heads.item(index++), "link", "rel", "manifest", "href", "manifest.json");
-        // <LINK href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
-        assertFavicon(heads.item(index++));
-        // <LINK href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css");
-        // <LINK href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "http://fonts.googleapis.com/css?family=Lato");
-        // <LINK href="styles/reset.css" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "styles/reset.css");
-        // <LINK href="styles/fx.css" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "styles/fx.css");
-        // <LINK href="styles/form.css" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "styles/form.css");
-        // <LINK href="styles/page.css" rel="stylesheet" type="text/css" />
-        assertHead(heads.item(index++), "styles/page.css");
-        // <SCRIPT src="script/js-lib.js" type="text/javascript"></SCRIPT>
-        assertHead(heads.item(index++), "script", "src", "script/js-lib.js", "type", "text/javascript");
-        // <SCRIPT src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" type="text/javascript"></SCRIPT>
-        assertHead(heads.item(index), "script", "src", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", "type", "text/javascript");
-
-        Element body = document.getByTag("body");
-        assertThat(body, notNullValue());
-        assertThat(body.getByTag("h1").getText(), equalTo("Test Page"));
+        assertThat(document.stringify(), equalTo(StringsUtil.loadResource("/expected-build-page-test")));
     }
 
     // --------------------------------------------------------------------------------------------
@@ -197,37 +145,6 @@ public class BuildPageTest {
             scripts.add(script);
         }
         return scripts;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    private static void assertHead(Element element) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo("title"));
-        assertThat(element.getTextContent(), equalTo("Test Page"));
-    }
-
-    private static void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo(tag));
-        assertThat(element.getAttr(attribute1), equalTo(value1));
-        assertThat(element.getAttr(attribute2), equalTo(value2));
-    }
-
-    private static void assertFavicon(Element element) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo("link"));
-        assertThat(element.getAttr("rel"), equalTo("shortcut icon"));
-        assertThat(element.getAttr("href"), equalTo("favicon.ico"));
-        assertThat(element.getAttr("type"), equalTo("image/x-icon"));
-    }
-
-    private static void assertHead(Element element, String value2) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo("link"));
-        assertThat(element.getAttr("rel"), equalTo("stylesheet"));
-        assertThat(element.getAttr("href"), equalTo(value2));
-        assertThat(element.getAttr("type"), equalTo("text/css"));
     }
 
     private static List<IMetaDescriptor> metas(String property, String content) {

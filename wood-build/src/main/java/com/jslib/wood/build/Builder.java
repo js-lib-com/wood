@@ -1,6 +1,7 @@
 package com.jslib.wood.build;
 
 import com.jslib.wood.*;
+import com.jslib.wood.lang.CheckedFunction;
 import com.jslib.wood.util.StringsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,6 @@ public class Builder implements IReferenceHandler {
      *
      * @return build directory path.
      */
-    @SuppressWarnings("unused")
     public FilePath getBuildDir() {
         return project.getBuildDir();
     }
@@ -211,46 +211,50 @@ public class Builder implements IReferenceHandler {
             addScript(pageComponent, pageDocument, project.createScriptDescriptor(pwaLoader, true));
         }
         for (IScriptDescriptor script : project.getScriptDescriptors()) {
-            if (!addScript(pageComponent, pageDocument, script)) {
-                throw new WoodException("Missing script %s declared by project descriptor.", script.getSource());
-            }
+            addScript(pageComponent, pageDocument, script);
         }
         for (IScriptDescriptor script : pageComponent.getScriptDescriptors()) {
-            if (!addScript(pageComponent, pageDocument, script)) {
-                throw new WoodException("Missing script %s declared by descriptor for page component %s.", script.getSource(), pageComponent.getName());
-            }
+            addScript(pageComponent, pageDocument, script);
         }
 
         buildFS.writePage(pageComponent, pageDocument.getDocument());
     }
 
-    private boolean addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
+    /**
+     * Helper for adding scripts to the page document. In addition to creating the script element in the page document,
+     * this method ensures that the script is written to the build file system. If the script is embedded, its source
+     * code is also included directly in the page document.
+     *
+     * @param pageComponent page component from which page document is created,
+     * @param pageDocument  page document under construction, that is, updated in current building step,
+     * @param script        descriptor for script to be added to page document and possible to write to build filesystem.
+     * @throws IOException if write on build filesystem fails.
+     */
+    private void addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
         for (IScriptDescriptor dependency : project.getScriptDependencies(script.getSource())) {
-            return addScript(pageComponent, pageDocument, dependency);
+            addScript(pageComponent, pageDocument, dependency);
+            return;
         }
 
-        String src = script.getSource();
-        String text = null;
-        if (FilePath.accept(src)) {
+        String relativeSource = script.getSource();
+        String sourceCode = null;
+        if (FilePath.accept(relativeSource)) {
             // only local script
             FilePath scriptFile = project.createFilePath(script.getSource());
-            if (!scriptFile.exists()) {
-                return false;
-            }
+            assert scriptFile.exists() : "Missing script file " + scriptFile;
             try (SourceReader reader = new SourceReader(scriptFile, this)) {
                 if (script.isEmbedded()) {
-                    // src value does not matter if script is embedded
-                    text = StringsUtil.load(reader);
+                    // relative source does not matter if script is embedded
+                    sourceCode = StringsUtil.load(reader);
                 } else {
-                    src = buildFS.writeScript(pageComponent, reader);
-                    // text value remains null for linked script
+                    relativeSource = buildFS.writeScript(pageComponent, reader);
+                    // source code remains null for linked script
                 }
             }
         }
-        // for third party script src remains as declared on script descriptor and text to null
+        // for third party script relative source remains as declared on script descriptor and source code to null
 
-        pageDocument.addScript(script, src, text);
-        return true;
+        pageDocument.addScript(script, relativeSource, sourceCode);
     }
 
     /**
@@ -349,20 +353,6 @@ public class Builder implements IReferenceHandler {
         return null;
     }
 
-    // --------------------------------------------------------------------------------------------
-
-    /**
-     * Functional interface that accepts checked exception.
-     *
-     * @param <T> the type of the input to the function
-     * @param <R> the type of the result of the function
-     * @author Iulian Rotaru
-     */
-    @FunctionalInterface
-    public interface CheckedFunction<T, R> {
-        R apply(T argument) throws Exception;
-    }
-
     private static <T, R> Function<T, R> exlambda(CheckedFunction<T, R> handler) {
         return argument -> {
             try {
@@ -375,19 +365,6 @@ public class Builder implements IReferenceHandler {
 
     // --------------------------------------------------------------------------------------------
     // Test Support
-
-    BuilderProject getProject() {
-        return project;
-    }
-
-    BuildFS getBuildFS() {
-        return buildFS;
-    }
-
-    @SuppressWarnings("all")
-    void setCurrentComponent(Component currentComponent) {
-        this.currentComponent = currentComponent;
-    }
 
     @SuppressWarnings("all")
     void setLanguage(String language) {

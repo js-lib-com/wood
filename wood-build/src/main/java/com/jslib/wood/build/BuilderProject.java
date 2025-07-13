@@ -3,7 +3,6 @@ package com.jslib.wood.build;
 import com.jslib.wood.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -13,12 +12,6 @@ import java.util.*;
  * @since 1.0
  */
 class BuilderProject extends Project {
-    public static BuilderProject create(File projectRoot) {
-        BuilderProject project = new BuilderProject(projectRoot);
-        project.create();
-        return project;
-    }
-
     /**
      * Variables declared on assets directory. Asset variables are used when source directory variables miss a certain value.
      */
@@ -87,18 +80,6 @@ class BuilderProject extends Project {
      */
     public boolean isMultiLanguage() {
         return getLanguages().size() > 1;
-    }
-
-    /**
-     * Load file content and return it as a string. This method is applicable only to text files; using non-binary files does
-     * not render predictable results.
-     *
-     * @param path file path relative to project root.
-     * @return requested file text content.
-     * @throws IOException if file reading fails.
-     */
-    public String loadFile(String path) throws IOException {
-        return createFilePath(path).load();
     }
 
     // --------------------------------------------------------------------------------------------

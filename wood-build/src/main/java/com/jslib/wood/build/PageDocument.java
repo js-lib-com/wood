@@ -6,7 +6,6 @@ import com.jslib.wood.dom.DocumentBuilder;
 import com.jslib.wood.dom.Element;
 import com.jslib.wood.util.StringsUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -49,9 +48,7 @@ class PageDocument {
     public PageDocument(Component component) {
         assert component != null : "Component argument is null";
         this.component = component;
-
-        DocumentBuilder builder = DocumentBuilder.getInstance();
-        this.doc = builder.createHTML();
+        this.doc = DocumentBuilder.getInstance().createHTML();
 
         this.html = this.doc.getRoot();
         this.html.addText("\r\n");
@@ -249,80 +246,17 @@ class PageDocument {
     private final List<String> processedScripts = new ArrayList<>();
 
     /**
-     * Add script element to this page head. Create <code>script</code> element and set attributes provided by script descriptor
-     * parameter. There is no validation on script descriptor; attributes are set exactly as provided. See
-     * {@link IScriptDescriptor} for a list of supported attributes.
-     * <p>
-     * If {@link IScriptDescriptor#getSource()} is a file path relative this project, as accepted by
-     * {@link FilePath#accept(String)}, invoke {@link Function#apply(Object)} with {@link FilePath} created from script source
-     * attribute. File handler returned value is used to replace current script source.
-     * <p>
-     * If script is embedded, see {@link IScriptDescriptor#isEmbedded()}, load script as text content to created script element,
-     * using {@link BuilderProject#loadFile(String)}. In this case {@link IScriptDescriptor#getSource()} is project relative
-     * path of the script file from where text content is loaded.
+     * Add script element to this page head. Create <code>script</code> element with <code>src</code> attribute set to
+     * relative source argument.
      *
      * @param scriptDescriptor script descriptor,
-     * @param fileHandler      file handler, used only if script source is a local file.
-     * @throws IllegalArgumentException if script or handler parameter is null or script source is missing.
-     * @throws IOException              if script is embedded and script content loading fails.
+     * @param relativeSource   script relative source: relative path for local scripts or URL for third party,
+     * @param sourceCode       optional script source code, used only if script is embedded.
      */
-    public void addScript(IScriptDescriptor scriptDescriptor, Function<FilePath, String> fileHandler) throws IOException {
+    public void addScript(IScriptDescriptor scriptDescriptor, String relativeSource, String... sourceCode) {
         assert scriptDescriptor != null : "Script descriptor argument is null";
         assert scriptDescriptor.getSource() != null && !scriptDescriptor.getSource().isEmpty() : "Script source argument is null or empty";
-        assert fileHandler != null : "File handler argument is null";
-
-        if (processedScripts.contains(scriptDescriptor.getSource())) {
-            return;
-        }
-        processedScripts.add(scriptDescriptor.getSource());
-
-        final BuilderProject project = (BuilderProject) component.getProject();
-        String src = scriptDescriptor.getSource();
-        if (!scriptDescriptor.isEmbedded()) {
-            if (FilePath.accept(src)) {
-                src = fileHandler.apply(project.createFilePath(src));
-            }
-            // dynamic scripts are not declared on page head; they are loaded by custom script loaders, e.g. ServiceLoader
-            if (scriptDescriptor.isDynamic()) {
-                return;
-            }
-        }
-
-        Element scriptElement = doc.createElement("script");
-        if (!scriptDescriptor.isEmbedded()) {
-            scriptElement.setAttr("src", src);
-        }
-
-        setAttr(scriptElement, "type", scriptDescriptor.getType(), "text/javascript");
-        setAttr(scriptElement, "async", scriptDescriptor.getAsync());
-        if (!scriptDescriptor.isEmbedded()) {
-            setAttr(scriptElement, "defer", scriptDescriptor.getDefer());
-        }
-        setAttr(scriptElement, "nomodule", scriptDescriptor.getNoModule());
-        setAttr(scriptElement, "nonce", scriptDescriptor.getNonce());
-        setAttr(scriptElement, "referrerpolicy", scriptDescriptor.getReferrerPolicy());
-        setAttr(scriptElement, "crossorigin", scriptDescriptor.getCrossOrigin());
-        setAttr(scriptElement, "integrity", scriptDescriptor.getIntegrity());
-
-        if (scriptDescriptor.isEmbedded()) {
-            scriptElement.setText(project.loadFile(src));
-        }
-
-        head.addChild(scriptElement);
-        head.addText("\r\n");
-    }
-
-    /**
-     * Add script to page document.
-     *
-     * @param scriptDescriptor script descriptor,
-     * @param src              script source text,
-     * @param text             optional script code, null only if script is embedded.
-     */
-    public void addScript(IScriptDescriptor scriptDescriptor, String src, String text) {
-        assert scriptDescriptor != null : "Script descriptor argument is null";
-        assert scriptDescriptor.getSource() != null && !scriptDescriptor.getSource().isEmpty() : "Script source argument is null or empty";
-        assert src != null && !src.isEmpty() : "Script source argument is null or empty";
+        assert relativeSource != null && !relativeSource.isEmpty() : "Script relative source is null or empty";
 
         if (processedScripts.contains(scriptDescriptor.getSource())) {
             return;
@@ -336,7 +270,7 @@ class PageDocument {
 
         Element scriptElement = doc.createElement("script");
         if (!scriptDescriptor.isEmbedded()) {
-            scriptElement.setAttr("src", src);
+            scriptElement.setAttr("src", relativeSource);
         }
 
         setAttr(scriptElement, "type", scriptDescriptor.getType(), "text/javascript");
@@ -351,8 +285,8 @@ class PageDocument {
         setAttr(scriptElement, "integrity", scriptDescriptor.getIntegrity());
 
         if (scriptDescriptor.isEmbedded()) {
-            assert text != null;
-            scriptElement.setText(text);
+            assert sourceCode.length == 1;
+            scriptElement.setText(sourceCode[0]);
         }
 
         head.addChild(scriptElement);

@@ -2,6 +2,9 @@ package com.jslib.wood.build;
 
 import java.io.File;
 
+/**
+ * Builder config is used by WOOD Maven plugin to configure builder.
+ */
 public class BuilderConfig {
     private File projectDir;
     private int buildNumber;

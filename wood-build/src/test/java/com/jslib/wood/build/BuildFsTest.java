@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.xml.sax.SAXException;
@@ -30,389 +29,543 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuildFsTest {
-	private DocumentBuilder documentBuilder;
+    private DocumentBuilder documentBuilder;
 
-	@Mock
-	private Component compo;
-	@Mock
-	private IReferenceHandler referenceHandler;
+    @Mock
+    private Component compo;
+    @Mock
+    private IReferenceHandler referenceHandler;
 
-	private File buildDir;
-	private BuildFS buildFS;
+    private File buildDir;
+    private BuildFS buildFS;
 
-	@Before
-	public void beforeTest() {
-		documentBuilder = DocumentBuilder.getInstance();
+    @Before
+    public void beforeTest() {
+        documentBuilder = DocumentBuilder.getInstance();
 
-		File projectRoot = new File("src/test/resources/build-fs");
-		buildDir = new File(projectRoot, "site");
-		buildFS = new TestBuildFS(buildDir, 0);
-	}
+        File projectRoot = new File("src/test/resources/build-fs");
+        buildDir = new File(projectRoot, "site");
+        buildFS = new TestBuildFS(buildDir, 0);
+    }
 
-	@After
-	public void afterTest() throws IOException {
-		if (buildDir.exists()) {
-			FilesUtil.removeFilesHierarchy(buildDir);
-		}
-	}
+    @After
+    public void afterTest() throws IOException {
+        if (buildDir.exists()) {
+            FilesUtil.removeFilesHierarchy(buildDir);
+        }
+    }
 
-	@Test
-	public void writePage() throws IOException, SAXException {
-		Component compo = compo();
-		PageDocument page = new PageDocument(compo);
+    @Test
+    public void GivenPageCompo_WhenWritePage_ThenCreateFile() throws IOException, SAXException {
+        // GIVEN
+        Component compo = compo();
+        PageDocument page = new PageDocument(compo);
 
-		buildFS.writePage(compo, page.getDocument());
-		assertTrue(buildFile("htm/index.htm").exists());
-	}
+        // WHEN
+        buildFS.writePage(compo, page.getDocument());
 
-	@Test
-	public void writePage_Twice() throws IOException, SAXException {
-		Component compo = compo();
-		PageDocument page = new PageDocument(compo);
+        // THEN
+        assertTrue(buildFile("htm/index.htm").exists());
+    }
 
-		buildFS.writePage(compo, page.getDocument());
-		assertTrue(buildFile("htm/index.htm").exists());
-		assertTrue(buildFile("htm/index.htm").delete());
+    @Test
+    public void GivenPageCompo_WhenWritePageTwice_ThenSecondWriteIsIgnored() throws IOException, SAXException {
+        // GIVEN
+        Component compo = compo();
+        PageDocument page = new PageDocument(compo);
 
-		// second attempt to write page in the same build FS instance is ignored
-		buildFS.writePage(compo, page.getDocument());
-		assertFalse(buildFile("htm/index.htm").exists());
-	}
+        buildFS.writePage(compo, page.getDocument());
+        assertTrue(buildFile("htm/index.htm").exists());
+        assertTrue(buildFile("htm/index.htm").delete());
 
-	@Test
-	public void writePage_Language() throws IOException, SAXException {
-		Component compo = compo();
-		PageDocument page = new PageDocument(compo);
+        // WHEN
+        // second attempt to write page in the same build FS instance is ignored
+        buildFS.writePage(compo, page.getDocument());
 
-		buildFS.setLanguage("ro");
-		buildFS.writePage(compo, page.getDocument());
-		assertTrue(buildFile("ro/htm/index.htm").exists());
-	}
+        // THEN
+        // because second write page is NOOP the file is not actually created
+        assertFalse(buildFile("htm/index.htm").exists());
+    }
 
-	@Test
-	public void writePage_BuildNumber() throws IOException, SAXException {
-		Component compo = compo();
-		PageDocument page = new PageDocument(compo);
+    @Test
+    public void GivenPageCompoAndLanguage_WhenWritePage_ThenCreateFileOnLanguageDir() throws IOException, SAXException {
+        // GIVEN
+        Component compo = compo();
+        PageDocument page = new PageDocument(compo);
+        buildFS.setLanguage("ro");
 
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
-		buildFS.writePage(compo, page.getDocument());
-		assertTrue(buildFile("htm/index-004.htm").exists());
-	}
+        // WHEN
+        buildFS.writePage(compo, page.getDocument());
 
-	@Test
-	public void writeManifest() throws IOException {
-		FilePath manifest = file("manifest.json");
+        // THEN
+        assertTrue(buildFile("ro/htm/index.htm").exists());
+    }
 
-		SourceReader reader = mock(SourceReader.class);
-		when(reader.getSourceFile()).thenReturn(manifest);
-		when(reader.read(any(char[].class), eq(0), eq(1024))).thenReturn(-1);
+    @Test
+    public void GivenPageCompoAndBuildNumber_WhenWritePage_ThenFileCreatedWithBuildNumber() throws IOException, SAXException {
+        // GIVEN
+        Component compo = compo();
+        PageDocument page = new PageDocument(compo);
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
 
-		assertThat(buildFS.writePwaManifest(reader), equalTo("manifest.json"));
-	}
+        // WHEN
+        buildFS.writePage(compo, page.getDocument());
 
-	@Test
-	public void writeFavicon() throws IOException {
-		FilePath favicon = file("favicon.ico");
+        // THEN
+        assertTrue(buildFile("htm/index-004.htm").exists());
+    }
 
-		assertFalse(buildFile("favicon.ico").exists());
-		assertThat(buildFS.writeFavicon(null, favicon), equalTo("../img/favicon.ico"));
-		assertTrue(buildFile("img/favicon.ico").exists());
-	}
+    @Test
+    public void GivenPwaManifestFile_WhenWritePwaManifest_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath manifest = file("manifest.json");
 
-	@Test
-	public void writePageMedia() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(buildFile("img/background.jpg").exists());
-	}
+        SourceReader reader = mock(SourceReader.class);
+        when(reader.getSourceFile()).thenReturn(manifest);
+        when(reader.read(any(char[].class), eq(0), eq(1024))).thenReturn(-1);
 
-	@Test
-	public void writePageMedia_Language() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		buildFS.setLanguage("ro");
+        // WHEN
+        String path = buildFS.writePwaManifest(reader);
 
-		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(buildFile("ro/img/background.jpg").exists());
-	}
+        // THEN
+        assertTrue(buildFile("manifest.json").exists());
+        assertThat(path, equalTo("manifest.json"));
+    }
 
-	@Test
-	public void writePageMedia_BuildNumber() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
+    @Test
+    public void GivenPwaWorkerFile_WhenWritePwaWorker_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath manifest = file("worker.js");
 
-		assertThat(buildFS.writePageMedia(null, mediaFile), equalTo("../img/background-004.jpg"));
-		assertTrue(buildFile("img/background-004.jpg").exists());
-	}
+        SourceReader reader = mock(SourceReader.class);
+        when(reader.getSourceFile()).thenReturn(manifest);
+        when(reader.read(any(char[].class), eq(0), eq(1024))).thenReturn(-1);
 
-	@Test(expected = IOException.class)
-	public void writePageMedia_IOException() throws IOException {
-		FilePath mediaFile = file("background.jpg");
+        // WHEN
+        buildFS.writePwaWorker(reader);
 
-		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer((Answer<Void>) invocation -> {
+        // THEN
+        assertTrue(buildFile("worker.js").exists());
+    }
+
+    @Test
+    public void GivenFaviconFile_WhenWriteFavicon_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath favicon = file("favicon.ico");
+        assertFalse(buildFile("favicon.ico").exists());
+
+        // WHEN
+        String path = buildFS.writeFavicon(null, favicon);
+
+        // THEN
+        assertTrue(buildFile("img/favicon.ico").exists());
+        assertThat(path, equalTo("../img/favicon.ico"));
+    }
+
+    @Test
+    public void GivenMediaFile_WhenWritePageMedia_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+
+        // WHEN
+        String path = buildFS.writePageMedia(null, mediaFile);
+
+        // THEN
+        assertTrue(buildFile("img/background.jpg").exists());
+        assertThat(path, equalTo("../img/background.jpg"));
+    }
+
+    @Test
+    public void GivenMediaFileAndLanguage_WhenWritePageMedia_ThenFileCreatedOnLanguageDir() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+        buildFS.setLanguage("ro");
+
+        // WHEN
+        String path = buildFS.writePageMedia(null, mediaFile);
+
+        // THEN
+        assertTrue(buildFile("ro/img/background.jpg").exists());
+        assertThat(path, equalTo("../img/background.jpg"));
+    }
+
+    @Test
+    public void GivenMediaFileAndBuildNumber_WhenWritePageMedia_ThenFileCreatedWithBuildNumber() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
+
+        // WHEN
+        String path = buildFS.writePageMedia(null, mediaFile);
+
+        // THEN
+        assertTrue(buildFile("img/background-004.jpg").exists());
+        assertThat(path, equalTo("../img/background-004.jpg"));
+    }
+
+    @Test(expected = IOException.class)
+    public void GivenMediaFile_WhenFailToWritePageMedia_ThenIOException() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+
+        // need to ensure stream is closed otherwise file delete on @After hook will fail
+        doAnswer((Answer<Void>) invocation -> {
             OutputStream stream = invocation.getArgument(0);
             stream.close();
             throw new IOException();
         }).when(mediaFile).copyTo(any(OutputStream.class));
 
-		buildFS.writePageMedia(null, mediaFile);
-	}
+        // WHEN
+        buildFS.writePageMedia(null, mediaFile);
 
-	@Test
-	public void writeStyleMedia() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(buildFile("img/background.jpg").exists());
-	}
+        // THEN
+    }
 
-	@Test
-	public void writeStyleMedia_Language() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		buildFS.setLanguage("ro");
+    @Test
+    public void GivenMediaFile_WhenWriteStyleMedia_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
 
-		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background.jpg"));
-		assertTrue(buildFile("ro/img/background.jpg").exists());
-	}
+        // WHEN
+        String path = buildFS.writeStyleMedia(mediaFile);
 
-	@Test
-	public void writeStyleMedia_BuildNumber() throws IOException {
-		FilePath mediaFile = file("background.jpg");
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
+        // THEN
+        assertThat(path, equalTo("../img/background.jpg"));
+        assertTrue(buildFile("img/background.jpg").exists());
+    }
 
-		assertThat(buildFS.writeStyleMedia(mediaFile), equalTo("../img/background-004.jpg"));
-		assertTrue(buildFile("img/background-004.jpg").exists());
-	}
+    @Test
+    public void GivenMediaFileAndLanguage_WhenWriteStyleMedia_ThenFileCreatedOnLanguageDir() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+        buildFS.setLanguage("ro");
 
-	@Test(expected = IOException.class)
-	public void writeStyleMedia_IOException() throws IOException {
-		FilePath mediaFile = file("background.jpg");
+        // WHEN
+        String path = buildFS.writeStyleMedia(mediaFile);
 
-		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer((Answer<Void>) invocation -> {
+        // THEN
+        assertTrue(buildFile("ro/img/background.jpg").exists());
+        assertThat(path, equalTo("../img/background.jpg"));
+    }
+
+    @Test
+    public void GivenMediaFileAndBuildNumber_WhenWriteStyleMedia_ThenFileCreatedWithBuildNumber() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
+
+        // WHEN
+        String path = buildFS.writeStyleMedia(mediaFile);
+
+        // THEN
+        assertThat(path, equalTo("../img/background-004.jpg"));
+        assertTrue(buildFile("img/background-004.jpg").exists());
+    }
+
+    @Test(expected = IOException.class)
+    public void GivenMediaFile_WhenFailToWriteStyleMedia_ThenIOException() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("background.jpg");
+
+        // need to ensure stream is closed otherwise file delete on @After hook will fail
+        doAnswer((Answer<Void>) invocation -> {
             OutputStream stream = invocation.getArgument(0);
             stream.close();
             throw new IOException();
         }).when(mediaFile).copyTo(any(OutputStream.class));
 
-		buildFS.writeStyleMedia(mediaFile);
-	}
+        // WHEN
+        buildFS.writeStyleMedia(mediaFile);
 
-	@Test
-	public void writeStyle() throws IOException {
-		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
+        // THEN
+    }
 
-		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDir()).thenReturn(sourceDir);
+    @Test
+    public void GiveStyleFile_WhenWriteStyle_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath sourceDir = mock(FilePath.class);
+        when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
-		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style.css"));
-		assertTrue(buildFile("css/style.css").exists());
-	}
+        FilePath styleFile = file("style.css");
+        when(styleFile.getParentDir()).thenReturn(sourceDir);
 
-	@Test
-	public void writeStyle_Language() throws IOException {
-		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
+        // WHEN
+        String path = buildFS.writeStyle(null, styleFile, referenceHandler);
 
-		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDir()).thenReturn(sourceDir);
+        // THEN
+        assertTrue(buildFile("css/style.css").exists());
+        assertThat(path, equalTo("../css/style.css"));
+    }
 
-		buildFS.setLanguage("ro");
+    @Test
+    public void GiveStyleFileAndLanguage_WhenWriteStyle_ThenFileCreatedOnLanguageDir() throws IOException {
+        // GIVEN
+        FilePath sourceDir = mock(FilePath.class);
+        when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
-		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style.css"));
-		assertTrue(buildFile("ro/css/style.css").exists());
-	}
+        FilePath styleFile = file("style.css");
+        when(styleFile.getParentDir()).thenReturn(sourceDir);
 
-	@Test
-	public void writeStyle_BuildNumber() throws IOException {
-		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
+        buildFS.setLanguage("ro");
 
-		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDir()).thenReturn(sourceDir);
+        // WHEN
+        String path = buildFS.writeStyle(null, styleFile, referenceHandler);
 
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
-		assertThat(buildFS.writeStyle(null, styleFile, referenceHandler), equalTo("../css/style-004.css"));
-		assertTrue(buildFile("css/style-004.css").exists());
-	}
+        // THEN
+        assertTrue(buildFile("ro/css/style.css").exists());
+        assertThat(path, equalTo("../css/style.css"));
+    }
 
-	@Test(expected = IOException.class)
-	public void writeStyle_IOException() throws IOException {
-		FilePath sourceDir = Mockito.mock(FilePath.class);
-		when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
+    @Test
+    public void GiveStyleFileAndBuildNumber_WhenWriteStyle_ThenFileCreatedWithBuildNumber() throws IOException {
+        // GIVEN
+        FilePath sourceDir = mock(FilePath.class);
+        when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
-		FilePath styleFile = file("style.css");
-		when(styleFile.getParentDir()).thenReturn(sourceDir);
-		when(styleFile.getReader()).thenReturn(new ExceptionalReaderTest());
+        FilePath styleFile = file("style.css");
+        when(styleFile.getParentDir()).thenReturn(sourceDir);
 
-		buildFS.writeStyle(null, styleFile, referenceHandler);
-	}
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
 
-	@Test
-	public void writeScript() throws IOException {
-		FilePath scriptFile = file("Index.js");
+        // WHEN
+        String path = buildFS.writeStyle(null, styleFile, referenceHandler);
 
-		assertThat(buildFS.writeScript(null, scriptFile, referenceHandler), equalTo("../js/Index.js"));
-		assertTrue(buildFile("js/Index.js").exists());
-	}
+        // THEN
+        assertTrue(buildFile("css/style-004.css").exists());
+        assertThat(path, equalTo("../css/style-004.css"));
+    }
 
-	@Test
-	public void writeScript_Language() throws IOException {
-		FilePath scriptFile = file("Index.js");
-		buildFS.setLanguage("ro");
+    @Test(expected = IOException.class)
+    public void GiveStyleFile_WhenFailToWriteStyle_ThenIOException() throws IOException {
+        // GIVEN
+        FilePath sourceDir = mock(FilePath.class);
+        when(sourceDir.filter(any())).thenReturn(Collections.emptyList());
 
-		assertThat(buildFS.writeScript(null, scriptFile, referenceHandler), equalTo("../js/Index.js"));
-		assertTrue(buildFile("ro/js/Index.js").exists());
-	}
+        FilePath styleFile = file("style.css");
+        when(styleFile.getParentDir()).thenReturn(sourceDir);
+        when(styleFile.getReader()).thenReturn(new ExceptionalReaderTest());
 
-	@Test
-	public void writeScript_BuildNumber() throws IOException {
-		FilePath scriptFile = file("Index.js");
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
+        // WHEN
+        buildFS.writeStyle(null, styleFile, referenceHandler);
 
-		assertThat(buildFS.writeScript(null, scriptFile, referenceHandler), equalTo("../js/Index-004.js"));
-		assertTrue(buildFile("js/Index-004.js").exists());
-	}
+        // THEN
+    }
 
-	@Test(expected = IOException.class)
-	public void writeScript_IOException() throws IOException {
-		FilePath scriptFile = file("Index.js");
-		when(scriptFile.getReader()).thenReturn(new ExceptionalReaderTest());
-		buildFS.writeScript(null, scriptFile, referenceHandler);
-	}
+    @Test
+    public void GivenScriptFile_WhenWriteScript_ThenFileCreated() throws IOException {
+        // GIVEN
+        FilePath scriptFile = file("Index.js");
 
-	@Test
-	public void dirFactory() {
-		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/images"));
-		buildFS.setLanguage("ro");
-		assertThat(buildFS.createDirectory("images"), isDir("src/test/resources/build-fs/site/ro/images"));
-	}
+        // WHEN
+        String path = buildFS.writeScript(null, scriptFile, referenceHandler);
 
-	@Test(expected = AssertionError.class)
-	public void nullLanguage() {
-		buildFS.setLanguage(null);
-	}
+        // THEN
+        assertTrue(buildFile("js/Index.js").exists());
+        assertThat(path, equalTo("../js/Index.js"));
+    }
 
-	@Test(expected = WoodException.class)
-	public void writeFile_MissingExtension() throws IOException {
-		FilePath mediaFile = file("style");
-		BuildFS buildFS = new TestBuildFS(buildDir, 4);
-		buildFS.writeStyleMedia(mediaFile);
-	}
+    @Test
+    public void GivenScriptFileAndLanguage_WhenWriteScript_ThenFileCreatedOnLanguageDir() throws IOException {
+        // GIVEN
+        FilePath scriptFile = file("Index.js");
+        buildFS.setLanguage("ro");
 
-	// --------------------------------------------------------------------------------------------
+        // WHEN
+        String path = buildFS.writeScript(null, scriptFile, referenceHandler);
 
-	private File buildFile(String path) {
-		return new File(buildDir, path);
-	}
+        // THEN
+        assertTrue(buildFile("ro/js/Index.js").exists());
+        assertThat(path, equalTo("../js/Index.js"));
+    }
 
-	private Component compo() throws SAXException {
-		Document doc = documentBuilder.parseXML("<body></body>");
-		when(compo.getLayout()).thenReturn(doc.getRoot());
-		when(compo.getLayoutFileName()).thenReturn("index.htm");
-		return compo;
-	}
+    @Test
+    public void GivenScriptFileAndBuildNumber_WhenWriteScript_ThenFileCreatedWithBuildNumber() throws IOException {
+        // GIVEN
+        FilePath scriptFile = file("Index.js");
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
 
-	private static FilePath file(String fileName) throws IOException {
-		FilePath file = Mockito.mock(FilePath.class);
-		when(file.exists()).thenReturn(true);
-		when(file.getName()).thenReturn(fileName);
-		when(file.getReader()).thenReturn(new StringReader("CONTENT"));
+        // WHEN
+        String path = buildFS.writeScript(null, scriptFile, referenceHandler);
 
-		// need to ensure stream is closed otherwise file delete on @After hook will fail
-		doAnswer((Answer<Void>) invocation -> {
+        // THEN
+        assertTrue(buildFile("js/Index-004.js").exists());
+        assertThat(path, equalTo("../js/Index-004.js"));
+    }
+
+    @Test(expected = IOException.class)
+    public void GivenScriptFile_WhenFailToWriteScript_ThenIOException() throws IOException {
+        // GIVEN
+        FilePath scriptFile = file("Index.js");
+        when(scriptFile.getReader()).thenReturn(new ExceptionalReaderTest());
+
+        // WHEN
+        buildFS.writeScript(null, scriptFile, referenceHandler);
+
+        // THEN
+    }
+
+    @Test
+    public void GivenDirName_WhenCreateDirectory_ThenDirCreated() {
+        // GIVEN
+        String dirName = "images";
+
+        // WHEN
+        File dir = buildFS.createDirectory(dirName);
+
+        // THEN
+        assertThat(dir, isDir("src/test/resources/build-fs/site/images"));
+    }
+
+    @Test
+    public void GivenDirNameAndLanguage_WhenCreateDirectory_ThenSubdirCreatedIntoLanguageDir() {
+        // GIVEN
+        String dirName = "images";
+        buildFS.setLanguage("ro");
+
+        // WHEN
+        File dir = buildFS.createDirectory(dirName);
+
+        // THEN
+        assertThat(dir, isDir("src/test/resources/build-fs/site/ro/images"));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void GivenNullLanguage_WhenSetLanguage_ThenAssertionError() {
+        // GIVEN
+        String language = null;
+
+        // WHEN
+        buildFS.setLanguage(language);
+
+        // THEN
+    }
+
+    @Test(expected = WoodException.class)
+    public void GivenFileWithMissingExtensionAndBuildNumber_WhenWriteFile_ThenWoodException() throws IOException {
+        // GIVEN
+        FilePath mediaFile = file("style");
+        BuildFS buildFS = new TestBuildFS(buildDir, 4);
+
+        // WHEN
+        buildFS.writeStyleMedia(mediaFile);
+
+        // THEN
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    private File buildFile(String path) {
+        return new File(buildDir, path);
+    }
+
+    private Component compo() throws SAXException {
+        Document doc = documentBuilder.parseXML("<body></body>");
+        when(compo.getLayout()).thenReturn(doc.getRoot());
+        when(compo.getLayoutFileName()).thenReturn("index.htm");
+        return compo;
+    }
+
+    private static FilePath file(String fileName) throws IOException {
+        FilePath file = mock(FilePath.class);
+        when(file.exists()).thenReturn(true);
+        when(file.getName()).thenReturn(fileName);
+        when(file.getReader()).thenReturn(new StringReader("CONTENT"));
+
+        // need to ensure stream is closed otherwise file delete on @After hook will fail
+        doAnswer((Answer<Void>) invocation -> {
             OutputStream stream = invocation.getArgument(0);
             stream.close();
             return null;
         }).when(file).copyTo(any(OutputStream.class));
 
-		return file;
-	}
+        return file;
+    }
 
-	private static Matcher<File> isDir(String path) {
-		return new BaseMatcher<File>() {
-			@Override
-			public boolean matches(Object item) {
-				return item.equals(new File(path.replace('/', File.separatorChar))) && ((File) item).isDirectory();
-			}
+    private static Matcher<File> isDir(String path) {
+        return new BaseMatcher<File>() {
+            @Override
+            public boolean matches(Object item) {
+                return item.equals(new File(path.replace('/', File.separatorChar))) && ((File) item).isDirectory();
+            }
 
-			@Override
-			public void describeTo(Description description) {
-				description.appendText(path);
-			}
-		};
-	}
+            @Override
+            public void describeTo(Description description) {
+                description.appendText(path);
+            }
+        };
+    }
 
-	private static class TestBuildFS extends BuildFS {
-		public TestBuildFS(File buildDir, int buildNumber) {
-			super(buildDir, buildNumber);
-		}
+    private static class TestBuildFS extends BuildFS {
+        public TestBuildFS(File buildDir, int buildNumber) {
+            super(buildDir, buildNumber);
+        }
 
-		@Override
-		protected File getPageDir(Component compo) {
-			return createDirectory("htm");
-		}
+        @Override
+        protected File getPageDir(Component compo) {
+            return createDirectory("htm");
+        }
 
-		@Override
-		protected File getStyleDir() {
-			return createDirectory("css");
-		}
+        @Override
+        protected File getStyleDir() {
+            return createDirectory("css");
+        }
 
-		@Override
-		protected File getScriptDir() {
-			return createDirectory("js");
-		}
+        @Override
+        protected File getScriptDir() {
+            return createDirectory("js");
+        }
 
-		@Override
-		protected File getMediaDir() {
-			return createDirectory("img");
-		}
+        @Override
+        protected File getMediaDir() {
+            return createDirectory("img");
+        }
 
-		@Override
-		protected File pwaDir() {
-			return buildDir;
-		}
+        @Override
+        protected File pwaDir() {
+            return buildDir;
+        }
 
-		@Override
-		protected File getFontDir() {
-			return createDirectory("font");
-		}
+        @Override
+        protected File getFontDir() {
+            return createDirectory("font");
+        }
 
-		@Override
-		protected File getFilesDir() {
-			return createDirectory("files");
-		}
+        @Override
+        protected File getFilesDir() {
+            return createDirectory("files");
+        }
 
-		@Override
-		protected String formatPageName(String pageName) {
-			return pageName;
-		}
+        @Override
+        protected String formatPageName(String pageName) {
+            return pageName;
+        }
 
-		@Override
-		protected String formatStyleName(FilePath styleFile) {
-			return styleFile.getName();
-		}
+        @Override
+        protected String formatStyleName(FilePath styleFile) {
+            return styleFile.getName();
+        }
 
-		@Override
-		protected String formatScriptName(FilePath scriptFile) {
-			return scriptFile.getName();
-		}
+        @Override
+        protected String formatScriptName(FilePath scriptFile) {
+            return scriptFile.getName();
+        }
 
-		@Override
-		protected String formatMediaName(FilePath mediaFile) {
-			return mediaFile.getName();
-		}
-	}
+        @Override
+        protected String formatMediaName(FilePath mediaFile) {
+            return mediaFile.getName();
+        }
+    }
 
-	private static class ExceptionalReaderTest extends Reader {
-		@Override
-		public int read(char[] cbuf, int off, int len) throws IOException {
-			throw new IOException();
-		}
+    private static class ExceptionalReaderTest extends Reader {
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            throw new IOException();
+        }
 
-		@Override
-		public void close() throws IOException {
-			throw new IOException();
-		}
-	}
+        @Override
+        public void close() throws IOException {
+            throw new IOException();
+        }
+    }
 }

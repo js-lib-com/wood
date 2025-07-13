@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<HTML lang="en">
+	<HEAD>
+		<META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+		<TITLE>Test</TITLE>
+		<LINK href="/style/var.css" rel="stylesheet" type="text/css" />
+		<LINK href="/style/default.css" rel="stylesheet" type="text/css" />
+		<LINK href="/style/fx.css" rel="stylesheet" type="text/css" />
+	</HEAD>
+	<BODY>
+		<H1>Test Page</H1>
+	</BODY>
+</HTML>
