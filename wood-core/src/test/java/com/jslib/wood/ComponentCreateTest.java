@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.StringReader;
@@ -17,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,6 +46,10 @@ public class ComponentCreateTest {
         when(project.hasNamespace()).thenReturn(true);
         when(project.getOperatorsHandler()).thenReturn(operatorsHandler);
 
+        FilePath filePath = mock(FilePath.class);
+        when(filePath.exists()).thenReturn(true);
+        when(project.createFilePath(any(String.class))).thenReturn(filePath);
+
         when(compoPath.getLayoutPath()).thenReturn(layoutPath);
 
         when(layoutPath.getName()).thenReturn("layout.htm");
@@ -57,9 +61,10 @@ public class ComponentCreateTest {
         when(layoutPath.cloneTo(FileType.XML)).thenReturn(descriptorFile);
         when(layoutPath.cloneTo(FileType.STYLE)).thenReturn(stylePath);
 
+        when(descriptorFile.getProject()).thenReturn(project);
         when(descriptorFile.cloneTo(FileType.SCRIPT)).thenReturn(scriptPath);
 
-        when(compoDir.getFilePath(any())).thenReturn(Mockito.mock(FilePath.class));
+        when(compoDir.getFilePath(any())).thenReturn(mock(FilePath.class));
     }
 
     @Test

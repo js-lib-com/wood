@@ -623,6 +623,7 @@ public class FilePath implements Iterable<FilePath> {
      *
      * @param path path value.
      * @return true if path value match file pattern.
+     * @throws NullPointerException if path argument is null.
      */
     public static boolean accept(String path) {
         Matcher matcher = FILE_PATTERN.matcher(path);

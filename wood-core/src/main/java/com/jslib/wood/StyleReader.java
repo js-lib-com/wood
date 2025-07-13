@@ -231,12 +231,6 @@ public class StyleReader extends Reader {
         BASE_CONTENT,
 
         /**
-         * Base style file finished to process. Use this style to add new line if source file is not properly ended
-         * with new line.
-         */
-        BASE_CONTENT_END,
-
-        /**
          * Select next variant, if any.
          */
         NEXT_VARIANT,

@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
@@ -80,6 +82,14 @@ public class ComponentInheritanceTest {
         when(project.getTitle()).thenReturn("Components");
         when(project.hasNamespace()).thenReturn(true);
         when(project.getOperatorsHandler()).thenReturn(new XmlnsOperatorsHandler());
+
+        when(pageDescriptor.getProject()).thenReturn(project);
+        when(templateDescriptor.getProject()).thenReturn(project);
+        when(compoDescriptor.getProject()).thenReturn(project);
+
+        FilePath filePath = mock(FilePath.class);
+        when(filePath.exists()).thenReturn(true);
+        when(project.createFilePath(any(String.class))).thenReturn(filePath);
 
         when(pageLayout.exists()).thenReturn(true);
         when(pageLayout.isLayout()).thenReturn(true);

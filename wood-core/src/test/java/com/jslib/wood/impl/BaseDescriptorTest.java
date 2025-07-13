@@ -6,11 +6,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 import java.util.List;
 
+import com.jslib.wood.*;
 import com.jslib.wood.test.TestDescriptor;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,18 +21,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.jslib.wood.FilePath;
-import com.jslib.wood.ILinkDescriptor;
-import com.jslib.wood.IMetaDescriptor;
-import com.jslib.wood.IScriptDescriptor;
-
 @RunWith(MockitoJUnitRunner.class)
 public class BaseDescriptorTest {
+	@Mock
+	private Project project;
 	@Mock
 	private FilePath descriptorFile;
 
 	@Before
 	public void beforeTest() {
+		FilePath filePath = mock(FilePath.class);
+		when(filePath.exists()).thenReturn(true);
+		when(project.createFilePath(any(String.class))).thenReturn(filePath);
+
+		when(descriptorFile.getProject()).thenReturn(project);
 		when(descriptorFile.exists()).thenReturn(true);
 	}
 
