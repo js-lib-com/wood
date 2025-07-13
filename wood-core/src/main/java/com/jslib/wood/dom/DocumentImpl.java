@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
@@ -262,6 +263,17 @@ final class DocumentImpl implements Document {
             if (child instanceof org.w3c.dom.Element) {
                 removeNamespaceDeclarations((org.w3c.dom.Element) child, namespaceURI);
             }
+        }
+    }
+
+    @Override
+    public String stringify() {
+        try (StringWriter writer = new StringWriter()) {
+            serialize(writer);
+            return writer.toString();
+        } catch (IOException e) {
+            // there is no reason for string writer to have IO fails
+            throw new IllegalStateException(e);
         }
     }
 }

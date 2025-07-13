@@ -243,4 +243,11 @@ public interface Document {
      * @since 1.2
      */
     void removeNamespaceDeclaration(String namespaceURI);
+
+    /**
+     * Handy utility for document serialization on string, mostly for testing and debugging.
+     *
+     * @return document string representation.
+     */
+    String stringify();
 }
