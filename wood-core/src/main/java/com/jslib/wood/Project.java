@@ -72,7 +72,7 @@ public class Project {
     private final ProjectDescriptor descriptor;
 
     /**
-     * Build directory where site files are created. Configured on project properties, <code>build.dir</code> property.
+     * Build directory where site files are created. Configured on project descriptor, see {@link ProjectDescriptor#getBuildDir()}.
      */
     private final FilePath buildDir;
 

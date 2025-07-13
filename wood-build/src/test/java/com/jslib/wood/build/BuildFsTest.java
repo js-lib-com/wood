@@ -44,7 +44,7 @@ public class BuildFsTest {
         documentBuilder = DocumentBuilder.getInstance();
 
         File projectRoot = new File("src/test/resources/build-fs");
-        buildDir = new File(projectRoot, "site");
+        buildDir = new File(projectRoot, "build");
         buildFS = new TestBuildFS(buildDir, 0);
     }
 
@@ -413,7 +413,7 @@ public class BuildFsTest {
         File dir = buildFS.createDirectory(dirName);
 
         // THEN
-        assertThat(dir, isDir("src/test/resources/build-fs/site/images"));
+        assertThat(dir, isDir("src/test/resources/build-fs/build/images"));
     }
 
     @Test
@@ -426,7 +426,7 @@ public class BuildFsTest {
         File dir = buildFS.createDirectory(dirName);
 
         // THEN
-        assertThat(dir, isDir("src/test/resources/build-fs/site/ro/images"));
+        assertThat(dir, isDir("src/test/resources/build-fs/build/ro/images"));
     }
 
     @SuppressWarnings("ConstantConditions")

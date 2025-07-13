@@ -24,7 +24,7 @@ public class DefaultBuildFsTest {
     @Before
     public void beforeTest() {
         File projectRoot = new File("src/test/resources/build-fs");
-        buildDir = new File(projectRoot, "site");
+        buildDir = new File(projectRoot, "build");
         if (buildDir.exists()) {
             try {
                 FilesUtil.removeFilesHierarchy(buildDir);
