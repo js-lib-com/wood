@@ -16,7 +16,6 @@ import com.jslib.wood.ThemeStyles;
 import com.jslib.wood.dom.Document;
 import com.jslib.wood.dom.DocumentBuilder;
 import com.jslib.wood.dom.Element;
-import com.jslib.wood.util.ClassesUtil;
 import com.jslib.wood.util.StringsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,7 +280,7 @@ class Preview {
      */
     private void addControlScript(Document doc) throws IOException {
         Element scriptElement = doc.createElement("script", "type", "text/javascript");
-        scriptElement.setText(StringsUtil.load(ClassesUtil.getResourceAsReader("wood.js")));
+        scriptElement.setText(StringsUtil.loadResource("/wood.js"));
 
         Element head = doc.getByTag("head");
         head.addChild(scriptElement);
@@ -299,7 +298,7 @@ class Preview {
      * @throws IOException if script source loading fails.
      */
     private void addScript(Document doc, IScriptDescriptor script) throws IOException {
-        log.debug("Add script {}.", script);
+        log.debug("Add script {}", script);
         if (processedScripts.contains(script.getSource())) {
             return;
         }

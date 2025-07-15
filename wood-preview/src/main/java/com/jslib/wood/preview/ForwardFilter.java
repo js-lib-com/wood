@@ -114,8 +114,9 @@ public class ForwardFilter implements Filter {
      */
     @Override
     public void init(FilterConfig config) {
+        log.trace("init(FilterConfig config)");
         servletContext = config.getServletContext();
-        log.trace("Initialize filter {}#{}.", servletContext.getServletContextName(), config.getFilterName());
+        log.trace("Initialize filter {}#{}", servletContext.getServletContextName(), config.getFilterName());
         previewContextPath = servletContext.getContextPath();
 
         // by convention preview context has suffix -preview
@@ -125,7 +126,7 @@ public class ForwardFilter implements Filter {
 
         String urlPatterns = config.getInitParameter(URL_PATTERNS);
         if (urlPatterns != null) {
-            log.debug("Forward filter URL patterns {}.", urlPatterns);
+            log.debug("Forward filter URL patterns {}", urlPatterns);
             requestPathMatcher.addPattern(urlPatterns.split(","));
         }
     }
@@ -136,6 +137,7 @@ public class ForwardFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        log.trace("doFilter(ServletRequest request, ServletResponse response, FilterChain chain)");
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String requestPath = httpRequest.getRequestURI().substring(previewContextPath.length() + 1);
 
@@ -146,7 +148,7 @@ public class ForwardFilter implements Filter {
 
         ServletContext buildContext = servletContext.getContext(buildContextName);
         if (buildContext == null) {
-            throw new WoodException("Build context |%s| is not deployed or preview context is not configured with crossContext='true'", buildContextName);
+            throw new WoodException("Build context %s is not deployed or preview context is not configured with crossContext='true'", buildContextName);
         }
 
         RequestDispatcher dispatcher = buildContext.getRequestDispatcher(forwardPath(projectRoot, requestPath));
@@ -206,6 +208,7 @@ public class ForwardFilter implements Filter {
     // Test support
 
     ForwardFilter(ServletContext servletContext, String previewContextPath, File projectRoot) {
+        log.trace("ForwardFilter(ServletContext servletContext, String previewContextPath, File projectRoot)");
         this.servletContext = servletContext;
         this.previewContextPath = previewContextPath;
         this.projectRoot = projectRoot;

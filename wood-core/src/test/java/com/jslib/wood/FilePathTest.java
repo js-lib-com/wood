@@ -51,6 +51,19 @@ public class FilePathTest {
     }
 
     @Test
+    public void GivenInvalidPath_WhenFilePatternMatch_ThenNotFound() {
+        // GIVEN
+        Pattern pattern = FilePath.FILE_PATTERN;
+        String path = "/test-preview/com/kidscademy/Controller/page.rmi";
+
+        // WHEN
+        Matcher m = pattern.matcher(path);
+
+        // THEN
+        assertThat(m.find(), equalTo(false));
+    }
+
+    @Test
     public void GivenValidPath_WhenDirectoryPatternMatch_ThenGroupsFound() {
         Pattern pattern = FilePath.DIRECTORY_PATTERN;
         assertThat(pattern, notNullValue());
@@ -286,6 +299,7 @@ public class FilePathTest {
     public void GivenInvalidPath_WhenAccept_ThenFalse() {
         assertFalse(FilePath.accept("res/template/page/page.htm#body"));
         assertFalse(FilePath.accept("dir/template/page#body"));
+        assertFalse(FilePath.accept("/test-preview/com/kidscademy/Controller/page.rmi"));
     }
 
     @Test

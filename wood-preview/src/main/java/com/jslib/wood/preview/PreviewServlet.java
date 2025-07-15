@@ -114,6 +114,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
     /**
      * Default constructor mandated by Servlet container.
      */
+    @SuppressWarnings("unused")
     public PreviewServlet() {
         super();
         log.trace("PreviewServlet()");
@@ -131,7 +132,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         servletContext = config.getServletContext();
-        log.trace("Initialize servlet {}#{}.", servletContext.getServletContextName(), config.getServletName());
+        log.trace("Initialize servlet {}#{}", servletContext.getServletContextName(), config.getServletName());
         contextPath = servletContext.getContextPath();
 
         project = (Project) servletContext.getAttribute(Project.class.getName());
@@ -182,13 +183,13 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
 
         // request path is request URI without context; it does not start with a path separator
         String requestPath = httpRequest.getRequestURI().substring(contextPath.length() + 1);
-        log.debug("Request {} on context {}.", requestPath, contextPath);
+        log.debug("Request {} on context {}", requestPath, contextPath);
 
         if (CompoPath.accept(requestPath)) {
             CompoPath compoPath = project.createCompoPath(requestPath);
             FilePath layoutPath = compoPath.getLayoutPath();
             if (!layoutPath.exists()) {
-                throw new WoodException("Missing component layout |%s|.", layoutPath);
+                throw new WoodException("Missing component layout %s", layoutPath);
             }
 
             // if component has preview layout uses it instead of component layout
@@ -210,7 +211,18 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
             return;
         }
 
+        if (!FilePath.accept(requestPath)) {
+            log.warn("Invalid request path {}; respond with 404 Not Found", requestPath);
+            httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         FilePath filePath = project.createFilePath(requestPath);
+        if (!filePath.exists()) {
+            log.warn("File not found {}; respond with 404 Not Found", filePath);
+            httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         httpResponse.setContentType(filePath.getMimeType());
 
         if (filePath.isStyle()) {
@@ -253,7 +265,7 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
         // discover resource file and returns its absolute URL path
         FilePath resourceFile = project.getResourceFile(previewLanguage, reference, sourceFile);
         if (resourceFile == null) {
-            throw new WoodException("Missing resource file for reference |%s| from source |%s|.", reference, sourceFile);
+            throw new WoodException("Missing resource file for reference %s from source %s", reference, sourceFile);
         }
 
         StringBuilder builder = new StringBuilder();

@@ -530,55 +530,6 @@ final class ElementImpl implements Element {
         return this;
     }
 
-    @Override
-    public String trace() {
-        StringBuilder sb = new StringBuilder();
-        Element el = this;
-        while (el != null) {
-            int index = ((ElementImpl) el).index();
-            if (index != -1) {
-                sb.insert(0, ']');
-                sb.insert(0, index);
-                sb.insert(0, '[');
-            }
-            sb.insert(0, el.getTag());
-            sb.insert(0, '/');
-            el = el.getParent();
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Return the index this element has in its parent children list. When determine the index only elements of the same
-     * kind are counted; returns -1 if this element is the only child of its kind. This helper method is used by
-     * {@link #trace()}.
-     *
-     * @return this element index or -1 if only of its kind.
-     */
-    private int index() {
-        ElementImpl parent = (ElementImpl) getParent();
-        if (parent == null) {
-            return -1;
-        }
-        Node n = parent.node.getFirstChild();
-        int index = 0;
-        int twinsCount = 0;
-        boolean indexFound = false;
-        while (n != null) {
-            if (n == node) {
-                indexFound = true;
-            }
-            if (n.getNodeType() == Node.ELEMENT_NODE && n.getNodeName().equals(node.getNodeName())) {
-                ++twinsCount;
-                if (!indexFound) {
-                    ++index;
-                }
-            }
-            n = n.getNextSibling();
-        }
-        return twinsCount > 1 ? index : -1;
-    }
-
     /**
      * Element string representation.
      */

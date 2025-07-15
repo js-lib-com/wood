@@ -30,13 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public class EventsServlet extends HttpServlet {
-    /**
-     * Java serialization version.
-     */
     private static final long serialVersionUID = 6319917762096267440L;
-    /**
-     * Class logger.
-     */
     private static final Logger log = LoggerFactory.getLogger(EventsServlet.class);
 
     /**
@@ -61,10 +55,18 @@ public class EventsServlet extends HttpServlet {
     /**
      * Construct events servlet instance.
      */
+    @SuppressWarnings("unused")
     public EventsServlet() {
         log.trace("EventsServlet()");
         this.json = Json.getInstance();
         this.eventsManager = EventsManager.instance();
+    }
+
+    // TEST
+    EventsServlet(Json json, EventsManager eventsManager) {
+        log.trace("EventsServlet(Json json, EventsManager eventsManager)");
+        this.json = json;
+        this.eventsManager = eventsManager;
     }
 
     /**
@@ -79,8 +81,10 @@ public class EventsServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        log.trace("init(ServletConfig config)");
         ServletContext servletContext = config.getServletContext();
-        log.trace("Initialize servlet {}#{}.", servletContext.getServletContextName(), config.getServletName());
+        log.trace("Initialize servlet {}#{}", servletContext.getServletContextName(), config.getServletName());
+        // flag for preview servlet that events servlet is running
         servletContext.setAttribute(EventsServlet.class.getName(), true);
     }
 
@@ -90,7 +94,7 @@ public class EventsServlet extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.trace("service(Request,Response)");
+        log.trace("service(HttpServletRequest request, HttpServletResponse response)");
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Cache-Control", "no-cache");
@@ -99,7 +103,7 @@ public class EventsServlet extends HttpServlet {
         OutputStream stream = response.getOutputStream();
 
         Integer id = ID_SEED.incrementAndGet();
-        log.debug("Open event stream {} from {}. ", id, request.getRemoteAddr());
+        log.debug("Open event stream {} from {}", id, request.getRemoteAddr());
         BlockingQueue<Event> queue = eventsManager.acquireQueue(id);
 
         try {
@@ -113,10 +117,10 @@ public class EventsServlet extends HttpServlet {
                     event = new KeepAliveEvent();
                 }
                 if (event instanceof ShutdownEvent) {
-                    log.debug("Got shutdown event. Break events loop.");
+                    log.debug("Got shutdown event; break events loop");
                     break;
                 }
-                log.debug("Sending event {} on stream {}.", event, id);
+                log.debug("Sending event {} on stream {}", event, id);
 
                 try {
                     // event: counterCRLF
@@ -135,7 +139,7 @@ public class EventsServlet extends HttpServlet {
                     stream.flush();
                 } catch (IOException e) {
                     log.debug("IO / Socket exception: {}", e.getMessage());
-                    log.debug("Client presumably closes event stream. Break server-sent events loop.");
+                    log.debug("Client presumably closes event stream; break server-sent events loop");
                     break;
                 } catch (Exception e) {
                     log.error("Error processing events stream: {}: {}", e.getClass(), e.getMessage(), e);
@@ -143,7 +147,7 @@ public class EventsServlet extends HttpServlet {
             }
         } finally {
             eventsManager.releaseQueue(id);
-            log.debug("Close event stream {} with {}.", id, request.getRemoteAddr());
+            log.debug("Close event stream {} with {}", id, request.getRemoteAddr());
         }
     }
 
@@ -152,21 +156,5 @@ public class EventsServlet extends HttpServlet {
      */
     private static byte[] bytes(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
-    }
-
-    // --------------------------------------------------------------------------------------------
-    // Test support
-
-    EventsServlet(Json json, EventsManager eventsManager) {
-        this.json = json;
-        this.eventsManager = eventsManager;
-    }
-
-    Json getJson() {
-        return json;
-    }
-
-    EventsManager getEventsManager() {
-        return eventsManager;
     }
 }

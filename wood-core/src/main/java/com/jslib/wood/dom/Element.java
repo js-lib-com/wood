@@ -528,11 +528,4 @@ public interface Element {
      * @return true if this element has requested CSS class.
      */
     boolean hasCssClass(String cssClass);
-
-    /**
-     * Return the path through document tree from root to current element. Designed for debugging purposed.
-     *
-     * @return this element trace.
-     */
-    String trace();
 }

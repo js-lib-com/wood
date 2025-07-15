@@ -23,64 +23,88 @@ public class EventsManagerTest {
 	}
 
 	@Test
-	public void instance() {
-		EventsManager instance1 = EventsManager.instance();
-		EventsManager instance2 = EventsManager.instance();
-		assertThat(instance1, equalTo(instance2));
-	}
+	public void GivenNotRegisteredClientID_WhenAcquireQueue_ThenCreateQueueOnTheFly() {
+		// GIVEN
+		int clientID = 1;
 
-	@Test
-	public void acquireQueue() {
-		BlockingQueue<Event> queue = manager.acquireQueue(1);
+		// WHEN
+		BlockingQueue<Event> queue = manager.acquireQueue(clientID);
+
+		// THEN
 		assertThat(queue, notNullValue());
 		assertThat(manager.getQueues().get(1), notNullValue());
 		assertThat(manager.getQueues().get(1), equalTo(queue));
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void acquireQueue_AlreadyCreated() {
+	public void GivenAlreadyCreatedQueue_WhenAcquireQueue_ThenIllegalStateException() {
+		// GIVEN
 		@SuppressWarnings("unchecked")
 		BlockingQueue<Event> queue = mock(BlockingQueue.class);
 		manager.getQueues().put(1, queue);
 
+		// WHEN
 		manager.acquireQueue(1);
+
+		// THEN
 	}
 
 	@Test
-	public void releaseQueue() {
+	public void GivenCreatedQueue_WhenReleaseQueue_ThenQueueRemoved() {
+		// GIVEN
 		@SuppressWarnings("unchecked")
 		BlockingQueue<Event> queue = mock(BlockingQueue.class);
 		manager.getQueues().put(1, queue);
 
+		// WHEN
 		manager.releaseQueue(1);
+
+		// THEN
 		assertThat(manager.getQueues().get(1), nullValue());
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void releaseQueue_Missing() {
-		manager.releaseQueue(1);
+	public void GivenMissingClientI_WhenReleaseQueue_ThenIllegalStateException() {
+		// GIVEN
+		int clientID = 1;
+
+		// WHEN
+		manager.releaseQueue(clientID);
+
+		// THEN
 	}
 
 	@Test
-	public void pushEvent() {
+	public void GivenQueueWithAvailableSpace_WhenPushEvent_ThenQueueOfferInvoked() {
+		// GIVEN
 		@SuppressWarnings("unchecked")
 		BlockingQueue<Event> queue = mock(BlockingQueue.class);
+		// blocking queue returns true if it has space and adding new item succeed
 		when(queue.offer(any(Event.class))).thenReturn(true);
 		manager.getQueues().put(1, queue);
 
+		// WHEN
 		Event event = new KeepAliveEvent();
 		manager.pushEvent(event);
+
+		// THEN
 		verify(queue, times(1)).offer(event);
 	}
 
 	@Test
-	public void pushEvent_QueueFull() {
+	public void GiveQueueWithoutSpace_WhenPushEvent_ThenEventLostAndLogError() {
+		// GIVEN
 		@SuppressWarnings("unchecked")
 		BlockingQueue<Event> queue = mock(BlockingQueue.class);
+		// blocking queue returns false if it has no space and adding new item fails
+		when(queue.offer(any(Event.class))).thenReturn(false);
 		manager.getQueues().put(1, queue);
 
+		// WHEN
 		Event event = new KeepAliveEvent();
 		manager.pushEvent(event);
+
+		// THEN
 		verify(queue, times(1)).offer(event);
 	}
 }

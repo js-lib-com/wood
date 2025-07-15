@@ -49,28 +49,28 @@ public class VariablesCacheTest {
 
 	@Test
 	public void GivenVariablesCache_WhenUpdate_ThenReloadAssetAndClearMap() {
-		// given
+		// GIVEN
 		
-		// when
+		// WHEN
 		variablesCache.update();
 		
-		// then
+		// THEN
 		verify(assetVariables, times(1)).reload(assetDir);
 		assertThat(variablesCache.getSourceVariablesMap().size(), equalTo(0));
 	}
 
 	@Test
 	public void GivenVariableFoundOnSource_WhenGet_ThenAssetNotInvoked() {
-		// given
+		// GIVEN
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(sourceVariables.get("en", reference, source, referenceHandler)).thenReturn("Compo Title");
 
-		// when
+		// WHEN
 		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
-		// then
+		// THEN
 		assertThat(value, equalTo("Compo Title"));
 		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
 		verify(assetVariables, times(0)).get("en", reference, source, referenceHandler);
@@ -78,16 +78,16 @@ public class VariablesCacheTest {
 
 	@Test
 	public void GivenVariableNotFoundOnSource_WhenGet_ThenAssetInvoked() {
-		// given
+		// GIVEN
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 		when(assetVariables.get("en", reference, source, referenceHandler)).thenReturn("Asset Title");
 
-		// when
+		// WHEN
 		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
-		// then
+		// THEN
 		assertThat(value, equalTo("Asset Title"));
 		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
 		verify(assetVariables, times(1)).get("en", reference, source, referenceHandler);
@@ -95,15 +95,15 @@ public class VariablesCacheTest {
 
 	@Test
 	public void GivenVariableNotFoundOnSourceOrAsset_WhenGet_ThenNull() {
-		// given
+		// GIVEN
 		Reference reference = new Reference(Reference.Type.STRING, "title");
 		FilePath source = mock(FilePath.class);
 		when(source.getParentDir()).thenReturn(sourceDir);
 
-		// when
+		// WHEN
 		String value = variablesCache.get("en", reference, source, referenceHandler);
 		
-		// then
+		// THEN
 		assertThat(value, nullValue());
 		verify(sourceVariables, times(1)).get("en", reference, source, referenceHandler);
 		verify(assetVariables, times(1)).get("en", reference, source, referenceHandler);

@@ -3,8 +3,7 @@ package com.jslib.wood.preview;
 import com.jslib.wood.*;
 import com.jslib.wood.dom.Document;
 import com.jslib.wood.dom.DocumentBuilder;
-import com.jslib.wood.dom.EList;
-import com.jslib.wood.dom.Element;
+import com.jslib.wood.util.StringsUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +21,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,9 +40,10 @@ public class PreviewTest {
     }
 
     @Test
-    public void serialize() throws IOException, SAXException {
-        // project fixture
+    public void GivenComponent_WhenPreviewSerialize_ThenCompoDocument() throws IOException, SAXException {
+        // GIVEN
 
+        // project fixture
         when(project.getDefaultLanguage()).thenReturn("en");
         when(project.getAuthors()).thenReturn(Collections.singletonList("Iulian Rotaru"));
         when(project.getThemeStyles()).thenReturn(theme);
@@ -71,7 +70,6 @@ public class PreviewTest {
         when(theme.getStyles()).thenReturn(Collections.singletonList(themeStyle));
 
         // component fixture
-
         when(compo.getTitle()).thenReturn("Test compo");
         when(compo.getDescription()).thenReturn("Test compo description.");
 
@@ -94,63 +92,16 @@ public class PreviewTest {
         DocumentBuilder documentBuilder = DocumentBuilder.getInstance();
         when(compo.getLayout()).thenReturn(documentBuilder.parseHTML(layout).getRoot());
 
-        // exercise test
+        // WHEN
         Writer writer = new StringWriter();
         preview.serialize(writer);
 
-        // verify test
+        // THEN
         Document document = documentBuilder.parseXML(writer.toString());
-        Element html = document.getByTag("HTML");
-        assertThat(html, notNullValue());
-        assertThat(html.getAttr("lang"), equalTo("en"));
-
-        Element head = document.getByTag("HEAD");
-        assertThat(head, notNullValue());
-        EList heads = head.getChildren();
-        int index = 0;
-        assertHead(heads.item(index++), "meta", "http-equiv", "Content-Type", "content", "text/html; charset=UTF-8");
-        assertHead(heads.item(index++));
-        assertHead(heads.item(index++), "meta", "name", "Author", "content", "Iulian Rotaru");
-        assertHead(heads.item(index++), "meta", "name", "Description", "content", "Test compo description.");
-        assertHead(heads.item(index++), "meta", "property", "og:url", "content", "http://kids-cademy.com");
-        assertHead(heads.item(index++), "meta", "property", "og:title", "content", "Test compo");
-        assertHead(heads.item(index++), "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css");
-        assertHead(heads.item(index++), "http://fonts.googleapis.com/css?family=Lato");
-        assertHead(heads.item(index++), "test/theme/reset.css");
-        assertHead(heads.item(index++), "test/theme/fx.css");
-        assertHead(heads.item(index++), "test/theme/form.css");
-        assertHead(heads.item(index++), "test/compo/compo.css");
-        assertHead(heads.item(index++), "script", "src", null, "type", "text/javascript");
-        assertHead(heads.item(index++), "script", "src", "test/lib/js-lib.js", "type", "text/javascript");
-        assertHead(heads.item(index), "script", "src", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", "type", "text/javascript");
-
-        Element body = document.getByTag("BODY");
-        assertThat(body, notNullValue());
-        assertThat(body.getByTag("H1").getText(), equalTo("Test Compo"));
+        assertThat(str(document.stringify()), equalTo(str(StringsUtil.loadResource("/preview-test-document"))));
     }
 
     // --------------------------------------------------------------------------------------------
-
-    private static void assertHead(Element element) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo("title"));
-        assertThat(element.getTextContent(), equalTo("Preview - Test compo"));
-    }
-
-    private static void assertHead(Element element, String tag, String attribute1, String value1, String attribute2, String value2) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo(tag));
-        assertThat(element.getAttr(attribute1), equalTo(value1));
-        assertThat(element.getAttr(attribute2), equalTo(value2));
-    }
-
-    private static void assertHead(Element element, String href) {
-        assertThat(element, notNullValue());
-        assertThat(element.getTag(), equalTo("link"));
-        assertThat(element.getAttr("rel"), equalTo("stylesheet"));
-        assertThat(element.getAttr("href"), equalTo(href));
-        assertThat(element.getAttr("type"), equalTo("text/css"));
-    }
 
     private static List<IScriptDescriptor> scripts(String... sources) {
         List<IScriptDescriptor> scripts = new ArrayList<>();
@@ -178,5 +129,19 @@ public class PreviewTest {
             styles.add(style);
         }
         return styles;
+    }
+
+    /**
+     * There is a peculiarity when W3C element set text content that always use LF instead of CRLF. To allow for
+     * serialized document comparison we need to remove CR from all compared strings.
+     *
+     * @param string string to remove CR from.
+     * @return given string with CR removed.
+     */
+    private static String str(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string.replaceAll("\r", "");
     }
 }

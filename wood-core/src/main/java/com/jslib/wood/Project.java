@@ -439,7 +439,9 @@ public class Project {
     }
 
     public Component createComponent(FilePath layoutPath, IReferenceHandler referenceHandler) {
-        return new Component(layoutPath, referenceHandler);
+        Component component = new Component(layoutPath, referenceHandler);
+        component.scan();
+        return component;
     }
 
     public Variables createVariables(FilePath dir) {

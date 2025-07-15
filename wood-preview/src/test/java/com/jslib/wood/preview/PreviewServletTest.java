@@ -51,8 +51,6 @@ public class PreviewServletTest {
         when(project.getThemeStyles()).thenReturn(mock(ThemeStyles.class));
 
         when(servletContext.getContextPath()).thenReturn("/test-preview");
-
-        // when(httpRequest.getContextPath()).thenReturn("/test-preview");
         when(httpResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
 
         when(httpResponse.getOutputStream()).thenReturn(new ServletOutputStream() {
@@ -85,18 +83,22 @@ public class PreviewServletTest {
     }
 
     @Test
-    public void init() throws Exception {
+    public void GivenServletContext_WhenServletInit_TheInitializeState() throws Exception {
+        // GIVEN
         when(servletConfig.getServletContext()).thenReturn(servletContext);
         when(servletContext.getInitParameter("PROJECT_DIR")).thenReturn("src/test/resources/project");
 
+        // WHEN
         servlet.init(servletConfig);
 
+        // THEN
         assertThat(servlet.getProject(), notNullValue());
         assertThat(servlet.getVariables(), notNullValue());
     }
 
     @Test
-    public void service_Component() throws ServletException, SAXException {
+    public void GivenRequestForComponent_WhenServletService_ThenCreatePreviewForCompo() throws ServletException, SAXException {
+        // GIVEN
         when(httpRequest.getServletContext()).thenReturn(servletContext);
         when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo");
 
@@ -109,12 +111,16 @@ public class PreviewServletTest {
         when(compoPath.getFilePath("preview.htm")).thenReturn(layoutPath);
 
         Component compo = mock(Component.class);
+        when(compo.getTitle()).thenReturn("Test Compo");
         when(project.createComponent(any(FilePath.class), any(IReferenceHandler.class))).thenReturn(compo);
 
         DocumentBuilder documentBuilder = DocumentBuilder.getInstance();
         when(compo.getLayout()).thenReturn(documentBuilder.parseXML("<body><h1>Test Compo</h1></body>").getRoot());
 
+        // WHEN
         servlet.service(httpRequest, httpResponse);
+
+        // THEN
         assertThat(responseStatus, equalTo(200));
         assertThat(responseContentType, nullValue());
 
@@ -124,7 +130,8 @@ public class PreviewServletTest {
     }
 
     @Test
-    public void service_Style() throws ServletException, IOException {
+    public void GivenRequestForStyle_WhenServletService_ThenSendBackStyle() throws ServletException, IOException {
+        // GIVEN
         when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.css");
 
         FilePath stylePath = mock(FilePath.class);
@@ -135,28 +142,18 @@ public class PreviewServletTest {
         when(stylePath.getReader()).thenReturn(new StringReader("body { width: 1200px; }"));
         when(stylePath.getParentDir()).thenReturn(mock(FilePath.class));
 
+        // WHEN
         servlet.service(httpRequest, httpResponse);
+
+        // THEN
         assertThat(responseWriter.toString(), equalTo("body { width: 1200px; }" + System.lineSeparator()));
         assertThat(responseStatus, equalTo(200));
         assertThat(responseContentType, equalTo("text/css;charset=UTF-8"));
     }
 
     @Test
-    public void service_Style_Variants() throws ServletException, IOException {
-        when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo_w800.css");
-
-        FilePath stylePath = mock(FilePath.class);
-        when(project.createFilePath("res/compo/compo_w800.css")).thenReturn(stylePath);
-        when(stylePath.isStyle()).thenReturn(true);
-        when(stylePath.hasVariants()).thenReturn(true);
-
-        servlet.service(httpRequest, httpResponse);
-        assertThat(responseContentType, nullValue());
-        verify(stylePath, times(0)).copyTo(any(OutputStream.class));
-    }
-
-    @Test
-    public void service_Script() throws ServletException, IOException {
+    public void GivenRequestForLibraryScript_WhenServletService_ThenSendBackLibraryScript() throws ServletException, IOException {
+        // GIVEN
         when(httpRequest.getRequestURI()).thenReturn("/test-preview/lib/js-lib.js");
 
         FilePath scriptPath = mock(FilePath.class);
@@ -166,17 +163,22 @@ public class PreviewServletTest {
         when(scriptPath.getReader()).thenReturn(new StringReader("alert('test');"));
         when(project.createFilePath("lib/js-lib.js")).thenReturn(scriptPath);
 
+        // WHEN
         servlet.service(httpRequest, httpResponse);
+
+        // THEN
         assertThat(responseWriter.toString(), equalTo("alert('test');"));
         assertThat(responseStatus, equalTo(200));
         assertThat(responseContentType, equalTo("application/javascript;charset=UTF-8"));
     }
 
     @Test
-    public void service_Media() throws ServletException, IOException {
+    public void GivenRequestForImage_WhenServletService_ThenSendBackImage() throws ServletException, IOException {
+        // GIVEN
         when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/asset/logo.png");
 
         FilePath mediaPath = mock(FilePath.class);
+        when(mediaPath.exists()).thenReturn(true);
         when(mediaPath.getMimeType()).thenReturn("image/png");
         when(project.createFilePath("res/asset/logo.png")).thenReturn(mediaPath);
 
@@ -186,46 +188,89 @@ public class PreviewServletTest {
             return null;
         }).when(mediaPath).copyTo(any(OutputStream.class));
 
+        // WHEN
         servlet.service(httpRequest, httpResponse);
+
+        // THEN
         assertThat(responseStatus, equalTo(200));
         assertThat(responseContentType, equalTo("image/png"));
         assertThat(responseStream.toString(), equalTo("PNG"));
     }
 
-    @Test(expected = ServletException.class)
-    public void service_RMI_MissingContext() throws ServletException {
+    @Test
+    public void GivenHttpRmiRequest_WhenServletService_ThenResponseStatus404() throws ServletException {
+        // GIVEN
         when(httpRequest.getRequestURI()).thenReturn("/test-preview/com/kidscademy/Controller/page.rmi");
+        when(project.createFilePath("com/kidscademy/Controller/page.rmi")).thenReturn(mock(FilePath.class));
+
+        // WHEN
         servlet.service(httpRequest, httpResponse);
-    }
 
-    @Test(expected = ServletException.class)
-    public void service_BadExtension() throws ServletException, IOException {
-        when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.xxx");
-
-        FilePath filePath = mock(FilePath.class);
-        when(filePath.getMimeType()).thenThrow(WoodException.class);
-        when(project.createFilePath("res/compo/compo.xxx")).thenReturn(filePath);
-
-        servlet.service(httpRequest, httpResponse);
+        // THEN
+        assertThat(responseStatus, equalTo(404));
+        assertThat(responseContentType, nullValue());
+        assertThat(responseStream.toString(), equalTo(""));
     }
 
     @Test
-    public void onResourceReference_Variable() {
+    public void GivenRequestForInvalidFilePath_WhenServletService_ThenResponseStatus404() throws ServletException {
+        // GIVEN
+        when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/template/page/page.htm#body");
+
+        // WHEN
+        servlet.service(httpRequest, httpResponse);
+
+        // THEN
+        assertThat(responseStatus, equalTo(404));
+        assertThat(responseContentType, nullValue());
+        assertThat(responseStream.toString(), equalTo(""));
+    }
+
+    @Test
+    public void GivenRequestForFileWithBadExtension_WhenServletService_ThenResponseStatus404() throws ServletException {
+        // GIVEN
+        when(httpRequest.getRequestURI()).thenReturn("/test-preview/res/compo/compo.xxx");
+        when(project.createFilePath("res/compo/compo.xxx")).thenReturn(mock(FilePath.class));
+
+        // WHEN
+        servlet.service(httpRequest, httpResponse);
+
+        // THEN
+        assertThat(responseStatus, equalTo(404));
+        assertThat(responseContentType, nullValue());
+        assertThat(responseStream.toString(), equalTo(""));
+    }
+
+    @Test
+    public void GivenReferenceForStringVariable_WhenServletOnResourceReference_ThenVariableValue() {
+        // GIVEN
         Reference reference = new Reference(Reference.Type.STRING, "title");
         FilePath source = mock(FilePath.class);
         when(variables.get("en", reference, source, servlet)).thenReturn("Compo Title");
-        assertThat(servlet.onResourceReference(reference, source), equalTo("Compo Title"));
+
+        // WHEN
+        String value = servlet.onResourceReference(reference, source);
+
+        // THEN
+        assertThat(value, equalTo("Compo Title"));
     }
 
     @Test
-    public void onResourceReference_Variable_NotDefined() {
+    public void GivenReferenceForNotDefinedStringVariable_WhenServletOnResourceReference_ThenReferenceToString() {
+        // GIVEN
         Reference reference = new Reference(Reference.Type.STRING, "title");
         FilePath source = mock(FilePath.class);
-        assertThat(servlet.onResourceReference(reference, source), equalTo("@string/title"));
+
+        // WHEN
+        String value = servlet.onResourceReference(reference, source);
+
+        // THEN
+        assertThat(value, equalTo("@string/title"));
     }
 
     @Test
-    public void onResourceReference_Media() {
+    public void GivenReferenceForImage_WhenServletOnResourceReference_ThenImagePath() {
+        // GIVEN
         Reference reference = new Reference(Reference.Type.IMAGE, "res/asset/logo.png");
         FilePath source = mock(FilePath.class);
 
@@ -237,13 +282,22 @@ public class PreviewServletTest {
         when(media.getName()).thenReturn("logo.png");
         when(project.getResourceFile("en", reference, source)).thenReturn(media);
 
-        assertThat(servlet.onResourceReference(reference, source), equalTo("/test-preview/res/asset/logo.png"));
+        // WHEN
+        String path = servlet.onResourceReference(reference, source);
+
+        // THEN
+        assertThat(path, equalTo("/test-preview/res/asset/logo.png"));
     }
 
     @Test(expected = WoodException.class)
-    public void onResourceReference_Media_Missing() {
+    public void GivenReferenceForMissingImage_WhenServletOnResourceReference_ThenWoodException() {
+        // GIVEN
         Reference reference = new Reference(Reference.Type.IMAGE, "res/asset/logo.png");
         FilePath source = mock(FilePath.class);
+
+        // WHEN
         servlet.onResourceReference(reference, source);
+
+        // THEN
     }
 }

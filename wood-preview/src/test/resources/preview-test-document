@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HTML lang="en">
+	<HEAD>
+		<META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+		<TITLE>Preview - Test compo</TITLE>
+		<META content="Iulian Rotaru" name="Author" />
+		<META content="Test compo description." name="Description" />
+		<META content="http://kids-cademy.com" property="og:url" />
+		<META content="Test compo" property="og:title" />
+		<LINK href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		<LINK href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
+		<LINK href="test/theme/reset.css" rel="stylesheet" type="text/css" />
+		<LINK href="test/theme/fx.css" rel="stylesheet" type="text/css" />
+		<LINK href="test/theme/form.css" rel="stylesheet" type="text/css" />
+		<LINK href="test/compo/compo.css" rel="stylesheet" type="text/css" />
+		<SCRIPT type="text/javascript">document.addEventListener("DOMContentLoaded", function() {
+	var eventSource = new EventSource("wood.event");
+	eventSource.addEventListener("FileSystemEvent", function(event) {
+		event = JSON.parse(event.data);
+		console.log(event.file + ":" + event.action);
+		if (document.visibilityState == "visible") {
+			location.reload();
+		}
+	});
+});</SCRIPT>
+		<SCRIPT src="test/lib/js-lib.js" type="text/javascript"></SCRIPT>
+		<SCRIPT src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" type="text/javascript"></SCRIPT>
+	</HEAD>
+	<BODY>
+		<HTML>
+			<HEAD></HEAD>
+			<BODY>
+				<H1>Test Compo</H1>
+			</BODY>
+		</HTML>
+	</BODY>
+</HTML>

@@ -41,6 +41,10 @@ public class EventsManager {
      */
     private final Map<Integer, BlockingQueue<Event>> queues = new HashMap<>();
 
+    public EventsManager() {
+        log.trace("EventsManager()");
+    }
+
     /**
      * Create a new blocking event queue for client identified by given ID.
      *
@@ -49,12 +53,13 @@ public class EventsManager {
      * @throws IllegalStateException if client already has an events queue.
      */
     public synchronized BlockingQueue<Event> acquireQueue(Integer clientID) {
+        log.trace("acquireQueue(Integer clientID)");
         if (queues.get(clientID) != null) {
-            throw new IllegalStateException(format("Events queue for client |%d| already created.", clientID));
+            throw new IllegalStateException(format("Events queue for client %d already created", clientID));
         }
         BlockingQueue<Event> queue = new LinkedBlockingDeque<>();
         queues.put(clientID, queue);
-        log.debug("Acquired events queue {}.", clientID);
+        log.debug("Acquired events queue {}", clientID);
         return queue;
     }
 
@@ -65,11 +70,12 @@ public class EventsManager {
      * @throws IllegalStateException if there is no events queue for requested client.
      */
     public synchronized void releaseQueue(Integer clientID) {
+        log.trace("releaseQueue(Integer clientID)");
         if (queues.get(clientID) == null) {
-            throw new IllegalStateException(format("Missing queue for client |%d|.", clientID));
+            throw new IllegalStateException(format("Missing queue for client %d", clientID));
         }
         queues.remove(clientID);
-        log.debug("Released events queue {}.", clientID);
+        log.debug("Released events queue {}", clientID);
     }
 
     /**
@@ -79,9 +85,10 @@ public class EventsManager {
      * @param event event to push to connected clients.
      */
     public synchronized void pushEvent(Event event) {
+        log.trace("pushEvent(Event event)");
         for (Map.Entry<Integer, BlockingQueue<Event>> entry : queues.entrySet()) {
             if (!entry.getValue().offer(event)) {
-                log.error("Events queue {} is full. Event {} lost.", entry.getKey(), event);
+                log.error("Events queue {} is full; event {} lost", entry.getKey(), event);
             }
         }
     }

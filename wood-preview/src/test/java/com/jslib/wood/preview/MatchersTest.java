@@ -1,101 +1,168 @@
 package com.jslib.wood.preview;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class MatchersTest {
-	private Matchers matchers;
+    private Matchers matchers;
 
-	@Before
-	public void beforeTest() {
-		matchers = new Matchers();
-	}
+    @Before
+    public void beforeTest() {
+        matchers = new Matchers();
+    }
 
-	@Test
-	public void startsWith() {
-		matchers.addPattern("abc*");
+    @Test
+    public void GivenStartsWithPattern_WhenPositiveMatcherMatch_ThenFound() {
+        // GIVEN
+        matchers.addPattern("abc*");
 
-		assertTrue(matchers.match("abc"));
-		assertTrue(matchers.match("abcx"));
+        // WHEN - THEN
+        assertTrue(matchers.match("abc"));
+        assertTrue(matchers.match("abcx"));
+    }
 
-		assertFalse(matchers.match("xabcx"));
-		assertFalse(matchers.match("xabc"));
-		assertFalse(matchers.match("xyz"));
-	}
+    @Test
+    public void GivenStartsWithPattern_WhenNegativeMatcherMatch_ThenNotFound() {
+        // GIVEN
+        matchers.addPattern("abc*");
 
-	@Test
-	public void endsWith() {
-		matchers.addPattern("*abc");
+        // WHEN - THEN
+        assertFalse(matchers.match("xabcx"));
+        assertFalse(matchers.match("xabc"));
+        assertFalse(matchers.match("xyz"));
+    }
 
-		assertTrue(matchers.match("abc"));
-		assertTrue(matchers.match("xabc"));
+    @Test
+    public void GivenEndsWithPattern_WhenPositiveMatcherMatch_ThenFound() {
+        // GIVEN
+        matchers.addPattern("*abc");
 
-		assertFalse(matchers.match("xabcx"));
-		assertFalse(matchers.match("abcx"));
-		assertFalse(matchers.match("xyz"));
-	}
+        // WHEN - THEN
+        assertTrue(matchers.match("abc"));
+        assertTrue(matchers.match("xabc"));
+    }
 
-	@Test
-	public void contains() {
-		matchers.addPattern("*abc*");
+    @Test
+    public void GivenEndsWithPattern_WhenNegativeMatcherMatch_ThenNotFound() {
+        // GIVEN
+        matchers.addPattern("*abc");
 
-		assertTrue(matchers.match("abc"));
-		assertTrue(matchers.match("xabcx"));
-		assertTrue(matchers.match("abcx"));
-		assertTrue(matchers.match("xabc"));
+        // WHEN - THEN
+        assertFalse(matchers.match("xabcx"));
+        assertFalse(matchers.match("abcx"));
+        assertFalse(matchers.match("xyz"));
+    }
 
-		assertFalse(matchers.match("xyz"));
-	}
+    @Test
+    public void GivenContainsPattern_WhenPositiveMatcherMatch_ThenFound() {
+        // GIVEN
+        matchers.addPattern("*abc*");
 
-	@Test
-	public void equals() {
-		matchers.addPattern("abc");
+        // WHEN - THEN
+        assertTrue(matchers.match("abc"));
+        assertTrue(matchers.match("xabcx"));
+        assertTrue(matchers.match("abcx"));
+        assertTrue(matchers.match("xabc"));
+    }
 
-		assertTrue(matchers.match("abc"));
+    @Test
+    public void GivenContainsPattern_WhenNegativeMatcherMatch_ThenNotFound() {
+        // GIVEN
+        matchers.addPattern("*abc*");
 
-		assertFalse(matchers.match("xabc"));
-		assertFalse(matchers.match("abcx"));
-		assertFalse(matchers.match("xabcx"));
-		assertFalse(matchers.match("xyz"));
-	}
+        // WHEN - THEN
+        assertFalse(matchers.match("xyz"));
+    }
 
-	@Test
-	public void multiple() {
-		matchers.addPattern("*abc", "abc*");
+    @Test
+    public void GivenEqualsPattern_WhenPositiveMatcherMatch_ThenFound() {
+        // GIVEN
+        matchers.addPattern("abc");
 
-		assertTrue(matchers.match("abc"));
-		assertTrue(matchers.match("abcx"));
-		assertTrue(matchers.match("xabc"));
+        // WHEN - THEN
+        assertTrue(matchers.match("abc"));
+    }
 
-		assertFalse(matchers.match("xabcx"));
-		assertFalse(matchers.match("xyz"));
-	}
+    @Test
+    public void GivenEqualsPattern_WhenNegativeMatcherMatch_ThenNotFound() {
+        // GIVEN
+        matchers.addPattern("abc");
 
-	@Test
-	public void requestPathMatcher() {
-		String urlPatterns = "*.rmi,*.xsp,*/captcha/image/*,*/rest/*";
-		matchers.addPattern(urlPatterns.split(","));
+        // WHEN - THEN
+        assertFalse(matchers.match("xabc"));
+        assertFalse(matchers.match("abcx"));
+        assertFalse(matchers.match("xabcx"));
+        assertFalse(matchers.match("xyz"));
+    }
 
-		assertTrue(matchers.match("res/page/com/kidscademy/ServiceController/getFeedbackData.rmi"));
-	}
+    @Test
+    public void GivenMultiplePattern_WhenPositiveMatcherMatch_ThenFound() {
+        // GIVEN
+        matchers.addPattern("*abc", "abc*");
 
-	@Test
-	public void GivenEmptyPattern_ThenRejectAll() {
-		assertFalse(matchers.match("anything"));
-	}
+        // WHEN - THEN
+        assertTrue(matchers.match("abc"));
+        assertTrue(matchers.match("abcx"));
+        assertTrue(matchers.match("xabc"));
+    }
 
-	@Test(expected = AssertionError.class)
-	public void GivenNullParameter_ThenAssertionError() {
-		matchers.addPattern("abc");
-		matchers.match(null);
-	}
+    @Test
+    public void GivenMultiplePattern_WhenNegativeMatcherMatch_ThenNotFound() {
+        // GIVEN
+        matchers.addPattern("*abc", "abc*");
 
-	@Test(expected = AssertionError.class)
-	public void GivenEmptyStringParameter_ThenAssertionError() {
-		matchers.addPattern("abc");
-		matchers.match("");
-	}
+        // WHEN - THEN
+        assertFalse(matchers.match("xabcx"));
+        assertFalse(matchers.match("xyz"));
+    }
+
+    @Test
+    public void GivenRequestPathMatcher_WhenMatcherMatch_ThenFound() {
+        // GIVEN
+        String urlPatterns = "*.rmi,*.xsp,*/captcha/image/*,*/rest/*";
+        matchers.addPattern(urlPatterns.split(","));
+
+        // WHEN
+        boolean match = matchers.match("res/page/com/kidscademy/ServiceController/getFeedbackData.rmi");
+
+        // THEN
+        assertTrue(match);
+    }
+
+    @Test
+    public void GivenEmptyPattern_WhenMatcherMatch_ThenRejectAll() {
+        // GIVEN
+        String pattern = "anything";
+
+        // WHEN
+        boolean match = matchers.match(pattern);
+
+        // THEN
+        assertFalse(match);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void GivenNullParameter_WhenMatcherMatch_ThenAssertionError() {
+        // GIVEN
+        matchers.addPattern("abc");
+
+        // WHEN
+        matchers.match(null);
+
+        // THEN
+    }
+
+    @Test(expected = AssertionError.class)
+    public void GivenEmptyStringParameter_WhenMatcherMatch_ThenAssertionError() {
+        // GIVEN
+        matchers.addPattern("abc");
+
+        // WHEN
+        matchers.match("");
+
+        // THEN
+    }
 }

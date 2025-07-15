@@ -76,10 +76,20 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
      */
     @Override
     public void contextInitialized(ServletContextEvent contextEvent) {
-        log.trace("contextInitialized(ServletContextEvent)");
+        log.trace("contextInitialized(ServletContextEvent contextEvent)");
         ServletContext servletContext = contextEvent.getServletContext();
 
-        Path projectDir = Paths.get(servletContext.getInitParameter(PreviewServlet.PROJECT_DIR_PARAM));
+        String projectDirParam = servletContext.getInitParameter(PreviewServlet.PROJECT_DIR_PARAM);
+        if(projectDirParam == null) {
+            log.warn("Missing servlet init parameter {}; abort file system watcher", PreviewServlet.PROJECT_DIR_PARAM);
+            return;
+        }
+        Path projectDir = Paths.get(projectDirParam);
+        if(!Files.isDirectory(projectDir)) {
+            log.warn("Servlet init parameter {} is not an existing directory; abort file system watcher", projectDirParam);
+            return;
+        }
+
         String excludeDirsParam = servletContext.getInitParameter(EXCLUDE_DIRS_PARAM);
         if (excludeDirsParam != null) {
             for (String excludeDir : StringsUtil.split(excludeDirsParam, ',')) {
@@ -106,7 +116,7 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
         thread.start();
     }
 
-    private boolean isExcluded(Path dir) {
+    boolean isExcluded(Path dir) {
         return excludes.contains(dir) || dir.getFileName().toString().startsWith(".");
     }
 
@@ -114,8 +124,8 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
      * Stop watch service events loop and unregister directories.
      */
     @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        log.trace("contextDestroyed(ServletContextEvent)");
+    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        log.trace("contextDestroyed(ServletContextEvent servletContextEvent)");
         running.set(false);
         thread.interrupt();
 
@@ -124,7 +134,7 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
         }
         try {
             watchService.close();
-            log.debug("File system watcher closed.");
+            log.debug("File system watcher closed");
         } catch (IOException e) {
             log.error("Fail to close watch service: {}: {}", e.getClass(), e.getMessage(), e);
         }
@@ -182,9 +192,10 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
      * @param dir directory path.
      */
     void register(Path dir) {
+        log.trace("register(Path dir)");
         try {
             WatchKey key = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-            log.debug("Register watcher for directory |{}|.", dir);
+            log.debug("Register watcher for directory {}", dir);
             keyPaths.put(key, dir);
         } catch (IOException e) {
             throw new WoodException(e);
@@ -203,6 +214,7 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
     // Test support
 
     FileSystemWatcher(WatchService watchService, Thread thread, EventsManager eventsManager) {
+        log.trace("FileSystemWatcher(WatchService watchService, Thread thread, EventsManager eventsManager)");
         this.watchService = watchService;
         this.thread = thread;
         this.eventsManager = eventsManager;

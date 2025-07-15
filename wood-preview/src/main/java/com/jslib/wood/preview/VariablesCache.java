@@ -53,6 +53,7 @@ class VariablesCache {
 	 * @param handler variable reference handler for specific processing.
 	 * @return variable value or null if variable not defined or if is empty.
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public String get(String language, Reference reference, FilePath sourceFile, IReferenceHandler handler) {
 		// if source file is in project root there is no parent directory in which case search on asset variables
 		FilePath sourceDir = sourceFile.getParentDir();
