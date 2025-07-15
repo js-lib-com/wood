@@ -2,6 +2,7 @@ package com.jslib.wood.preview;
 
 import com.jslib.wood.*;
 import com.jslib.wood.util.FilesUtil;
+import com.jslib.wood.util.StringsUtil;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -12,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.io.File;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -162,8 +163,19 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
         try {
             doService(httpRequest, httpResponse);
         } catch (Throwable e) {
-            log.error("Fatal preview exception: ", e);
-            throw new ServletException(e);
+            log.error("Fatal preview exception: {}: {}", e.getClass(), e.getMessage(), e);
+            String requestPath = httpRequest.getRequestURI().substring(contextPath.length() + 1);
+            log.warn("Fail to process request path {}; respond with error page", requestPath);
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            try {
+                String errorPage = StringsUtil.loadResource("/error-page.htm");
+                assert errorPage != null;
+                errorPage = StringsUtil.format(errorPage, requestPath, e.getClass(), e.getMessage());
+                FilesUtil.copy(new ByteArrayInputStream(errorPage.getBytes(StandardCharsets.UTF_8)), httpResponse.getOutputStream());
+            } catch (IOException ex) {
+                log.error("Fail to send error page: {}: {}", ex.getClass(), ex.getMessage());
+                throw new ServletException(ex);
+            }
         } finally {
             log.trace("{} {} processed in {} msec.", httpRequest.getMethod(), httpRequest.getRequestURL(), System.currentTimeMillis() - start);
             MDC.clear();

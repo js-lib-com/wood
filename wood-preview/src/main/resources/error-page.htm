@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<HTML lang="en">
+<HEAD>
+    <META content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <TITLE>Preview - Error Page</TITLE>
+    <META content="Iulian Rotaru" name="Author" />
+    <META content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport" />
+    <SCRIPT type="text/javascript">document.addEventListener("DOMContentLoaded", function() {
+	var eventSource = new EventSource("wood.event");
+	eventSource.addEventListener("FileSystemEvent", function(event) {
+		event = JSON.parse(event.data);
+		console.log(event.file + ":" + event.action);
+		if (document.visibilityState == "visible") {
+			location.reload();
+		}
+	});
+});</SCRIPT>
+</HEAD>
+<BODY>
+    <H1>Error Page</H1>
+    <P>Request: %s</P>
+    <P>Exception: %s</P>
+    <P>Message: %s</P>
+</BODY>
+</HTML>
