@@ -133,7 +133,7 @@ public class FilePath implements Iterable<FilePath> {
             directory = true;
             matcher = DIRECTORY_PATTERN.matcher(value);
             if (!matcher.find()) {
-                throw new WoodException("Invalid file path |%s|.", value);
+                throw new WoodException("Invalid file path %s", value);
             }
         }
 
@@ -521,7 +521,7 @@ public class FilePath implements Iterable<FilePath> {
 
         File[] files = file.listFiles();
         if (files == null) {
-            throw new WoodException("Cannot list files from directory |%s|.", file);
+            throw new WoodException("Cannot list files from directory %s", file);
         }
 
         for (File file : files) {

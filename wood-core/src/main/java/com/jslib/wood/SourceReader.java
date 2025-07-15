@@ -245,7 +245,7 @@ public class SourceReader extends Reader {
                 if (reference != null) {
                     if (reference.getType() == Reference.Type.PARAM) {
                         if (layoutParameters == null) {
-                            throw new WoodException("Found @param at-meta but missing layout parameters for source file |%s|.", sourceFile);
+                            throw new WoodException("Found @param at-meta but missing layout parameters for source file %s", sourceFile);
                         }
                         value = layoutParameters.getValue(sourceFile, reference.getName());
                     } else {
@@ -264,7 +264,7 @@ public class SourceReader extends Reader {
                 charAfterMeta = c;
                 valueIndex = 1;
                 if (value == null) {
-                    throw new WoodException("Null value for at-meta reference |%s| in source file |%s|.", metaBuilder.toString(), sourceFile);
+                    throw new WoodException("Null value for at-meta reference %s in source file %s", metaBuilder.toString(), sourceFile);
                 }
                 return value.charAt(0);
 

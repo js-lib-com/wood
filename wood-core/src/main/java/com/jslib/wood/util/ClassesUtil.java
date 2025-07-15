@@ -58,7 +58,7 @@ public class ClassesUtil {
                 throw new IllegalStateException(e);
             }
         }
-        throw new NoSuchMethodException(format("No getter for |%s#%s|.", clazz.getCanonicalName(), fieldName));
+        throw new NoSuchMethodException(format("No getter for %s#%s", clazz.getCanonicalName(), fieldName));
     }
 
     /**
@@ -85,7 +85,7 @@ public class ClassesUtil {
                         Thread.currentThread().getContextClassLoader(), ClassesUtil.class.getClassLoader(), ClassLoader.getSystemClassLoader()
                 });
         if (stream == null) {
-            throw new IOException(format("Resource |%s| not found.", name));
+            throw new IOException(format("Resource %s not found", name));
         }
         return stream;
     }
@@ -202,6 +202,6 @@ public class ClassesUtil {
         if (t instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) t).getRawType();
         }
-        throw new IllegalStateException(format("Unknown type %s to convert to class.", t));
+        throw new IllegalStateException(format("Unknown type %s to convert to class", t));
     }
 }

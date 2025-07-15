@@ -108,7 +108,7 @@ final class DocumentImpl implements Document {
     @Override
     public Element createElement(String tagName, String... attrNameValues) {
         assert tagName != null && !tagName.isEmpty() : "Tag name argument is null or empty";
-        assert attrNameValues.length % 2 == 0 : "Missing value for last attribute.";
+        assert attrNameValues.length % 2 == 0 : "Missing value for last attribute";
 
         Element el = getElement(doc.createElement(tagName));
         if (attrNameValues.length > 0) {
@@ -120,7 +120,7 @@ final class DocumentImpl implements Document {
     @Override
     public Element importElement(Element el) {
         assert el != null : "Element argument is null";
-        assert el.getDocument() != this : "Element already belongs to this document.";
+        assert el.getDocument() != this : "Element already belongs to this document";
         return getElement(doc.importNode(((ElementImpl) el).getNode(), true));
     }
 

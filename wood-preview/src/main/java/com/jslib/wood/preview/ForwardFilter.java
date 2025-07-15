@@ -99,13 +99,14 @@ public class ForwardFilter implements Filter {
      * {@link #URL_PATTERNS}. If filter initialization parameter is not configured this matcher is empty and accept all. In this
      * case <code>filter-mapping</code> is used.
      */
-    private final Matchers requestPathMatcher = new Matchers();
+    private final Matchers requestPathMatcher;
 
     /**
      * Default constructor mandated by Servlet container.
      */
     public ForwardFilter() {
         log.trace("ForwardFilter()");
+        this.requestPathMatcher = new Matchers();
     }
 
     /**
@@ -209,6 +210,7 @@ public class ForwardFilter implements Filter {
 
     ForwardFilter(ServletContext servletContext, String previewContextPath, File projectRoot) {
         log.trace("ForwardFilter(ServletContext servletContext, String previewContextPath, File projectRoot)");
+        this.requestPathMatcher = new Matchers();
         this.servletContext = servletContext;
         this.previewContextPath = previewContextPath;
         this.projectRoot = projectRoot;

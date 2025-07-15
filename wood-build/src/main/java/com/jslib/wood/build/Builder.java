@@ -68,6 +68,7 @@ public class Builder implements IReferenceHandler {
      * @throws IOException if build directory creation fails.
      */
     public Builder(BuilderConfig config) throws IOException {
+        log.trace("Builder(BuilderConfig config)");
         this.project = new BuilderProject(config.getProjectDir());
         this.project.create();
 
@@ -85,6 +86,7 @@ public class Builder implements IReferenceHandler {
      * @param buildFS build file system.
      */
     Builder(BuilderProject project, BuildFS buildFS) {
+        log.trace("Builder(BuilderProject project, BuildFS buildFS)");
         this.project = project;
         this.buildFS = buildFS;
     }
@@ -105,6 +107,7 @@ public class Builder implements IReferenceHandler {
      * @throws IOException for error related to underlying file system operations.
      */
     public void build() throws IOException {
+        log.trace("build()");
         for (String language : project.getLanguages()) {
             this.language = language;
             if (project.isMultiLanguage()) {
@@ -147,6 +150,7 @@ public class Builder implements IReferenceHandler {
      * @throws IOException if files operation fails.
      */
     void buildPage(Component pageComponent) throws IOException {
+        log.trace("buildPage(Component pageComponent)");
         log.debug("Building page {}", pageComponent);
 
         PageDocument pageDocument = new PageDocument(pageComponent);
@@ -231,6 +235,8 @@ public class Builder implements IReferenceHandler {
      * @throws IOException if write on build filesystem fails.
      */
     private void addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script) throws IOException {
+        log.trace("addScript(Component pageComponent, PageDocument pageDocument, IScriptDescriptor script)");
+
         for (IScriptDescriptor dependency : project.getScriptDependencies(script.getSource())) {
             addScript(pageComponent, pageDocument, dependency);
             return;
@@ -281,7 +287,7 @@ public class Builder implements IReferenceHandler {
                 value = project.getAssetVariables().get(language, reference, sourceFile, this);
             }
             if (value == null) {
-                throw new WoodException("Missing variable value for reference |%s:%s|.", sourceFile, reference);
+                throw new WoodException("Missing variable value for reference %s:%s", sourceFile, reference);
             }
             return value;
         }
@@ -289,7 +295,7 @@ public class Builder implements IReferenceHandler {
         if (reference.isProject()) {
             String value = project.getDescriptor().getValue(reference.getName());
             if (value == null) {
-                throw new WoodException("Missing project descriptor value for reference |%s:%s|.", sourceFile, reference);
+                throw new WoodException("Missing project descriptor value for reference %s:%s", sourceFile, reference);
             }
             return value;
         }
@@ -302,7 +308,7 @@ public class Builder implements IReferenceHandler {
 
         FilePath resourceFile = project.getResourceFile(language, reference, sourceFile);
         if (resourceFile == null) {
-            throw new WoodException("Missing resource file for reference |%s:%s|.", sourceFile, reference);
+            throw new WoodException("Missing resource file for reference %s:%s", sourceFile, reference);
         }
 
         if (reference.isMediaFile()) {

@@ -43,7 +43,7 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
     /**
      * Keeps track of all registered directories. Used to register newly created directories and to unregister watch keys.
      */
-    private final Map<WatchKey, Path> keyPaths = new HashMap<>();
+    private final Map<WatchKey, Path> keyPaths;
 
     /**
      * Watch service events loop.
@@ -52,14 +52,14 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
     /**
      * Thread active flag.
      */
-    private final AtomicBoolean running = new AtomicBoolean();
+    private final AtomicBoolean running;
 
     /**
      * Manager for client blocking events queues. Watch events are send to this manager for push to connected clients.
      */
     private final EventsManager eventsManager;
 
-    private final List<Path> excludes = new ArrayList<>();
+    private final List<Path> excludes;
 
     /**
      * Construct file system watcher.
@@ -67,8 +67,11 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
     public FileSystemWatcher() throws IOException {
         log.trace("FileSystemWatcher()");
         this.watchService = FileSystems.getDefault().newWatchService();
+        this.keyPaths = new HashMap<>();
         this.thread = new Thread(this);
+        this.running = new AtomicBoolean();
         this.eventsManager = EventsManager.instance();
+        this.excludes = new ArrayList<>();
     }
 
     /**
@@ -183,7 +186,7 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
             key.reset();
         }
 
-        log.debug("Exit watcher thread.");
+        log.debug("Exit watcher thread");
     }
 
     /**
@@ -216,8 +219,11 @@ public class FileSystemWatcher implements ServletContextListener, Runnable {
     FileSystemWatcher(WatchService watchService, Thread thread, EventsManager eventsManager) {
         log.trace("FileSystemWatcher(WatchService watchService, Thread thread, EventsManager eventsManager)");
         this.watchService = watchService;
+        this.keyPaths = new HashMap<>();
         this.thread = thread;
+        this.running = new AtomicBoolean();
         this.eventsManager = eventsManager;
+        this.excludes = new ArrayList<>();
     }
 
     WatchService getWatchService() {

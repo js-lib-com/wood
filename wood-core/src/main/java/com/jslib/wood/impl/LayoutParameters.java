@@ -81,7 +81,7 @@ public class LayoutParameters {
 	public String getValue(FilePath sourceFile, String name) {
 		String value = parameters.get(name);
 		if (value == null) {
-			throw new WoodException("Missing layout parameter |%s| in source file |%s|.", name, sourceFile);
+			throw new WoodException("Missing layout parameter %s in source file %s", name, sourceFile);
 		}
 		return value;
 	}

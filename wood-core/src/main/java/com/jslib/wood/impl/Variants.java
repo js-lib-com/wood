@@ -101,7 +101,7 @@ public class Variants {
             if (matcher.match(LANGUAGE_PATTERN, variant)) {
                 // language
                 if (language != null) {
-                    throw new WoodException("Invalid variants syntax %s. Multiple language variants.", variants);
+                    throw new WoodException("Invalid variants syntax %s; multiple language variants", variants);
                 }
                 String country = matcher.group(2);
                 if (country == null) {
@@ -113,7 +113,7 @@ public class Variants {
             }
             if (!mediaQueries.add(variant)) {
                 // unknown variants
-                throw new WoodException("Not recognized variant %s on file %s.", variant, file);
+                throw new WoodException("Not recognized variant %s on file %s", variant, file);
             }
         }
 

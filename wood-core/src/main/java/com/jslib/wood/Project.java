@@ -469,7 +469,7 @@ public class Project {
 
         File[] files = dir.listFiles();
         if (files == null) {
-            throw new WoodException("Fail to list directory |%s|.", dir);
+            throw new WoodException("Fail to list directory %s", dir);
         }
 
         for (File file : files) {

@@ -69,11 +69,11 @@ public abstract class BaseDescriptor {
         List<IMetaDescriptor> descriptors = new ArrayList<>();
         for (Element element : doc.findByTag("meta")) {
             if (!(element.hasAttr("name") || element.hasAttr("http-equiv") || element.hasAttr("property"))) {
-                throw new WoodException("Invalid descriptor file |%s|. Missing 'name', 'http-equiv' or 'property' attribute from <meta> element.", descriptorFile);
+                throw new WoodException("Invalid descriptor file %s; missing 'name', 'http-equiv' or 'property' attribute from <meta> element", descriptorFile);
             }
             MetaDescriptor descriptor = MetaDescriptor.create(element);
             if (descriptors.contains(descriptor)) {
-                throw new WoodException("Duplicate meta |%s| in project descriptor.", descriptor);
+                throw new WoodException("Duplicate meta %s in project descriptor", descriptor);
             }
             descriptors.add(descriptor);
         }
@@ -85,17 +85,17 @@ public abstract class BaseDescriptor {
         for (Element element : doc.findByTag("link")) {
             String href = element.getAttr("href");
             if (href == null) {
-                throw new WoodException("Invalid descriptor file %s. Missing 'href' attribute from <link> element.", descriptorFile);
+                throw new WoodException("Invalid descriptor file %s; missing 'href' attribute from <link> element", descriptorFile);
             }
             if (FilePath.accept(href)) { // only local script
                 FilePath scriptFile = project.createFilePath(href);
                 if (!scriptFile.exists()) {
-                    throw new WoodException("Missing link file %s declared by descriptor %s.", href, descriptorFile);
+                    throw new WoodException("Missing link file %s declared by descriptor %s", href, descriptorFile);
                 }
             }
             LinkDescriptor descriptor = LinkDescriptor.create(element);
             if (descriptors.contains(descriptor)) {
-                throw new WoodException("Duplicate link %s in project descriptor.", descriptor);
+                throw new WoodException("Duplicate link %s in project descriptor", descriptor);
             }
             descriptors.add(descriptor);
         }
@@ -127,17 +127,17 @@ public abstract class BaseDescriptor {
         for (Element element : doc.findByTag("script")) {
             String src = element.getAttr("src");
             if (src == null) {
-                throw new WoodException("Invalid descriptor file %s. Missing 'src' attribute from <script> element.", descriptorFile);
+                throw new WoodException("Invalid descriptor file %s; missing 'src' attribute from <script> element", descriptorFile);
             }
             if (FilePath.accept(src)) { // only local script
                 FilePath scriptFile = project.createFilePath(src);
                 if (!scriptFile.exists()) {
-                    throw new WoodException("Missing script file %s declared by descriptor %s.", src, descriptorFile);
+                    throw new WoodException("Missing script file %s declared by descriptor %s", src, descriptorFile);
                 }
             }
             ScriptDescriptor descriptor = ScriptDescriptor.create(element);
             if (descriptors.contains(descriptor)) {
-                throw new WoodException("Duplicate script %s in project descriptor.", descriptor);
+                throw new WoodException("Duplicate script %s in project descriptor", descriptor);
             }
             descriptors.add(descriptor);
         }

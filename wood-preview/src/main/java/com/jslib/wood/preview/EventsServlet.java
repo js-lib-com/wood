@@ -52,9 +52,6 @@ public class EventsServlet extends HttpServlet {
      */
     private final EventsManager eventsManager;
 
-    /**
-     * Construct events servlet instance.
-     */
     @SuppressWarnings("unused")
     public EventsServlet() {
         log.trace("EventsServlet()");

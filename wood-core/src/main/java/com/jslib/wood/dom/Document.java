@@ -206,6 +206,7 @@ public interface Document {
     /**
      * Serialize this document to standard output. Mainly for quick debugging.
      */
+    @SuppressWarnings("unused")
     void dump();
 
     /**

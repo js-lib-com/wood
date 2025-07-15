@@ -121,7 +121,7 @@ public class LayoutReader extends Reader {
 
                 case WAIT_ROOT:
                     if (c != '<') {
-                        throw new LayoutParseException("Missing root element from file %s.", sourceFile);
+                        throw new LayoutParseException("Missing root element from file %s", sourceFile);
                     }
                     state = State.PROLOG;
                     break;

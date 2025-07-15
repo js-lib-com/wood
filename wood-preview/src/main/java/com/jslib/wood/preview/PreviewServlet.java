@@ -53,14 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public final class PreviewServlet extends HttpServlet implements IReferenceHandler {
-    /**
-     * Java serialization ID,
-     */
     private static final long serialVersionUID = -2971057399517075118L;
-
-    /**
-     * Class logger.
-     */
     private static final Logger log = LoggerFactory.getLogger(PreviewServlet.class);
 
     /**
@@ -132,8 +125,9 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        log.trace("init(ServletConfig config)");
         servletContext = config.getServletContext();
-        log.trace("Initialize servlet {}#{}", servletContext.getServletContextName(), config.getServletName());
+        log.debug("Initialize servlet {}#{}", servletContext.getServletContextName(), config.getServletName());
         contextPath = servletContext.getContextPath();
 
         project = (Project) servletContext.getAttribute(Project.class.getName());
@@ -153,6 +147,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
      */
     @Override
     protected void service(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException {
+        log.trace("service(HttpServletRequest httpRequest, HttpServletResponse httpResponse)");
+
         // push context path and remote address of the requested processed by this thread to logger diagnostic context
         MDC.put(LOG_CONTEXT_APP, contextPath.isEmpty() ? "root" : contextPath.substring(1));
         MDC.put(LOG_CONTEXT_IP, httpRequest.getRemoteHost());
@@ -190,6 +186,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
      * @throws Exception exceptions from preview process are thrown to caller.
      */
     private void doService(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+        log.trace("doService(HttpServletRequest httpRequest, HttpServletResponse httpResponse)");
+
         httpResponse.setCharacterEncoding("UTF-8");
         httpResponse.setStatus(HttpServletResponse.SC_OK);
 
@@ -302,6 +300,8 @@ public final class PreviewServlet extends HttpServlet implements IReferenceHandl
      */
     PreviewServlet(ServletContext servletContext, Project project, VariablesCache variables) {
         super();
+        log.trace("PreviewServlet(ServletContext servletContext, Project project, VariablesCache variables)");
+
         this.servletContext = servletContext;
         this.contextPath = servletContext.getContextPath();
 

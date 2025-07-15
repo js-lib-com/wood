@@ -25,11 +25,12 @@ class VariablesCache {
 	 * Source variables instances mapped by source directory where variables files are defined. Asset variables are not
 	 * included.
 	 */
-	private final Map<FilePath, Variables> sourceVariablesMap = new HashMap<>();
+	private final Map<FilePath, Variables> sourceVariablesMap;
 
 	public VariablesCache(Project project) {
 		this.project = project;
 		this.assetVariables = this.project.createVariables(project.getAssetDir());
+		this.sourceVariablesMap = new HashMap<>();
 	}
 
 	/**

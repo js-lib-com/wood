@@ -391,7 +391,7 @@ public class Variables {
 
                 default:
                     if (referenceType != Reference.Type.TEXT) {
-                        throw new WoodException("Not allowed nested element |%s| in  file |%s|. Only text variables support nested elements.", qName, sourceFile);
+                        throw new WoodException("Not allowed nested element %s in file %s; only text variables support nested elements", qName, sourceFile);
                     }
                     builder.startTag(qName);
             }

@@ -118,8 +118,8 @@ public class FilesUtil {
     public static long copy(InputStream inputStream, OutputStream outputStream) throws IOException, IllegalArgumentException {
         assert inputStream != null : "Input stream argument is null";
         assert outputStream != null : "Output stream argument is null";
-        assert !(inputStream instanceof ZipInputStream) : "Input stream argument is ZIP.";
-        assert !(outputStream instanceof ZipOutputStream) : "Output stream argument is ZIP.";
+        assert !(inputStream instanceof ZipInputStream) : "Input stream argument is ZIP";
+        assert !(outputStream instanceof ZipOutputStream) : "Output stream argument is ZIP";
 
         if (!(inputStream instanceof BufferedInputStream)) {
             inputStream = new BufferedInputStream(inputStream);
@@ -280,7 +280,7 @@ public class FilesUtil {
                 baseDirPathComponents.remove(lastIndex);
             } else if (baseDirPathComponents.get(lastIndex).equals("..")) {
                 if (baseDirPathComponents.size() < 2) {
-                    throw new IllegalStateException("Invalid base directory for relative path. It ends with '..' but has no parent directory.");
+                    throw new IllegalStateException("Invalid base directory for relative path; it ends with '..' but has no parent directory");
                 }
                 baseDirPathComponents.remove(baseDirPathComponents.size() - 1);
                 baseDirPathComponents.remove(baseDirPathComponents.size() - 1);
@@ -342,7 +342,7 @@ public class FilesUtil {
                 removeDirectory(file);
             }
             if (!file.delete()) {
-                throw new IOException(format("Fail to delete %s |%s|.", file.isDirectory() ? "empty directory" : "file", file));
+                throw new IOException(format("Fail to delete %s %s", file.isDirectory() ? "empty directory" : "file", file));
             }
         }
     }

@@ -98,7 +98,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
         if (reference.isVariable()) {
             String value = VARIABLES.get(reference);
             if (value == null) {
-                throw new WoodException("Missing variable value for reference |%s| from source |%s|.", reference, sourceFile);
+                throw new WoodException("Missing variable value for reference %s from source %s", reference, sourceFile);
             }
             return value;
         }
@@ -106,7 +106,7 @@ public class ProjectIntegrationTest implements IReferenceHandler {
         // discover media file and returns its absolute URL path
         FilePath mediaFile = sourceFile.getProject().getResourceFile(language, reference, sourceFile);
         if (mediaFile == null) {
-            throw new WoodException("Missing media file for reference |%s| from source |%s|.", reference, sourceFile);
+            throw new WoodException("Missing media file for reference %s from source %s", reference, sourceFile);
         }
 
         return mediaFile.getParentDir().value() + mediaFile.getName();

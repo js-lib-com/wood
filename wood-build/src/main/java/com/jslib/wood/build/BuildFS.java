@@ -63,8 +63,10 @@ public abstract class BuildFS {
      * @throws IllegalArgumentException if project parameter is null or build number is negative.
      */
     protected BuildFS(File buildDir, int buildNumber) {
+        log.trace("BuildFS(File buildDir, int buildNumber)");
         assert buildDir != null : "Build directory argument is null";
         assert buildNumber >= 0 : "Build number argument is negative";
+
         this.buildDir = buildDir;
         this.buildNumber = buildNumber;
         this.processedFiles = new ArrayList<>();
@@ -293,7 +295,7 @@ public abstract class BuildFS {
         }
         int extensionSeparatorIndex = fileName.lastIndexOf('.');
         if (extensionSeparatorIndex == -1) {
-            throw new WoodException("Invalid file name |%s|. Missing extension.", fileName);
+            throw new WoodException("Invalid file name %s; missing extension", fileName);
         }
         String baseName = fileName.substring(0, extensionSeparatorIndex);
         String extension = fileName.substring(extensionSeparatorIndex + 1);

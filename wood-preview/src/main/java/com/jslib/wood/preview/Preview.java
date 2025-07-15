@@ -65,7 +65,7 @@ class Preview {
      * @param controlScript enable control script injection.
      */
     public Preview(Project project, Component compo, String contextPath, boolean controlScript) {
-        log.trace("Preview(Project,Component,String,boolean)");
+        log.trace("Preview(Project project, Component compo, String contextPath, boolean controlScript)");
         this.project = project;
         this.compo = compo;
         this.contextPath = contextPath;
@@ -80,6 +80,8 @@ class Preview {
      * @throws IOException if document serialization fails.
      */
     public void serialize(Writer writer) throws IOException {
+        log.trace("serialize(Writer writer)");
+
         DocumentBuilder builder = DocumentBuilder.getInstance();
         Document doc = builder.createHTML();
 

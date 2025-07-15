@@ -101,7 +101,7 @@ final class EListImpl implements EList {
          * Remove operation is not supported.
          */
         public void remove() {
-            throw new UnsupportedOperationException("Nodes list iterator does not support node removing.");
+            throw new UnsupportedOperationException("Nodes list iterator does not support node removing");
         }
     }
 }

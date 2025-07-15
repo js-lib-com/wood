@@ -103,7 +103,7 @@ public class Reference {
             this.name = name;
         } else {
             if (isVariable()) {
-                throw new WoodException("Invalid reference |%s:%s| syntax on file |%s|. Variable reference with path.", type, name, sourceFile);
+                throw new WoodException("Invalid reference %s:%s syntax on file %s; variable reference with path", type, name, sourceFile);
             }
             this.path = name.substring(0, pathSeparator).replace('\\', '/');
             this.name = name.substring(pathSeparator + 1);

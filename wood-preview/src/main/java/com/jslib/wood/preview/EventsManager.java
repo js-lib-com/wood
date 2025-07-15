@@ -27,22 +27,21 @@ import static com.jslib.wood.util.StringsUtil.format;
 public class EventsManager {
     private static final Logger log = LoggerFactory.getLogger(EventsManager.class);
 
-    private static final class InstanceHolder {
-        static final EventsManager instance = new EventsManager();
-    }
+    private static final EventsManager instance = new EventsManager();
 
     public static EventsManager instance() {
-        return InstanceHolder.instance;
+        return instance;
     }
 
     /**
      * Clients blocking event queues. This dictionary is live, it is updated on every new client connection creation and close.
      * Dictionary key is the client ID.
      */
-    private final Map<Integer, BlockingQueue<Event>> queues = new HashMap<>();
+    private final Map<Integer, BlockingQueue<Event>> queues;
 
     public EventsManager() {
         log.trace("EventsManager()");
+        this.queues = new HashMap<>();
     }
 
     /**

@@ -111,7 +111,7 @@ public class CompoPath extends FilePath {
         assert compoPath != null && !compoPath.isEmpty() : "Component path argument is null or empty";
         Matcher matcher = PATTERN.matcher(compoPath);
         if (!matcher.find()) {
-            throw new WoodException("Invalid component path |%s|.", compoPath);
+            throw new WoodException("Invalid component path %s", compoPath);
         }
         return matcher.group(1) + FilePath.SEPARATOR_CHAR;
     }

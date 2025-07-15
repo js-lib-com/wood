@@ -450,7 +450,7 @@ public class StringsUtil {
     private static Pair pair(String string, char separator) {
         int separatorIndex = string.indexOf(separator);
         if (separatorIndex == -1) {
-            throw new IllegalArgumentException("Missing pair separator. Cannot initialize pair instance.");
+            throw new IllegalArgumentException("Missing pair separator; cannot initialize pair instance");
         }
         final String first = string.substring(0, separatorIndex).trim();
         final String second = string.substring(separatorIndex + 1).trim();
@@ -494,7 +494,7 @@ public class StringsUtil {
             escapeXML(text, writer);
         } catch (IOException e) {
             // there is no reason for IO exception on a string writer
-            throw new IllegalStateException("IO failure while attempting to write to string.");
+            throw new IllegalStateException("IO failure while attempting to write to string");
         }
         return writer.toString();
     }

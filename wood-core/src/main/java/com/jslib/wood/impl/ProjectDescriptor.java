@@ -44,7 +44,7 @@ public class ProjectDescriptor extends BaseDescriptor {
 
         this.languages = StringsUtil.split(text("language", "en"), ',', ' ');
         if (languages.isEmpty()) {
-            throw new WoodException("Invalid project descriptor. Empty <language> element.");
+            throw new WoodException("Invalid project descriptor; empty <language> element");
         }
 
         this.mediaQueries = new HashSet<>();
@@ -57,7 +57,7 @@ public class ProjectDescriptor extends BaseDescriptor {
             }
             String expression = mediaQueryElement.getAttr("expression");
             if (!mediaQueries.add(new MediaQueryDefinition(alias, media, expression))) {
-                throw new WoodException("Redefinition of the media query alias %s.", alias);
+                throw new WoodException("Redefinition of the media query alias %s", alias);
             }
         }
     }

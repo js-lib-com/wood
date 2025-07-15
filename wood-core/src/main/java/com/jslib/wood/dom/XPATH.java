@@ -90,7 +90,7 @@ final class XPATH {
         }
         node = (Node) result;
         if (node.getNodeType() != Node.ELEMENT_NODE) {
-            log.debug("XPath expression {} on {} yields a node that is not element. Force to null.", xpath, contextNode);
+            log.debug("XPath expression {} on {} yields a node that is not element; force to null", xpath, contextNode);
             return null;
         }
         return node;

@@ -125,7 +125,7 @@ public class Component {
 	 */
 	public Component(FilePath layoutPath, IReferenceHandler referenceHandler) {
 		if (!layoutPath.exists()) {
-			throw new WoodException("Missing component layout |%s|.", layoutPath);
+			throw new WoodException("Missing component layout %s", layoutPath);
 		}
 		this.documentBuilder = DocumentBuilder.getInstance();
 
@@ -231,7 +231,7 @@ public class Component {
 
 			FilePath childLayoutPath = compoPath.getLayoutPath();
 			if (!childLayoutPath.exists()) {
-				throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", childLayoutPath, layoutPath);
+				throw new WoodException("Missing child component layout %s requested from parent %s", childLayoutPath, layoutPath);
 			}
 
 			mergeDescriptor(childLayoutPath);
@@ -343,7 +343,7 @@ public class Component {
 		CompoPath templateCompoPath = project.createCompoPath(contentFragment.getTemplatePath());
 		FilePath templateLayoutPath = templateCompoPath.getLayoutPath();
 		if (!templateLayoutPath.exists()) {
-			throw new WoodException("Missing child component layout |%s| requested from parent |%s|.", templateLayoutPath, componentLayoutPath);
+			throw new WoodException("Missing child component layout %s requested from parent %s", templateLayoutPath, componentLayoutPath);
 		}
 		mergeDescriptor(templateLayoutPath);
 
@@ -368,7 +368,7 @@ public class Component {
 				// it is legal to have empty template in which case consider entire template as editable
 				// anyway, if template document has children is mandatory to have editable element
 				if (templateDoc.getRoot().hasChildren()) {
-					throw new WoodException("Missing editable element |%s#%s| requested from component |%s|.", templateCompoPath, editableName, componentLayoutPath);
+					throw new WoodException("Missing editable element %s#%s requested from component %s", templateCompoPath, editableName, componentLayoutPath);
 				}
 				editableElement = templateDoc.getRoot();
 			}
@@ -691,7 +691,7 @@ public class Component {
 					return null;
 				}
 				if (editable.hasChildren()) {
-					throw new WoodException("Template editable element |%s| is not allowed to have children.", editable);
+					throw new WoodException("Template editable element %s is not allowed to have children", editable);
 				}
 				editables.put(editableName, editable);
 			}

@@ -87,7 +87,7 @@ public class StyleReader extends Reader {
      * @param styleFile base style file.
      */
     public StyleReader(FilePath styleFile) {
-        assert !styleFile.hasVariants() : "Style reader decorates a base style file and supplied file is a variant.";
+        assert !styleFile.hasVariants() : "Style reader decorates a base style file and supplied file is a variant";
         this.reader = styleFile.getReader();
         this.state = State.BASE_CONTENT;
 

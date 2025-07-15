@@ -65,9 +65,9 @@ final class DocumentBuilderImpl implements DocumentBuilder {
         try {
             return loadXML(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("JVM with missing support for UTF-8.");
+            throw new IllegalStateException("JVM with missing support for UTF-8");
         } catch (IOException e) {
-            throw new IllegalStateException("IO exception while reading string.");
+            throw new IllegalStateException("IO exception while reading string");
         }
     }
 
@@ -77,9 +77,9 @@ final class DocumentBuilderImpl implements DocumentBuilder {
         try {
             return loadXMLNS(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("JVM with missing support for UTF-8.");
+            throw new IllegalStateException("JVM with missing support for UTF-8");
         } catch (IOException e) {
-            throw new IllegalStateException("IO exception while reading string.");
+            throw new IllegalStateException("IO exception while reading string");
         }
     }
 
@@ -143,7 +143,7 @@ final class DocumentBuilderImpl implements DocumentBuilder {
     @Override
     public Document loadHTML(File file) throws IOException, SAXException {
         assert file != null : "Source file argument is null";
-        assert !file.isDirectory() : format("Source file argument |%s| is a directory.", file);
+        assert !file.isDirectory() : format("Source file argument %s is a directory", file);
         return loadHTML(Files.newInputStream(file.toPath()));
     }
 

@@ -402,7 +402,7 @@ final class ElementImpl implements Element {
         }
         Node parent = node.getParentNode();
         if (parent == null) {
-            throw new IllegalStateException("Missing parent node.");
+            throw new IllegalStateException("Missing parent node");
         }
         parent.insertBefore(node(sibling), node);
         return this;
@@ -505,12 +505,12 @@ final class ElementImpl implements Element {
                 return this;
             }
         }
-        throw new IllegalArgumentException("Missing prefix from attribute name.");
+        throw new IllegalArgumentException("Missing prefix from attribute name");
     }
 
     @Override
     public Element setAttrs(String... nameValuePairs) {
-        assert nameValuePairs.length % 2 == 0 : "Missing value for last attribute.";
+        assert nameValuePairs.length % 2 == 0 : "Missing value for last attribute";
         for (int i = 0, l = nameValuePairs.length - 1; i < l; i += 2) {
             assert nameValuePairs[i + 1] != null : "Attribute value argument is null";
             node.setAttribute(nameValuePairs[i], nameValuePairs[i + 1]);

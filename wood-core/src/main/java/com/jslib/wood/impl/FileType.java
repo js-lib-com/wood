@@ -53,7 +53,7 @@ public enum FileType {
 			return CT.VAR_EXT;
 
 		default:
-			throw new IllegalStateException(format("Attempt to got extension for file type |%s|.", this));
+			throw new IllegalStateException(format("Attempt to got extension for file type %s", this));
 		}
 	}
 
